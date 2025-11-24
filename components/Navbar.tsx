@@ -52,8 +52,12 @@ const Navbar: React.FC = () => {
             <div className={`flex justify-between items-center transition-all duration-300 ${isScrolled ? 'py-3' : 'py-4'}`}>
                 
                 {/* Logo */}
-                <Link to="/" className="flex items-center gap-2 group z-50">
-                    <span className="font-black text-3xl tracking-tighter text-hett-dark">HETT.</span>
+                <Link to="/" className="block z-50">
+                    <img 
+                        src="/logo.png" 
+                        alt="HETT - Panelen & Profielen" 
+                        className={`w-auto object-contain transition-all duration-300 ${isScrolled ? 'h-10' : 'h-12'}`}
+                    />
                 </Link>
 
                 {/* Desktop Navigation */}
@@ -141,15 +145,15 @@ const Navbar: React.FC = () => {
                 animate="open"
                 exit="closed"
                 variants={menuVariants}
-                className="fixed inset-0 z-[100] bg-[#1a1a1a] text-white flex flex-col font-sans"
+                className="fixed inset-0 z-[100] bg-white text-hett-dark flex flex-col font-sans"
             >
                 {/* Mobile Header */}
-                <div className="flex justify-between items-center p-6">
-                    <span className="font-black text-3xl tracking-tighter">HETT.</span>
+                <div className="flex justify-between items-center p-6 border-b border-gray-100">
+                    <img src="/logo.png" alt="HETT" className="h-10 w-auto object-contain" />
                     <motion.button 
                         whileTap={{ scale: 0.8, rotate: 90 }}
                         onClick={() => setIsOpen(false)} 
-                        className="p-2 hover:bg-white/10 rounded-full transition-colors"
+                        className="p-2 hover:bg-gray-100 rounded-full transition-colors text-hett-dark"
                     >
                         <X size={32} strokeWidth={1.5} />
                     </motion.button>
@@ -159,38 +163,38 @@ const Navbar: React.FC = () => {
                 <div className="flex-1 overflow-y-auto px-6 py-4 space-y-8 no-scrollbar">
                     <motion.div variants={itemVariants}>
                         <Link to="/" onClick={() => setIsOpen(false)} className="flex items-center justify-between group cursor-pointer">
-                            <span className="text-3xl font-medium text-gray-300 group-hover:text-white transition-colors">Home</span>
-                            <ChevronRight size={24} className="text-gray-500 group-hover:text-white" />
+                            <span className="text-3xl font-bold text-gray-400 group-hover:text-hett-dark transition-colors">Home</span>
+                            <ChevronRight size={24} className="text-gray-300 group-hover:text-hett-dark" />
                         </Link>
                     </motion.div>
 
                     {NAV_ITEMS.map((link) => (
                          <motion.div variants={itemVariants} key={link.path}>
                             <Link to={link.path} onClick={() => setIsOpen(false)} className="flex items-center justify-between group">
-                                <span className="text-3xl font-medium text-gray-300 group-hover:text-white transition-colors">{link.label}</span>
-                                <ChevronRight size={24} className="text-gray-500 group-hover:text-white" />
+                                <span className="text-3xl font-bold text-gray-400 group-hover:text-hett-dark transition-colors">{link.label}</span>
+                                <ChevronRight size={24} className="text-gray-300 group-hover:text-hett-dark" />
                             </Link>
                         </motion.div>
                     ))}
                     
                     <motion.div variants={itemVariants}>
-                        <Link to="/configurator" onClick={() => setIsOpen(false)} className="block text-2xl text-hett-brown font-bold mt-4">
+                        <Link to="/configurator" onClick={() => setIsOpen(false)} className="block text-2xl text-hett-brown font-black mt-4">
                             Configurator Tool
                         </Link>
                     </motion.div>
                 </div>
 
                 {/* Mobile Footer */}
-                <motion.div variants={itemVariants} className="p-6 border-t border-white/10 bg-[#151515]">
+                <motion.div variants={itemVariants} className="p-6 border-t border-gray-100 bg-gray-50">
                      <div className="flex items-center gap-2 text-yellow-400 mb-4 font-bold text-sm">
                         <Star size={16} fill="currentColor" />
                         <Star size={16} fill="currentColor" />
                         <Star size={16} fill="currentColor" />
                         <Star size={16} fill="currentColor" />
                         <Star size={16} fill="currentColor" />
-                        <span className="text-white ml-2">4.8 op Google</span>
+                        <span className="text-hett-dark ml-2">4.8 op Google</span>
                      </div>
-                     <Link to="/contact" onClick={() => setIsOpen(false)} className="block w-full bg-white text-hett-dark text-center font-bold py-4 rounded-lg">
+                     <Link to="/contact" onClick={() => setIsOpen(false)} className="block w-full bg-hett-dark text-white text-center font-bold py-4 rounded-lg shadow-sm">
                         Contact opnemen
                      </Link>
                 </motion.div>

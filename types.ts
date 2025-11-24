@@ -1,7 +1,7 @@
 export interface Product {
   id: string;
   title: string;
-  category: 'dak' | 'wand' | 'accessoires';
+  category: 'dak' | 'wand' | 'accessoires' | 'gevel';
   shortDescription: string;
   description: string;
   imageUrl: string;

@@ -11,9 +11,9 @@ const Products: React.FC = () => {
       {/* Header */}
       <PageHeader 
         title="Producten"
-        subtitle="Collectie"
-        description="Hoogwaardige panelen en profielen voor de professionele bouwer. Bekijk ons assortiment gevel- en dakoplossingen."
-        image="https://picsum.photos/1200/800?random=1"
+        subtitle="Onze Collectie"
+        description="Hoogwaardige panelen en profielen voor de professionele bouwer. Bekijk ons exclusieve assortiment."
+        image="/product-kroc.jpg"
         action={{ label: "Bekijk Configurator", link: "/configurator" }}
       />
 
@@ -59,7 +59,7 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
         
         <div className="p-8 flex-grow flex flex-col">
             <div className="mb-4">
-                <span className="text-xs font-bold text-gray-400 uppercase mb-2 block tracking-wider">{product.category}paneel</span>
+                <span className="text-xs font-bold text-gray-400 uppercase mb-2 block tracking-wider">{product.category}</span>
                 <h3 className="text-2xl font-bold text-hett-dark mb-3 group-hover:text-hett-brown transition-colors">{product.title}</h3>
                 <p className="text-gray-500 text-sm leading-relaxed line-clamp-3">{product.shortDescription}</p>
             </div>

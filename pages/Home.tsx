@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ShieldCheck, Truck, Droplets, TrendingUp, Star, CheckCircle2, Quote, ArrowUpRight, Calendar } from 'lucide-react';
@@ -131,33 +130,13 @@ const Home: React.FC = () => {
                 className="relative rounded-[24px] md:rounded-[32px] overflow-hidden shadow-sm group h-[300px] sm:h-[400px] lg:h-auto"
             >
                 <img 
-                    src="https://picsum.photos/1200/800?random=101" 
+                    src="/hero-image.jpg" 
                     alt="Veranda met HETT panelen" 
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
                 />
                 
-                {/* Slimglass style sticker */}
-                <motion.div 
-                    initial={{ scale: 0, rotate: 0 }}
-                    animate={{ scale: 1, rotate: 12 }}
-                    transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.8 }}
-                    className="absolute top-4 right-4 sm:top-8 sm:right-8 md:top-12 md:right-12 bg-orange-500 text-white rounded-full w-20 h-20 sm:w-28 h-28 flex flex-col items-center justify-center shadow-lg z-20"
-                >
-                    <span className="font-black text-xl sm:text-3xl leading-none">9.2</span>
-                    <div className="flex text-white/90">
-                        <Star size={10} fill="currentColor" strokeWidth={0} />
-                        <Star size={10} fill="currentColor" strokeWidth={0} />
-                        <Star size={10} fill="currentColor" strokeWidth={0} />
-                        <Star size={10} fill="currentColor" strokeWidth={0} />
-                        <Star size={10} fill="currentColor" strokeWidth={0} />
-                    </div>
-                </motion.div>
-                
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-60"></div>
-                <div className="absolute bottom-6 left-6 sm:bottom-8 sm:left-8 text-white">
-                    <span className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wider mb-2 inline-block">Project uitgelicht</span>
-                    <h3 className="text-xl sm:text-2xl font-bold">Luxe Tuinkamer Utrecht</h3>
-                </div>
+                {/* Text and Overlay removed as per request */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-30"></div>
             </motion.div>
         </div>
       </div>
@@ -191,76 +170,32 @@ const Home: React.FC = () => {
          </div>
       </div>
 
-      {/* Categorieën Section */}
+      {/* Producten / Profielen Section */}
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mb-24">
-        <h2 className="text-4xl font-black text-hett-dark tracking-tight mb-8">Categorieën</h2>
+        <h2 className="text-4xl font-black text-hett-dark tracking-tight mb-8">Producten</h2>
 
-        <div className="flex md:grid md:grid-cols-3 gap-6 overflow-x-auto md:overflow-visible snap-x snap-mandatory md:snap-none pb-6 md:pb-0 px-4 -mx-4 md:px-0 md:mx-0 no-scrollbar">
+        <Link to="/producten" className="group relative h-[600px] rounded-[32px] overflow-hidden block w-full">
+            <img src="/product-kroc.jpg" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="K-Roc Gevelpanelen" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
             
-            {/* Card 1: Dakpanelen */}
-            <Link to="/producten" className="snap-center min-w-[85vw] md:min-w-0 flex-shrink-0 md:flex-shrink group relative h-[500px] rounded-[32px] overflow-hidden block">
-                <img src="https://picsum.photos/800/1000?random=20" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Dakpanelen" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
-                
-                <div className="absolute inset-0 p-8 flex flex-col justify-between">
-                    <p className="text-white text-xl font-medium leading-snug max-w-[80%] drop-shadow-sm translate-y-0 transition-transform duration-500">
-                        Maximale isolatie voor uw veranda met Eco+ panelen.
+            <div className="absolute inset-0 p-12 flex flex-col justify-end items-start">
+                <div className="mb-8">
+                    <span className="bg-orange-500 text-white px-4 py-1.5 rounded-full text-sm font-bold uppercase tracking-wider mb-4 inline-block shadow-md">
+                        Nieuw in assortiment
+                    </span>
+                    <h3 className="text-white text-5xl md:text-6xl font-black leading-tight drop-shadow-sm mb-4">
+                        K-Roc KS1000 RH
+                    </h3>
+                    <p className="text-white/90 text-xl font-medium leading-relaxed max-w-2xl drop-shadow-sm mb-8">
+                        Hoogwaardige gevelpanelen met steenwol isolatiekern en onzichtbare bevestiging. De nieuwe standaard in brandveiligheid en esthetiek.
                     </p>
                     
-                    <div>
-                        <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white mb-6 transition-all duration-300 group-hover:bg-white group-hover:text-hett-dark group-hover:scale-110">
-                            <ArrowRight size={28} strokeWidth={2} />
-                        </div>
-                        <h3 className="text-white text-4xl font-bold leading-tight drop-shadow-sm">
-                            Dakpanelen
-                        </h3>
-                    </div>
+                    <button className="flex items-center gap-3 bg-white text-hett-dark px-8 py-4 rounded-full font-bold hover:bg-gray-100 transition-all shadow-lg">
+                        Bekijk specificaties <ArrowRight size={20} />
+                    </button>
                 </div>
-            </Link>
-
-            {/* Card 2: Wandpanelen */}
-            <Link to="/producten" className="snap-center min-w-[85vw] md:min-w-0 flex-shrink-0 md:flex-shrink group relative h-[500px] rounded-[32px] overflow-hidden block">
-                <img src="https://picsum.photos/800/1000?random=21" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Wandpanelen" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
-                
-                <div className="absolute inset-0 p-8 flex flex-col justify-between">
-                    <p className="text-white text-xl font-medium leading-snug max-w-[80%] drop-shadow-sm">
-                        Creëer een strakke, moderne gevel met blinde bevestiging.
-                    </p>
-                    
-                    <div>
-                        <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white mb-6 transition-all duration-300 group-hover:bg-white group-hover:text-hett-dark group-hover:scale-110">
-                            <ArrowRight size={28} strokeWidth={2} />
-                        </div>
-                        <h3 className="text-white text-4xl font-bold leading-tight drop-shadow-sm">
-                            Wandpanelen
-                        </h3>
-                    </div>
-                </div>
-            </Link>
-
-            {/* Card 3: Profielen/Zetwerk */}
-            <Link to="/producten" className="snap-center min-w-[85vw] md:min-w-0 flex-shrink-0 md:flex-shrink group relative h-[500px] rounded-[32px] overflow-hidden block">
-                <img src="https://picsum.photos/800/1000?random=22" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Profielen" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
-                
-                <div className="absolute inset-0 p-8 flex flex-col justify-between">
-                    <p className="text-white text-xl font-medium leading-snug max-w-[80%] drop-shadow-sm">
-                        Maak het project compleet met bijpassend zetwerk.
-                    </p>
-                    
-                    <div>
-                        <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white mb-6 transition-all duration-300 group-hover:bg-white group-hover:text-hett-dark group-hover:scale-110">
-                            <ArrowRight size={28} strokeWidth={2} />
-                        </div>
-                        <h3 className="text-white text-4xl font-bold leading-tight drop-shadow-sm">
-                            Profielen<br/>& Accessoires
-                        </h3>
-                    </div>
-                </div>
-            </Link>
-
-        </div>
+            </div>
+        </Link>
       </div>
 
       {/* Infinite Inspiration Slider */}

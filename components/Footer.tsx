@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Phone, MessageCircle, Mail, Check, Star } from 'lucide-react';
 
@@ -79,13 +78,8 @@ const Footer: React.FC = () => {
           {/* Col 1: Company Info */}
           <div className="space-y-8">
             <div>
-                <Link to="/" className="block mb-4">
-                    {/* Logo replacement similar to screenshot Vira BV but HETT style */}
-                    <div className="flex items-center gap-2">
-                         {/* Abstract logo shape matching the green check in screenshot but HETT style */}
-                         <div className="w-8 h-8 bg-hett-brown rounded-tr-xl rounded-bl-xl"></div>
-                         <span className="font-black text-2xl tracking-tighter text-hett-dark">HETT.</span>
-                    </div>
+                <Link to="/" className="block mb-6">
+                    <img src="/logo.png" alt="HETT Panelen & Profielen" className="h-14 w-auto object-contain" />
                 </Link>
                 <p className="text-gray-500 text-sm leading-relaxed">
                 HETT is marktleider in de groothandel van sandwichpanelen, veranda's en buitenverblijven. Professionele kwaliteit direct uit voorraad.
@@ -118,10 +112,7 @@ const Footer: React.FC = () => {
           <div>
             <h4 className="font-bold text-hett-dark text-lg mb-6">Producten</h4>
             <ul className="space-y-4 text-sm">
-              <li><Link to="/producten" className="text-gray-500 hover:text-hett-dark transition-colors">Dakpanelen</Link></li>
-              <li><Link to="/producten" className="text-gray-500 hover:text-hett-dark transition-colors">Wandpanelen</Link></li>
-              <li><Link to="/producten" className="text-gray-500 hover:text-hett-dark transition-colors">Profielen</Link></li>
-              <li><Link to="/producten" className="text-gray-500 hover:text-hett-dark transition-colors">Accessoires</Link></li>
+              <li><Link to="/producten" className="text-gray-500 hover:text-hett-dark transition-colors">Producten</Link></li>
               <li><Link to="/configurator" className="text-gray-500 hover:text-hett-dark transition-colors">Configurator</Link></li>
               <li><Link to="/dealers" className="text-gray-500 hover:text-hett-dark transition-colors">Zakelijk</Link></li>
             </ul>

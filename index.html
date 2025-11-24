@@ -1,0 +1,89 @@
+
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HETT - Hoogwaardige Sandwichpanelen</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              hett: {
+                dark: '#1a1a1a', // Almost black / Anthracite
+                primary: '#333333', // Dark Grey
+                brown: '#6d4026', // Industrial Brown from Logo
+                brownLight: '#8c5e42', // Lighter brown for hovers
+                light: '#f4f4f5', // Zinc 100
+                white: '#ffffff',
+                metallic: '#94a3b8', // Slate 400
+              }
+            },
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            }
+          }
+        }
+      };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+    <style>
+      html, body {
+        overflow-x: hidden;
+        width: 100%;
+        -webkit-overflow-scrolling: touch;
+      }
+      body { font-family: 'Inter', sans-serif; }
+      
+      /* Hide scrollbar for Chrome, Safari and Opera */
+      .no-scrollbar::-webkit-scrollbar {
+          display: none;
+      }
+
+      /* Hide scrollbar for IE, Edge and Firefox */
+      .no-scrollbar {
+          -ms-overflow-style: none;  /* IE and Edge */
+          scrollbar-width: none;  /* Firefox */
+      }
+
+      /* Infinite Scroll Animation */
+      @keyframes infinite-scroll {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+      }
+      .animate-infinite-scroll {
+        animation: infinite-scroll 40s linear infinite;
+      }
+      .animate-infinite-scroll:hover {
+        animation-play-state: paused;
+      }
+      
+      /* Mask for fading scroll areas */
+      .mask-fade-sides {
+        mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.2.0",
+    "react/": "https://esm.sh/react@18.2.0/",
+    "react-dom": "https://esm.sh/react-dom@18.2.0",
+    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+    "react-router-dom": "https://esm.sh/react-router-dom@6.22.3?external=react,react-dom",
+    "lucide-react": "https://esm.sh/lucide-react@0.358.0?external=react",
+    "three": "https://esm.sh/three@0.162.0",
+    "@react-three/fiber": "https://esm.sh/@react-three/fiber@8.15.19?external=react,react-dom,three",
+    "@react-three/drei": "https://esm.sh/@react-three/drei@9.102.6?external=react,react-dom,three,@react-three/fiber",
+    "framer-motion": "https://esm.sh/framer-motion@11.0.8?external=react,react-dom",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>

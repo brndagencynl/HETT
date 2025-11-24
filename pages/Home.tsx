@@ -29,14 +29,14 @@ const TESTIMONIALS = [
 ];
 
 const SLIDER_ITEMS = [
-    { title: "Tuinkamer Modern", image: "https://picsum.photos/600/400?random=401" },
-    { title: "Veranda Klassiek", image: "https://picsum.photos/600/400?random=402" },
-    { title: "Glazen Schuifwand", image: "https://picsum.photos/600/400?random=403" },
-    { title: "Carport Aluminium", image: "https://picsum.photos/600/400?random=404" },
-    { title: "Horeca Overkapping", image: "https://picsum.photos/600/400?random=405" },
-    { title: "Lichtstraat Detail", image: "https://picsum.photos/600/400?random=406" },
-    { title: "Zwart Zweeds Rabat", image: "https://picsum.photos/600/400?random=407" },
-    { title: "Industriële Look", image: "https://picsum.photos/600/400?random=408" },
+    { title: "Aluminium Veranda", image: "https://picsum.photos/600/400?random=501" },
+    { title: "Aluminium Veranda", image: "https://picsum.photos/600/400?random=502" },
+    { title: "Aluminium Veranda", image: "https://picsum.photos/600/400?random=503" },
+    { title: "Aluminium Veranda", image: "https://picsum.photos/600/400?random=504" },
+    { title: "Aluminium Veranda", image: "https://picsum.photos/600/400?random=505" },
+    { title: "Aluminium Veranda", image: "https://picsum.photos/600/400?random=506" },
+    { title: "Aluminium Veranda", image: "https://picsum.photos/600/400?random=507" },
+    { title: "Aluminium Veranda", image: "https://picsum.photos/600/400?random=508" },
 ];
 
 const Home: React.FC = () => {
@@ -224,11 +224,7 @@ const Home: React.FC = () => {
                             alt={item.title} 
                             className="w-full h-full object-cover transition-transform duration-700 group-hover/item:scale-110" 
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-80" />
-                        <div className="absolute bottom-6 left-6">
-                            <h4 className="text-white font-bold text-xl mb-1">{item.title}</h4>
-                            <div className="h-1 w-0 bg-white group-hover/item:w-12 transition-all duration-300"></div>
-                        </div>
+                        {/* Removed text overlay and gradient as requested */}
                     </Link>
                 ))}
             </div>

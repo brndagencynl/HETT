@@ -1,8 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { PanelConfig } from '../types';
-import { Check, Info, Calculator, RefreshCw } from 'lucide-react';
+import { Check, Calculator, RefreshCw } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 
 const Configurator: React.FC = () => {
@@ -11,8 +10,10 @@ const Configurator: React.FC = () => {
     thickness: 40,
     color: 'Anthracite',
     finish: 'Trapezium',
-    length: 300
+    length: 300 // Corresponds to Diepte (Depth)
   });
+
+  const [width, setWidth] = useState(500); // Corresponds to Breedte (Width) in cm
 
   // Calculated Values Simulation
   const [stats, setStats] = useState({ uValue: '0.58', weight: '11.2', priceIndex: 100 });
@@ -37,8 +38,6 @@ const Configurator: React.FC = () => {
     { name: 'Black', hex: '#1a1a1a', label: 'RAL 9005' }
   ];
 
-  const thicknesses = [40, 60, 80, 100, 120];
-
   return (
     <div className="min-h-screen bg-hett-light">
       
@@ -46,7 +45,7 @@ const Configurator: React.FC = () => {
       <PageHeader 
         title="Product Configurator"
         subtitle="Interactieve Tool"
-        description="Stel uw ideale sandwichpaneel samen, bekijk direct de specificaties en bereken de isolatiewaarde."
+        description="Stel uw ideale sandwichpaneel samen. Kies product, kleur en afmetingen voor een directe prijsindicatie."
         image="https://picsum.photos/1200/800?random=8"
       />
 
@@ -55,184 +54,198 @@ const Configurator: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           
           {/* Controls Section */}
-          <div className="lg:col-span-7 space-y-8">
+          <div className="lg:col-span-8 space-y-8">
             
-            {/* Type Selection */}
-            <div className="bg-white p-6 rounded-[24px] shadow-sm border border-gray-100">
-              <h2 className="text-lg font-bold text-hett-dark mb-6 flex items-center">
-                <span className="w-8 h-8 bg-hett-brown text-white rounded-full flex items-center justify-center text-sm mr-3">1</span>
-                Toepassing & Type
+            {/* STEP 1: Product Selection (Type only) */}
+            <div className="bg-white p-8 rounded-[32px] shadow-sm border border-gray-100">
+              <h2 className="text-xl font-bold text-hett-dark mb-6 flex items-center">
+                <span className="w-10 h-10 bg-hett-brown text-white rounded-full flex items-center justify-center text-base font-bold mr-4">1</span>
+                Product Selectie
               </h2>
-              <div className="grid grid-cols-2 gap-4">
-                {['dak', 'wand'].map((type) => (
-                  <button
-                    key={type}
-                    onClick={() => setConfig({ ...config, type: type as 'dak' | 'wand' })}
-                    className={`p-6 rounded-2xl border-2 transition-all text-left ${
-                      config.type === type 
-                        ? 'border-hett-brown bg-orange-50/30' 
-                        : 'border-gray-100 hover:border-gray-300'
-                    }`}
-                  >
-                    <span className="block font-bold text-hett-dark capitalize mb-1 text-lg">{type}paneel</span>
-                    <span className="text-sm text-gray-500">
-                      {type === 'dak' ? 'Voor overkappingen en daken' : 'Voor gevels en wanden'}
-                    </span>
-                  </button>
-                ))}
+              
+              <div className="space-y-6">
+                 {/* Type */}
+                 <div>
+                    <label className="block text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">Type Paneel</label>
+                    <div className="grid grid-cols-1">
+                        <button
+                            className="p-5 rounded-2xl border-2 border-hett-brown bg-orange-50/50 transition-all text-left flex items-center justify-between"
+                        >
+                            <span className="font-bold text-hett-dark capitalize text-lg">Sandwichpanelen</span>
+                            <Check size={20} className="text-hett-brown" />
+                        </button>
+                    </div>
+                 </div>
               </div>
             </div>
 
-            {/* Thickness Selection */}
-            <div className="bg-white p-6 rounded-[24px] shadow-sm border border-gray-100">
-              <h2 className="text-lg font-bold text-hett-dark mb-6 flex items-center">
-                <span className="w-8 h-8 bg-hett-brown text-white rounded-full flex items-center justify-center text-sm mr-3">2</span>
-                Dikte (Isolatiewaarde)
-              </h2>
-              <div className="flex flex-wrap gap-3">
-                {thicknesses.map((t) => (
-                  <button
-                    key={t}
-                    onClick={() => setConfig({ ...config, thickness: t })}
-                    className={`px-6 py-3 rounded-full font-bold transition-all ${
-                      config.thickness === t
-                        ? 'bg-hett-dark text-white shadow-md transform scale-105'
-                        : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
-                    }`}
-                  >
-                    {t}mm
-                  </button>
-                ))}
-              </div>
-              <p className="text-sm text-gray-500 mt-4 flex items-center gap-2 bg-blue-50 p-3 rounded-xl border border-blue-100 text-blue-800">
-                <Info size={16} /> Hoe dikker het paneel, hoe hoger de isolatiewaarde (Rd).
-              </p>
-            </div>
-
-            {/* Color Selection */}
-            <div className="bg-white p-6 rounded-[24px] shadow-sm border border-gray-100">
-              <h2 className="text-lg font-bold text-hett-dark mb-6 flex items-center">
-                <span className="w-8 h-8 bg-hett-brown text-white rounded-full flex items-center justify-center text-sm mr-3">3</span>
-                Kleur (Buitenzijde)
+            {/* STEP 2: Color */}
+            <div className="bg-white p-8 rounded-[32px] shadow-sm border border-gray-100">
+              <h2 className="text-xl font-bold text-hett-dark mb-6 flex items-center">
+                <span className="w-10 h-10 bg-hett-brown text-white rounded-full flex items-center justify-center text-base font-bold mr-4">2</span>
+                Kleur
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 {colors.map((c) => (
                   <button
                     key={c.name}
                     onClick={() => setConfig({ ...config, color: c.name })}
-                    className={`group relative p-1 rounded-2xl border-2 transition-all ${
-                      config.color === c.name ? 'border-hett-brown' : 'border-transparent'
+                    className={`group relative p-1.5 rounded-2xl border-2 transition-all ${
+                      config.color === c.name ? 'border-hett-brown' : 'border-transparent hover:bg-gray-50'
                     }`}
                   >
-                    <div className="w-full h-20 rounded-xl bg-slate-200 mb-3 shadow-inner" style={{ backgroundColor: c.hex }}>
+                    <div className="w-full h-24 rounded-xl mb-3 shadow-inner relative overflow-hidden" style={{ backgroundColor: c.hex }}>
+                        <div className="absolute inset-0 bg-gradient-to-tr from-black/5 to-white/20"></div>
                         {config.color === c.name && (
                             <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="bg-white/20 backdrop-blur-sm p-2 rounded-full">
-                                    <Check className="text-white" size={20} />
+                                <div className="bg-white/20 backdrop-blur-md p-2 rounded-full shadow-sm">
+                                    <Check className="text-white drop-shadow-md" size={24} strokeWidth={3} />
                                 </div>
                             </div>
                         )}
                     </div>
-                    <span className="block text-center text-sm font-bold text-gray-700">{c.name}</span>
-                    <span className="block text-center text-xs text-gray-400">{c.label}</span>
+                    <div className="text-center">
+                        <span className="block text-sm font-bold text-gray-800">{c.name}</span>
+                        <span className="block text-xs text-gray-400 font-medium">{c.label}</span>
+                    </div>
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Length Slider */}
-            <div className="bg-white p-6 rounded-[24px] shadow-sm border border-gray-100">
-              <h2 className="text-lg font-bold text-hett-dark mb-6 flex items-center">
-                <span className="w-8 h-8 bg-hett-brown text-white rounded-full flex items-center justify-center text-sm mr-3">4</span>
-                Lengte (cm)
+            {/* STEP 3: Width (Breedte) */}
+            <div className="bg-white p-8 rounded-[32px] shadow-sm border border-gray-100">
+              <h2 className="text-xl font-bold text-hett-dark mb-6 flex items-center">
+                <span className="w-10 h-10 bg-hett-brown text-white rounded-full flex items-center justify-center text-base font-bold mr-4">3</span>
+                Breedte
               </h2>
-              <div className="flex items-center gap-8">
-                <input 
-                    type="range" 
-                    min="100" 
-                    max="1300" 
-                    step="10"
-                    value={config.length}
-                    onChange={(e) => setConfig({...config, length: parseInt(e.target.value)})}
-                    className="w-full h-2 bg-gray-200 rounded-full appearance-none cursor-pointer accent-hett-brown"
-                />
-                <div className="w-32 px-4 py-3 bg-gray-50 rounded-xl text-center font-bold text-hett-dark border border-gray-200 text-lg">
-                    {config.length} cm
+              <div className="flex flex-col sm:flex-row items-center gap-8">
+                <div className="flex-grow w-full">
+                    <input 
+                        type="range" 
+                        min="100" 
+                        max="2000" 
+                        step="10"
+                        value={width}
+                        onChange={(e) => setWidth(parseInt(e.target.value))}
+                        className="w-full h-3 bg-gray-100 rounded-full appearance-none cursor-pointer accent-hett-brown hover:bg-gray-200 transition-colors"
+                    />
+                    <div className="flex justify-between mt-2 text-xs text-gray-400 font-medium px-1">
+                        <span>100 cm</span>
+                        <span>2000 cm</span>
+                    </div>
+                </div>
+                <div className="flex-shrink-0 w-full sm:w-auto">
+                    <div className="flex items-center border-2 border-gray-100 rounded-2xl px-4 py-3 bg-white focus-within:border-hett-brown transition-colors">
+                        <input 
+                            type="number"
+                            value={width}
+                            onChange={(e) => setWidth(parseInt(e.target.value) || 0)}
+                            className="w-20 text-xl font-bold text-hett-dark outline-none bg-transparent"
+                        />
+                        <span className="text-gray-400 font-bold ml-2">cm</span>
+                    </div>
                 </div>
               </div>
-              <p className="text-xs text-gray-500 mt-3">Wij zagen panelen op de millimeter nauwkeurig. Max lengte 13m.</p>
+            </div>
+
+            {/* STEP 4: Depth (Diepte) */}
+            <div className="bg-white p-8 rounded-[32px] shadow-sm border border-gray-100">
+              <h2 className="text-xl font-bold text-hett-dark mb-6 flex items-center">
+                <span className="w-10 h-10 bg-hett-brown text-white rounded-full flex items-center justify-center text-base font-bold mr-4">4</span>
+                Diepte (Uitval)
+              </h2>
+              <div className="flex flex-col sm:flex-row items-center gap-8">
+                <div className="flex-grow w-full">
+                    <input 
+                        type="range" 
+                        min="100" 
+                        max="1300" 
+                        step="10"
+                        value={config.length}
+                        onChange={(e) => setConfig({...config, length: parseInt(e.target.value)})}
+                        className="w-full h-3 bg-gray-100 rounded-full appearance-none cursor-pointer accent-hett-brown hover:bg-gray-200 transition-colors"
+                    />
+                    <div className="flex justify-between mt-2 text-xs text-gray-400 font-medium px-1">
+                        <span>100 cm</span>
+                        <span>1300 cm</span>
+                    </div>
+                </div>
+                <div className="flex-shrink-0 w-full sm:w-auto">
+                    <div className="flex items-center border-2 border-gray-100 rounded-2xl px-4 py-3 bg-white focus-within:border-hett-brown transition-colors">
+                        <input 
+                            type="number"
+                            value={config.length}
+                            onChange={(e) => setConfig({...config, length: parseInt(e.target.value) || 0})}
+                            className="w-20 text-xl font-bold text-hett-dark outline-none bg-transparent"
+                        />
+                        <span className="text-gray-400 font-bold ml-2">cm</span>
+                    </div>
+                </div>
+              </div>
+              <p className="text-xs text-gray-400 mt-4">Wij zagen panelen op de millimeter nauwkeurig. Max lengte 13m.</p>
             </div>
 
           </div>
 
-          {/* Preview & Summary Sidebar */}
-          <div className="lg:col-span-5">
-            <div className="sticky top-24 space-y-6">
+          {/* Sidebar Summary */}
+          <div className="lg:col-span-4">
+            <div className="sticky top-28 space-y-6">
                 
-                {/* Visual Preview */}
-                <div className="bg-white rounded-[32px] shadow-lg overflow-hidden border border-gray-200">
-                    <div className="bg-gray-100 h-56 flex items-center justify-center relative p-8">
-                        {/* Simulated Panel Visual */}
-                        <div 
-                            className="w-full h-16 shadow-2xl transform rotate-[-2deg] transition-all duration-500 relative"
-                            style={{ 
-                                backgroundColor: colors.find(c => c.name === config.color)?.hex,
-                                height: `${config.thickness}px`
-                            }}
-                        >
-                            {/* Gloss effect */}
-                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-50"></div>
-                            {/* Ribbing effect for dak */}
-                            {config.type === 'dak' && (
-                                <div className="absolute inset-0 flex justify-around">
-                                    <div className="w-6 h-full bg-black/10"></div>
-                                    <div className="w-6 h-full bg-black/10"></div>
-                                    <div className="w-6 h-full bg-black/10"></div>
-                                </div>
-                            )}
-                            {/* Side edge showing foam */}
-                            <div className="absolute -right-3 top-1 bottom-1 w-3 bg-yellow-50 border-l border-gray-400 skew-y-[45deg]"></div>
+                {/* Summary Card */}
+                <div className="bg-hett-dark text-white rounded-[32px] shadow-2xl overflow-hidden p-8 border border-gray-800">
+                        <h3 className="text-2xl font-bold mb-1">HETT Sandwichpaneel</h3>
+                        <div className="flex items-center gap-2 mb-8 opacity-60">
+                             <span className="text-sm font-medium">{config.thickness}mm</span>
+                             <span>•</span>
+                             <span className="text-sm font-medium">{config.color}</span>
                         </div>
-                        <div className="absolute bottom-4 right-4 text-xs text-gray-400 font-mono uppercase tracking-widest">
-                            HETT Preview
-                        </div>
-                    </div>
-                    
-                    <div className="p-8 bg-hett-dark text-white">
-                        <h3 className="text-2xl font-bold mb-2">{config.type === 'dak' ? 'HETT Dakpaneel' : 'HETT Wandpaneel'}</h3>
-                        <p className="text-gray-400 text-sm mb-8 border-b border-gray-700 pb-4">{config.thickness}mm • {config.color} • {config.finish}</p>
 
-                        <div className="space-y-4 mb-8">
+                        <div className="space-y-5 mb-10 border-t border-white/10 pt-8">
                             <div className="flex justify-between items-center">
-                                <span className="text-gray-400 text-sm">U-Waarde (Isolatie)</span>
-                                <span className="font-bold text-lg">{stats.uValue} W/m²K</span>
-                            </div>
-                            <div className="flex justify-between items-center">
-                                <span className="text-gray-400 text-sm">Gewicht per m²</span>
-                                <span className="font-bold text-lg">{stats.weight} kg</span>
+                                <span className="text-gray-400 text-sm font-medium">Breedte</span>
+                                <span className="font-bold text-xl">{width} <span className="text-sm font-normal text-gray-500">cm</span></span>
                             </div>
                              <div className="flex justify-between items-center">
-                                <span className="text-gray-400 text-sm">Lengte</span>
-                                <span className="font-bold text-lg">{config.length} cm</span>
+                                <span className="text-gray-400 text-sm font-medium">Diepte</span>
+                                <span className="font-bold text-xl">{config.length} <span className="text-sm font-normal text-gray-500">cm</span></span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <span className="text-gray-400 text-sm font-medium">Totaal oppervlak</span>
+                                <span className="font-bold text-xl text-hett-brown">{((width * config.length) / 10000).toFixed(2)} <span className="text-sm font-normal text-gray-500">m²</span></span>
+                            </div>
+                            
+                            <div className="h-px bg-white/10 my-2"></div>
+                            
+                            <div className="flex justify-between items-center">
+                                <span className="text-gray-400 text-xs">U-Waarde</span>
+                                <span className="font-bold text-sm">{stats.uValue} W/m²K</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <span className="text-gray-400 text-xs">Gewicht</span>
+                                <span className="font-bold text-sm">{stats.weight} kg/m²</span>
                             </div>
                         </div>
 
-                        <button className="w-full bg-hett-brown text-white font-bold uppercase tracking-wide py-4 rounded-full hover:bg-white hover:text-hett-brown transition-colors flex items-center justify-center gap-2 mb-4 shadow-lg">
-                            <Calculator size={18} />
+                        <button className="w-full bg-white text-hett-dark font-black uppercase tracking-wide py-5 rounded-2xl hover:bg-gray-100 transition-colors flex items-center justify-center gap-2 shadow-lg mb-4">
+                            <Calculator size={20} className="text-hett-brown" />
                             Offerte Aanvragen
                         </button>
-                    </div>
+                        
+                        <p className="text-center text-xs text-gray-500">
+                            Vrijblijvende prijsopgave binnen 24u
+                        </p>
                 </div>
 
                 {/* Assistance Box */}
                 <div className="bg-white p-6 rounded-[24px] border border-gray-200 shadow-sm flex items-start gap-4">
-                    <div className="bg-hett-brown/10 p-3 rounded-full text-hett-brown">
+                    <div className="bg-hett-brown/10 p-3 rounded-full text-hett-brown flex-shrink-0">
                         <RefreshCw size={20} />
                     </div>
                     <div>
-                        <h4 className="font-bold text-hett-dark text-sm mb-1">Technische hulp nodig?</h4>
+                        <h4 className="font-bold text-hett-dark text-sm mb-1">Hulp nodig?</h4>
                         <p className="text-xs text-gray-600 leading-relaxed">
-                            Onze engineers berekenen graag de maximale overspanning voor uw project. Neem contact op voor een gratis advies.
+                            Onze engineers helpen u graag met de berekening voor uw specifieke situatie.
                         </p>
                     </div>
                 </div>

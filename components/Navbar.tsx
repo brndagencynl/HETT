@@ -1,14 +1,12 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, ChevronRight, ChevronDown, Star, Check } from 'lucide-react';
+import { Menu, X, ChevronRight, Star, Check } from 'lucide-react';
 import { NAV_ITEMS } from '../constants';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isProductsOpen, setIsProductsOpen] = useState(true);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -166,26 +164,7 @@ const Navbar: React.FC = () => {
                         </Link>
                     </motion.div>
 
-                    <motion.div variants={itemVariants}>
-                        <button 
-                            onClick={() => setIsProductsOpen(!isProductsOpen)}
-                            className="w-full flex items-center justify-between group mb-6"
-                        >
-                            <span className="text-3xl font-medium text-gray-300 group-hover:text-white transition-colors">Producten</span>
-                            <ChevronDown size={28} className={`text-gray-500 transition-transform duration-300 ${isProductsOpen ? 'rotate-180' : ''}`} />
-                        </button>
-                        
-                        <div className={`space-y-6 overflow-hidden transition-all duration-500 ease-in-out ${isProductsOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}>
-                            <div className="pl-2 ml-1 border-l border-white/10 space-y-6">
-                                <Link to="/producten" onClick={() => setIsOpen(false)} className="block text-lg text-gray-400 hover:text-white">Dakpanelen</Link>
-                                <Link to="/producten" onClick={() => setIsOpen(false)} className="block text-lg text-gray-400 hover:text-white">Wandpanelen</Link>
-                                <Link to="/producten" onClick={() => setIsOpen(false)} className="block text-lg text-gray-400 hover:text-white">Profielen & Zetwerk</Link>
-                                <Link to="/configurator" onClick={() => setIsOpen(false)} className="block text-lg text-hett-brown font-bold">Configurator Tool</Link>
-                            </div>
-                        </div>
-                    </motion.div>
-
-                    {NAV_ITEMS.filter(i => !['Producten', 'Dakpanelen', 'Wandpanelen', 'Profielen'].includes(i.label)).map((link) => (
+                    {NAV_ITEMS.map((link) => (
                          <motion.div variants={itemVariants} key={link.path}>
                             <Link to={link.path} onClick={() => setIsOpen(false)} className="flex items-center justify-between group">
                                 <span className="text-3xl font-medium text-gray-300 group-hover:text-white transition-colors">{link.label}</span>
@@ -193,6 +172,12 @@ const Navbar: React.FC = () => {
                             </Link>
                         </motion.div>
                     ))}
+                    
+                    <motion.div variants={itemVariants}>
+                        <Link to="/configurator" onClick={() => setIsOpen(false)} className="block text-2xl text-hett-brown font-bold mt-4">
+                            Configurator Tool
+                        </Link>
+                    </motion.div>
                 </div>
 
                 {/* Mobile Footer */}

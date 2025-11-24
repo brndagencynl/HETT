@@ -1,9 +1,7 @@
 import { NavItem, Product, Project, NewsItem } from './types';
 
 export const NAV_ITEMS: NavItem[] = [
-  { label: 'Dakpanelen', path: '/producten' },
-  { label: 'Wandpanelen', path: '/producten' },
-  { label: 'Profielen', path: '/producten' },
+  { label: 'Producten', path: '/producten' },
   { label: 'Projecten', path: '/projecten' },
   { label: 'Montage', path: '/downloads' },
   { label: 'Zakelijk', path: '/dealers' },
@@ -42,61 +40,19 @@ export const USP_LIST = [
 
 export const PRODUCTS: Product[] = [
   {
-    id: 'dak-eco-plus',
-    title: 'HETT Dakpaneel Eco+',
-    category: 'dak',
-    shortDescription: 'Ideaal voor veranda’s met hoge isolatie-eis.',
-    description: 'Het HETT Eco+ dakpaneel is speciaal ontwikkeld voor veranda’s en tuinkamers waar isolatie centraal staat. Voorzien van een hoogwaardige staalplaat met duurzame coating.',
-    imageUrl: 'https://picsum.photos/800/600?random=1',
+    id: 'k-roc-ks1000-rh',
+    title: 'K-Roc KS1000 RH gevelpaneel',
+    category: 'wand',
+    shortDescription: 'Geïsoleerde gevelpanelen met steenwol kern en onzichtbare bevestiging.',
+    description: 'K-Roc KS1000 RH gevelpanelen omvat het assortiment geïsoleerde gevelpanelen met een steenwol isolatiekern. Het gevelpaneelsysteem met onzichtbare bevestiging is verkrijgbaar in 5 afzonderlijke profileringen. De panelen kunnen in de lengte of breedte (verticaal of horizontaal) worden toepast. Door de kern van steenwol is het paneel uitermate geschikt voor toepassingen waarbij hoge eisen worden gesteld aan brandweerstand.',
+    imageUrl: 'https://picsum.photos/1000/800?random=150', // Placeholder for the uploaded image
     specs: {
-      thickness: ['40mm', '60mm', '80mm'],
-      uValue: '0.45 W/m²K',
-      width: '1000mm werkend',
-      coating: '25µm polyester'
+      thickness: ['60mm', '80mm', '100mm', '120mm', '150mm'],
+      uValue: 'Brandgedrag A2-s1,d0',
+      width: '1000mm',
+      coating: 'Diverse profileringen'
     },
     isNew: true
-  },
-  {
-    id: 'dak-licht',
-    title: 'HETT Helder Dak',
-    category: 'dak',
-    shortDescription: 'Geïntegreerde lichtstraat oplossingen.',
-    description: 'Combineer isolatie met natuurlijk licht. Perfect te integreren met onze standaard sandwichpanelen.',
-    imageUrl: 'https://picsum.photos/800/600?random=2',
-    specs: {
-      thickness: ['10mm', '16mm'],
-      uValue: '2.1 W/m²K',
-      width: 'Variabel',
-      coating: 'UV-bestendig polycarbonaat'
-    }
-  },
-  {
-    id: 'wand-prof-rib',
-    title: 'HETT Wand Prof-Rib',
-    category: 'wand',
-    shortDescription: 'Strakke wandafwerking met microliniëring.',
-    description: 'Voor een moderne uitstraling van tuinkamers en garages. Blinde bevestiging mogelijk voor een naadloos resultaat.',
-    imageUrl: 'https://picsum.photos/800/600?random=3',
-    specs: {
-      thickness: ['40mm', '60mm'],
-      uValue: '0.50 W/m²K',
-      width: '1150mm',
-      coating: '35µm HPS200'
-    }
-  },
-  {
-    id: 'acc-profielen',
-    title: 'Afwerkprofielen Set',
-    category: 'accessoires',
-    shortDescription: 'Zetwerk in bijpassende kleuren.',
-    description: 'Maak het project compleet met onze op maat gemaakte lekdorpels, windveren en nokstukken.',
-    imageUrl: 'https://picsum.photos/800/600?random=4',
-    specs: {
-      thickness: ['0.63mm'],
-      uValue: 'N.v.t.',
-      width: 'Maatwerk',
-      coating: 'Gelijkaardig aan panelen'
-    }
   }
 ];
 

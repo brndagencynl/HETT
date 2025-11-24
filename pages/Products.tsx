@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
@@ -7,52 +6,30 @@ import { Product } from '../types';
 import PageHeader from '../components/PageHeader';
 
 const Products: React.FC = () => {
-  const [filter, setFilter] = useState<'all' | 'dak' | 'wand' | 'accessoires'>('all');
-
-  const filteredProducts = filter === 'all' 
-    ? PRODUCTS 
-    : PRODUCTS.filter(p => p.category === filter);
-
   return (
     <div className="min-h-screen bg-[#f6f8fa] font-sans">
       {/* Header */}
       <PageHeader 
-        title="Onze Collectie"
-        subtitle="Producten"
-        description="Hoogwaardige panelen en profielen voor de professionele bouwer. Direct uit voorraad leverbaar in diverse diktes en kleuren."
+        title="Producten"
+        subtitle="Collectie"
+        description="Hoogwaardige panelen en profielen voor de professionele bouwer. Bekijk ons assortiment gevel- en dakoplossingen."
         image="https://picsum.photos/1200/800?random=1"
         action={{ label: "Bekijk Configurator", link: "/configurator" }}
       />
 
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        {/* Filters */}
-        <div className="flex justify-center flex-wrap gap-3 mb-16">
-          {(['all', 'dak', 'wand', 'accessoires'] as const).map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setFilter(cat)}
-              className={`px-8 py-3 rounded-full text-sm font-bold transition-all shadow-sm ${
-                filter === cat 
-                  ? 'bg-hett-dark text-white shadow-md transform scale-105' 
-                  : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
-              }`}
-            >
-              {cat === 'all' ? 'Alles' : cat.charAt(0).toUpperCase() + cat.slice(1) + (cat === 'accessoires' ? '' : 'panelen')}
-            </button>
-          ))}
-        </div>
-
+        
         {/* Product Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-          {filteredProducts.map((product) => (
+          {PRODUCTS.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
 
         {/* No Results */}
-        {filteredProducts.length === 0 && (
+        {PRODUCTS.length === 0 && (
           <div className="text-center py-20">
-            <p className="text-gray-500 text-lg">Geen producten gevonden in deze categorie.</p>
+            <p className="text-gray-500 text-lg">Geen producten gevonden.</p>
           </div>
         )}
       </div>
@@ -84,7 +61,7 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
             <div className="mb-4">
                 <span className="text-xs font-bold text-gray-400 uppercase mb-2 block tracking-wider">{product.category}paneel</span>
                 <h3 className="text-2xl font-bold text-hett-dark mb-3 group-hover:text-hett-brown transition-colors">{product.title}</h3>
-                <p className="text-gray-500 text-sm leading-relaxed line-clamp-2">{product.shortDescription}</p>
+                <p className="text-gray-500 text-sm leading-relaxed line-clamp-3">{product.shortDescription}</p>
             </div>
 
             <div className="mt-auto pt-6 border-t border-gray-50">
@@ -94,8 +71,8 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
                         <span className="text-sm font-bold text-gray-800">{product.specs.thickness[0]}</span>
                     </div>
                     <div className="bg-gray-50 rounded-2xl p-4 text-center">
-                        <span className="text-[10px] text-gray-400 block uppercase font-bold mb-1">Isolatie</span>
-                        <span className="text-sm font-bold text-gray-800">{product.specs.uValue}</span>
+                        <span className="text-[10px] text-gray-400 block uppercase font-bold mb-1">Brandklasse</span>
+                        <span className="text-sm font-bold text-gray-800">A2-s1,d0</span>
                     </div>
                 </div>
             </div>

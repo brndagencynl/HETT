@@ -1,58 +1,217 @@
+
 import { NavItem, Product, Project, NewsItem } from './types';
 
 export const NAV_ITEMS: NavItem[] = [
-  { label: 'Producten', path: '/producten' },
+  { label: 'Overkappingen', path: '/categorie/overkappingen' },
+  { label: 'Sandwichpanelen', path: '/categorie/sandwichpanelen' },
+  { label: 'Profielen', path: '/categorie/profielen' },
+  { label: 'Accessoires', path: '/categorie/accessoires' },
   { label: 'Projecten', path: '/projecten' },
-  { label: 'Montage', path: '/downloads' },
-  { label: 'Zakelijk', path: '/dealers' },
   { label: 'Contact', path: '/contact' },
 ];
 
 export const TOP_BAR_USPS = [
-  "Op maat gemaakt tot op de mm",
-  "Levering door heel Nederland & België",
+  "Gratis levering vanaf €2500",
+  "Showroom in Eindhoven",
   "Achteraf betalen mogelijk",
   "Beoordeeld met een 9.2"
 ];
 
 export const USP_LIST = [
   {
-    title: 'Hoge Isolatiewaarde',
-    description: 'Maximale thermische efficiëntie met hoogwaardige PIR-isolatiekernen.',
+    title: 'Hoge Kwaliteit Aluminium',
+    description: 'Duits geverifieerd T6-aluminium voor maximale sterkte en levensduur.',
     icon: 'ShieldCheck'
   },
   {
-    title: 'Condensvrij',
-    description: 'Speciale dampdichte verbindingen voorkomen vochtproblemen in tuinkamers.',
-    icon: 'Droplets'
+    title: 'Eenvoudige Montage',
+    description: 'Slimme bouwpakketten met voorgeboorde profielen en duidelijke handleiding.',
+    icon: 'PenTool'
   },
   {
     title: 'Snelle Levering',
-    description: 'Direct uit eigen voorraad leverbaar door heel de Benelux.',
+    description: 'Uit eigen voorraad geleverd binnen 1-2 weken in de hele Benelux.',
     icon: 'Truck'
   },
   {
-    title: 'Groothandelsprijzen',
-    description: 'Directe inkoopvoordelen en staffelkortingen voor geregistreerde dealers.',
-    icon: 'TrendingUp'
+    title: '5 Jaar Garantie',
+    description: 'Volledige fabrieksgarantie op constructie en kleurvastheid.',
+    icon: 'CheckCircle2'
   }
 ];
 
 export const PRODUCTS: Product[] = [
   {
-    id: 'k-roc-ks1000-rh',
-    title: 'K-Roc KS1000 RH gevelpaneel',
-    category: 'gevel',
-    shortDescription: 'Geïsoleerde gevelpanelen met steenwol isolatiekern en onzichtbare bevestiging.',
-    description: 'K-Roc KS1000 RH gevelpanelen omvat het assortiment geïsoleerde gevelpanelen met een steenwol isolatiekern. Het gevelpaneelsysteem met onzichtbare bevestiging is verkrijgbaar in 5 afzonderlijke profileringen. De panelen kunnen in de lengte of breedte (verticaal of horizontaal) worden toepast. Door de kern van steenwol is het paneel uitermate geschikt voor toepassingen waarbij hoge eisen worden gesteld aan brandweerstand.',
-    imageUrl: '/product-kroc.jpg',
+    id: 'veranda-306-250-opaal',
+    title: 'Aluminium overkapping 3.06 x 2.5 m – Hittewerend',
+    category: 'Overkappingen',
+    price: 839,
+    shortDescription: 'Hittewerend polycarbonaat dak voor optimaal comfort.',
+    description: 'Complete aluminium terrasoverkapping inclusief hittewerend opaal polycarbonaat dakbedekking. Eenvoudig te monteren en onderhoudsvrij.',
+    imageUrl: 'https://images.unsplash.com/photo-1628624747186-a941c476b7ef?q=80&w=2070&auto=format&fit=crop',
     specs: {
-      thickness: ['60mm', '80mm', '100mm', '120mm', '150mm'],
-      uValue: 'Brandgedrag A2-s1,d0',
-      width: '1000mm',
-      coating: 'Diverse profileringen'
+      'Materiaal': 'Aluminium T6-6063',
+      'Dak': 'Polycarbonaat Opaal (Hittewerend)',
+      'Afmeting': '306 x 250 cm'
+    },
+    options: {
+      sizes: ['306x250cm'],
+      colors: ['Antraciet (RAL7016)']
+    },
+    isBestseller: true
+  },
+  {
+    id: 'veranda-306-250-helder',
+    title: 'Aluminium overkapping 3.06 x 2.5 m – Helder',
+    category: 'Overkappingen',
+    price: 839,
+    shortDescription: 'Helder polycarbonaat dak voor maximale lichtinval.',
+    description: 'Geniet van maximaal licht met deze aluminium overkapping voorzien van helder polycarbonaat dakplaten.',
+    imageUrl: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2070&auto=format&fit=crop',
+    specs: {
+      'Materiaal': 'Aluminium T6-6063',
+      'Dak': 'Polycarbonaat Helder',
+      'Afmeting': '306 x 250 cm'
+    },
+    options: {
+      sizes: ['306x250cm'],
+      colors: ['Antraciet (RAL7016)']
+    }
+  },
+  {
+    id: 'veranda-606-350-opaal',
+    title: 'Aluminium overkapping 6.06 x 3.5 m – Hittewerend',
+    category: 'Overkappingen',
+    price: 1949,
+    shortDescription: 'Grote overkapping met hittewerend dak.',
+    description: 'Ruime terrasoverkapping van ruim 6 meter breed. Voorzien van 3 staanders en hittewerend dak.',
+    imageUrl: 'https://images.unsplash.com/photo-1595846519845-68e298c2edd8?q=80&w=1960&auto=format&fit=crop',
+    specs: {
+      'Materiaal': 'Aluminium T6-6063',
+      'Dak': 'Polycarbonaat Opaal',
+      'Afmeting': '606 x 350 cm'
+    },
+    options: {
+      sizes: ['606x350cm'],
+      colors: ['Antraciet (RAL7016)']
+    }
+  },
+  {
+    id: 'veranda-306-250-glas',
+    title: 'Aluminium overkapping 3.06 x 2.5 m – Glazen dak',
+    category: 'Overkappingen',
+    price: 1159,
+    shortDescription: 'Luxe uitvoering met 44.2 veiligheidsglas.',
+    description: 'Voor de ultieme luxe uitstraling en maximale transparantie kiest u voor een glazen dak.',
+    imageUrl: 'https://images.unsplash.com/photo-1510627489930-0c1b0bfb6785?q=80&w=2000&auto=format&fit=crop',
+    specs: {
+      'Materiaal': 'Aluminium T6-6063',
+      'Dak': 'Veiligheidsglas 44.2',
+      'Afmeting': '306 x 250 cm'
+    },
+    options: {
+      sizes: ['306x250cm'],
+      colors: ['Antraciet (RAL7016)']
+    }
+  },
+  {
+    id: 'veranda-premium',
+    title: 'HETT Premium Veranda',
+    category: 'Overkappingen',
+    price: 1895,
+    shortDescription: 'Luxe aluminium overkapping met versterkte goot en staanders.',
+    description: 'De HETT Premium Veranda is ons meest gekozen model. Uitgevoerd in hoogwaardig gepoedercoat aluminium en standaard voorzien van een versterkte goot, waardoor een vrije overspanning tot 7 meter mogelijk is op slechts 2 staanders. Keuze uit glazen of polycarbonaat dakbedekking.',
+    imageUrl: 'https://picsum.photos/800/600?random=101',
+    specs: {
+      'Materiaal': 'Aluminium T6-6063',
+      'Staanders': '110x110mm',
+      'Goot': 'Versterkt profiel (XS-type)',
+      'Dakbelasting': '110kg/m²',
+      'Kleuren': ['Antraciet (RAL7016)', 'Zwart (RAL9005)', 'Wit (RAL9010)']
+    },
+    options: {
+      colors: ['Antraciet', 'Zwart', 'Wit'],
+      sizes: ['300x250cm', '400x300cm', '500x350cm', '600x400cm'],
+      roofTypes: ['Polycarbonaat Opaal', 'Polycarbonaat Helder', 'Glas 44.2']
+    },
+    isBestseller: true
+  },
+  {
+    id: 'veranda-basic',
+    title: 'HETT Basic Veranda',
+    category: 'Overkappingen',
+    price: 1250,
+    shortDescription: 'Betaalbare kwaliteit. De perfecte instap overkapping voor elke tuin.',
+    description: 'Geniet van het buitenleven met de HETT Basic. Een slank vormgegeven overkapping die eenvoudig zelf te monteren is. Inclusief alle bevestigingsmaterialen en regenwaterafvoer.',
+    imageUrl: 'https://picsum.photos/800/600?random=102',
+    specs: {
+      'Materiaal': 'Aluminium',
+      'Staanders': '90x90mm',
+      'Dak': 'Polycarbonaat 16mm',
+    },
+    options: {
+      colors: ['Antraciet', 'Wit'],
+      sizes: ['300x250cm', '400x300cm'],
+      roofTypes: ['Polycarbonaat Opaal']
+    }
+  },
+  {
+    id: 'eco-dakpaneel',
+    title: 'HETT Eco+ Dakpaneel',
+    category: 'Sandwichpanelen',
+    price: 45,
+    shortDescription: 'Hoogwaardig geïsoleerd dakpaneel met trapezium profiel.',
+    description: 'Het HETT Eco+ dakpaneel is de standaard voor geïsoleerde daken. Voorzien van een trapezium buitenplaat en een stucco witte interieurzijde. Uitstekende isolatiewaarde en overspanning.',
+    imageUrl: 'https://images.unsplash.com/photo-1595846519845-68e298c2edd8?q=80&w=1960&auto=format&fit=crop',
+    specs: {
+      'Werkende breedte': '1000mm',
+      'Isolatiekern': 'PIR (brandvertragend)',
+      'Brandklasse': 'B-s2,d0',
+      'Coating': '25µm Polyester'
+    },
+    options: {
+      colors: ['Antraciet (RAL7016)', 'Zwart (RAL9005)'],
+      sizes: ['40mm', '60mm', '80mm', '100mm'],
+    },
+    isBestseller: true
+  },
+  {
+    id: 'wandpaneel-microrib',
+    title: 'HETT Wandpaneel Microrib',
+    category: 'Sandwichpanelen',
+    price: 52,
+    shortDescription: 'Strak wandpaneel met blinde bevestiging voor een naadloze gevel.',
+    description: 'Geef uw project een moderne uitstraling met onze Microrib wandpanelen. Dankzij de blinde bevestiging zijn er geen schroeven zichtbaar. Hoge isolatiewaarde en beschikbaar in diverse kleuren.',
+    imageUrl: 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?q=80&w=1931&auto=format&fit=crop',
+    specs: {
+      'Werkende breedte': '1000mm',
+      'Bevestiging': 'Blind (verborgen)',
+      'Isolatie': 'PIR',
+      'Profiel': 'Microrib'
+    },
+    options: {
+        colors: ['Antraciet', 'Zwart', 'Wit', 'Zilver'],
+        sizes: ['60mm', '80mm', '100mm']
     },
     isNew: true
+  },
+  {
+    id: 'led-set',
+    title: 'LED Verlichting Set',
+    category: 'Accessoires',
+    price: 129,
+    shortDescription: 'Dimbare LED spots voor in de liggers.',
+    description: 'Set van 6 dimbare LED inbouwspots incl. afstandsbediening en transformator. Plug & Play.',
+    imageUrl: 'https://picsum.photos/800/600?random=104',
+    specs: {
+      'Aantal': '6 spots',
+      'Kleur': 'Warm wit (2700K)',
+      'Bediening': 'Afstandsbediening'
+    },
+    options: {
+        colors: ['RVS', 'Zwart'],
+        sizes: ['Standaard']
+    }
   }
 ];
 
@@ -62,9 +221,9 @@ export const PROJECTS: Project[] = [
     title: 'Luxe Tuinkamer Utrecht',
     category: 'Tuinkamer',
     imageUrl: 'https://picsum.photos/800/600?random=10',
-    description: 'Volledig geïsoleerde tuinkamer met 80mm dakpanelen. De klant wenste een ruimte die het hele jaar door te gebruiken is als thuiskantoor.',
+    description: 'Volledig geïsoleerde tuinkamer met glazen schuifwanden rondom. De klant wenste een ruimte die het hele jaar door te gebruiken is.',
     location: 'Utrecht, Nederland',
-    usedProductIds: ['dak-eco-plus', 'wand-prof-rib'],
+    usedProductIds: ['veranda-premium'],
     images: [
         'https://picsum.photos/800/600?random=10',
         'https://picsum.photos/800/600?random=50',
@@ -73,12 +232,11 @@ export const PROJECTS: Project[] = [
   },
   {
     id: 'prj-2',
-    title: 'Veranda Vrijstaand',
+    title: 'Vrijstaande Overkapping',
     category: 'Veranda',
     imageUrl: 'https://picsum.photos/800/600?random=11',
-    description: 'Vrijstaande overkapping met antraciet afwerking en geïntegreerde LED-verlichting.',
+    description: 'Vrijstaande overkapping met antraciet afwerking en geïntegreerde LED-verlichting achterin de tuin.',
     location: 'Eindhoven, Nederland',
-    usedProductIds: ['dak-eco-plus', 'acc-profielen'],
     images: [
         'https://picsum.photos/800/600?random=11',
         'https://picsum.photos/800/600?random=52'
@@ -86,90 +244,28 @@ export const PROJECTS: Project[] = [
   },
   {
     id: 'prj-3',
-    title: 'Horeca Overkapping',
-    category: 'Zakelijk',
+    title: 'Zwarte Veranda met Glas',
+    category: 'Veranda',
     imageUrl: 'https://picsum.photos/800/600?random=12',
-    description: 'Grootschalige terrasoverkapping voor restaurant. Voorzien van extra geluidsisolerende panelen.',
+    description: 'Strakke matzwarte overkapping met helder glazen dak voor maximale lichtinval in de woning.',
     location: 'Antwerpen, België',
-    usedProductIds: ['dak-eco-plus'],
     images: [
         'https://picsum.photos/800/600?random=12',
         'https://picsum.photos/800/600?random=53'
-    ]
-  },
-  {
-    id: 'prj-4',
-    title: 'Moderne Carport',
-    category: 'Carport',
-    imageUrl: 'https://picsum.photos/800/600?random=13',
-    description: 'Strakke dubbele carport met vlakke wandpanelen voor een minimalistische look.',
-    location: 'Breda, Nederland',
-    usedProductIds: ['wand-prof-rib'],
-    images: [
-        'https://picsum.photos/800/600?random=13'
     ]
   }
 ];
 
 export const NEWS_ITEMS: NewsItem[] = [
   {
-    id: 'tips-perfecte-veranda',
-    title: '5 tips voor het bouwen van de perfecte veranda',
-    excerpt: 'Waar moet je op letten bij het plaatsen van een veranda? Van fundering tot dakbedekking: wij zetten de belangrijkste aandachtspunten op een rij.',
-    content: `
-      <p>Een veranda is een prachtige toevoeging aan je huis, maar een goede voorbereiding is het halve werk. In dit artikel delen we vijf onmisbare tips voor een succesvol project.</p>
-      <h3>1. De juiste fundering</h3>
-      <p>Alles begint bij de basis. Zorg voor een stabiele ondergrond, bijvoorbeeld met betonpoeren, om verzakking te voorkomen. Dit is cruciaal voor de levensduur van je constructie.</p>
-      <h3>2. Kies het juiste materiaal</h3>
-      <p>Hout heeft charme, maar aluminium is onderhoudsarm. Onze sandwichpanelen passen perfect op beide constructies en zorgen direct voor isolatie en een strak plafond.</p>
-      <h3>3. Denk aan de waterafvoer</h3>
-      <p>Niets is vervelender dan lekkage. Zorg voor voldoende afschot (minimaal 5 graden) en een goede gotenset. Onze profielen zijn hier speciaal voor ontworpen.</p>
-      <h3>4. Lichtinval</h3>
-      <p>Wil je veel licht? Combineer dichte panelen met een lichtstraat of glazen schuifwanden. Zo behoud je het buitengevoel, ook als het dak dicht is.</p>
-      <h3>5. Vergunning checken</h3>
-      <p>In veel gevallen mag je vergunningsvrij bouwen in de achtertuin, maar check altijd even de regels in jouw gemeente via het omgevingsloket.</p>
-    `,
-    date: '10 April 2024',
-    author: 'Lisa van HETT',
-    category: 'Tips & Tricks',
+    id: 'tips-montage',
+    title: '5 tips voor het monteren van je veranda',
+    excerpt: 'Zelf aan de slag? Lees onze experts tips voor een waterpas en lekvrij resultaat.',
+    content: '...',
+    date: '12 Mei 2024',
+    author: 'Team HETT',
+    category: 'Montage',
     imageUrl: 'https://picsum.photos/800/600?random=90',
     readTime: '4 min lezen'
-  },
-  {
-    id: 'binnenkijken-tuinkamer',
-    title: 'Binnenkijken bij: De tuinkamer van familie De Vries',
-    excerpt: 'Laat je inspireren door dit prachtige project in Utrecht. Een lichte tuinkamer met zwarte profielen en onze hoogwaardige isolatiepanelen.',
-    content: `
-      <p>Vandaag nemen we een kijkje bij familie De Vries in Utrecht. Zij transformeerden hun terrasoverkapping tot een volwaardige tuinkamer die het hele jaar door gebruikt kan worden.</p>
-      <p>"We wilden een plek waar we ook in de herfst lekker kunnen zitten," vertelt Jan de Vries. "De keuze viel op de geïsoleerde sandwichpanelen van HETT vanwege de strakke afwerking."</p>
-      <h3>Strak design</h3>
-      <p>Er is gekozen voor panelen met een antraciet buitenkant en een witte binnenkant. Dit zorgt voor een moderne uitstraling aan de buitenzijde, maar houdt het binnen licht en ruimtelijk.</p>
-      <h3>Comfort</h3>
-      <p>Dankzij de hoge isolatiewaarde blijft het in de zomer koel en houdt het in de winter de warmte van de heater goed vast. "Het is echt een verlengstuk van onze woonkamer geworden."</p>
-    `,
-    date: '28 Maart 2024',
-    author: 'Redactie',
-    category: 'Inspiratie',
-    imageUrl: 'https://picsum.photos/800/600?random=91',
-    readTime: '3 min lezen'
-  },
-  {
-    id: 'zelf-monteren-advies',
-    title: 'Zelf monteren of laten doen? De voor- en nadelen',
-    excerpt: 'Twijfel je of je zelf aan de slag gaat met onze sandwichpanelen? We helpen je bij de keuze met een eerlijk overzicht van de klus.',
-    content: `
-      <p>Onze sandwichpanelen zijn ontworpen voor eenvoudige montage. Toch twijfelen veel mensen: doe ik het zelf of schakel ik een vakman in? Wij zetten de overwegingen op een rij.</p>
-      <h3>Zelf doen: De voordelen</h3>
-      <p>Het grootste voordeel is natuurlijk de kostenbesparing. Je betaalt geen arbeidsloon. Daarnaast geeft het enorm veel voldoening om je eigen overkapping te bouwen. Met onze montagehandleidingen is het voor een handige doe-het-zelver goed te doen.</p>
-      <h3>Laten doen: De voordelen</h3>
-      <p>Een vakman heeft het gereedschap en de ervaring. Het gaat vaak sneller en je hebt garantie op de montage. HETT werkt samen met diverse montagepartners door het hele land.</p>
-      <h3>Ons advies</h3>
-      <p>Ben je handig en heb je hulp van een vriend? Dan is zelf doen een prima optie. Heb je twee linkerhanden of weinig tijd? Vraag dan via ons een offerte aan voor montage.</p>
-    `,
-    date: '15 Maart 2024',
-    author: 'Mark de Vries',
-    category: 'Advies',
-    imageUrl: 'https://picsum.photos/800/600?random=92',
-    readTime: '5 min lezen'
   }
 ];

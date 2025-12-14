@@ -131,7 +131,7 @@ const ProductDetail: React.FC = () => {
                         <tbody className="divide-y divide-gray-200">
                             <tr>
                                 <td className="px-4 py-3 font-medium bg-gray-50 w-1/3">Diktes</td>
-                                <td className="px-4 py-3">{product.specs.thickness.join(', ')}</td>
+                                <td className="px-4 py-3">{Array.isArray(product.specs.thickness) ? product.specs.thickness.join(', ') : product.specs.thickness}</td>
                             </tr>
                             <tr>
                                 <td className="px-4 py-3 font-medium bg-gray-50">Werkende breedte</td>

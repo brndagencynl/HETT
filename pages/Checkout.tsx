@@ -22,7 +22,7 @@ const Checkout: React.FC = () => {
       <PageHeader title="Afrekenen" description="Rond uw bestelling veilig af." image="https://picsum.photos/1200/400?random=98" />
       
       <div className="max-w-[1000px] mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="bg-white p-8 md:p-12 rounded-[32px] shadow-sm border border-gray-100">
+        <div className="bg-white p-8 md:p-12 rounded-xl shadow-sm border border-gray-100">
             
             <div className="flex mb-12 border-b border-gray-100 pb-6">
                 <div className={`mr-8 font-bold ${step >= 1 ? 'text-hett-brown' : 'text-gray-300'}`}>1. Gegevens</div>
@@ -32,18 +32,18 @@ const Checkout: React.FC = () => {
 
             <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); handleFinishOrder(); }}>
                 <div className="grid grid-cols-2 gap-6">
-                    <input type="text" placeholder="Voornaam" className="w-full px-5 py-4 border border-gray-200 rounded-2xl bg-gray-50" required />
-                    <input type="text" placeholder="Achternaam" className="w-full px-5 py-4 border border-gray-200 rounded-2xl bg-gray-50" required />
+                    <input type="text" placeholder="Voornaam" className="w-full px-5 py-4 border border-gray-200 rounded-lg bg-gray-50" required />
+                    <input type="text" placeholder="Achternaam" className="w-full px-5 py-4 border border-gray-200 rounded-lg bg-gray-50" required />
                 </div>
-                <input type="email" placeholder="E-mailadres" className="w-full px-5 py-4 border border-gray-200 rounded-2xl bg-gray-50" required />
-                <input type="text" placeholder="Straat + Huisnummer" className="w-full px-5 py-4 border border-gray-200 rounded-2xl bg-gray-50" required />
+                <input type="email" placeholder="E-mailadres" className="w-full px-5 py-4 border border-gray-200 rounded-lg bg-gray-50" required />
+                <input type="text" placeholder="Straat + Huisnummer" className="w-full px-5 py-4 border border-gray-200 rounded-lg bg-gray-50" required />
                 <div className="grid grid-cols-2 gap-6">
-                    <input type="text" placeholder="Postcode" className="w-full px-5 py-4 border border-gray-200 rounded-2xl bg-gray-50" required />
-                    <input type="text" placeholder="Plaats" className="w-full px-5 py-4 border border-gray-200 rounded-2xl bg-gray-50" required />
+                    <input type="text" placeholder="Postcode" className="w-full px-5 py-4 border border-gray-200 rounded-lg bg-gray-50" required />
+                    <input type="text" placeholder="Plaats" className="w-full px-5 py-4 border border-gray-200 rounded-lg bg-gray-50" required />
                 </div>
 
                 <div className="pt-8 mt-8 border-t border-gray-100">
-                    <button type="submit" className="w-full bg-hett-dark text-white font-bold py-5 rounded-2xl hover:bg-hett-brown transition-colors">
+                    <button type="submit" className="w-full bg-hett-dark text-white font-bold py-5 rounded-lg hover:bg-hett-brown transition-colors">
                         Bestelling afronden (€{total},-)
                     </button>
                 </div>

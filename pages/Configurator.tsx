@@ -111,9 +111,9 @@ const Configurator: React.FC = () => {
                 <h2 className="text-2xl font-black text-hett-dark mb-6">1. Configuratie</h2>
 
                 {/* Product Selection */}
-                <div className="bg-white p-8 rounded-[32px] shadow-sm border border-gray-100">
+                <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
                     <h3 className="text-lg font-bold text-hett-dark mb-4">Product</h3>
-                    <div className="p-5 rounded-2xl border-2 border-hett-brown bg-orange-50/50 flex items-center justify-between">
+                    <div className="p-5 rounded-lg border-2 border-hett-brown bg-orange-50/50 flex items-center justify-between">
                         <div>
                             <span className="font-bold text-hett-dark capitalize text-lg block">{PRODUCT_NAME}</span>
                             <span className="text-sm text-gray-500">Hoogwaardig steenwol sandwichpaneel</span>
@@ -123,14 +123,14 @@ const Configurator: React.FC = () => {
                 </div>
 
                 {/* Dimensions & Quantity */}
-                <div className="bg-white p-8 rounded-[32px] shadow-sm border border-gray-100">
+                <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
                     <h3 className="text-lg font-bold text-hett-dark mb-6">Afmetingen & Aantal</h3>
                     
                     <div className="space-y-6">
                         {/* Width */}
                         <div>
                             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Werkende Breedte</label>
-                            <div className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl text-gray-500 font-bold">
+                            <div className="w-full p-4 bg-gray-50 border border-gray-200 rounded-lg text-gray-500 font-bold">
                                 {FIXED_WIDTH} mm (Standaard)
                             </div>
                         </div>
@@ -144,7 +144,7 @@ const Configurator: React.FC = () => {
                                         type="button"
                                         key={opt}
                                         onClick={() => setLength(opt)}
-                                        className={`py-3 px-2 rounded-2xl font-bold text-sm transition-all border-2 ${
+                                        className={`py-3 px-2 rounded-lg font-bold text-sm transition-all border-2 ${
                                             length === opt 
                                             ? 'border-hett-brown bg-hett-brown text-white shadow-md' 
                                             : 'border-gray-100 bg-white text-gray-700 hover:border-gray-300'
@@ -159,11 +159,11 @@ const Configurator: React.FC = () => {
                         {/* Quantity */}
                         <div>
                             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Aantal Panelen</label>
-                            <div className="inline-flex items-center bg-gray-50 rounded-2xl p-1 border border-gray-200 w-full sm:w-auto">
+                            <div className="inline-flex items-center bg-gray-50 rounded-lg p-1 border border-gray-200 w-full sm:w-auto">
                                 <button 
                                     type="button"
                                     onClick={() => handleQuantityChange(-1)}
-                                    className="w-12 h-12 flex items-center justify-center bg-white rounded-xl text-hett-dark hover:text-hett-brown shadow-sm transition-colors disabled:opacity-50"
+                                    className="w-12 h-12 flex items-center justify-center bg-white rounded-md text-hett-dark hover:text-hett-brown shadow-sm transition-colors disabled:opacity-50"
                                     disabled={quantity <= 1}
                                 >
                                     <Minus size={20} />
@@ -174,7 +174,7 @@ const Configurator: React.FC = () => {
                                 <button 
                                     type="button"
                                     onClick={() => handleQuantityChange(1)}
-                                    className="w-12 h-12 flex items-center justify-center bg-white rounded-xl text-hett-dark hover:text-hett-brown shadow-sm transition-colors"
+                                    className="w-12 h-12 flex items-center justify-center bg-white rounded-md text-hett-dark hover:text-hett-brown shadow-sm transition-colors"
                                 >
                                     <Plus size={20} />
                                 </button>
@@ -184,7 +184,7 @@ const Configurator: React.FC = () => {
                 </div>
 
                 {/* Color */}
-                <div className="bg-white p-8 rounded-[32px] shadow-sm border border-gray-100">
+                <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
                     <h3 className="text-lg font-bold text-hett-dark mb-6">Kleur</h3>
                     <div className="grid grid-cols-3 gap-4">
                         {colors.map((c) => (
@@ -192,11 +192,11 @@ const Configurator: React.FC = () => {
                             type="button"
                             key={c.ral}
                             onClick={() => setColor(c)}
-                            className={`group relative p-1.5 rounded-2xl border-2 transition-all ${
+                            className={`group relative p-1.5 rounded-lg border-2 transition-all ${
                             color.ral === c.ral ? 'border-hett-brown' : 'border-transparent hover:bg-gray-50'
                             }`}
                         >
-                            <div className="w-full h-16 rounded-2xl mb-2 shadow-inner relative overflow-hidden" style={{ backgroundColor: c.hex }}>
+                            <div className="w-full h-16 rounded-md mb-2 shadow-inner relative overflow-hidden" style={{ backgroundColor: c.hex }}>
                                 <div className="absolute inset-0 bg-gradient-to-tr from-black/5 to-white/10"></div>
                                 {color.ral === c.ral && (
                                     <div className="absolute inset-0 flex items-center justify-center">
@@ -216,11 +216,11 @@ const Configurator: React.FC = () => {
                 </div>
 
                 {/* Extras */}
-                <div className="bg-white p-8 rounded-[32px] shadow-sm border border-gray-100">
+                <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
                     <h3 className="text-lg font-bold text-hett-dark mb-6">Extra's</h3>
-                    <div className="flex items-center justify-between p-4 border border-gray-100 rounded-2xl bg-gray-50">
+                    <div className="flex items-center justify-between p-4 border border-gray-100 rounded-lg bg-gray-50">
                         <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 bg-white rounded-2xl flex items-center justify-center text-hett-dark shadow-sm">
+                            <div className="w-10 h-10 bg-white rounded-md flex items-center justify-center text-hett-dark shadow-sm">
                                 <Box size={20} />
                             </div>
                             <div>
@@ -233,7 +233,7 @@ const Configurator: React.FC = () => {
                             <button 
                                 type="button"
                                 onClick={() => handleProfileChange(-1)}
-                                className="w-8 h-8 flex items-center justify-center bg-white rounded-xl border border-gray-200 text-gray-500 hover:text-hett-dark hover:border-hett-dark transition-colors"
+                                className="w-8 h-8 flex items-center justify-center bg-white rounded-md border border-gray-200 text-gray-500 hover:text-hett-dark hover:border-hett-dark transition-colors"
                                 disabled={uProfileCount <= 0}
                             >
                                 <Minus size={14} />
@@ -244,7 +244,7 @@ const Configurator: React.FC = () => {
                             <button 
                                 type="button"
                                 onClick={() => handleProfileChange(1)}
-                                className="w-8 h-8 flex items-center justify-center bg-white rounded-xl border border-gray-200 text-gray-500 hover:text-hett-dark hover:border-hett-dark transition-colors"
+                                className="w-8 h-8 flex items-center justify-center bg-white rounded-md border border-gray-200 text-gray-500 hover:text-hett-dark hover:border-hett-dark transition-colors"
                             >
                                 <Plus size={14} />
                             </button>
@@ -257,7 +257,7 @@ const Configurator: React.FC = () => {
             <div className="space-y-8">
                 <h2 className="text-2xl font-black text-hett-dark mb-6">2. Gegevens</h2>
                 
-                <div className="bg-white p-8 rounded-[32px] shadow-sm border border-gray-100 h-full">
+                <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 h-full">
                     <div className="space-y-8">
                         
                         {/* Bedrijfsgegevens */}
@@ -268,24 +268,24 @@ const Configurator: React.FC = () => {
                                     <label className="block text-xs font-bold text-gray-500 mb-1">Bedrijfsnaam</label>
                                     <div className="relative">
                                         <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                                        <input type="text" name="companyName" value={form.companyName} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-2xl focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm" placeholder="Optioneel" />
+                                        <input type="text" name="companyName" value={form.companyName} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm" placeholder="Optioneel" />
                                     </div>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-xs font-bold text-gray-500 mb-1">KvK Nummer</label>
-                                        <input type="text" name="kvk" value={form.kvk} onChange={handleInputChange} className="w-full px-4 py-3 border border-gray-200 rounded-2xl focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm" placeholder="KvK" />
+                                        <input type="text" name="kvk" value={form.kvk} onChange={handleInputChange} className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm" placeholder="KvK" />
                                     </div>
                                     <div>
                                         <label className="block text-xs font-bold text-gray-500 mb-1">BTW Nummer</label>
-                                        <input type="text" name="btw" value={form.btw} onChange={handleInputChange} className="w-full px-4 py-3 border border-gray-200 rounded-2xl focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm" placeholder="BTW" />
+                                        <input type="text" name="btw" value={form.btw} onChange={handleInputChange} className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm" placeholder="BTW" />
                                     </div>
                                 </div>
                                 <div>
                                     <label className="block text-xs font-bold text-gray-500 mb-1">Website</label>
                                     <div className="relative">
                                         <Globe className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                                        <input type="text" name="website" value={form.website} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-2xl focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm" placeholder="www.uwbedrijf.nl" />
+                                        <input type="text" name="website" value={form.website} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm" placeholder="www.uwbedrijf.nl" />
                                     </div>
                                 </div>
                             </div>
@@ -297,11 +297,11 @@ const Configurator: React.FC = () => {
                             <div className="grid grid-cols-2 gap-4 mb-4">
                                 <div>
                                     <label className="block text-xs font-bold text-gray-500 mb-1">Voornaam <span className="text-red-500">*</span></label>
-                                    <input type="text" name="firstName" value={form.firstName} onChange={handleInputChange} className="w-full px-4 py-3 border border-gray-200 rounded-2xl focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm" placeholder="Voornaam" required />
+                                    <input type="text" name="firstName" value={form.firstName} onChange={handleInputChange} className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm" placeholder="Voornaam" required />
                                 </div>
                                 <div>
                                     <label className="block text-xs font-bold text-gray-500 mb-1">Achternaam <span className="text-red-500">*</span></label>
-                                    <input type="text" name="lastName" value={form.lastName} onChange={handleInputChange} className="w-full px-4 py-3 border border-gray-200 rounded-2xl focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm" placeholder="Achternaam" required />
+                                    <input type="text" name="lastName" value={form.lastName} onChange={handleInputChange} className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm" placeholder="Achternaam" required />
                                 </div>
                             </div>
                             <div className="grid grid-cols-1 gap-4">
@@ -309,14 +309,14 @@ const Configurator: React.FC = () => {
                                     <label className="block text-xs font-bold text-gray-500 mb-1">Telefoon <span className="text-red-500">*</span></label>
                                     <div className="relative">
                                         <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                                        <input type="tel" name="phone" value={form.phone} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-2xl focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm" placeholder="06 12345678" required />
+                                        <input type="tel" name="phone" value={form.phone} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm" placeholder="06 12345678" required />
                                     </div>
                                 </div>
                                 <div>
                                     <label className="block text-xs font-bold text-gray-500 mb-1">E-mailadres <span className="text-red-500">*</span></label>
                                     <div className="relative">
                                         <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                                        <input type="email" name="email" value={form.email} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-2xl focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm" placeholder="naam@bedrijf.nl" required />
+                                        <input type="email" name="email" value={form.email} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm" placeholder="naam@bedrijf.nl" required />
                                     </div>
                                 </div>
                             </div>
@@ -330,24 +330,24 @@ const Configurator: React.FC = () => {
                                     <label className="block text-xs font-bold text-gray-500 mb-1">Straat + Huisnummer <span className="text-red-500">*</span></label>
                                     <div className="relative">
                                         <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                                        <input type="text" name="address" value={form.address} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-2xl focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm" placeholder="Straatnaam 123" required />
+                                        <input type="text" name="address" value={form.address} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm" placeholder="Straatnaam 123" required />
                                     </div>
                                 </div>
                                 <div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-xs font-bold text-gray-500 mb-1">Postcode <span className="text-red-500">*</span></label>
-                                            <input type="text" name="zip" value={form.zip} onChange={handleInputChange} className="w-full px-4 py-3 border border-gray-200 rounded-2xl focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm" placeholder="1234 AB" required />
+                                            <input type="text" name="zip" value={form.zip} onChange={handleInputChange} className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm" placeholder="1234 AB" required />
                                         </div>
                                         <div>
                                             <label className="block text-xs font-bold text-gray-500 mb-1">Plaats <span className="text-red-500">*</span></label>
-                                            <input type="text" name="city" value={form.city} onChange={handleInputChange} className="w-full px-4 py-3 border border-gray-200 rounded-2xl focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm" placeholder="Plaats" required />
+                                            <input type="text" name="city" value={form.city} onChange={handleInputChange} className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm" placeholder="Plaats" required />
                                         </div>
                                     </div>
                                 </div>
                                 <div>
                                     <label className="block text-xs font-bold text-gray-500 mb-1">Land</label>
-                                    <select name="country" value={form.country} onChange={handleInputChange} className="w-full px-4 py-3 border border-gray-200 rounded-2xl focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm appearance-none">
+                                    <select name="country" value={form.country} onChange={handleInputChange} className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm appearance-none">
                                         <option>Nederland</option>
                                         <option>België</option>
                                         <option>Duitsland</option>
@@ -363,7 +363,7 @@ const Configurator: React.FC = () => {
             </div>
 
             {/* BOTTOM: Full Width Summary & Submit */}
-            <div className="bg-hett-dark rounded-[32px] text-white p-8 lg:p-12 shadow-2xl relative overflow-hidden">
+            <div className="bg-hett-dark rounded-xl text-white p-8 lg:p-12 shadow-xl relative overflow-hidden">
                 {/* Abstract decorative circles */}
                 <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-3xl pointer-events-none -translate-y-1/2 translate-x-1/2"></div>
                 
@@ -389,7 +389,7 @@ const Configurator: React.FC = () => {
                         <button 
                             type="submit"
                             disabled={!isFormValid}
-                            className={`w-full bg-white text-hett-dark font-black uppercase tracking-wide py-4 rounded-full flex items-center justify-center gap-3 shadow-lg transition-all ${
+                            className={`w-full bg-white text-hett-dark font-black uppercase tracking-wide py-4 rounded-lg flex items-center justify-center gap-3 shadow-lg transition-all ${
                                 isFormValid ? 'hover:bg-hett-brown hover:text-white cursor-pointer transform hover:-translate-y-1' : 'opacity-50 cursor-not-allowed'
                             }`}
                         >

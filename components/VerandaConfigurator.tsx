@@ -173,9 +173,9 @@ const VerandaConfigurator = forwardRef<VerandaConfiguratorRef, VerandaConfigurat
   const WallOptionCard = ({ option, selected, onClick, onInfo }: any) => (
       <div 
         onClick={onClick}
-        className={`flex items-center p-4 rounded-xl border transition-all cursor-pointer group ${selected ? 'border-hett-brown bg-white shadow-sm ring-1 ring-hett-brown' : 'border-gray-200 bg-white hover:border-gray-300'}`}
+        className={`flex items-center p-4 rounded-lg border transition-all cursor-pointer group ${selected ? 'border-hett-brown bg-white shadow-sm ring-1 ring-hett-brown' : 'border-gray-200 bg-white hover:border-gray-300'}`}
       >
-          <div className={`w-10 h-10 rounded-lg flex items-center justify-center mr-4 transition-colors ${selected ? 'bg-hett-brown text-white' : 'bg-gray-100 text-gray-400 group-hover:text-gray-600'}`}>
+          <div className={`w-10 h-10 rounded-md flex items-center justify-center mr-4 transition-colors ${selected ? 'bg-hett-brown text-white' : 'bg-gray-100 text-gray-400 group-hover:text-gray-600'}`}>
               <option.icon size={20} />
           </div>
           <div className="flex-grow">
@@ -210,7 +210,7 @@ const VerandaConfigurator = forwardRef<VerandaConfiguratorRef, VerandaConfigurat
           {/* Info Modal */}
           {infoModal && (
               <div className="absolute inset-0 z-[110] flex items-center justify-center p-4" onClick={() => setInfoModal(null)}>
-                  <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
+                  <div className="bg-white rounded-xl p-6 max-w-sm w-full shadow-2xl animate-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
                       <div className="flex justify-between items-start mb-4">
                           <h4 className="font-bold text-lg text-hett-dark">{infoModal.title}</h4>
                           <button onClick={() => setInfoModal(null)} className="p-1 hover:bg-gray-100 rounded-full"><X size={20} /></button>
@@ -226,7 +226,7 @@ const VerandaConfigurator = forwardRef<VerandaConfiguratorRef, VerandaConfigurat
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="bg-white w-full h-full md:h-[95vh] md:w-[95vw] md:max-w-[1600px] md:rounded-[24px] shadow-2xl overflow-hidden flex flex-col md:flex-row relative"
+            className="bg-white w-full h-full md:h-[95vh] md:w-[95vw] md:max-w-[1600px] md:rounded-xl shadow-2xl overflow-hidden flex flex-col md:flex-row relative"
           >
             
             {/* Close Button */}
@@ -260,7 +260,7 @@ const VerandaConfigurator = forwardRef<VerandaConfiguratorRef, VerandaConfigurat
                     <p className="text-gray-500 text-sm">Configureer uw droomveranda.</p>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6 pb-32 custom-scrollbar">
+                <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6 pb-28 custom-scrollbar">
                     
                     {/* 1. Kleur */}
                     <div className="border-b border-gray-100 pb-6">
@@ -279,7 +279,7 @@ const VerandaConfigurator = forwardRef<VerandaConfiguratorRef, VerandaConfigurat
                                             { label: 'Crèmewit (RAL9001)', hex: '#FDF4E3' },
                                             { label: 'Zwart (RAL9005)', hex: '#0E0E10' }
                                         ].map((opt) => (
-                                            <label key={opt.label} className={`flex items-center gap-4 p-3 border rounded-xl cursor-pointer transition-all ${config.profileColor === opt.label ? 'border-hett-brown bg-orange-50/20 ring-1 ring-hett-brown' : 'border-gray-200'}`}>
+                                            <label key={opt.label} className={`flex items-center gap-4 p-3 border rounded-lg cursor-pointer transition-all ${config.profileColor === opt.label ? 'border-hett-brown bg-orange-50/20 ring-1 ring-hett-brown' : 'border-gray-200'}`}>
                                                 <div className="w-8 h-8 rounded-full shadow-sm border border-black/10" style={{ backgroundColor: opt.hex }}></div>
                                                 <span className="font-bold text-gray-800 text-sm flex-grow">{opt.label}</span>
                                                 <input type="radio" name="color" className="accent-hett-brown w-5 h-5" checked={config.profileColor === opt.label} onChange={() => setConfig(prev => ({ ...prev, profileColor: opt.label as any }))} />
@@ -311,7 +311,7 @@ const VerandaConfigurator = forwardRef<VerandaConfiguratorRef, VerandaConfigurat
                                                     type="number" 
                                                     value={config.widthCm}
                                                     onChange={(e) => setConfig(prev => ({...prev, widthCm: Number(e.target.value)}))}
-                                                    className="w-full pl-9 pr-3 py-3 border border-gray-200 rounded-xl font-bold bg-white text-gray-900 focus:border-hett-brown outline-none"
+                                                    className="w-full pl-9 pr-3 py-3 border border-gray-200 rounded-lg font-bold bg-white text-gray-900 focus:border-hett-brown outline-none"
                                                     min={200} max={1200} step={10}
                                                 />
                                             </div>
@@ -324,7 +324,7 @@ const VerandaConfigurator = forwardRef<VerandaConfiguratorRef, VerandaConfigurat
                                                     type="number" 
                                                     value={config.depthCm}
                                                     onChange={(e) => setConfig(prev => ({...prev, depthCm: Number(e.target.value)}))}
-                                                    className="w-full pl-9 pr-3 py-3 border border-gray-200 rounded-xl font-bold bg-white text-gray-900 focus:border-hett-brown outline-none"
+                                                    className="w-full pl-9 pr-3 py-3 border border-gray-200 rounded-lg font-bold bg-white text-gray-900 focus:border-hett-brown outline-none"
                                                     min={200} max={500} step={10}
                                                 />
                                             </div>
@@ -352,7 +352,7 @@ const VerandaConfigurator = forwardRef<VerandaConfiguratorRef, VerandaConfigurat
                                             <div 
                                                 key={option.id}
                                                 onClick={() => setConfig(prev => ({ ...prev, roofType: option.id as any }))}
-                                                className={`relative rounded-xl overflow-hidden cursor-pointer transition-all border group ${config.roofType === option.id ? 'border-hett-brown ring-1 ring-hett-brown shadow-md' : 'border-gray-200 hover:border-gray-300'}`}
+                                                className={`relative rounded-lg overflow-hidden cursor-pointer transition-all border group ${config.roofType === option.id ? 'border-hett-brown ring-1 ring-hett-brown shadow-md' : 'border-gray-200 hover:border-gray-300'}`}
                                             >
                                                 {/* Selected Overlay */}
                                                 {config.roofType === option.id && (
@@ -458,9 +458,9 @@ const VerandaConfigurator = forwardRef<VerandaConfiguratorRef, VerandaConfigurat
 
                     {/* 5. Verlichting */}
                     <div>
-                         <div className="flex items-center justify-between bg-gray-50 p-4 rounded-xl border border-gray-200">
+                         <div className="flex items-center justify-between bg-gray-50 p-4 rounded-lg border border-gray-200">
                              <div className="flex items-center gap-3">
-                                 <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center text-yellow-500 shadow-sm border border-gray-100">
+                                 <div className="w-10 h-10 bg-white rounded-md flex items-center justify-center text-yellow-50 shadow-sm border border-gray-100">
                                      <Lightbulb size={20} fill={config.lighting ? "currentColor" : "none"} />
                                  </div>
                                  <div>
@@ -478,33 +478,33 @@ const VerandaConfigurator = forwardRef<VerandaConfiguratorRef, VerandaConfigurat
                     <div className="h-24"></div>
                 </div>
 
-                {/* --- FOOTER --- */}
-                <div className="absolute bottom-0 left-0 right-0 md:left-auto md:w-[55%] bg-white border-t border-gray-200 p-6 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] z-20">
-                    <div className="flex items-center gap-4 text-[10px] text-gray-500 font-bold uppercase tracking-wide mb-4">
-                        <span className="flex items-center gap-1"><Truck size={12} /> 1-2 weken</span>
-                        <span className="flex items-center gap-1"><ShieldCheck size={12} /> 10 jaar garantie</span>
+                {/* --- FOOTER (COMPACT) --- */}
+                <div className="absolute bottom-0 left-0 right-0 md:left-auto md:w-[55%] bg-white border-t border-gray-200 p-4 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] z-20">
+                    <div className="flex items-center gap-4 text-[10px] text-gray-500 font-bold uppercase tracking-wide mb-3">
+                        <span className="flex items-center gap-1.5"><Truck size={12} /> 1-2 weken</span>
+                        <span className="flex items-center gap-1.5"><ShieldCheck size={12} /> 10 jaar garantie</span>
                     </div>
 
-                    <div className="flex items-end justify-between mb-4">
-                         <div>
-                             <span className="block text-xs text-gray-500 font-medium">Totaalprijs (incl. BTW)</span>
-                             <span className="text-2xl font-black text-[#1a1a1a]">€ {currentPrice.toLocaleString()},-</span>
+                    <div className="flex items-center justify-between gap-4">
+                         <div className="flex flex-col">
+                             <span className="text-[10px] text-gray-500 font-medium leading-tight">Totaalprijs (incl. BTW)</span>
+                             <span className="text-2xl font-black text-[#1a1a1a] leading-none">€ {currentPrice.toLocaleString()},-</span>
                          </div>
-                    </div>
 
-                    <div className="flex gap-3">
-                        <button 
-                            onClick={() => handleSubmit('quote')}
-                            className="flex-1 py-4 bg-white border border-gray-300 text-[#1a1a1a] font-bold rounded-lg hover:bg-gray-50 transition-colors"
-                        >
-                            Offerte
-                        </button>
-                        <button 
-                            onClick={() => handleSubmit('order')}
-                            className="flex-[2] py-4 bg-black text-white font-bold rounded-lg hover:bg-[#333] transition-colors flex items-center justify-center gap-2"
-                        >
-                            Verdergaan <ArrowRight size={18} />
-                        </button>
+                         <div className="flex gap-2 flex-1 justify-end max-w-md">
+                            <button 
+                                onClick={() => handleSubmit('quote')}
+                                className="px-4 py-3 bg-white border border-gray-300 text-[#1a1a1a] font-bold rounded-lg hover:bg-gray-50 transition-colors text-sm whitespace-nowrap"
+                            >
+                                Offerte
+                            </button>
+                            <button 
+                                onClick={() => handleSubmit('order')}
+                                className="flex-1 px-6 py-3 bg-black text-white font-bold rounded-lg hover:bg-[#333] transition-colors flex items-center justify-center gap-2 text-sm whitespace-nowrap"
+                            >
+                                Verdergaan <ArrowRight size={16} />
+                            </button>
+                        </div>
                     </div>
                 </div>
 

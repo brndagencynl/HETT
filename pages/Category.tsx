@@ -1,361 +1,183 @@
-
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { PRODUCTS } from '../constants';
-import { Filter, Check, X, ChevronDown, ChevronUp, RotateCcw, SlidersHorizontal, ArrowUpDown } from 'lucide-react';
+import { Product } from '../types';
+import { Check, Heart, ChevronDown, ChevronUp, SlidersHorizontal, LayoutGrid, List, Star } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import { motion, AnimatePresence } from 'framer-motion';
 
-interface FilterCheckboxProps {
-  label: string;
-  count?: number;
-  defaultChecked?: boolean;
-}
-
-const FilterCheckbox: React.FC<FilterCheckboxProps> = ({ label, count, defaultChecked = false }) => {
-    const [checked, setChecked] = useState(defaultChecked);
-    return (
-        <label className="flex items-center justify-between py-3 cursor-pointer group">
-            <div className="flex items-center gap-3">
-                <div className={`w-6 h-6 border-2 rounded flex items-center justify-center transition-colors ${checked ? 'bg-hett-dark border-hett-dark' : 'border-gray-300 bg-white group-hover:border-gray-400'}`}>
-                    <Check size={14} className={`text-white transition-opacity ${checked ? 'opacity-100' : 'opacity-0'}`} strokeWidth={3} />
-                </div>
-                <span className={`text-base ${checked ? 'font-bold text-hett-dark' : 'font-medium text-gray-700'}`}>{label}</span>
-                <input type="checkbox" className="hidden" checked={checked} onChange={() => setChecked(!checked)} />
-            </div>
-            {count !== undefined && <span className="text-gray-400 text-sm">({count})</span>}
-        </label>
-    );
-};
-
-interface FilterGroupProps {
-  title: string;
-  children?: React.ReactNode;
-  defaultOpen?: boolean;
-}
-
-const FilterGroup: React.FC<FilterGroupProps> = ({ title, children, defaultOpen = true }) => {
-    const [isOpen, setIsOpen] = useState(defaultOpen);
-    return (
-        <div className="border-b border-gray-200 last:border-0">
-            <button 
-                onClick={() => setIsOpen(!isOpen)} 
-                className="flex items-center justify-between w-full text-left py-5 group bg-gray-50/50 px-4 hover:bg-gray-50 transition-colors"
-            >
-                <h4 className="font-bold text-hett-dark text-base">{title}</h4>
-                {isOpen ? <ChevronUp size={20} className="text-gray-500" /> : <ChevronDown size={20} className="text-gray-500" />}
-            </button>
-            <AnimatePresence>
-                {isOpen && (
-                    <motion.div 
-                        initial={{ height: 0, opacity: 0 }} 
-                        animate={{ height: 'auto', opacity: 1 }} 
-                        exit={{ height: 0, opacity: 0 }}
-                        className="overflow-hidden bg-white"
-                    >
-                        <div className="px-4 pb-5 pt-2">{children}</div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-        </div>
-    );
-};
-
 const Category: React.FC = () => {
   const { categorySlug } = useParams();
-  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
-  const [sortOption, setSortOption] = useState('Aanbevolen');
-  
-  // Simple mapping from slug to category name
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [showMoreDesc, setShowMoreDesc] = useState(false);
+
   const getCategoryName = (slug: string | undefined) => {
-    if (!slug) return '';
-    if (slug === 'overkappingen') return 'Overkappingen';
-    if (slug === 'sandwichpanelen') return 'Sandwichpanelen';
-    if (slug === 'profielen') return 'Profielen';
-    if (slug === 'accessoires') return 'Accessoires';
-    return slug;
+    if (!slug) return 'Assortiment';
+    const names: Record<string, string> = {
+        'overkappingen': 'Universele Overkappingen',
+        'sandwichpanelen': 'Geïsoleerde Panelen',
+        'profielen': 'Aluminium Profielen',
+        'accessoires': 'Montage Accessoires'
+    };
+    return names[slug] || slug.charAt(0).toUpperCase() + slug.slice(1);
   };
 
   const categoryName = getCategoryName(categorySlug);
-  const products = PRODUCTS.filter(p => p.category === categoryName);
-  const isOverkappingen = categorySlug === 'overkappingen';
-
-  const handleResetFilters = () => {
-      // Reset logic
-  };
-
-  const FilterContent = () => (
-    <div className="flex flex-col h-full bg-white">
-        
-        {/* Sortering Section */}
-        <div className="p-4 border-b border-gray-200">
-            <label className="block text-sm font-bold text-hett-dark mb-2">Sortering</label>
-            <div className="relative">
-                <select 
-                    value={sortOption}
-                    onChange={(e) => setSortOption(e.target.value)}
-                    className="w-full appearance-none bg-white border border-gray-300 text-gray-700 py-3 px-4 rounded-lg font-medium focus:outline-none focus:border-hett-dark focus:ring-1 focus:ring-hett-dark"
-                >
-                    <option>Aanbevolen</option>
-                    <option>Prijs: Laag - Hoog</option>
-                    <option>Prijs: Hoog - Laag</option>
-                    <option>Nieuwste eerst</option>
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
-                    <ChevronDown size={16} />
-                </div>
-            </div>
-        </div>
-
-        <div className="flex-grow overflow-y-auto">
-            
-            {/* Specific Filters for Overkappingen */}
-            {isOverkappingen ? (
-                <>
-                    <FilterGroup title="Populaire filters">
-                        <div className="flex flex-col">
-                            <FilterCheckbox label="Direct leverbaar" count={12} />
-                            <FilterCheckbox label="Actie producten" count={4} />
-                            <FilterCheckbox label="Nieuw" count={8} />
-                        </div>
-                    </FilterGroup>
-
-                    <FilterGroup title="Breedte">
-                        <div className="flex flex-col">
-                            {[306, 406, 506, 606, 706, 806, 906, 1006].map(w => (
-                                <FilterCheckbox key={w} label={`${w} cm`} count={Math.floor(Math.random() * 15) + 1} />
-                            ))}
-                        </div>
-                    </FilterGroup>
-
-                    <FilterGroup title="Diepte">
-                        <div className="flex flex-col">
-                            {[250, 300, 350, 400, 500].map(d => (
-                                <FilterCheckbox key={d} label={`${d} cm`} count={Math.floor(Math.random() * 20) + 1} />
-                            ))}
-                        </div>
-                    </FilterGroup>
-
-                    <FilterGroup title="Kleur">
-                        <div className="flex flex-col">
-                            <FilterCheckbox label="Antraciet (RAL7016)" count={42} defaultChecked />
-                            <FilterCheckbox label="Crèmewit (RAL9001)" count={18} />
-                            <FilterCheckbox label="Zwart (RAL9005)" count={12} />
-                        </div>
-                    </FilterGroup>
-
-                    <FilterGroup title="Type dakbedekking">
-                        <div className="flex flex-col">
-                            <FilterCheckbox label="Polycarbonaat Opaal" count={35} />
-                            <FilterCheckbox label="Polycarbonaat Helder" count={28} />
-                            <FilterCheckbox label="Glas Helder" count={15} />
-                            <FilterCheckbox label="Glas Melk" count={8} />
-                        </div>
-                    </FilterGroup>
-                </>
-            ) : (
-                // Generic Categories for other pages
-                <FilterGroup title="Categorie">
-                    <ul className="space-y-3">
-                        <li><Link to="/categorie/overkappingen" className="text-gray-700 hover:text-hett-brown font-medium block">Overkappingen (14)</Link></li>
-                        <li><Link to="/categorie/sandwichpanelen" className="text-gray-700 hover:text-hett-brown font-medium block">Sandwichpanelen (8)</Link></li>
-                        <li><Link to="/categorie/profielen" className="text-gray-700 hover:text-hett-brown font-medium block">Profielen (24)</Link></li>
-                        <li><Link to="/categorie/accessoires" className="text-gray-700 hover:text-hett-brown font-medium block">Accessoires (32)</Link></li>
-                    </ul>
-                </FilterGroup>
-            )}
-        </div>
-    </div>
-  );
+  const products = PRODUCTS.filter(p => !categorySlug || p.category.toLowerCase() === categorySlug);
 
   return (
-    <div className="min-h-screen bg-[#f6f8fa] font-sans">
-      <PageHeader 
-        title={categoryName}
-        subtitle="Shop"
-        description={`Bekijk ons assortiment ${categoryName.toLowerCase()}. Hoogwaardige kwaliteit voor uw tuinproject.`}
-        image={`https://picsum.photos/1200/400?random=${categorySlug?.length}`}
-      />
+    <div className="min-h-screen bg-white font-sans">
+      <PageHeader />
 
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
-            
-            {/* Filters Sidebar (Desktop) */}
-            <div className="hidden lg:block">
-                <div className="bg-white rounded-[16px] shadow-sm border border-gray-200 sticky top-32 overflow-hidden">
-                    <div className="p-5 border-b border-gray-200 flex justify-between items-center bg-gray-50">
-                        <div className="flex items-center gap-2 font-black text-hett-dark text-lg">
-                            <SlidersHorizontal size={20} />
-                            <h3>Filters</h3>
+        <div className="mb-10">
+            <h1 className="text-3xl md:text-4xl font-bold text-hett-dark mb-4">{categoryName}</h1>
+            <div className="max-w-4xl">
+                <p className={`text-sm text-gray-600 leading-relaxed transition-all ${showMoreDesc ? '' : 'line-clamp-2'}`}>
+                    Bij HETT.nl vind je een ruime selectie aan hoogwaardige {categoryName.toLowerCase()} van topmerken. Onze systemen zijn verkrijgbaar in verschillende maten en materialen, waaronder aluminium en gepoedercoat staal, zodat je altijd de juiste oplossing hebt voor jouw tuinproject.
+                </p>
+                <button onClick={() => setShowMoreDesc(!showMoreDesc)} className="text-blue-700 font-bold text-sm mt-1 hover:underline">
+                    {showMoreDesc ? 'Minder weergeven' : 'Lees meer'}
+                </button>
+            </div>
+            <div className="w-full h-px bg-gray-200 mt-8"></div>
+        </div>
+
+        <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
+            <aside className="w-full lg:w-[300px] flex-shrink-0">
+                <div className="flex items-center gap-2 mb-6 text-xl font-bold text-hett-dark">
+                    <SlidersHorizontal size={24} /> Filters
+                </div>
+                
+                <div className="border border-gray-200 rounded-lg overflow-hidden divide-y divide-gray-200">
+                    <FilterAccordion title="Laat resultaten zien in" defaultOpen>
+                        <div className="text-blue-700 text-sm font-bold pl-2 cursor-pointer hover:underline">
+                            {categoryName} ({products.length})
                         </div>
-                        <button onClick={handleResetFilters} className="text-xs font-bold text-gray-400 hover:text-hett-brown uppercase tracking-wider">
-                            Wis alles
-                        </button>
+                    </FilterAccordion>
+                    <FilterAccordion title="Merk" defaultOpen>
+                        <FilterCheckbox label="HETT Premium" count={42} checked />
+                        <FilterCheckbox label="Deponti" count={15} />
+                    </FilterAccordion>
+                </div>
+            </aside>
+
+            <main className="flex-grow">
+                <div className="flex flex-wrap items-center justify-between gap-4 mb-8 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                    <div className="text-xs sm:text-sm font-medium text-gray-500">
+                        <span className="font-bold text-hett-dark">{products.length}</span> resultaten
                     </div>
-                    <div className="max-h-[70vh] overflow-y-auto custom-scrollbar">
-                        <FilterContent />
-                    </div>
-                    <div className="p-4 border-t border-gray-200 bg-gray-50">
-                        <button className="w-full bg-[#7fb035] text-white font-bold py-3 rounded-lg hover:bg-[#719d2f] transition-colors shadow-sm">
-                            Toon {products.length} resultaten
-                        </button>
+
+                    <div className="flex items-center gap-4">
+                        <select className="bg-white border border-gray-300 rounded px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold text-hett-dark outline-none">
+                            <option>Standaard</option>
+                            <option>Prijs: Laag - Hoog</option>
+                            <option>Prijs: Hoog - Laag</option>
+                        </select>
+
+                        <div className="hidden sm:flex items-center bg-gray-200/50 rounded-lg p-1">
+                            <button onClick={() => setViewMode('grid')} className={`p-1.5 rounded-md transition-all ${viewMode === 'grid' ? 'bg-hett-dark text-white shadow-sm' : 'text-gray-500'}`}><LayoutGrid size={18} /></button>
+                            <button onClick={() => setViewMode('list')} className={`p-1.5 rounded-md transition-all ${viewMode === 'list' ? 'bg-hett-dark text-white shadow-sm' : 'text-gray-500'}`}><List size={18} /></button>
+                        </div>
                     </div>
                 </div>
+
+                <div className={`grid gap-3 sm:gap-6 ${viewMode === 'grid' ? 'grid-cols-2 sm:grid-cols-2 xl:grid-cols-3' : 'grid-cols-1'}`}>
+                    {products.map((product) => (
+                        <ProductCard key={product.id} product={product} viewMode={viewMode} />
+                    ))}
+                </div>
+            </main>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ProductCard: React.FC<{ product: Product, viewMode: 'grid' | 'list' }> = ({ product, viewMode }) => {
+    return (
+        <div className={`bg-white border border-gray-200 rounded-lg shadow-soft hover:shadow-md transition-all flex flex-col group overflow-hidden ${viewMode === 'list' ? 'md:flex-row' : ''}`}>
+            {/* Action Bar (Compare & Wishlist) */}
+            <div className={`px-2 py-1.5 flex justify-between items-center ${viewMode === 'list' ? 'hidden' : ''}`}>
+                <label className="flex items-center gap-1.5 cursor-pointer">
+                    <input type="checkbox" className="w-3.5 h-3.5 border-gray-300 rounded text-hett-dark focus:ring-hett-primary" />
+                    <span className="text-[10px] sm:text-xs font-bold text-blue-700">Vergelijk</span>
+                </label>
+                <button className="text-gray-300 hover:text-red-500 transition-colors p-1"><Heart size={18} /></button>
             </div>
 
-            {/* Product Grid & Mobile Filter */}
-            <div className="lg:col-span-3">
-                
-                {/* Mobile Filter Bar (Horizontal Scroll) */}
-                <div className="lg:hidden mb-6">
-                    <div className="flex items-center gap-3 overflow-x-auto no-scrollbar pb-1 -mx-4 px-4">
-                        {/* Main Filter Button */}
-                        <button 
-                            onClick={() => setIsMobileFilterOpen(true)}
-                            className="flex-shrink-0 flex items-center gap-2 bg-[#002f5d] text-white px-5 py-3 rounded-lg font-bold text-sm shadow-md active:scale-95 transition-transform"
-                        >
-                            <SlidersHorizontal size={18} />
-                            Filter
-                        </button>
+            <Link to={`/product/${product.id}`} className={`relative flex items-center justify-center overflow-hidden bg-gray-50 ${viewMode === 'list' ? 'w-full md:w-64 p-4' : 'h-32 sm:h-64'}`}>
+                <img src={product.imageUrl} alt={product.title} className="w-full h-full object-cover mix-blend-multiply transition-transform duration-500 group-hover:scale-105" />
+                {product.isBestseller && (
+                    <div className="absolute top-2 left-2 bg-hett-secondary text-white text-[8px] sm:text-[10px] font-black px-2 py-0.5 rounded shadow-sm uppercase">Bestseller</div>
+                )}
+            </Link>
 
-                        {/* Quick Pills */}
-                        <button className="flex-shrink-0 px-4 py-3 bg-white border border-gray-300 rounded-lg text-sm font-bold text-gray-700 whitespace-nowrap active:bg-gray-50">
-                            Bekijk de TOP 10
-                        </button>
-                        <button className="flex-shrink-0 px-4 py-3 bg-white border border-gray-300 rounded-lg text-sm font-bold text-gray-700 whitespace-nowrap active:bg-gray-50">
-                            Merk HETT
-                        </button>
-                        <button className="flex-shrink-0 px-4 py-3 bg-white border border-gray-300 rounded-lg text-sm font-bold text-gray-700 whitespace-nowrap active:bg-gray-50">
-                            Type Premium
-                        </button>
-                        <button className="flex-shrink-0 px-4 py-3 bg-white border border-gray-300 rounded-lg text-sm font-bold text-gray-700 whitespace-nowrap active:bg-gray-50">
-                            Direct leverbaar
-                        </button>
-                    </div>
-                    
-                    {/* Active Filters Summary (Optional) */}
-                    <div className="mt-4 flex items-center justify-between text-sm text-gray-500">
-                        <span><strong>{products.length}</strong> resultaten</span>
-                        <div className="flex items-center gap-1">
-                            <span>Sortering:</span>
-                            <span className="font-bold text-hett-dark">{sortOption}</span>
-                        </div>
-                    </div>
+            <div className="p-2.5 sm:p-5 flex flex-col flex-grow">
+                <div className="flex flex-wrap gap-1 mb-1.5">
+                    {product.badges?.slice(0, 1).map(badge => (
+                        <span key={badge} className="text-[8px] sm:text-[10px] font-black uppercase px-1.5 py-0.5 rounded bg-orange-100 text-orange-700 whitespace-nowrap">
+                            {badge}
+                        </span>
+                    ))}
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-6">
-                    {products.map((product) => (
-                         <div key={product.id} className="bg-white rounded-lg overflow-hidden flex flex-col h-full group hover:shadow-lg transition-shadow duration-300 border border-transparent hover:border-gray-200">
-                            {/* Image */}
-                            <Link to={`/product/${product.id}`} className="block relative h-36 md:h-56 overflow-hidden bg-gray-100">
-                                <img src={product.imageUrl} alt={product.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                                {product.isBestseller && (
-                                    <div className="absolute top-2 left-2 md:top-4 md:left-4 bg-[#a05a2c] text-white text-[8px] md:text-[10px] font-bold px-2 py-0.5 md:px-3 md:py-1 rounded-full uppercase tracking-wider shadow-sm">
-                                        Populair
-                                    </div>
-                                )}
-                                {product.isNew && (
-                                    <div className="absolute top-2 left-2 md:top-4 md:left-4 bg-[#293133] text-white text-[8px] md:text-[10px] font-bold px-2 py-0.5 md:px-3 md:py-1 rounded-full uppercase tracking-wider shadow-sm">
-                                        Nieuw
-                                    </div>
-                                )}
-                            </Link>
-                            
-                            {/* Content */}
-                            <div className="p-3 md:p-6 flex flex-col flex-grow">
-                                <Link to={`/product/${product.id}`} className="block mb-2 md:mb-4">
-                                    <h3 className="text-[#1a1a1a] text-xs md:text-sm font-normal leading-snug hover:underline line-clamp-2 min-h-[2.5em]">
-                                        {product.title} – {product.shortDescription}
-                                    </h3>
-                                </Link>
-                                
-                                <div className="text-[#1a1a1a] font-bold text-xs md:text-sm mb-2 md:mb-4">
-                                    {product.options?.sizes?.[0] ? product.options.sizes[0].replace('x', ' cm x ').replace('cm', ' cm') : '306 cm x 250 cm'}
-                                </div>
+                <Link to={`/product/${product.id}`} className="block mb-1 sm:mb-2">
+                    <h3 className="text-hett-dark font-bold text-[13px] sm:text-base leading-tight hover:underline line-clamp-2 min-h-[2.4rem] sm:min-h-[3rem]">
+                        {product.title}
+                    </h3>
+                </Link>
 
-                                <div className="flex items-center gap-1.5 md:gap-2 text-[#5d734e] text-[10px] md:text-xs font-medium mb-3 md:mb-6">
-                                    <Check size={12} strokeWidth={3} /> Op voorraad
-                                </div>
+                <div className="flex items-center gap-1 mb-2 sm:mb-4">
+                    <div className="flex text-yellow-400">
+                        <Star size={10} fill="currentColor" />
+                    </div>
+                    <span className="text-[9px] sm:text-xs text-gray-400 font-bold">({product.reviewCount})</span>
+                </div>
 
-                                <div className="mt-auto flex flex-col gap-3">
-                                    <div className="flex flex-col">
-                                        <span className="text-[#1a1a1a] font-bold text-lg md:text-xl leading-none">{product.price}</span>
-                                        <span className="text-gray-500 text-[10px] mt-1">incl. BTW</span>
-                                    </div>
-                                    <Link 
-                                        to={`/product/${product.id}`}
-                                        className="w-full bg-[#293133] text-white text-xs font-medium px-4 py-3 rounded-full hover:bg-[#1a1a1a] transition-colors text-center"
-                                    >
-                                        Configureer nu
-                                    </Link>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                    {products.length === 0 && (
-                        <div className="col-span-full text-center py-12">
-                            <p className="text-gray-500">Geen producten gevonden in deze categorie.</p>
-                        </div>
+                <div className="mb-3 sm:mb-4">
+                    <div className="text-base sm:text-2xl font-black text-hett-dark leading-none">€ {product.price},-</div>
+                </div>
+
+                <div className="mt-auto">
+                    <button className="w-full bg-hett-dark text-white rounded-md py-2 sm:py-3 text-[11px] sm:text-sm font-bold flex items-center justify-center gap-1.5 sm:gap-2 shadow-sm hover:bg-hett-primary transition-colors">
+                        Bestel
+                    </button>
+                    {product.variantCount && (
+                        <Link to={`/product/${product.id}`} className="block text-center mt-1.5 text-blue-700 text-[10px] sm:text-xs font-bold hover:underline">
+                            {product.variantCount} Varianten
+                        </Link>
                     )}
                 </div>
             </div>
-
         </div>
-      </div>
+    );
+};
 
-      {/* Mobile Filter Drawer (Full Screen / Slide Up) */}
-      <AnimatePresence>
-        {isMobileFilterOpen && (
-            <div className="fixed inset-0 z-[100] font-sans">
-                {/* Backdrop */}
-                <motion.div 
-                    initial={{ opacity: 0 }} 
-                    animate={{ opacity: 1 }} 
-                    exit={{ opacity: 0 }} 
-                    className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-                    onClick={() => setIsMobileFilterOpen(false)}
-                />
-                
-                {/* Drawer */}
-                <motion.div
-                    initial={{ y: '100%' }}
-                    animate={{ y: 0 }}
-                    exit={{ y: '100%' }}
-                    transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                    className="absolute inset-x-0 bottom-0 top-[10vh] bg-white rounded-t-[20px] flex flex-col shadow-2xl overflow-hidden"
-                >
-                    {/* Header */}
-                    <div className="flex justify-between items-center p-5 border-b border-gray-200 bg-white z-10">
-                        <h3 className="text-2xl font-black text-hett-dark">Filters</h3>
-                        <button 
-                            onClick={() => setIsMobileFilterOpen(false)}
-                            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                        >
-                            <X size={28} className="text-hett-dark" strokeWidth={2.5} />
-                        </button>
-                    </div>
-                    
-                    {/* Content */}
-                    <div className="flex-grow overflow-y-auto bg-white pb-24">
-                        <FilterContent />
-                    </div>
+const FilterAccordion: React.FC<{ title: string, children: React.ReactNode, defaultOpen?: boolean }> = ({ title, children, defaultOpen = false }) => {
+    const [isOpen, setIsOpen] = useState(defaultOpen);
+    return (
+        <div>
+            <button onClick={() => setIsOpen(!isOpen)} className="w-full flex justify-between items-center p-4 hover:bg-gray-50 transition-colors">
+                <h4 className="text-xs sm:text-sm font-black text-hett-dark uppercase tracking-wider text-left">{title}</h4>
+                {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </button>
+            {isOpen && <div className="p-4 pt-0 space-y-1 bg-white">{children}</div>}
+        </div>
+    );
+};
 
-                    {/* Sticky Footer Button */}
-                    <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 bg-white z-20 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
-                        <button 
-                            onClick={() => setIsMobileFilterOpen(false)}
-                            className="w-full bg-[#7fb035] text-white font-black text-lg py-4 rounded-xl hover:bg-[#719d2f] transition-colors shadow-md active:scale-[0.99] transform"
-                        >
-                            Toon {products.length} resultaten
-                        </button>
-                    </div>
-                </motion.div>
+const FilterCheckbox: React.FC<{ label: string, count: number, checked?: boolean }> = ({ label, count, checked = false }) => {
+    const [isChecked, setIsChecked] = useState(checked);
+    return (
+        <label className="flex items-center justify-between group cursor-pointer py-1.5">
+            <div className="flex items-center gap-2">
+                <input type="checkbox" className="w-4 h-4 rounded text-hett-dark" checked={isChecked} onChange={() => setIsChecked(!isChecked)} />
+                <span className={`text-xs sm:text-sm ${isChecked ? 'font-bold text-hett-dark' : 'text-gray-600'}`}>{label}</span>
             </div>
-        )}
-      </AnimatePresence>
-
-    </div>
-  );
+            <span className="text-gray-400 text-[10px] sm:text-xs">({count})</span>
+        </label>
+    );
 };
 
 export default Category;

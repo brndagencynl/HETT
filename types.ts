@@ -4,6 +4,7 @@ export interface Product {
   title: string;
   category: 'Overkappingen' | 'Sandwichpanelen' | 'Profielen' | 'Accessoires' | 'Dakpanelen' | 'Wandpanelen' | 'gevel';
   price: number;
+  priceExVat?: number;
   shortDescription: string;
   description: string;
   imageUrl: string;
@@ -12,6 +13,11 @@ export interface Product {
   };
   isNew?: boolean;
   isBestseller?: boolean;
+  badges?: string[];
+  rating?: number;
+  reviewCount?: number;
+  stockStatus?: string;
+  variantCount?: number;
   options?: {
     colors: string[];
     sizes: string[];

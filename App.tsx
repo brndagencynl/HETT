@@ -42,6 +42,7 @@ import MyAccount from './pages/MyAccount';
 import OrderReceived from './pages/OrderReceived';
 import Search from './pages/Search';
 import Quote from './pages/Quote'; 
+import Wishlist from './pages/Wishlist';
 
 // ScrollToTop helper
 const ScrollToTop = () => {
@@ -70,6 +71,7 @@ const AnimatedRoutes: React.FC = () => {
                 <Route path="/order-received" element={<PageTransition><OrderReceived /></PageTransition>} />
                 <Route path="/search" element={<PageTransition><Search /></PageTransition>} />
                 <Route path="/offerte" element={<PageTransition><Quote /></PageTransition>} /> 
+                <Route path="/wishlist" element={<PageTransition><Wishlist /></PageTransition>} />
 
                 {/* Information Pages */}
                 <Route path="/bezorging" element={<PageTransition><Delivery /></PageTransition>} />

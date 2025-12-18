@@ -1,9 +1,9 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { PRODUCTS } from '../constants';
-import { Filter, Check } from 'lucide-react';
+import { Filter, Check, Star, Heart } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
+import { Product } from '../types';
 
 const Shop: React.FC = () => {
   return (
@@ -15,12 +15,12 @@ const Shop: React.FC = () => {
         image="https://picsum.photos/1200/400?random=shop"
       />
 
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 md:gap-12">
             
             {/* Filters Sidebar */}
             <div className="hidden lg:block">
-                <div className="bg-white p-6 rounded-[24px] shadow-sm border border-gray-100 sticky top-32">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 sticky top-32">
                     <div className="flex items-center gap-2 mb-6">
                         <Filter size={20} className="text-hett-brown" />
                         <h3 className="font-bold text-hett-dark">Filters</h3>
@@ -30,19 +30,11 @@ const Shop: React.FC = () => {
                         <div>
                             <h4 className="text-sm font-bold mb-3">Categorie</h4>
                             <ul className="space-y-2 text-sm text-gray-600">
-                                <li><Link to="/categorie/overkappingen" className="hover:text-hett-brown">Overkappingen</Link></li>
-                                <li><Link to="/categorie/glazen-schuifwanden" className="hover:text-hett-brown">Glazen schuifwanden</Link></li>
-                                <li><Link to="/categorie/profielen" className="hover:text-hett-brown">Profielen</Link></li>
-                                <li><Link to="/categorie/accessoires" className="hover:text-hett-brown">Accessoires</Link></li>
+                                <li><Link to="/categorie/overkappingen" className="hover:text-hett-brown transition-colors">Overkappingen</Link></li>
+                                <li><Link to="/categorie/sandwichpanelen" className="hover:text-hett-brown transition-colors">Sandwichpanelen</Link></li>
+                                <li><Link to="/categorie/profielen" className="hover:text-hett-brown transition-colors">Aluminium Profielen</Link></li>
+                                <li><Link to="/categorie/accessoires" className="hover:text-hett-brown transition-colors">Montage Accessoires</Link></li>
                             </ul>
-                        </div>
-                        <div>
-                            <h4 className="text-sm font-bold mb-3">Prijs</h4>
-                            <input type="range" className="w-full accent-hett-brown" />
-                            <div className="flex justify-between text-xs text-gray-500 mt-2">
-                                <span>€0</span>
-                                <span>€5000+</span>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -50,62 +42,72 @@ const Shop: React.FC = () => {
 
             {/* Product Grid */}
             <div className="lg:col-span-3">
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                <div className="flex items-center justify-between mb-8">
+                    <div className="text-sm text-gray-500 font-bold">
+                        {PRODUCTS.length} Producten
+                    </div>
+                    <select className="bg-white border border-gray-200 rounded-md px-4 py-2 text-sm font-bold outline-none">
+                        <option>Sorteer op: Populair</option>
+                        <option>Prijs: Laag - Hoog</option>
+                        <option>Prijs: Hoog - Laag</option>
+                    </select>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-6">
                     {PRODUCTS.map((product) => (
-                        <div key={product.id} className="bg-white rounded-lg overflow-hidden flex flex-col h-full group hover:shadow-lg transition-shadow duration-300 border border-transparent hover:border-gray-200">
-                            {/* Image */}
-                            <Link to={`/product/${product.id}`} className="block relative h-56 overflow-hidden">
-                                <img src={product.imageUrl} alt={product.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                                {product.isBestseller && (
-                                    <div className="absolute top-4 left-4 bg-[#a05a2c] text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">
-                                        Populair
-                                    </div>
-                                )}
-                                {product.isNew && (
-                                    <div className="absolute top-4 left-4 bg-[#293133] text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">
-                                        Nieuw
-                                    </div>
-                                )}
-                            </Link>
-                            
-                            {/* Content */}
-                            <div className="p-6 flex flex-col flex-grow">
-                                <Link to={`/product/${product.id}`} className="block mb-4">
-                                    <h3 className="text-[#1a1a1a] text-sm font-normal leading-snug hover:underline line-clamp-2">
-                                        {product.title} – {product.shortDescription}
-                                    </h3>
-                                </Link>
-                                
-                                <div className="text-[#1a1a1a] font-bold text-sm mb-4">
-                                    {product.options?.sizes?.[0] ? product.options.sizes[0].replace('x', ' cm x ').replace('cm', ' cm') : '306 cm x 250 cm'}
-                                </div>
-
-                                <div className="flex items-center gap-2 text-[#5d734e] text-xs font-medium mb-6">
-                                    <Check size={14} strokeWidth={3} /> Op voorraad
-                                </div>
-
-                                <div className="mt-auto flex items-end justify-between">
-                                    <div className="flex flex-col">
-                                        <span className="text-[#1a1a1a] font-bold text-xl leading-none">{product.price}</span>
-                                        <span className="text-gray-500 text-[10px] mt-1">incl. BTW</span>
-                                    </div>
-                                    <Link 
-                                        to={`/product/${product.id}`}
-                                        className="bg-[#293133] text-white text-xs font-medium px-5 py-2.5 rounded-full hover:bg-[#1a1a1a] transition-colors"
-                                    >
-                                        Configureer nu
-                                    </Link>
-                                </div>
-                            </div>
-                        </div>
+                        <ShopProductCard key={product.id} product={product} />
                     ))}
                 </div>
             </div>
-
         </div>
       </div>
     </div>
   );
+};
+
+const ShopProductCard: React.FC<{ product: Product }> = ({ product }) => {
+    return (
+        <div className="bg-white border border-gray-200 rounded-lg shadow-soft hover:shadow-md transition-all flex flex-col group overflow-hidden">
+            <div className="px-2 py-1.5 flex justify-end">
+                <button className="text-gray-300 hover:text-red-500 transition-colors p-1"><Heart size={18} /></button>
+            </div>
+
+            <Link to={`/product/${product.id}`} className="relative flex items-center justify-center overflow-hidden bg-gray-50 h-32 sm:h-64">
+                <img src={product.imageUrl} alt={product.title} className="w-full h-full object-cover mix-blend-multiply transition-transform duration-500 group-hover:scale-105" />
+                {product.isBestseller && (
+                    <div className="absolute top-2 left-2 bg-hett-secondary text-white text-[8px] sm:text-[10px] font-black px-2 py-0.5 rounded shadow-sm uppercase">Populair</div>
+                )}
+            </Link>
+
+            <div className="p-2.5 sm:p-5 flex flex-col flex-grow">
+                <Link to={`/product/${product.id}`} className="block mb-1 sm:mb-2">
+                    <h3 className="text-hett-dark font-bold text-[13px] sm:text-base leading-tight hover:underline line-clamp-2 min-h-[2.4rem] sm:min-h-[3rem]">
+                        {product.title}
+                    </h3>
+                </Link>
+
+                <div className="flex items-center gap-1 mb-2 sm:mb-4">
+                    <div className="flex text-yellow-400">
+                        <Star size={10} fill="currentColor" />
+                    </div>
+                    <span className="text-[9px] sm:text-xs text-gray-400 font-bold">({product.reviewCount})</span>
+                </div>
+
+                <div className="mb-3 sm:mb-4">
+                    <div className="text-base sm:text-2xl font-black text-hett-dark leading-none">€ {product.price},-</div>
+                </div>
+
+                <div className="mt-auto">
+                    <Link 
+                        to={`/product/${product.id}`}
+                        className="w-full bg-hett-dark text-white rounded-md py-2 sm:py-3 text-[11px] sm:text-sm font-bold flex items-center justify-center gap-1.5 sm:gap-2 shadow-sm hover:bg-hett-primary transition-colors"
+                    >
+                        Configureer
+                    </Link>
+                </div>
+            </div>
+        </div>
+    );
 };
 
 export default Shop;

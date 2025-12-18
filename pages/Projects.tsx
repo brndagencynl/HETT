@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { PROJECTS } from '../constants';
 import { ArrowRight, MapPin, X, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -59,7 +60,7 @@ const Projects: React.FC = () => {
             <button
               key={cat}
               onClick={() => setFilter(cat)}
-              className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all border ${
+              className={`px-6 py-2.5 rounded-lg text-sm font-bold transition-all border ${
                 filter === cat 
                   ? 'bg-hett-dark text-white border-hett-dark' 
                   : 'bg-white text-hett-dark border-gray-200 hover:border-gray-300'
@@ -77,7 +78,7 @@ const Projects: React.FC = () => {
               layoutId={`card-${project.id}`}
               key={project.id}
               onClick={() => openProject(project)}
-              className="bg-white rounded-[24px] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer group border border-gray-100 flex flex-col h-full"
+              className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer group border border-gray-100 flex flex-col h-full"
             >
               {/* Image Container */}
               <div className="relative h-[280px] overflow-hidden bg-gray-100">
@@ -87,7 +88,7 @@ const Projects: React.FC = () => {
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                  />
                  {/* Tag */}
-                 <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-lg text-xs font-bold text-hett-dark shadow-sm">
+                 <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-md text-xs font-bold text-hett-dark shadow-sm">
                     {project.category}
                  </div>
               </div>
@@ -130,7 +131,7 @@ const Projects: React.FC = () => {
                 
                 <motion.div 
                     layoutId={`card-${selectedProject.id}`}
-                    className="bg-white w-full max-w-5xl max-h-[90vh] rounded-[32px] shadow-2xl overflow-hidden relative z-10 flex flex-col lg:flex-row"
+                    className="bg-white w-full max-w-5xl max-h-[90vh] rounded-xl shadow-2xl overflow-hidden relative z-10 flex flex-col lg:flex-row"
                 >
                     <button 
                         onClick={closeProject} 
@@ -180,7 +181,7 @@ const Projects: React.FC = () => {
                     {/* Right: Content */}
                     <div className="lg:w-2/5 p-8 lg:p-10 overflow-y-auto bg-white flex flex-col">
                         <div className="mb-6">
-                            <span className="inline-block px-3 py-1 bg-gray-100 rounded-lg text-xs font-bold text-gray-600 mb-3 uppercase tracking-wider">
+                            <span className="inline-block px-3 py-1 bg-gray-100 rounded-md text-xs font-bold text-gray-600 mb-3 uppercase tracking-wider">
                                 {selectedProject.category}
                             </span>
                             <h2 className="text-3xl font-black text-hett-dark mb-2 leading-tight">
@@ -210,7 +211,7 @@ const Projects: React.FC = () => {
                         </div>
 
                         <div className="pt-6 border-t border-gray-100 mt-auto">
-                            <button className="w-full bg-hett-dark text-white font-bold py-4 rounded-xl hover:bg-hett-brown transition-colors">
+                            <button className="w-full bg-hett-dark text-white font-bold py-4 rounded-lg hover:bg-hett-brown transition-colors">
                                 Vraag offerte aan voor dit type
                             </button>
                         </div>

@@ -13,7 +13,7 @@ const Cart: React.FC = () => {
       <div className="min-h-screen bg-[#f6f8fa] font-sans">
         <PageHeader title="Winkelwagen" description="Uw winkelwagen is nog leeg." image="https://picsum.photos/1200/400?random=99" />
         <div className="text-center py-20">
-            <Link to="/" className="inline-block bg-hett-dark text-white px-8 py-4 rounded-full font-bold">Verder winkelen</Link>
+            <Link to="/" className="inline-block bg-hett-dark text-white px-8 py-4 rounded-lg font-bold">Verder winkelen</Link>
         </div>
       </div>
     );
@@ -28,15 +28,15 @@ const Cart: React.FC = () => {
             
             <div className="lg:col-span-2 space-y-6">
                 {cart.map((item, idx) => (
-                    <div key={idx} className="bg-white p-6 rounded-[24px] shadow-sm border border-gray-100 flex flex-col md:flex-row gap-6 items-start">
-                        <div className="w-24 h-24 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0">
+                    <div key={idx} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col md:flex-row gap-6 items-start">
+                        <div className="w-24 h-24 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
                             <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
                         </div>
                         <div className="flex-grow w-full">
                             <h3 className="font-bold text-hett-dark text-lg">{item.title}</h3>
                             
                             {item.details ? (
-                                <div className="text-xs text-gray-500 mt-2 space-y-1 bg-gray-50 p-3 rounded-lg border border-gray-200">
+                                <div className="text-xs text-gray-500 mt-2 space-y-1 bg-gray-50 p-3 rounded-md border border-gray-200">
                                     {item.details.map((detail, i) => (
                                         <div key={i} className="flex justify-between border-b border-gray-200 last:border-0 pb-1 last:pb-0">
                                             <span className="font-medium">{detail.label}:</span>
@@ -62,7 +62,7 @@ const Cart: React.FC = () => {
                 ))}
             </div>
 
-            <div className="bg-white p-8 rounded-[32px] shadow-sm border border-gray-100 h-fit sticky top-32">
+            <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 h-fit sticky top-32">
                 <h3 className="text-xl font-bold text-hett-dark mb-6">Overzicht</h3>
                 <div className="space-y-4 mb-8 border-b border-gray-100 pb-8">
                     <div className="flex justify-between text-gray-600">
@@ -78,7 +78,7 @@ const Cart: React.FC = () => {
                     <span>Totaal</span>
                     <span>€{total},-</span>
                 </div>
-                <Link to="/checkout" className="block w-full bg-hett-dark text-white text-center font-bold py-4 rounded-2xl hover:bg-hett-brown transition-colors shadow-lg">
+                <Link to="/checkout" className="block w-full bg-hett-dark text-white text-center font-bold py-4 rounded-lg hover:bg-hett-brown transition-colors shadow-lg">
                     Naar bestellen
                 </Link>
             </div>

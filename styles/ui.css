@@ -116,3 +116,59 @@
   background: rgba(0,56,120,.08);
   color: var(--color-primary);
 }
+@import "./tokens.css";
+
+body{
+  font-family: var(--font-sans);
+  color: var(--c-text);
+  background: var(--c-surface);
+}
+
+/* Cards */
+.ui-card{
+  background: var(--c-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid rgba(0,0,0,.06);
+}
+
+/* Buttons */
+.ui-btn{
+  border-radius: var(--radius-md);
+  padding: 12px 18px;
+  font-weight: 700;
+  border: 1px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.ui-btn--primary{
+  background: var(--c-primary);
+  color: #fff;
+}
+.ui-btn--primary:hover{ filter: brightness(.92); }
+.ui-btn--secondary{
+  background: var(--c-secondary);
+  color: #fff;
+}
+
+/* Inputs */
+.ui-input, .ui-select, .ui-textarea{
+  width: 100%;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,.14);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  outline: none;
+}
+.ui-input:focus, .ui-select:focus, .ui-textarea:focus{
+  border-color: var(--c-primary);
+  box-shadow: 0 0 0 3px rgba(0,56,120,.12);
+}
+
+/* Section header */
+.ui-section-title{
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}

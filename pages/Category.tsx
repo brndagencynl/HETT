@@ -1,108 +1,190 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { PRODUCTS } from '../constants';
 import { Product } from '../types';
 import { Check, Heart, ChevronDown, ChevronUp, SlidersHorizontal, LayoutGrid, List, Star } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import { motion, AnimatePresence } from 'framer-motion';
+import MobileFilterSheet from '../components/ui/MobileFilterSheet';
+import ActiveFilters from '../components/ui/ActiveFilters';
 
 const Category: React.FC = () => {
-  const { categorySlug } = useParams();
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [showMoreDesc, setShowMoreDesc] = useState(false);
+    const { categorySlug } = useParams();
+    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+    const [showMoreDesc, setShowMoreDesc] = useState(false);
+    const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
-  const getCategoryName = (slug: string | undefined) => {
-    if (!slug) return 'Assortiment';
-    const names: Record<string, string> = {
-        'overkappingen': 'Universele Overkappingen',
-        'sandwichpanelen': 'Geïsoleerde Panelen',
-        'profielen': 'Aluminium Profielen',
-        'accessoires': 'Montage Accessoires'
+    // Filter State
+    const [activeBrands, setActiveBrands] = useState<string[]>([]);
+    const [pendingBrands, setPendingBrands] = useState<string[]>([]);
+
+    // Reset pending state when sheet opens
+    useEffect(() => {
+        if (mobileFiltersOpen) {
+            setPendingBrands([...activeBrands]);
+        }
+    }, [mobileFiltersOpen, activeBrands]);
+
+    const getCategoryName = (slug: string | undefined) => {
+        if (!slug) return 'Assortiment';
+        const names: Record<string, string> = {
+            'overkappingen': 'Universele Overkappingen',
+            'sandwichpanelen': 'Geïsoleerde Panelen',
+            'profielen': 'Aluminium Profielen',
+            'accessoires': 'Montage Accessoires'
+        };
+        return names[slug] || slug.charAt(0).toUpperCase() + slug.slice(1);
     };
-    return names[slug] || slug.charAt(0).toUpperCase() + slug.slice(1);
-  };
 
-  const categoryName = getCategoryName(categorySlug);
-  const products = PRODUCTS.filter(p => !categorySlug || p.category.toLowerCase() === categorySlug);
+    const categoryName = getCategoryName(categorySlug);
 
-  return (
-    <div className="min-h-screen bg-white font-sans">
-      <PageHeader />
+    // Filtering Logic
+    const products = PRODUCTS.filter(p => {
+        const matchesCategory = !categorySlug || p.category.toLowerCase() === categorySlug;
+        const matchesBrand = activeBrands.length === 0 || activeBrands.includes(p.brand || 'Onbekend');
+        // Note: PRODUCTS constant usually has a brand field, if not we fall back to logic.
+        // For this demo, we'll assume the brand labels match product properties.
+        return matchesCategory && matchesBrand;
+    });
 
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
-        <div className="mb-10">
-            <h1 className="text-3xl md:text-4xl font-bold text-hett-dark mb-4">{categoryName}</h1>
-            <div className="max-w-4xl">
-                <p className={`text-sm text-gray-600 leading-relaxed transition-all ${showMoreDesc ? '' : 'line-clamp-2'}`}>
-                    Bij HETT.nl vind je een ruime selectie aan hoogwaardige {categoryName.toLowerCase()} van topmerken. Onze systemen zijn verkrijgbaar in verschillende maten en materialen, waaronder aluminium en gepoedercoat staal, zodat je altijd de juiste oplossing hebt voor jouw tuinproject.
-                </p>
-                <button onClick={() => setShowMoreDesc(!showMoreDesc)} className="text-blue-700 font-bold text-sm mt-1 hover:underline">
-                    {showMoreDesc ? 'Minder weergeven' : 'Lees meer'}
-                </button>
+    const handleApplyFilters = () => {
+        setActiveBrands([...pendingBrands]);
+    };
+
+    const handleToggleBrand = (brand: string, isPending: boolean) => {
+        const setter = isPending ? setPendingBrands : setActiveBrands;
+        setter(prev =>
+            prev.includes(brand)
+                ? prev.filter(b => b !== brand)
+                : [...prev, brand]
+        );
+    };
+
+    const handleRemoveBrand = (brand: string) => {
+        setActiveBrands(prev => prev.filter(b => b !== brand));
+    };
+
+    const handleClearAll = () => {
+        setActiveBrands([]);
+    };
+
+    // Extracted filter content for reuse
+    const FilterContent = ({ isPending = false }: { isPending?: boolean }) => {
+        const currentBrands = isPending ? pendingBrands : activeBrands;
+        return (
+            <div className="border border-gray-200 rounded-lg overflow-hidden divide-y divide-gray-200">
+                <FilterAccordion title="Laat resultaten zien in" defaultOpen>
+                    <div className="text-blue-700 text-sm font-bold pl-2 cursor-pointer hover:underline">
+                        {categoryName} ({products.length})
+                    </div>
+                </FilterAccordion>
+                <FilterAccordion title="Merk" defaultOpen>
+                    <FilterCheckbox
+                        label="HETT Premium"
+                        count={42}
+                        checked={currentBrands.includes("HETT Premium")}
+                        onChange={() => handleToggleBrand("HETT Premium", isPending)}
+                    />
+                    <FilterCheckbox
+                        label="Deponti"
+                        count={15}
+                        checked={currentBrands.includes("Deponti")}
+                        onChange={() => handleToggleBrand("Deponti", isPending)}
+                    />
+                </FilterAccordion>
             </div>
-            <div className="w-full h-px bg-gray-200 mt-8"></div>
-        </div>
+        );
+    };
 
-        <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
-            <aside className="w-full lg:w-[300px] flex-shrink-0">
-                <div className="flex items-center gap-2 mb-6 text-xl font-bold text-hett-dark">
-                    <SlidersHorizontal size={24} /> Filters
-                </div>
-                
-                <div className="border border-gray-200 rounded-lg overflow-hidden divide-y divide-gray-200">
-                    <FilterAccordion title="Laat resultaten zien in" defaultOpen>
-                        <div className="text-blue-700 text-sm font-bold pl-2 cursor-pointer hover:underline">
-                            {categoryName} ({products.length})
-                        </div>
-                    </FilterAccordion>
-                    <FilterAccordion title="Merk" defaultOpen>
-                        <FilterCheckbox label="HETT Premium" count={42} checked />
-                        <FilterCheckbox label="Deponti" count={15} />
-                    </FilterAccordion>
-                </div>
-            </aside>
+    return (
+        <div className="min-h-screen bg-white font-sans">
+            <PageHeader />
 
-            <main className="flex-grow">
-                <div className="flex flex-wrap items-center justify-between gap-4 mb-8 bg-gray-50 p-3 rounded-lg border border-gray-100">
-                    <div className="text-xs sm:text-sm font-medium text-gray-500">
-                        <span className="font-bold text-hett-dark">{products.length}</span> resultaten
+            <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+                <div className="mb-10">
+                    <h1 className="text-3xl md:text-4xl font-bold text-hett-dark mb-4">{categoryName}</h1>
+                    <div className="max-w-4xl">
+                        <p className={`text-sm text-gray-600 leading-relaxed transition-all ${showMoreDesc ? '' : 'line-clamp-2'}`}>
+                            Bij HETT.nl vind je een ruime selectie aan hoogwaardige {categoryName.toLowerCase()} van topmerken. Onze systemen zijn verkrijgbaar in verschillende maten en materialen, waaronder aluminium en gepoedercoat staal, zodat je altijd de juiste oplossing hebt voor jouw tuinproject.
+                        </p>
+                        <button onClick={() => setShowMoreDesc(!showMoreDesc)} className="text-blue-700 font-bold text-sm mt-1 hover:underline">
+                            {showMoreDesc ? 'Minder weergeven' : 'Lees meer'}
+                        </button>
                     </div>
+                    <div className="w-full h-px bg-gray-200 mt-8"></div>
+                </div>
 
-                    <div className="flex items-center gap-4">
-                        <select className="bg-white border border-gray-300 rounded px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold text-hett-dark outline-none">
-                            <option>Standaard</option>
-                            <option>Prijs: Laag - Hoog</option>
-                            <option>Prijs: Hoog - Laag</option>
-                        </select>
-
-                        <div className="hidden sm:flex items-center bg-gray-200/50 rounded-lg p-1">
-                            <button onClick={() => setViewMode('grid')} className={`p-1.5 rounded-md transition-all ${viewMode === 'grid' ? 'bg-hett-dark text-white shadow-sm' : 'text-gray-500'}`}><LayoutGrid size={18} /></button>
-                            <button onClick={() => setViewMode('list')} className={`p-1.5 rounded-md transition-all ${viewMode === 'list' ? 'bg-hett-dark text-white shadow-sm' : 'text-gray-500'}`}><List size={18} /></button>
+                <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
+                    {/* Desktop Filter Sidebar */}
+                    <aside className="hidden lg:block w-full lg:w-[300px] flex-shrink-0">
+                        <div className="flex items-center gap-2 mb-6 text-xl font-bold text-hett-dark">
+                            <SlidersHorizontal size={24} /> Filters
                         </div>
-                    </div>
-                </div>
+                        <FilterContent />
+                    </aside>
 
-                <div className={`grid gap-3 sm:gap-6 ${viewMode === 'grid' ? 'grid-cols-2 sm:grid-cols-2 xl:grid-cols-3' : 'grid-cols-1'}`}>
-                    {products.map((product) => (
-                        <ProductCard key={product.id} product={product} viewMode={viewMode} />
-                    ))}
+                    <main className="flex-grow">
+                        {/* Mobile Filter Button */}
+                        <button
+                            className="mobile-filter-btn lg:hidden"
+                            onClick={() => setMobileFiltersOpen(true)}
+                        >
+                            <SlidersHorizontal size={20} />
+                            Filters
+                        </button>
+
+                        {/* Active Filter Badges */}
+                        <ActiveFilters
+                            activeBrands={activeBrands}
+                            onRemoveBrand={handleRemoveBrand}
+                            onClearAll={handleClearAll}
+                        />
+
+                        <div className="flex flex-wrap items-center justify-between gap-4 mb-8 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                            <div className="text-xs sm:text-sm font-medium text-gray-500">
+                                <span className="font-bold text-hett-dark">{products.length}</span> resultaten
+                            </div>
+
+                            <div className="flex items-center gap-4">
+                                <select className="bg-white border border-gray-300 rounded px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold text-hett-dark outline-none">
+                                    <option>Standaard</option>
+                                    <option>Prijs: Laag - Hoog</option>
+                                    <option>Prijs: Hoog - Laag</option>
+                                </select>
+
+                                <div className="hidden sm:flex items-center bg-gray-200/50 rounded-lg p-1">
+                                    <button onClick={() => setViewMode('grid')} className={`p-1.5 rounded-md transition-all ${viewMode === 'grid' ? 'bg-hett-dark text-white shadow-sm' : 'text-gray-500'}`}><LayoutGrid size={18} /></button>
+                                    <button onClick={() => setViewMode('list')} className={`p-1.5 rounded-md transition-all ${viewMode === 'list' ? 'bg-hett-dark text-white shadow-sm' : 'text-gray-500'}`}><List size={18} /></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className={`grid gap-3 sm:gap-6 ${viewMode === 'grid' ? 'grid-cols-2 sm:grid-cols-2 xl:grid-cols-3' : 'grid-cols-1'}`}>
+                            {products.map((product) => (
+                                <ProductCard key={product.id} product={product} viewMode={viewMode} />
+                            ))}
+                        </div>
+                    </main>
                 </div>
-            </main>
+            </div>
+
+            {/* Mobile Filter Bottom Sheet */}
+            <MobileFilterSheet
+                isOpen={mobileFiltersOpen}
+                onClose={() => setMobileFiltersOpen(false)}
+                onApply={handleApplyFilters}
+            >
+                <FilterContent isPending />
+            </MobileFilterSheet>
         </div>
-      </div>
-    </div>
-  );
+    );
 };
 
 const ProductCard: React.FC<{ product: Product, viewMode: 'grid' | 'list' }> = ({ product, viewMode }) => {
     return (
         <div className={`bg-white border border-gray-200 rounded-lg shadow-soft hover:shadow-md transition-all flex flex-col group overflow-hidden ${viewMode === 'list' ? 'md:flex-row' : ''}`}>
-            {/* Action Bar (Compare & Wishlist) */}
-            <div className={`px-2 py-1.5 flex justify-between items-center ${viewMode === 'list' ? 'hidden' : ''}`}>
-                <label className="flex items-center gap-1.5 cursor-pointer">
-                    <input type="checkbox" className="w-3.5 h-3.5 border-gray-300 rounded text-hett-dark focus:ring-hett-primary" />
-                    <span className="text-[10px] sm:text-xs font-bold text-blue-700">Vergelijk</span>
-                </label>
+            {/* Action Bar */}
+            <div className={`px-2 py-1.5 flex justify-end ${viewMode === 'list' ? 'hidden' : ''}`}>
                 <button className="text-gray-300 hover:text-red-500 transition-colors p-1"><Heart size={18} /></button>
             </div>
 
@@ -167,13 +249,22 @@ const FilterAccordion: React.FC<{ title: string, children: React.ReactNode, defa
     );
 };
 
-const FilterCheckbox: React.FC<{ label: string, count: number, checked?: boolean }> = ({ label, count, checked = false }) => {
-    const [isChecked, setIsChecked] = useState(checked);
+const FilterCheckbox: React.FC<{
+    label: string,
+    count: number,
+    checked: boolean,
+    onChange: () => void
+}> = ({ label, count, checked, onChange }) => {
     return (
         <label className="flex items-center justify-between group cursor-pointer py-1.5">
             <div className="flex items-center gap-2">
-                <input type="checkbox" className="w-4 h-4 rounded text-hett-dark" checked={isChecked} onChange={() => setIsChecked(!isChecked)} />
-                <span className={`text-xs sm:text-sm ${isChecked ? 'font-bold text-hett-dark' : 'text-gray-600'}`}>{label}</span>
+                <input
+                    type="checkbox"
+                    className="w-4 h-4 rounded text-hett-dark"
+                    checked={checked}
+                    onChange={onChange}
+                />
+                <span className={`text-xs sm:text-sm ${checked ? 'font-bold text-hett-dark' : 'text-gray-600'}`}>{label}</span>
             </div>
             <span className="text-gray-400 text-[10px] sm:text-xs">({count})</span>
         </label>

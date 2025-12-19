@@ -1,4 +1,3 @@
-import "./styles/theme.css";
 import "./styles/ui.css";
 import React from 'react';
 import ReactDOM from 'react-dom/client';

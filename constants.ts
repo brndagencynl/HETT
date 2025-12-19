@@ -64,9 +64,9 @@ export const PRODUCTS: Product[] = [
 ];
 
 export const PROJECTS: Project[] = [
-  { id: 'prj-1', title: 'Luxe Tuinkamer Utrecht', category: 'Tuinkamer', imageUrl: 'https://picsum.photos/800/600?random=10', description: 'Volledig geïsoleerd.', location: 'Utrecht' }
+  { id: 'prj-1', title: 'Luxe Tuinkamer Utrecht', category: 'Tuinkamer', imageUrl: '/assets/images/inspiration_tuinkamer.png', description: 'Volledig geïsoleerd.', location: 'Utrecht' }
 ];
 
 export const NEWS_ITEMS: NewsItem[] = [
-  { id: 'tips-montage', title: '5 tips voor montage', excerpt: 'Expert tips.', content: '...', date: '12 Mei 2024', author: 'HETT', category: 'Montage', imageUrl: 'https://picsum.photos/800/600?random=90', readTime: '4 min' }
+  { id: 'tips-montage', title: '5 tips voor montage', excerpt: 'Expert tips.', content: '...', date: '12 Mei 2024', author: 'HETT', category: 'Montage', imageUrl: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=800&auto=format&fit=crop', readTime: '4 min' }
 ];

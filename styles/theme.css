@@ -1,86 +1,51 @@
 @import "./tokens.css";
 
-:root {
-  --color-primary: #003878;
-  --color-secondary: #FF7300;
-  --color-surface: #EDF0F2;
-  --color-white: #ffffff;
-
-  --text: #0f172a;
-  --muted: #64748b;
-  --border: #e5e7eb;
-
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
-
-  --space-2: .5rem;
-  --space-3: .75rem;
-  --space-4: 1rem;
-  --space-6: 1.5rem;
-  --space-8: 2rem;
-  --space-12: 3rem;
-
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, .06);
-  --shadow-md: 0 10px 30px rgba(0, 0, 0, .10);
-}
-
+/* Base Element Styling */
 html,
 body {
-  height: 100%
+  height: 100%;
 }
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
+  font-family: var(--font-sans);
   color: var(--text);
   background: var(--color-surface);
 }
 
+/* Links */
 a {
   color: var(--color-primary);
-  text-decoration: none
+  text-decoration: none;
 }
 
 a:hover {
-  color: var(--color-secondary)
+  color: var(--color-secondary);
 }
 
-.ui-card {
-  background: var(--color-white);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
+/* Headings Typography Classes */
+.h1 {
+  font-size: 40px;
+  line-height: 1.05;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: .5rem;
-  font-weight: 700;
-  border-radius: var(--radius-md);
-  padding: .9rem 1.25rem;
-  border: 1px solid transparent;
-  cursor: pointer;
+.h2 {
+  font-size: 28px;
+  line-height: 1.15;
+  font-weight: 800;
+  letter-spacing: -0.01em;
 }
 
-.btn-primary {
-  background: var(--color-primary);
-  color: #fff;
+.h3 {
+  font-size: 18px;
+  line-height: 1.25;
+  font-weight: 800;
 }
 
-.btn-primary:hover {
-  background: var(--color-secondary)
-}
-
-.btn-outline {
-  background: #fff;
-  border-color: var(--border);
-  color: var(--text);
-}
-
-.btn-outline:hover {
-  border-color: var(--color-primary);
-  color: var(--color-primary)
+.p {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--muted);
 }

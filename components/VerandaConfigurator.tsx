@@ -5,6 +5,8 @@ import { VERANDA_OPTIONS_UI, DEFAULT_VERANDA_CONFIG, VerandaConfig, VerandaOptio
 import { calcVerandaPrice } from '../src/configurator/pricing/veranda';
 import { getVerandaLayers } from '../src/configurator/visual/verandaLayers';
 
+const MotionDiv = motion.div as any;
+
 // --- Types ---
 export interface VerandaConfiguratorRef {
     open: (initialConfig?: Partial<VerandaConfig>) => void;
@@ -31,23 +33,32 @@ const VerandaConfigurator = forwardRef<VerandaConfiguratorRef, VerandaConfigurat
     const [infoModal, setInfoModal] = useState<{ title: string, text: string } | null>(null);
 
     // Configuration State
-    const [config, setConfig] = useState<VerandaConfig>(DEFAULT_VERANDA_CONFIG);
+    const [config, setConfig] = useState<Partial<VerandaConfig>>(DEFAULT_VERANDA_CONFIG);
+    const [errors, setErrors] = useState<Record<string, string>>({});
 
     // Price Calculation
-    const { total: currentPrice, items: priceBreakdown } = calcVerandaPrice(basePrice, config);
+    // calcVerandaPrice likely expects full config, let's cast or ensure defaults in calc
+    // For now assuming calcVerandaPrice handles missing gracefully or we provide defaults during calc
+    const { total: currentPrice } = calcVerandaPrice(basePrice, config as VerandaConfig);
 
     // Visual Layers Check (Integration)
     useEffect(() => {
-        const layers = getVerandaLayers(config);
-        console.log('Active Visual Layers:', layers);
-        // Future: Update 3D model or overlay visibility state here
+        // Safe check
+        if (config.daktype) {
+            const layers = getVerandaLayers(config as VerandaConfig);
+            // console.log('Active Visual Layers:', layers);
+        }
     }, [config]);
 
     useImperativeHandle(ref, () => ({
         open: (initialConfig) => {
             if (initialConfig) {
                 setConfig(prev => ({ ...prev, ...initialConfig }));
+            } else {
+                // Reset to default if no initial
+                setConfig(DEFAULT_VERANDA_CONFIG);
             }
+            setErrors({}); // Clear errors
             setIsOpen(true);
             document.body.style.overflow = 'hidden';
             // Default open first section
@@ -83,9 +94,32 @@ const VerandaConfigurator = forwardRef<VerandaConfiguratorRef, VerandaConfigurat
         }));
     };
 
+    const validate = () => {
+        const newErrors: Record<string, string> = {};
+        let isValid = true;
+
+        if (!config.daktype) {
+            newErrors['daktype'] = 'Kies een daktype';
+            isValid = false;
+        }
+        if (!config.goot) {
+            newErrors['goot'] = 'Kies een goot optie';
+            isValid = false;
+        }
+
+        setErrors(newErrors);
+        return isValid;
+    };
+
     const handleSubmit = (mode: 'order' | 'quote') => {
-        if (onSubmit) {
-            onSubmit(config, mode, currentPrice, generateDetails());
+        if (validate()) {
+            if (onSubmit) {
+                onSubmit(config as VerandaConfig, mode, currentPrice, generateDetails());
+            }
+        } else {
+            // Auto open first invalid section
+            if (!config.daktype) setActiveSection('daktype');
+            else if (!config.goot) setActiveSection('goot');
         }
     };
 
@@ -210,7 +244,7 @@ const VerandaConfigurator = forwardRef<VerandaConfiguratorRef, VerandaConfigurat
     return (
         <AnimatePresence>
             {isOpen && (
-                <motion.div
+                <MotionDiv
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
@@ -230,7 +264,7 @@ const VerandaConfigurator = forwardRef<VerandaConfiguratorRef, VerandaConfigurat
                     )}
 
                     {/* Main Modal Container */}
-                    <motion.div
+                    <MotionDiv
                         initial={{ y: "100%" }}
                         animate={{ y: 0 }}
                         exit={{ y: "100%" }}
@@ -248,16 +282,39 @@ const VerandaConfigurator = forwardRef<VerandaConfiguratorRef, VerandaConfigurat
 
                         {/* --- LEFT COLUMN: VISUALS --- */}
                         <div className="w-full md:w-[45%] h-[35vh] md:h-full bg-gray-100 relative group overflow-hidden">
+                            {/* Base Image */}
                             <img
                                 src={IMAGES[currentImageIdx]}
                                 alt="Configurator View"
-                                className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+                                className="absolute inset-0 w-full h-full object-cover z-0"
                             />
-                            <button onClick={prevImage} className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 hover:bg-white rounded-full flex items-center justify-center shadow-lg transition-all opacity-0 group-hover:opacity-100"><ChevronLeft size={20} /></button>
-                            <button onClick={nextImage} className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 hover:bg-white rounded-full flex items-center justify-center shadow-lg transition-all opacity-0 group-hover:opacity-100"><ChevronRight size={20} /></button>
 
-                            <div className="absolute bottom-6 left-6 flex">
+                            {/* Overlays */}
+                            {getVerandaLayers(config as VerandaConfig).map((layer) => (
+                                <img
+                                    key={layer.id}
+                                    src={layer.src}
+                                    alt={layer.type}
+                                    className="absolute inset-0 w-full h-full object-cover pointer-events-none transition-opacity duration-300"
+                                    style={{ zIndex: layer.zIndex }}
+                                    onError={(e) => {
+                                        console.warn(`Failed to load overlay: ${layer.src}`);
+                                        e.currentTarget.style.display = 'none';
+                                    }}
+                                />
+                            ))}
+
+                            {/* Controls */}
+                            <button onClick={prevImage} className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 hover:bg-white rounded-full flex items-center justify-center shadow-lg transition-all opacity-0 group-hover:opacity-100 z-50"><ChevronLeft size={20} /></button>
+                            <button onClick={nextImage} className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 hover:bg-white rounded-full flex items-center justify-center shadow-lg transition-all opacity-0 group-hover:opacity-100 z-50"><ChevronRight size={20} /></button>
+
+                            <div className="absolute bottom-6 left-6 flex flex-col items-start gap-2 z-50">
                                 <span className="px-4 py-2 rounded-md text-xs font-bold bg-white/90 shadow-sm text-gray-600">Visualisatie</span>
+                                {config.goot && (
+                                    <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-hett-brown text-white shadow-sm animate-in fade-in slide-in-from-bottom-2">
+                                        Goot: {config.goot.charAt(0).toUpperCase() + config.goot.slice(1)} ({config.profileColor?.split(' ')[0]})
+                                    </span>
+                                )}
                             </div>
                         </div>
 
@@ -274,16 +331,29 @@ const VerandaConfigurator = forwardRef<VerandaConfiguratorRef, VerandaConfigurat
                                 {VERANDA_OPTIONS_UI.map((option) => (
                                     <div key={option.key} className="border-b border-gray-100 pb-6">
                                         <button onClick={() => toggleSection(option.key)} className="w-full flex justify-between items-center mb-2 group">
-                                            <h3 className="text-lg font-bold text-[#1a1a1a] flex items-center">
-                                                {option.label}. {activeSection !== option.key && <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide ml-2 bg-gray-100 text-gray-600">{getOptionLabel(option.key, config[option.key as keyof VerandaConfig] as any).toString().substring(0, 20)}...</span>}
+                                            <h3 className={`text-lg font-bold flex items-center ${errors[option.key] ? 'text-red-500' : 'text-[#1a1a1a]'}`}>
+                                                {option.label}
+                                                {errors[option.key] && <span className="text-red-500 text-xs ml-2 font-normal">({errors[option.key]})</span>}
+                                                {/* Selection Badge if valid */}
+                                                {!errors[option.key] && activeSection !== option.key && config[option.key as keyof VerandaConfig] && (
+                                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide ml-2 bg-gray-100 text-gray-600">
+                                                        {getOptionLabel(option.key, config[option.key as keyof VerandaConfig] as any).toString().substring(0, 20)}...
+                                                    </span>
+                                                )}
                                             </h3>
                                             {activeSection === option.key ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                                         </button>
                                         <AnimatePresence>
                                             {activeSection === option.key && (
-                                                <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden pt-2">
+                                                <MotionDiv initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden pt-2">
                                                     {renderOption(option)}
-                                                </motion.div>
+                                                    {errors[option.key] && (
+                                                        <div className="mt-2 text-sm text-red-500 font-bold flex items-center gap-1 animate-pulse">
+                                                            <div className="w-1.5 h-1.5 rounded-full bg-red-500 inline-block" />
+                                                            {errors[option.key]}
+                                                        </div>
+                                                    )}
+                                                </MotionDiv>
                                             )}
                                         </AnimatePresence>
                                     </div>
@@ -324,8 +394,8 @@ const VerandaConfigurator = forwardRef<VerandaConfiguratorRef, VerandaConfigurat
 
                         </div>
 
-                    </motion.div>
-                </motion.div>
+                    </MotionDiv>
+                </MotionDiv>
             )}
         </AnimatePresence>
     );

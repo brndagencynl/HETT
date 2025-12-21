@@ -1,7 +1,9 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { CartItem, Product } from '../types';
+import { CartItem, Product, ProductConfig } from '../types';
 import { isConfigOnly } from '../utils/productRules';
+import { validateConfig } from '../utils/configValidation';
+import { generateConfigHash } from '../utils/hash';
 
 interface CartContextType {
   cart: CartItem[];
@@ -28,32 +30,104 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const total = cart.reduce((sum, item) => sum + item.totalPrice, 0);
   const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
-  const addToCart = (product: Product, quantity: number, options: any) => {
-    // GUARD: Check if product requires configuration
-    if (isConfigOnly(product)) {
-      // Check for valid configuration "signature"
-      const hasConfig = options &&
-        (options.isConfigured === true || options.width || options.depth || options.sizeKey);
+  // New imports needed at top:
+  // import { validateConfig } from '../utils/configValidation';
+  // import { generateConfigHash } from '../utils/hash';
+  // import { ProductConfig } from '../types';
 
-      if (!hasConfig) {
-        console.warn('Blocked add-to-cart: Product requires configuration', product.title);
-        // In a real app, you might trigger a toast or redirect here.
-        // For now, we block and return. The UI should have prevented this.
+  const addToCart = (product: Product, quantity: number, options: any) => {
+    // 1. Determine Category
+    const category = product.category;
+
+    // 2. Strict Guard for Configurable Categories
+    if (category === 'verandas' || category === 'sandwichpanelen') {
+      // "options" here is expected to be the ProductConfig object or contain it. 
+      // Adapting to existing usage: usually "options" passed was a mix. 
+      // We now expect the caller to pass the full `ProductConfig` wrapper or we construct it?
+      // The prompt says: "Cart line items must include... config object".
+      // Let's assume the `options` argument CONTAINS the `config` property if coming from new flow,
+      // OR we try to construct it from legacy args if possible (but we want strict).
+
+      // Let's expect `options.config` to be the `ProductConfig` type.
+      const configCandidate = options?.config as ProductConfig | undefined;
+
+      if (!configCandidate) {
+        console.warn(`Blocked add-to-cart: ${product.title} requires configuration.`);
+        alert('Kies eerst je opties in de configurator before adding to cart.');
         return;
       }
+
+      const validation = validateConfig(category, configCandidate);
+      if (!validation.ok) {
+        console.warn(`Blocked add-to-cart: Invalid config`, validation.errors);
+        alert(`Configuratie incompleet: ${validation.errors.join(', ')}`);
+        return;
+      }
+
+      // 3. Compute Hash
+      const configHash = generateConfigHash(configCandidate.data);
+
+      // 4. Create summary string
+      // Logic to create a readable string from config data
+      // For now simple JSON dump or specific field map
+      const summary = configCandidate.category === 'verandas'
+        ? `Dak: ${configCandidate.data.daktype}, Goot: ${configCandidate.data.goot?.charAt(0).toUpperCase() + configCandidate.data.goot?.slice(1) || '-'}, Voorzijde: ${configCandidate.data.voorzijde || 'Geen'}`
+        : `Sandwichpaneel`; // todo better summary
+
+      // 5. Add/Update Item
+      // Check if item with same ID AND same Hash exists?
+      // Actually, simple cart usually just adds. Duplicate ID might merge quantity.
+      // With hash, we treat them as unique variants. 
+      // Let's generate a unique cart ID: product.id + hash
+      const cartId = `${product.id}-${configHash}`;
+
+      const newItem: CartItem = {
+        ...product,
+        id: cartId, // Override ID for cart uniqueness
+        slug: product.id, // Keep original slug/id ref
+        quantity,
+        totalPrice: (options.price || product.price) * quantity,
+        config: configCandidate,
+        configHash,
+        displayConfigSummary: summary,
+        // Legacy mapping for UI safety until updated
+        selectedColor: 'Configured',
+        selectedSize: 'Custom'
+      };
+
+      // If exists, update quantity? Or just append?
+      // Simple append for now or merge
+      setCart(prev => {
+        const existing = prev.find(i => i.id === cartId);
+        if (existing) {
+          return prev.map(i => i.id === cartId ? { ...i, quantity: i.quantity + quantity, totalPrice: i.totalPrice + (newItem.totalPrice) } : i);
+        }
+        return [...prev, newItem];
+      });
+      setIsCartOpen(true);
+      return;
     }
 
-    const newItem: CartItem = {
-      ...product,
-      quantity,
-      selectedColor: options.color,
-      selectedSize: options.size,
-      selectedRoof: options.roof,
-      details: options.details,
-      totalPrice: (options.price || product.price) * quantity
-    };
-    setCart([...cart, newItem]);
-    setIsCartOpen(true); // Auto-open drawer
+    // 3. Accessoires (Pass-through)
+    if (category === 'accessoires') {
+      const newItem: CartItem = {
+        ...product,
+        id: product.id, // Simple ID
+        slug: product.id,
+        quantity,
+        selectedColor: options.color || 'N/A',
+        selectedSize: options.size || 'N/A',
+        totalPrice: (options.price || product.price) * quantity,
+      };
+      setCart(prev => {
+        const existing = prev.find(i => i.id === newItem.id);
+        if (existing) {
+          return prev.map(i => i.id === newItem.id ? { ...i, quantity: i.quantity + quantity, totalPrice: i.totalPrice + newItem.totalPrice } : i);
+        }
+        return [...prev, newItem];
+      });
+      setIsCartOpen(true);
+    }
   };
 
   const removeFromCart = (index: number) => {

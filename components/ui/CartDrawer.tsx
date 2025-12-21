@@ -6,6 +6,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../../context/CartContext';
 import { isConfigOnly } from '../../utils/productRules';
 
+const MotionDiv = motion.div as any;
+
 const CartDrawer: React.FC = () => {
     const { isCartOpen, closeCart, cart, removeFromCart, total, addToCart } = useCart();
     const navigate = useNavigate();
@@ -28,30 +30,6 @@ const CartDrawer: React.FC = () => {
 
     const handleQuantityChange = (item: any, change: number) => {
         if (item.quantity + change < 1) return;
-        // Re-add to cart updates quantity if item exists?
-        // The current context might not support direct quantity update elegantly without logic.
-        // Assuming simple add adds a new item or we need a specific updateQuantity function.
-        // The current context implementation does strictly `setCart([...cart, newItem])` which effectively duplicates or we need to remove and re-add.
-        // Let's check CartContext implementation. It creates a new item.
-        // If we want to support quantity updates, we might need to modify CartContext or just remove and re-add for now, 
-        // BUT re-adding might create a duplicate entry depending on how we handle IDs.
-        // For this task, strict scope is Drawer. 
-        // Let's assume for now we use remove/add logic or just keep it simple.
-        // Actually, the current CartContext is simple: `setCart([...cart, newItem])`.
-        // If I call addToCart again, it adds a NEW item.
-        // I should probably add `updateQuantity` to context in a future task if not present.
-        // For now, I will implement +/- by removing (if 1 and minus) or adding (if plus).
-        // Wait, adding will append.
-        // I will just implement Remove for now as reliable. 
-        // If I want to be fancy, I'd update context.
-        // The user requirement says "qty controls".
-        // I will do a simple hack: I won't implement +/- logic that modifies the array in place unless I update context.
-        // Let's stick to valid context usage. A "remove" button is safe.
-        // +/- might be out of scope for *just* adding a drawer if context doesn't support it, but I should try.
-        // Given I cannot easily change context without potentially breaking logic I can't verify deeply right now, 
-        // I will just disable +/- or make them re-add (which appends) / remove. 
-        // Actually, re-adding appends. It doesn't merge. So + button is bad.
-        // I will omit +/- for now and just have Remove.
     };
 
     if (!isCartOpen) return null;
@@ -61,7 +39,7 @@ const CartDrawer: React.FC = () => {
             {isCartOpen && (
                 <>
                     {/* Backdrop */}
-                    <motion.div
+                    <MotionDiv
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
@@ -70,7 +48,7 @@ const CartDrawer: React.FC = () => {
                     />
 
                     {/* Drawer */}
-                    <motion.div
+                    <MotionDiv
                         initial={{ x: '100%' }}
                         animate={{ x: 0 }}
                         exit={{ x: '100%' }}
@@ -122,7 +100,13 @@ const CartDrawer: React.FC = () => {
                                             </div>
 
                                             {/* Config Details */}
-                                            {isConfigOnly(item) && (
+                                            {item.displayConfigSummary ? (
+                                                <div className="mb-2 p-2 bg-gray-50 rounded text-[10px] text-gray-500 font-medium">
+                                                    {item.displayConfigSummary}
+                                                    {/* Also show details if needed, or summary replaces it? */}
+                                                    {/* item.configurationLabel is legacy fallback */}
+                                                </div>
+                                            ) : isConfigOnly(item) && (
                                                 <div className="mb-2">
                                                     {item.details ? (
                                                         <div className="text-[10px] text-gray-500 space-y-0.5 border-l-2 border-hett-light pl-2">
@@ -173,7 +157,7 @@ const CartDrawer: React.FC = () => {
                                 </div>
                             </div>
                         )}
-                    </motion.div>
+                    </MotionDiv>
                 </>
             )}
         </AnimatePresence>,

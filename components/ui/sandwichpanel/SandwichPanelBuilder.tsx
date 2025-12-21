@@ -1,58 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import { Check, ShoppingCart, Info, Minus, Plus, ShieldCheck } from 'lucide-react';
-import { DEFAULT_SANDWICH_CONFIG, SandwichPanelChoice, SandwichPanelOptionGroup } from './SandwichPanelConfig';
+import { DEFAULT_SANDWICH_CONFIG } from './SandwichPanelConfig';
 import { Product } from '../../../types';
-import { useCart } from '../../../context/CartContext';
 
 interface Props {
     product: Product;
     basePrice: number;
+    initialConfig?: Record<string, string | string[]>;
+    onConfigChange?: (config: Record<string, string | string[]>, price: number, isValid: boolean) => void;
+    onAddToCart?: (payload: any) => void;
+    existingCartItem?: any;
 }
 
-const SandwichPanelBuilder: React.FC<Props> = ({ product, basePrice }) => {
-    const { addToCart } = useCart();
+const SandwichPanelBuilder: React.FC<Props> = ({ product, basePrice, initialConfig, onConfigChange, onAddToCart, existingCartItem }) => {
     const [selections, setSelections] = useState<Record<string, string | string[]>>({});
     const [quantity, setQuantity] = useState(1);
     const [touched, setTouched] = useState(false);
 
-    // Initialize defaults (required fields that have a default, or warranty)
+    // Initialize defaults or load initial config
     useEffect(() => {
-        const defaults: Record<string, string> = {};
-        DEFAULT_SANDWICH_CONFIG.forEach(group => {
-            if (group.type === 'included' && group.choices.length > 0) {
-                defaults[group.id] = group.choices[0].id;
-            }
-            // Pre-select first option for required groups if strict UX allows, 
-            // BUT user request implies "validation disable untill selected".
-            // Reference screenshot usually implies explicit selection for dropdowns.
-            // Let's NOT auto-select dropdowns to force user choice if desired, matches "missing helper text" req.
-            // However, "Tiles" usually have a default. 
-            // For now, only 'included' is auto-set.
-        });
-        setSelections(prev => ({ ...defaults, ...prev }));
-    }, []);
+        if (initialConfig && Object.keys(initialConfig).length > 0) {
+            setSelections(initialConfig);
+        } else {
+            const defaults: Record<string, string> = {};
+            DEFAULT_SANDWICH_CONFIG.forEach(group => {
+                if (group.type === 'included' && group.choices.length > 0) {
+                    defaults[group.id] = group.choices[0].id;
+                }
+            });
+            setSelections(prev => ({ ...defaults, ...prev }));
+        }
+    }, [initialConfig]);
 
     const handleSelect = (groupId: string, choiceId: string) => {
         setSelections(prev => {
-            // Toggle logic for addons?
-            // Schema says 'addons'. Usually multiple? 
-            // For simple builder, let's assume 'addons' in schema is multi-select or single? 
-            // The Prompt request structure implies "Opties (addons, optional) — list cards". 
-            // Typically these are checkboxes (multi).
-            // Let's assume multi-select for 'addons' type, single for others.
-            // Wait, schema structure 'choices' implies one choice? 
-            // If type is 'addons', let's treat it as toggle-able set if we map by ID.
-            // But for simplicity of this object structure `Record<string, string>`, it implies one value per Group.
-            // If addons are multiple, we need `Record<string, string[]>` or specific logic.
-            // Let's look at config again. "Opties" group has choices.
-            // I will allow MULTIPLE selections for 'addons' group by storing them differently?
-            // Or I stick to the Type "SandwichPanelOptionGroup" which seems to function as "Pick one".
-            // Re-reading: "Opties (addons, optional) — list cards". 
-            // Usually you can pick multiple options (e.g. screws AND tape).
-            // I'll make ADDONS special: `selections[groupId]` could be an array? 
-            // To keep typescript happy with `Record<string, string>`, I might need to change state type or join strings. 
-            // Let's change state to `Record<string, string | string[]>`.
-
             const group = DEFAULT_SANDWICH_CONFIG.find(g => g.id === groupId);
             if (group?.type === 'addons') {
                 const current = (prev[groupId] as string[]) || [];
@@ -62,31 +43,27 @@ const SandwichPanelBuilder: React.FC<Props> = ({ product, basePrice }) => {
                     return { ...prev, [groupId]: [...current, choiceId] };
                 }
             }
-
             return { ...prev, [groupId]: choiceId };
         });
         setTouched(true);
     };
 
-    // State typing cast helper
+    // Helper
     const getSelection = (groupId: string): string | string[] | undefined => selections[groupId];
 
     // Calculate Price
     const calculateTotal = () => {
         let optionsTotal = 0;
-
         DEFAULT_SANDWICH_CONFIG.forEach(group => {
             const selection = selections[group.id];
             if (!selection) return;
 
             if (Array.isArray(selection)) {
-                // Multi-select addons
                 selection.forEach(selId => {
                     const choice = group.choices.find(c => c.id === selId);
                     if (choice) optionsTotal += choice.priceDelta;
                 });
             } else {
-                // Single select
                 const choice = group.choices.find(c => c.id === selection);
                 if (choice) optionsTotal += choice.priceDelta;
             }
@@ -108,12 +85,18 @@ const SandwichPanelBuilder: React.FC<Props> = ({ product, basePrice }) => {
     const missing = getMissingRequired();
     const isValid = missing.length === 0;
 
-    const handleAddToCart = () => {
+    // Emit changes
+    useEffect(() => {
+        if (onConfigChange) {
+            onConfigChange(selections, total, isValid);
+        }
+    }, [selections, total, isValid, onConfigChange]);
+
+    const handleAddToCartClick = () => {
         setTouched(true);
         if (!isValid) return;
 
-        // Build configuration payload
-        const configPayload: any = { ...selections };
+        const configPayload = { ...selections };
         const configLabel: string[] = [];
 
         DEFAULT_SANDWICH_CONFIG.forEach(group => {
@@ -131,22 +114,32 @@ const SandwichPanelBuilder: React.FC<Props> = ({ product, basePrice }) => {
             }
         });
 
-        addToCart(product, quantity, {
+        // Strict ProductConfig structure
+        const productConfig = {
+            category: 'sandwichpanelen',
+            data: configPayload
+        };
+
+        const payload = {
             price: total,
+            quantity: quantity,
+            config: productConfig,
             configuration: configPayload,
-            configurationLabel: configLabel, // For display in cart
+            configurationLabel: configLabel,
             details: configLabel.map(l => {
                 const [label, value] = l.split(': ');
                 return { label, value };
             }),
-            isConfigured: true // Signature for CartGuard
-        });
+            isConfigured: true
+        };
+
+        if (onAddToCart) {
+            onAddToCart(payload);
+        }
     };
 
     return (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-
-            {/* Header */}
             <div className="bg-gray-50 border-b border-gray-100 p-6">
                 <h2 className="text-xl font-black text-hett-dark">Stel samen</h2>
                 <p className="text-sm text-gray-500">Kies uw opties en afmetingen.</p>
@@ -155,7 +148,6 @@ const SandwichPanelBuilder: React.FC<Props> = ({ product, basePrice }) => {
             <div className="p-6 space-y-8">
                 {DEFAULT_SANDWICH_CONFIG.map(group => {
                     const currentVal = getSelection(group.id);
-
                     return (
                         <div key={group.id} className="space-y-3">
                             <div className="flex justify-between">
@@ -167,9 +159,6 @@ const SandwichPanelBuilder: React.FC<Props> = ({ product, basePrice }) => {
                                 )}
                             </div>
 
-                            {/* RENDER TYPES */}
-
-                            {/* 1. SELECT */}
                             {group.type === 'select' && (
                                 <div className="relative">
                                     <select
@@ -184,13 +173,9 @@ const SandwichPanelBuilder: React.FC<Props> = ({ product, basePrice }) => {
                                             </option>
                                         ))}
                                     </select>
-                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 9l6 6 6-6" /></svg>
-                                    </div>
                                 </div>
                             )}
 
-                            {/* 2. TILES */}
                             {group.type === 'tiles' && (
                                 <div className="grid grid-cols-2 gap-3">
                                     {group.choices.map(c => {
@@ -215,7 +200,6 @@ const SandwichPanelBuilder: React.FC<Props> = ({ product, basePrice }) => {
                                 </div>
                             )}
 
-                            {/* 3. SWATCHES */}
                             {group.type === 'swatches' && (
                                 <div className="flex gap-3">
                                     {group.choices.map(c => {
@@ -233,19 +217,12 @@ const SandwichPanelBuilder: React.FC<Props> = ({ product, basePrice }) => {
                                                 title={c.label}
                                             >
                                                 {isSelected && <div className="absolute inset-0 flex items-center justify-center text-hett-primary drop-shadow-md"><Check size={20} /></div>}
-                                                <span className="sr-only">{c.label}</span>
                                             </button>
                                         );
                                     })}
-                                    <div className="flex-1 flex items-center">
-                                        <span className="text-sm text-gray-600 font-medium">
-                                            {currentVal ? group.choices.find(c => c.id === currentVal)?.label : 'Kies een kleur'}
-                                        </span>
-                                    </div>
                                 </div>
                             )}
 
-                            {/* 4. ADDONS (Cards) */}
                             {group.type === 'addons' && (
                                 <div className="space-y-2">
                                     {group.choices.map(c => {
@@ -256,15 +233,11 @@ const SandwichPanelBuilder: React.FC<Props> = ({ product, basePrice }) => {
                                                 onClick={() => handleSelect(group.id, c.id)}
                                                 className={`flex items-center p-3 rounded-lg border transition-all cursor-pointer select-none ${isSelected ? 'border-hett-primary bg-hett-primary/5 ring-1 ring-hett-primary' : 'border-gray-200 bg-white hover:border-gray-300'}`}
                                             >
-                                                <div className="w-12 h-12 bg-gray-100 rounded-md overflow-hidden mr-3 flex-shrink-0">
-                                                    {c.image ? <img src={c.image} className="w-full h-full object-cover" /> : <div className="w-full h-full bg-gray-200" />}
-                                                </div>
                                                 <div className="flex-grow min-w-0">
                                                     <div className="flex items-center gap-2">
                                                         <span className="font-bold text-hett-dark text-sm truncate">{c.label}</span>
                                                         {c.badge && <span className="text-[9px] bg-hett-secondary text-white px-1.5 py-0.5 rounded font-bold uppercase">{c.badge}</span>}
                                                     </div>
-                                                    {c.subtitle && <div className="text-xs text-gray-500">{c.subtitle}</div>}
                                                 </div>
                                                 <div className="text-right pl-3">
                                                     <div className="text-sm font-bold text-hett-dark">+€{c.priceDelta.toFixed(2)}</div>
@@ -278,7 +251,6 @@ const SandwichPanelBuilder: React.FC<Props> = ({ product, basePrice }) => {
                                 </div>
                             )}
 
-                            {/* 5. INCLUDED */}
                             {group.type === 'included' && (
                                 <div className="space-y-2">
                                     {group.choices.map(c => (
@@ -287,18 +259,15 @@ const SandwichPanelBuilder: React.FC<Props> = ({ product, basePrice }) => {
                                                 <ShieldCheck size={18} />
                                             </div>
                                             <div className="flex-grow font-bold text-hett-dark text-sm">{c.label}</div>
-                                            <div className="text-green-600 font-bold text-sm uppercase tracking-wide">{c.badge}</div>
                                         </div>
                                     ))}
                                 </div>
                             )}
-
                         </div>
                     );
                 })}
             </div>
 
-            {/* Summary Footer */}
             <div className="bg-gray-50 p-6 border-t border-gray-200">
                 <div className="space-y-2 mb-6 text-sm">
                     <div className="flex justify-between text-gray-500">
@@ -322,12 +291,12 @@ const SandwichPanelBuilder: React.FC<Props> = ({ product, basePrice }) => {
                         <button onClick={() => setQuantity(quantity + 1)} className="p-2 text-gray-400 hover:text-hett-dark"><Plus size={16} /></button>
                     </div>
                     <button
-                        onClick={handleAddToCart}
+                        onClick={handleAddToCartClick}
                         disabled={!isValid}
                         className={`flex-1 flex items-center justify-center gap-2 rounded-lg font-bold text-sm transition-all py-3 ${isValid ? 'bg-hett-primary text-white hover:bg-hett-dark shadow-lg shadow-hett-primary/20' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}
                     >
                         <ShoppingCart size={18} />
-                        In winkelwagen
+                        {existingCartItem ? 'Update in winkelwagen' : 'In winkelwagen'}
                     </button>
                 </div>
                 {!isValid && touched && (
@@ -336,7 +305,6 @@ const SandwichPanelBuilder: React.FC<Props> = ({ product, basePrice }) => {
                     </p>
                 )}
             </div>
-
         </div>
     );
 };

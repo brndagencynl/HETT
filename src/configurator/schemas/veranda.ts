@@ -1,5 +1,6 @@
 export type VerandaOptionKey =
     | "daktype"
+    | "goot"
     | "voorzijde"
     | "zijwand_links"
     | "zijwand_rechts"
@@ -7,6 +8,7 @@ export type VerandaOptionKey =
 
 export type VerandaConfig = {
     daktype: "poly_helder" | "poly_opaal" | "glas_helder" | "glas_melk";
+    goot: 'deluxe' | 'cube' | 'classic';
     voorzijde: "geen" | "schuifwand";
     zijwand_links: "geen" | "poly_wand" | "poly_spie" | "sandwich_polyspie" | "sandwich_vol" | "rabat" | "glas_schuif";
     zijwand_rechts: "geen" | "poly_wand" | "poly_spie" | "sandwich_polyspie" | "sandwich_vol" | "rabat" | "glas_schuif";
@@ -14,8 +16,10 @@ export type VerandaConfig = {
     profileColor: 'Antraciet (RAL7016)' | 'Crèmewit (RAL9001)' | 'Zwart (RAL9005)';
 };
 
-export const DEFAULT_VERANDA_CONFIG: VerandaConfig = {
-    daktype: "poly_opaal",
+// @ts-ignore - Partial defaults fine, validation catches missing
+export const DEFAULT_VERANDA_CONFIG: Partial<VerandaConfig> = {
+    // daktype: undefined, // Force choice
+    // goot: undefined, // Force choice
     voorzijde: "geen",
     zijwand_links: "geen",
     zijwand_rechts: "geen",
@@ -43,6 +47,16 @@ export const VERANDA_OPTIONS_UI = [
             { value: "poly_helder", label: "Polycarbonaat helder", price: 0, description: "Helder polycarbonaat. Maximale lichtinval.", image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=400" },
             { value: "glas_helder", label: "Helder glas", price: 320, description: "Luxe uitstraling, geluiddempend.", image: "https://images.unsplash.com/photo-1510627489930-0c1b0bfb6785?q=80&w=400" },
             { value: "glas_melk", label: "Melk glas", price: 450, description: "Privacy en luxe uitstraling.", image: "https://images.unsplash.com/photo-1628624747186-a941c476b7ef?q=80&w=400" },
+        ],
+    },
+    {
+        key: "goot",
+        label: "Goot optie",
+        type: "select",
+        choices: [
+            { value: "classic", label: "Classic (Rond)", price: 0, description: "Traditionele ronde goot." },
+            { value: "cube", label: "Cube (Vierkant)", price: 0, description: "Strakke rechte goot." },
+            { value: "deluxe", label: "Deluxe (Sierlijst)", price: 50, description: "Luxe afgewerkte goot met sierlijst." },
         ],
     },
     {

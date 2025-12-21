@@ -28,15 +28,55 @@ export interface Product {
   requiresConfiguration: boolean; // Now mandatory/explicit
 }
 
+// Product Configuration Types
+export type ProductCategory = 'verandas' | 'sandwichpanelen' | 'accessoires';
+
+export type VerandaConfig = {
+  daktype?: 'poly_helder' | 'poly_opaal' | 'glas';
+  goot?: 'deluxe' | 'cube' | 'classic'; // NEW (required)
+  voorzijde?: 'geen' | 'glazen_schuifwand';
+  zijwand_links?: 'geen' | 'poly_spie' | 'sandwich_poly_spie' | 'sandwich_volledig';
+  zijwand_rechts?: 'geen' | 'poly_spie' | 'sandwich_poly_spie' | 'sandwich_volledig';
+  extra_verlichting?: boolean;
+  // Common visual options
+  profileColor?: string;
+  widthCm?: number;
+  depthCm?: number;
+};
+
+export type SandwichConfig = {
+  dikte?: string;
+  kleur?: string;
+  afwerking?: string;
+  extra_u_profielen_m?: number;
+  // Common visual options
+  length?: number;
+};
+
+export type ProductConfig =
+  | { category: 'verandas'; data: VerandaConfig }
+  | { category: 'sandwichpanelen'; data: SandwichConfig }
+  | { category: 'accessoires'; data?: Record<string, never> };
+
 export interface CartItem extends Product {
-  selectedSize: string;
-  selectedColor: string;
-  selectedRoof?: string;
+  id: string; // Unique line ID
+  sku?: string;
+  slug: string; // Ensure slug is available (usually derived from ID)
+
+  // Standard props
   quantity: number;
   totalPrice: number;
+
+  // Config props
+  config?: ProductConfig;
+  configHash?: string;
+  displayConfigSummary?: string;
+
+  // Legacy/Compatibility props (to be deprecated or mapped)
+  selectedSize?: string;
+  selectedColor?: string;
+  selectedRoof?: string;
   details?: { label: string; value: string }[];
-  configuration?: any;
-  configurationLabel?: string[];
 }
 
 export interface Post {

@@ -33,6 +33,8 @@ export interface CartItem extends Product {
   quantity: number;
   totalPrice: number;
   details?: { label: string; value: string }[];
+  configuration?: any;
+  configurationLabel?: string[];
 }
 
 export interface Post {

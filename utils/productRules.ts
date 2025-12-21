@@ -2,19 +2,9 @@
 import { Product } from '../types';
 
 export const isConfigOnly = (product: Product): boolean => {
-    // Manual override flag check
+    // Strict check based on configuration requirement or category
     if (product.requiresConfiguration) return true;
 
-    // Categories that require configuration
-    const configKeywords = [
-        'overkapping',
-        'veranda',
-        'sandwich',
-        'tuinkamer',
-        'glazen schuifwand'
-    ];
-
-    const category = product.category.toLowerCase();
-
-    return configKeywords.some(keyword => category.includes(keyword));
+    // Fallback based on strict categories
+    return ['verandas', 'sandwichpanelen'].includes(product.category);
 };

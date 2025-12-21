@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { PRODUCTS } from '../constants';
+import { PRODUCTS, CATEGORIES } from '../constants';
 import { Filter, Check, Star, Heart } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import { Product } from '../types';
@@ -28,14 +28,16 @@ const Shop: React.FC = () => {
                                 <h3 className="font-bold text-hett-dark">Filters</h3>
                             </div>
 
+
                             <div className="space-y-6">
                                 <div>
                                     <h4 className="text-sm font-bold mb-3">Categorie</h4>
                                     <ul className="space-y-2 text-sm text-gray-600">
-                                        <li><Link to="/categorie/overkappingen" className="hover:text-hett-brown transition-colors">Overkappingen</Link></li>
-                                        <li><Link to="/categorie/sandwichpanelen" className="hover:text-hett-brown transition-colors">Sandwichpanelen</Link></li>
-                                        <li><Link to="/categorie/profielen" className="hover:text-hett-brown transition-colors">Aluminium Profielen</Link></li>
-                                        <li><Link to="/categorie/accessoires" className="hover:text-hett-brown transition-colors">Montage Accessoires</Link></li>
+                                        {Object.values(CATEGORIES).map(c => (
+                                            <li key={c.path}>
+                                                <Link to={c.path} className="hover:text-hett-brown transition-colors">{c.label}</Link>
+                                            </li>
+                                        ))}
                                     </ul>
                                 </div>
                             </div>

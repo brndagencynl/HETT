@@ -1,12 +1,11 @@
 
 import React from 'react';
-import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { HashRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
-import Products from './pages/Products';
-import ProductDetail from './pages/ProductDetail';
+
 import Configurator from './pages/Configurator';
 import Projects from './pages/Projects';
 import ProjectDetailPage from './pages/ProjectDetail';
@@ -86,8 +85,9 @@ const AnimatedRoutes: React.FC = () => {
         <Route path="/showroom" element={<PageTransition><Showroom /></PageTransition>} />
 
         {/* Legacy/Other Routes */}
-        <Route path="/producten" element={<PageTransition><Products /></PageTransition>} />
-        <Route path="/producten/:id" element={<PageTransition><ProductDetail /></PageTransition>} />
+        {/* Redirect Legacy Routes */}
+        <Route path="/producten" element={<Navigate to="/shop" replace />} />
+        <Route path="/producten/:id" element={<Navigate to="/product/:id" replace />} />
         <Route path="/configurator" element={<PageTransition><Configurator /></PageTransition>} />
         <Route path="/projecten" element={<PageTransition><Projects /></PageTransition>} />
         <Route path="/projecten/:id" element={<PageTransition><ProjectDetailPage /></PageTransition>} />

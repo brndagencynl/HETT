@@ -13,12 +13,9 @@ const Footer: React.FC = () => {
                     <div className="grid grid-cols-2 gap-8 lg:contents">
                         <div className="col-span-1">
                             <h3 className="text-lg font-bold uppercase tracking-widest mb-6 border-b border-white pb-2">Producten</h3>
-                            <ul className="space-y-3 text-sm font-medium">
-                                <li><Link to="/categorie/overkappingen" className="text-white hover:text-[#FF7300] transition-colors flex items-center gap-2"><span>&rsaquo;</span> Veranda's</Link></li>
-                                <li><Link to="/categorie/glazen-schuifwanden" className="text-white hover:text-[#FF7300] transition-colors flex items-center gap-2"><span>&rsaquo;</span> Schuifwanden</Link></li>
-                                <li><Link to="/categorie/sandwichpanelen" className="text-white hover:text-[#FF7300] transition-colors flex items-center gap-2"><span>&rsaquo;</span> Sandwichpanelen</Link></li>
-                                <li><Link to="/categorie/profielen" className="text-white hover:text-[#FF7300] transition-colors flex items-center gap-2"><span>&rsaquo;</span> Profielen</Link></li>
-                            </ul>
+                            <li><Link to="/categorie/verandas" className="text-white hover:text-[#FF7300] transition-colors flex items-center gap-2"><span>&rsaquo;</span> Veranda's</Link></li>
+                            <li><Link to="/categorie/sandwichpanelen" className="text-white hover:text-[#FF7300] transition-colors flex items-center gap-2"><span>&rsaquo;</span> Sandwichpanelen</Link></li>
+                            <li><Link to="/categorie/accessoires" className="text-white hover:text-[#FF7300] transition-colors flex items-center gap-2"><span>&rsaquo;</span> Accessoires</Link></li>
                         </div>
 
                         <div className="col-span-1">

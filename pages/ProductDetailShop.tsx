@@ -90,9 +90,9 @@ const ProductDetailShop: React.FC = () => {
                                 <span className="flex items-center gap-1"><ShieldCheck size={14} className="text-green-600" /> 10 Jaar garantie</span>
                             </div>
 
-                            {product.category.toLowerCase().includes('sandwich') ? (
+                            {product.category === 'sandwichpanelen' ? (
                                 <SandwichPanelBuilder product={product} basePrice={product.price} />
-                            ) : (
+                            ) : product.requiresConfiguration ? (
                                 <>
                                     <h3 className="text-2xl font-black text-hett-text mb-4">Product configuratie</h3>
                                     <p className="text-hett-muted text-sm leading-relaxed mb-8">
@@ -121,6 +121,30 @@ const ProductDetailShop: React.FC = () => {
                                             <Check size={16} className="text-hett-secondary flex-shrink-0" strokeWidth={3} /> Vrijblijvende offerte per mail
                                         </div>
                                     </div>
+                                </>
+                            ) : (
+                                <>
+                                    <h3 className="text-2xl font-black text-hett-text mb-4">Bestellen</h3>
+                                    <p className="text-hett-muted text-sm leading-relaxed mb-8">
+                                        Bestel dit product direct uit onze voorraad. Snelle levering gegarandeerd.
+                                    </p>
+
+                                    <div className="flex items-baseline gap-2 mb-8">
+                                        <span className="text-4xl font-black text-hett-text">€{product.price},-</span>
+                                        <span className="text-hett-muted text-xs font-bold uppercase tracking-wider">Incl. BTW</span>
+                                    </div>
+
+                                    <button
+                                        onClick={() => {
+                                            addToCart(product, 1, {
+                                                color: product.options?.colors?.[0] || 'Standaard'
+                                            });
+                                            navigate('/cart');
+                                        }}
+                                        className="btn-primary w-full py-4 text-lg flex items-center justify-center gap-3"
+                                    >
+                                        <ShoppingCart size={20} /> In winkelwagen
+                                    </button>
                                 </>
                             )}
                         </div>

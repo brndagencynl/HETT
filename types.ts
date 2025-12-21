@@ -1,8 +1,10 @@
 
+export type CategorySlug = 'verandas' | 'sandwichpanelen' | 'accessoires';
+
 export interface Product {
   id: string;
   title: string;
-  category: 'Overkappingen' | 'Sandwichpanelen' | 'Profielen' | 'Accessoires' | 'Dakpanelen' | 'Wandpanelen' | 'gevel';
+  category: CategorySlug;
   price: number;
   priceExVat?: number;
   shortDescription: string;
@@ -17,13 +19,13 @@ export interface Product {
   rating?: number;
   reviewCount?: number;
   stockStatus?: string;
-  variantCount?: number;
+  // variantCount removed as per request
   options?: {
     colors: string[];
     sizes: string[];
     roofTypes?: string[];
   };
-  requiresConfiguration?: boolean;
+  requiresConfiguration: boolean; // Now mandatory/explicit
 }
 
 export interface CartItem extends Product {

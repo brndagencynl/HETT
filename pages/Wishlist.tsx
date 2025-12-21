@@ -12,11 +12,12 @@ const Wishlist: React.FC = () => {
     const { addToCart } = useCart();
 
     const handleAddToCart = (product: any) => {
-        // Default config for direct add from wishlist
+        if (isConfigOnly(product)) return; // Should not happen due to UI logic, but extra safety
+
+        // Simple add for accessories
         addToCart(product, 1, {
             color: product.options?.colors?.[0] || 'Standaard',
-            size: product.options?.sizes?.[0] || 'Standaard',
-            roof: product.options?.roofTypes?.[0] || 'Standaard'
+            size: product.options?.sizes?.[0] || 'Standaard'
         });
     };
 

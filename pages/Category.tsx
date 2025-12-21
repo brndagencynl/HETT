@@ -7,6 +7,10 @@ import PageHeader from '../components/PageHeader';
 import { motion, AnimatePresence } from 'framer-motion';
 import MobileFilterSheet from '../components/ui/MobileFilterSheet';
 import ActiveFilters from '../components/ui/ActiveFilters';
+import ProductCard from '../components/ui/ProductCard';
+
+import { CATEGORIES } from '../constants';
+import { CategorySlug } from '../types';
 
 const Category: React.FC = () => {
     const { categorySlug } = useParams();
@@ -25,23 +29,18 @@ const Category: React.FC = () => {
         }
     }, [mobileFiltersOpen, activeBrands]);
 
-    const getCategoryName = (slug: string | undefined) => {
+    const getCategoryName = (slug: string | undefined): string => {
         if (!slug) return 'Assortiment';
-        const names: Record<string, string> = {
-            'overkappingen': 'Universele Overkappingen',
-            'sandwichpanelen': 'Geïsoleerde Panelen',
-            'profielen': 'Aluminium Profielen',
-            'accessoires': 'Montage Accessoires'
-        };
-        return names[slug] || slug.charAt(0).toUpperCase() + slug.slice(1);
+        const category = CATEGORIES[slug as CategorySlug];
+        return category ? category.label : slug.charAt(0).toUpperCase() + slug.slice(1);
     };
 
     const categoryName = getCategoryName(categorySlug);
 
     // Filtering Logic
     const products = PRODUCTS.filter(p => {
-        const matchesCategory = !categorySlug || p.category.toLowerCase() === categorySlug;
-        const matchesBrand = activeBrands.length === 0 || activeBrands.includes(p.brand || 'Onbekend');
+        const matchesCategory = !categorySlug || p.category === categorySlug;
+        const matchesBrand = activeBrands.length === 0 || activeBrands.includes(p.badges?.[0] || 'Onbekend'); // Workaround since brand field missing in interface
         // Note: PRODUCTS constant usually has a brand field, if not we fall back to logic.
         // For this demo, we'll assume the brand labels match product properties.
         return matchesCategory && matchesBrand;
@@ -180,61 +179,7 @@ const Category: React.FC = () => {
     );
 };
 
-const ProductCard: React.FC<{ product: Product, viewMode: 'grid' | 'list' }> = ({ product, viewMode }) => {
-    return (
-        <div className={`bg-white border border-gray-200 rounded-lg shadow-soft hover:shadow-md transition-all flex flex-col group overflow-hidden ${viewMode === 'list' ? 'md:flex-row' : ''}`}>
-            {/* Action Bar */}
-            <div className={`px-2 py-1.5 flex justify-end ${viewMode === 'list' ? 'hidden' : ''}`}>
-                <button className="text-gray-300 hover:text-red-500 transition-colors p-1"><Heart size={18} /></button>
-            </div>
 
-            <Link to={`/product/${product.id}`} className={`relative flex items-center justify-center overflow-hidden bg-gray-50 ${viewMode === 'list' ? 'w-full md:w-64 p-4' : 'h-32 sm:h-64'}`}>
-                <img src={product.imageUrl} alt={product.title} className="w-full h-full object-cover mix-blend-multiply transition-transform duration-500 group-hover:scale-105" />
-                {product.isBestseller && (
-                    <div className="absolute top-2 left-2 bg-hett-secondary text-white text-[8px] sm:text-[10px] font-black px-2 py-0.5 rounded shadow-sm uppercase">Bestseller</div>
-                )}
-            </Link>
-
-            <div className="p-2.5 sm:p-5 flex flex-col flex-grow">
-                <div className="flex flex-wrap gap-1 mb-1.5">
-                    {product.badges?.slice(0, 1).map(badge => (
-                        <span key={badge} className="text-[8px] sm:text-[10px] font-black uppercase px-1.5 py-0.5 rounded bg-orange-100 text-orange-700 whitespace-nowrap">
-                            {badge}
-                        </span>
-                    ))}
-                </div>
-
-                <Link to={`/product/${product.id}`} className="block mb-1 sm:mb-2">
-                    <h3 className="text-hett-dark font-bold text-[13px] sm:text-base leading-tight hover:underline line-clamp-2 min-h-[2.4rem] sm:min-h-[3rem]">
-                        {product.title}
-                    </h3>
-                </Link>
-
-                <div className="flex items-center gap-1 mb-2 sm:mb-4">
-                    <div className="flex text-yellow-400">
-                        <Star size={10} fill="currentColor" />
-                    </div>
-                    <span className="text-[9px] sm:text-xs text-gray-400 font-bold">({product.reviewCount})</span>
-                </div>
-
-                <div className="mb-3 sm:mb-4">
-                    <div className="text-base sm:text-2xl font-black text-hett-dark leading-none">€ {product.price},-</div>
-                </div>
-
-                <div className="mt-auto">
-                    <button className="w-full bg-hett-dark text-white rounded-md py-2 sm:py-3 text-[11px] sm:text-sm font-bold flex items-center justify-center gap-1.5 sm:gap-2 shadow-sm hover:bg-hett-primary transition-colors">
-                        Bestel
-                    </button>
-                    {product.variantCount && (
-                        <Link to={`/product/${product.id}`} className="block text-center mt-1.5 text-blue-700 text-[10px] sm:text-xs font-bold hover:underline">
-                            {product.variantCount} Varianten
-                        </Link>
-                    )}
-                </div>
-            </div>
-        </div>
-    );
-};
 
 const FilterAccordion: React.FC<{ title: string, children: React.ReactNode, defaultOpen?: boolean }> = ({ title, children, defaultOpen = false }) => {
     const [isOpen, setIsOpen] = useState(defaultOpen);

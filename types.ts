@@ -23,6 +23,7 @@ export interface Product {
     sizes: string[];
     roofTypes?: string[];
   };
+  requiresConfiguration?: boolean;
 }
 
 export interface CartItem extends Product {

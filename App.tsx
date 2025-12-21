@@ -41,8 +41,9 @@ import Checkout from './pages/Checkout';
 import MyAccount from './pages/MyAccount';
 import OrderReceived from './pages/OrderReceived';
 import Search from './pages/Search';
-import Quote from './pages/Quote'; 
+import Quote from './pages/Quote';
 import Wishlist from './pages/Wishlist';
+import CartDrawer from './components/ui/CartDrawer';
 
 // ScrollToTop helper
 const ScrollToTop = () => {
@@ -54,54 +55,54 @@ const ScrollToTop = () => {
 };
 
 const AnimatedRoutes: React.FC = () => {
-    const location = useLocation();
-    
-    return (
-        <AnimatePresence mode="wait">
-            <Routes location={location} key={location.pathname}>
-                <Route path="/" element={<PageTransition><Home /></PageTransition>} />
-                
-                {/* Shop Routes */}
-                <Route path="/shop" element={<PageTransition><Shop /></PageTransition>} />
-                <Route path="/categorie/:categorySlug" element={<PageTransition><Category /></PageTransition>} />
-                <Route path="/product/:id" element={<PageTransition><ProductDetailShop /></PageTransition>} />
-                <Route path="/cart" element={<PageTransition><Cart /></PageTransition>} />
-                <Route path="/checkout" element={<PageTransition><Checkout /></PageTransition>} />
-                <Route path="/my-account" element={<PageTransition><MyAccount /></PageTransition>} />
-                <Route path="/order-received" element={<PageTransition><OrderReceived /></PageTransition>} />
-                <Route path="/search" element={<PageTransition><Search /></PageTransition>} />
-                <Route path="/offerte" element={<PageTransition><Quote /></PageTransition>} /> 
-                <Route path="/wishlist" element={<PageTransition><Wishlist /></PageTransition>} />
+  const location = useLocation();
 
-                {/* Information Pages */}
-                <Route path="/bezorging" element={<PageTransition><Delivery /></PageTransition>} />
-                <Route path="/betaalmethoden" element={<PageTransition><PaymentMethods /></PageTransition>} />
-                <Route path="/montage-handleiding" element={<PageTransition><Mounting /></PageTransition>} />
-                <Route path="/afhalen" element={<PageTransition><Pickup /></PageTransition>} />
-                <Route path="/blogs" element={<PageTransition><News /></PageTransition>} />
-                <Route path="/garantie-en-klachten" element={<PageTransition><Warranty /></PageTransition>} />
-                <Route path="/retourneren" element={<PageTransition><Returns /></PageTransition>} />
-                <Route path="/leveringsvoorwaarden" element={<PageTransition><DeliveryTerms /></PageTransition>} />
-                <Route path="/showroom" element={<PageTransition><Showroom /></PageTransition>} />
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<PageTransition><Home /></PageTransition>} />
 
-                {/* Legacy/Other Routes */}
-                <Route path="/producten" element={<PageTransition><Products /></PageTransition>} />
-                <Route path="/producten/:id" element={<PageTransition><ProductDetail /></PageTransition>} />
-                <Route path="/configurator" element={<PageTransition><Configurator /></PageTransition>} />
-                <Route path="/projecten" element={<PageTransition><Projects /></PageTransition>} />
-                <Route path="/projecten/:id" element={<PageTransition><ProjectDetailPage /></PageTransition>} />
-                <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />
-                <Route path="/downloads" element={<PageTransition><Documents /></PageTransition>} />
-                <Route path="/over-ons" element={<PageTransition><About /></PageTransition>} />
-                <Route path="/veelgestelde-vragen" element={<PageTransition><FAQ /></PageTransition>} />
-                <Route path="/nieuws" element={<PageTransition><News /></PageTransition>} />
-                <Route path="/nieuws/:id" element={<PageTransition><NewsDetail /></PageTransition>} />
-                <Route path="/algemene-voorwaarden" element={<PageTransition><Terms /></PageTransition>} />
-                <Route path="/privacy" element={<PageTransition><Privacy /></PageTransition>} />
-                <Route path="/cookies" element={<PageTransition><Cookies /></PageTransition>} />
-            </Routes>
-        </AnimatePresence>
-    );
+        {/* Shop Routes */}
+        <Route path="/shop" element={<PageTransition><Shop /></PageTransition>} />
+        <Route path="/categorie/:categorySlug" element={<PageTransition><Category /></PageTransition>} />
+        <Route path="/product/:id" element={<PageTransition><ProductDetailShop /></PageTransition>} />
+        <Route path="/cart" element={<PageTransition><Cart /></PageTransition>} />
+        <Route path="/checkout" element={<PageTransition><Checkout /></PageTransition>} />
+        <Route path="/my-account" element={<PageTransition><MyAccount /></PageTransition>} />
+        <Route path="/order-received" element={<PageTransition><OrderReceived /></PageTransition>} />
+        <Route path="/search" element={<PageTransition><Search /></PageTransition>} />
+        <Route path="/offerte" element={<PageTransition><Quote /></PageTransition>} />
+        <Route path="/wishlist" element={<PageTransition><Wishlist /></PageTransition>} />
+
+        {/* Information Pages */}
+        <Route path="/bezorging" element={<PageTransition><Delivery /></PageTransition>} />
+        <Route path="/betaalmethoden" element={<PageTransition><PaymentMethods /></PageTransition>} />
+        <Route path="/montage-handleiding" element={<PageTransition><Mounting /></PageTransition>} />
+        <Route path="/afhalen" element={<PageTransition><Pickup /></PageTransition>} />
+        <Route path="/blogs" element={<PageTransition><News /></PageTransition>} />
+        <Route path="/garantie-en-klachten" element={<PageTransition><Warranty /></PageTransition>} />
+        <Route path="/retourneren" element={<PageTransition><Returns /></PageTransition>} />
+        <Route path="/leveringsvoorwaarden" element={<PageTransition><DeliveryTerms /></PageTransition>} />
+        <Route path="/showroom" element={<PageTransition><Showroom /></PageTransition>} />
+
+        {/* Legacy/Other Routes */}
+        <Route path="/producten" element={<PageTransition><Products /></PageTransition>} />
+        <Route path="/producten/:id" element={<PageTransition><ProductDetail /></PageTransition>} />
+        <Route path="/configurator" element={<PageTransition><Configurator /></PageTransition>} />
+        <Route path="/projecten" element={<PageTransition><Projects /></PageTransition>} />
+        <Route path="/projecten/:id" element={<PageTransition><ProjectDetailPage /></PageTransition>} />
+        <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />
+        <Route path="/downloads" element={<PageTransition><Documents /></PageTransition>} />
+        <Route path="/over-ons" element={<PageTransition><About /></PageTransition>} />
+        <Route path="/veelgestelde-vragen" element={<PageTransition><FAQ /></PageTransition>} />
+        <Route path="/nieuws" element={<PageTransition><News /></PageTransition>} />
+        <Route path="/nieuws/:id" element={<PageTransition><NewsDetail /></PageTransition>} />
+        <Route path="/algemene-voorwaarden" element={<PageTransition><Terms /></PageTransition>} />
+        <Route path="/privacy" element={<PageTransition><Privacy /></PageTransition>} />
+        <Route path="/cookies" element={<PageTransition><Cookies /></PageTransition>} />
+      </Routes>
+    </AnimatePresence>
+  );
 };
 
 const App: React.FC = () => {
@@ -111,8 +112,9 @@ const App: React.FC = () => {
         <ScrollToTop />
         <Navbar />
         <main className="flex-grow">
-           <AnimatedRoutes />
+          <AnimatedRoutes />
         </main>
+        <CartDrawer />
         <Footer />
         <ScrollToTopButton />
       </div>

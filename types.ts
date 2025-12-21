@@ -34,6 +34,17 @@ export interface CartItem extends Product {
   details?: { label: string; value: string }[];
 }
 
+export interface Post {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  date: string;
+  category: string;
+  image: string;
+  readingTime: string;
+}
+
 export interface Project {
   id: string;
   title: string;
@@ -49,12 +60,12 @@ export interface NewsItem {
   id: string;
   title: string;
   excerpt: string;
-  content: string; 
+  content: string;
   date: string;
   author: string;
   category: string;
   imageUrl: string;
-  readTime: string; 
+  readTime: string;
 }
 
 export interface NavItem {
@@ -64,8 +75,8 @@ export interface NavItem {
 
 export interface PanelConfig {
   type: 'dak' | 'wand';
-  thickness: number; 
+  thickness: number;
   color: string;
   finish: string;
-  length: number; 
+  length: number;
 }

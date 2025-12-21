@@ -1,8 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Check, Star } from 'lucide-react';
 import { PROJECTS, PRODUCTS } from '../constants';
+import { Post } from '../types';
+import { content } from '../services/content'; // Using Content Provider
 import InspirationStrip from '../components/ui/InspirationStrip';
+import BlogCarousel from '../components/ui/BlogCarousel';
+import HomeFeatureBlock from '../components/ui/HomeFeatureBlock';
 import HomeFAQ from '../components/ui/HomeFAQ';
 
 const NEW_USPS = [
@@ -16,6 +20,26 @@ const Home: React.FC = () => {
     const bestsellerProducts = PRODUCTS.filter(p =>
         ['veranda-306-250-opaal', 'veranda-306-250-helder'].includes(p.id)
     );
+
+    const [blogPosts, setBlogPosts] = useState<Post[]>([]); // Using Post type
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
+
+    useEffect(() => {
+        const fetchPosts = async () => {
+            try {
+                const posts = await content.getPosts(6); // Fetch via provider
+                setBlogPosts(posts);
+                setLoading(false);
+            } catch (err) {
+                console.error(err);
+                setError(true);
+                setLoading(false);
+            }
+        };
+
+        fetchPosts();
+    }, []);
 
     return (
         <div className="pt-[185px] md:pt-[200px] pb-20 bg-hett-bg">
@@ -68,7 +92,7 @@ const Home: React.FC = () => {
             </div>
 
             {/* USP Bar - Retail Layout */}
-            <div className="bg-hett-light py-6 border-y border-gray-200 mb-20">
+            <div className="bg-hett-light py-6 border-y border-gray-200 mb-0">
                 <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between gap-8 overflow-x-auto no-scrollbar snap-x">
                         {NEW_USPS.map((usp, i) => (
@@ -81,8 +105,24 @@ const Home: React.FC = () => {
                 </div>
             </div>
 
+            {/* Feature Block */}
+            <HomeFeatureBlock />
+
             {/* Inspiratie Section */}
             <InspirationStrip />
+
+            {/* Blog & Nieuws Section */}
+            {loading ? (
+                <div className="py-24 text-center bg-white border-b border-gray-100">
+                    <span className="text-hett-muted font-medium animate-pulse">Nieuws laden...</span>
+                </div>
+            ) : error ? (
+                // On error, we could optionally hide the section or show a fallback. 
+                // Showing nothing effectively hides the broken section.
+                <div className="hidden"></div>
+            ) : (
+                <BlogCarousel items={blogPosts} />
+            )}
 
             {/* Popular Products - Grid layout */}
             <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mb-20">

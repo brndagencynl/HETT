@@ -7,6 +7,9 @@ import { Check, Truck, ShieldCheck, PenTool, ArrowLeft, ChevronLeft, ChevronRigh
 import PageHeader from '../components/PageHeader';
 import VerandaConfigurator, { VerandaConfiguratorRef } from '../components/VerandaConfigurator';
 import SandwichPanelBuilder from '../components/ui/sandwichpanel/SandwichPanelBuilder';
+import ProductDetailContent, { ProductDetailContentProps } from '../components/ui/ProductDetailContent';
+import { ShoppingCart } from 'lucide-react'; // Ensure no unused imports, but Keep necessary ones
+
 
 const ProductDetailShop: React.FC = () => {
     const { id } = useParams();
@@ -124,35 +127,34 @@ const ProductDetailShop: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Info Blocks */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20">
-                    <div className="card-muted">
-                        <h4 className="text-xl font-black mb-4 flex items-center gap-2">
-                            <Info size={20} className="text-hett-primary" /> Specificaties
-                        </h4>
-                        <div className="space-y-4">
-                            {Object.entries(product.specs).slice(0, 4).map(([key, value]) => (
-                                <div key={key} className="flex justify-between border-b border-hett-muted/10 pb-2">
-                                    <span className="text-hett-muted text-sm font-bold">{key}</span>
-                                    <span className="text-hett-text text-sm font-bold">{Array.isArray(value) ? value[0] : value}</span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                    <div className="card-muted">
-                        <h4 className="text-xl font-black mb-4 flex items-center gap-2">
-                            <Truck size={20} className="text-hett-primary" /> Levering & Montage
-                        </h4>
-                        <p className="text-sm text-hett-muted leading-relaxed mb-4">
-                            Wij leveren met eigen vervoer door de hele Benelux. Alle pakketten zijn voorzien van een duidelijke montagehandleiding.
-                        </p>
-                        <div className="flex flex-col gap-2">
-                            <div className="bg-white p-3 rounded-lg flex justify-between items-center">
-                                <span className="text-xs font-bold text-hett-text">Gemiddelde levertijd</span>
-                                <span className="text-xs font-bold text-hett-secondary">10 werkdagen</span>
-                            </div>
-                        </div>
-                    </div>
+                {/* 3. Standardized Content using ProductDetailContent */}
+                <div className="mb-20">
+                    <ProductDetailContent
+                        uspItems={[
+                            { icon: "shield", title: "Gratis 5 jaar garantie", subtitle: "Op constructie & systeem" },
+                            { icon: "rail", title: "Unieke onderrail", subtitle: "Strak, stabiel en duurzaam" },
+                            { icon: "truck", title: "Gratis levering", subtitle: "In Nederland & België" },
+                            { icon: "tools", title: "Zelf eenvoudig monteren", subtitle: "Duidelijke handleiding inbegrepen" }
+                        ]}
+                        delivery={{
+                            title: "Levering & montage",
+                            text: "Wij leveren met eigen transport door de Benelux. Elk pakket is compleet en voorzien van een duidelijke montagehandleiding. Montage door ons team is optioneel (op aanvraag).",
+                            leadTimeLabel: "Gemiddelde levertijd",
+                            leadTimeValue: "10 werkdagen"
+                        }}
+                        description={{
+                            title: `Over de ${product.title}`,
+                            intro: product.description || product.shortDescription, // Fallback if no long desc
+                            paragraphs: [
+                                "Ontdek de perfecte combinatie van stijl en functionaliteit met onze hoogwaardige verandassystemen. Speciaal ontworpen om uw buitenleven te verrijken, ongeacht het seizoen.",
+                                "Dankzij het gebruik van duurzame materialen en een slim ontwerp is montage eenvoudig en geniet u jarenlang van een onderhoudsvrij resultaat."
+                            ]
+                        }}
+                        specs={Object.entries(product.specs).map(([label, value]) => ({
+                            label: label,
+                            value: Array.isArray(value) ? value.join(', ') : String(value)
+                        }))}
+                    />
                 </div>
             </div>
         </div>

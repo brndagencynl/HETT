@@ -1,5 +1,5 @@
 import React, { useState, forwardRef, useImperativeHandle, useMemo } from 'react';
-import { X, Check, Info, ChevronLeft, ChevronRight, Truck, ShieldCheck, ArrowRight, Lightbulb, Edit2, Eye } from 'lucide-react';
+import { X, Check, Info, ChevronLeft, ChevronRight, Truck, ShieldCheck, ArrowRight, Lightbulb, Edit2, Eye, ChevronUp, ShoppingBag } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { VERANDA_OPTIONS_UI, DEFAULT_VERANDA_CONFIG, VerandaConfig } from '../src/configurator/schemas/veranda';
 import { calcVerandaPrice } from '../src/configurator/pricing/veranda';
@@ -99,6 +99,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
     const [config, setConfig] = useState<Partial<VerandaConfig>>(DEFAULT_VERANDA_CONFIG);
     const [infoModal, setInfoModal] = useState<{ title: string, text: string } | null>(null);
     const [agreed, setAgreed] = useState(false);
+    const [isSelectionOpen, setSelectionOpen] = useState(false);
 
     // Price calculation
     const { total: currentPrice, items: priceItems, basePrice: calcBasePrice } = calcVerandaPrice(basePrice, config as VerandaConfig);
@@ -398,26 +399,26 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
     };
 
     const renderProgressIndicator = () => (
-        <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2">
+        <div className="flex items-center gap-1.5 mb-8">
             {STEPS.map((step, idx) => (
                 <React.Fragment key={step.id}>
                     <button
                         onClick={() => goToStep(idx)}
                         disabled={idx > currentStepIndex}
-                        className={`flex-shrink-0 min-w-[32px] h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
+                        className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
                             idx === currentStepIndex 
-                                ? 'bg-[#003878] text-white shadow-md scale-110 px-3' 
+                                ? 'bg-[#003878] text-white' 
                                 : idx < currentStepIndex 
-                                    ? 'bg-green-500 text-white cursor-pointer hover:bg-green-600' 
-                                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                    ? 'bg-[#003878]/20 text-[#003878] cursor-pointer hover:bg-[#003878]/30' 
+                                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                         }`}
                         title={step.title}
                     >
-                        {idx < currentStepIndex ? <Check size={16} /> : idx + 1}
+                        {idx < currentStepIndex ? <Check size={14} /> : idx + 1}
                     </button>
                     {idx < STEPS.length - 1 && (
-                        <div className={`h-0.5 w-8 flex-shrink-0 transition-colors ${
-                            idx < currentStepIndex ? 'bg-green-500' : 'bg-gray-200'
+                        <div className={`h-0.5 w-4 lg:w-6 flex-shrink-0 transition-colors ${
+                            idx < currentStepIndex ? 'bg-[#003878]/30' : 'bg-gray-200'
                         }`} />
                     )}
                 </React.Fragment>
@@ -425,83 +426,170 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
         </div>
     );
 
-    const renderSummarySidebar = () => (
-        <div className="bg-white rounded-xl border-2 border-gray-200 p-5 space-y-4 shadow-sm sticky top-4">
-            <h4 className="font-bold text-gray-900 text-base flex items-center gap-2">
-                <Eye size={18} className="text-[#003878]" />
-                Uw selectie
-            </h4>
-            <div className="space-y-2.5 text-sm">
-                {config.daktype && (
-                    <div className="flex justify-between items-start">
-                        <span className="text-gray-600">Daktype</span>
-                        <span className="font-semibold text-gray-900 text-right">{getOptionLabel('daktype', config.daktype)}</span>
+    // Count selected options for mobile button
+    const selectionCount = useMemo(() => {
+        let count = 0;
+        if (config.daktype) count++;
+        if (config.goot) count++;
+        if (config.voorzijde && config.voorzijde !== 'geen') count++;
+        if (config.zijwand_links && config.zijwand_links !== 'geen') count++;
+        if (config.zijwand_rechts && config.zijwand_rechts !== 'geen') count++;
+        if (config.verlichting) count++;
+        return count;
+    }, [config]);
+
+    // Reusable Selection Summary Component
+    const SelectionSummary = ({ showEditButtons = true }: { showEditButtons?: boolean }) => (
+        <div className="space-y-3">
+            {config.daktype && (
+                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                    <div>
+                        <span className="text-xs text-gray-500 uppercase tracking-wide">Daktype</span>
+                        <span className="block text-sm font-semibold text-gray-900">{getOptionLabel('daktype', config.daktype)}</span>
                     </div>
-                )}
-                {config.goot && (
-                    <div className="flex justify-between items-start">
-                        <span className="text-gray-600">Goot</span>
-                        <span className="font-semibold text-gray-900 text-right">{getOptionLabel('goot', config.goot)}</span>
-                    </div>
-                )}
-                {config.voorzijde && config.voorzijde !== 'geen' && (
-                    <div className="flex justify-between items-start">
-                        <span className="text-gray-600">Voorzijde</span>
-                        <span className="font-semibold text-gray-900 text-right">{getOptionLabel('voorzijde', config.voorzijde)}</span>
-                    </div>
-                )}
-                {config.zijwand_links && config.zijwand_links !== 'geen' && (
-                    <div className="flex justify-between items-start">
-                        <span className="text-gray-600">Zijwand L</span>
-                        <span className="font-semibold text-gray-900 text-right">{getOptionLabel('zijwand_links', config.zijwand_links)}</span>
-                    </div>
-                )}
-                {config.zijwand_rechts && config.zijwand_rechts !== 'geen' && (
-                    <div className="flex justify-between items-start">
-                        <span className="text-gray-600">Zijwand R</span>
-                        <span className="font-semibold text-gray-900 text-right">{getOptionLabel('zijwand_rechts', config.zijwand_rechts)}</span>
-                    </div>
-                )}
-                {config.verlichting && (
-                    <div className="flex justify-between items-start">
-                        <span className="text-gray-600">Verlichting</span>
-                        <span className="font-semibold text-gray-900">Ja</span>
-                    </div>
-                )}
-            </div>
-            <div className="border-t-2 border-gray-200 pt-4">
-                <div className="flex justify-between items-center">
-                    <span className="text-gray-600 text-sm font-medium">Totaalprijs</span>
-                    <div className="text-right">
-                        <span className="block font-black text-xl text-[#003878]">€ {currentPrice.toLocaleString()},-</span>
-                        <span className="text-xs text-gray-500">incl. BTW</span>
-                    </div>
+                    {showEditButtons && (
+                        <button onClick={() => { goToStep(0); setSelectionOpen(false); }} className="text-xs text-[#003878] font-medium hover:underline">
+                            Wijzig
+                        </button>
+                    )}
                 </div>
+            )}
+            {config.goot && (
+                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                    <div>
+                        <span className="text-xs text-gray-500 uppercase tracking-wide">Goot</span>
+                        <span className="block text-sm font-semibold text-gray-900">{getOptionLabel('goot', config.goot)}</span>
+                    </div>
+                    {showEditButtons && (
+                        <button onClick={() => { goToStep(1); setSelectionOpen(false); }} className="text-xs text-[#003878] font-medium hover:underline">
+                            Wijzig
+                        </button>
+                    )}
+                </div>
+            )}
+            {config.voorzijde && (
+                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                    <div>
+                        <span className="text-xs text-gray-500 uppercase tracking-wide">Voorzijde</span>
+                        <span className="block text-sm font-semibold text-gray-900">{getOptionLabel('voorzijde', config.voorzijde)}</span>
+                    </div>
+                    {showEditButtons && (
+                        <button onClick={() => { goToStep(2); setSelectionOpen(false); }} className="text-xs text-[#003878] font-medium hover:underline">
+                            Wijzig
+                        </button>
+                    )}
+                </div>
+            )}
+            {config.zijwand_links && (
+                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                    <div>
+                        <span className="text-xs text-gray-500 uppercase tracking-wide">Zijwand links</span>
+                        <span className="block text-sm font-semibold text-gray-900">{getOptionLabel('zijwand_links', config.zijwand_links)}</span>
+                    </div>
+                    {showEditButtons && (
+                        <button onClick={() => { goToStep(3); setSelectionOpen(false); }} className="text-xs text-[#003878] font-medium hover:underline">
+                            Wijzig
+                        </button>
+                    )}
+                </div>
+            )}
+            {config.zijwand_rechts && (
+                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                    <div>
+                        <span className="text-xs text-gray-500 uppercase tracking-wide">Zijwand rechts</span>
+                        <span className="block text-sm font-semibold text-gray-900">{getOptionLabel('zijwand_rechts', config.zijwand_rechts)}</span>
+                    </div>
+                    {showEditButtons && (
+                        <button onClick={() => { goToStep(4); setSelectionOpen(false); }} className="text-xs text-[#003878] font-medium hover:underline">
+                            Wijzig
+                        </button>
+                    )}
+                </div>
+            )}
+            <div className="flex justify-between items-center py-2">
+                <div>
+                    <span className="text-xs text-gray-500 uppercase tracking-wide">Verlichting</span>
+                    <span className="block text-sm font-semibold text-gray-900">{config.verlichting ? 'Ja (LED spots)' : 'Nee'}</span>
+                </div>
+                {showEditButtons && (
+                    <button onClick={() => { goToStep(5); setSelectionOpen(false); }} className="text-xs text-[#003878] font-medium hover:underline">
+                        Wijzig
+                    </button>
+                )}
             </div>
         </div>
     );
 
-    const renderPreviewPlaceholder = () => (
-        <div className="bg-gradient-to-br from-[#003878]/10 to-[#FF7300]/10 rounded-xl p-6 h-full min-h-[300px] flex flex-col items-center justify-center text-center border-2 border-dashed border-gray-300">
-            <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-4 shadow-lg">
-                <Eye size={32} className="text-[#003878]" />
-            </div>
-            <h4 className="font-bold text-gray-900 text-lg mb-2">Preview Visualisatie</h4>
-            <p className="text-sm text-gray-600 max-w-xs">
-                Uw configuratie wordt hier visueel weergegeven. Overlay rendering wordt later geïmplementeerd.
-            </p>
-            {config.goot && (
-                <div className="mt-4 flex flex-wrap gap-2 justify-center">
-                    <span className="px-3 py-1.5 bg-[#003878] text-white text-xs font-bold rounded-full shadow-sm">
-                        Goot: {config.goot}
-                    </span>
-                    {config.daktype && (
-                        <span className="px-3 py-1.5 bg-[#FF7300] text-white text-xs font-bold rounded-full shadow-sm">
-                            Dak: {config.daktype.replace('_', ' ')}
-                        </span>
-                    )}
-                </div>
+    // Mobile Bottom Sheet Component
+    const BottomSheet = () => (
+        <AnimatePresence>
+            {isSelectionOpen && (
+                <>
+                    {/* Backdrop */}
+                    <MotionDiv
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black/50 z-[200]"
+                        onClick={() => setSelectionOpen(false)}
+                    />
+                    {/* Sheet */}
+                    <MotionDiv
+                        initial={{ y: "100%" }}
+                        animate={{ y: 0 }}
+                        exit={{ y: "100%" }}
+                        transition={{ type: "spring", damping: 30, stiffness: 300 }}
+                        className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl z-[201] max-h-[80vh] flex flex-col"
+                    >
+                        {/* Handle */}
+                        <div className="flex justify-center pt-3 pb-2">
+                            <div className="w-10 h-1 bg-gray-300 rounded-full" />
+                        </div>
+                        {/* Header */}
+                        <div className="flex items-center justify-between px-5 pb-4 border-b border-gray-100">
+                            <h3 className="text-lg font-bold text-gray-900">Uw selectie</h3>
+                            <button
+                                onClick={() => setSelectionOpen(false)}
+                                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+                        {/* Content */}
+                        <div className="flex-1 overflow-y-auto px-5 py-4">
+                            <SelectionSummary showEditButtons={true} />
+                        </div>
+                    </MotionDiv>
+                </>
             )}
+        </AnimatePresence>
+    );
+
+    // Visualization Component
+    const Visualization = ({ className = "" }: { className?: string }) => (
+        <div className={`bg-gradient-to-br from-gray-100 to-gray-50 rounded-xl overflow-hidden ${className}`}>
+            <div className="aspect-[16/9] lg:aspect-[21/9] relative flex items-center justify-center">
+                {/* Placeholder for future overlay rendering */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
+                    <Eye size={40} className="text-gray-300 mb-3" />
+                    <p className="text-sm text-gray-400 font-medium">Preview visualisatie</p>
+                </div>
+                {/* Config badges */}
+                {(config.daktype || config.goot) && (
+                    <div className="absolute bottom-3 left-3 flex flex-wrap gap-1.5">
+                        {config.daktype && (
+                            <span className="px-2.5 py-1 bg-[#003878] text-white text-[10px] font-bold rounded-full uppercase tracking-wide">
+                                {config.daktype.replace('_', ' ')}
+                            </span>
+                        )}
+                        {config.goot && (
+                            <span className="px-2.5 py-1 bg-[#FF7300] text-white text-[10px] font-bold rounded-full uppercase tracking-wide">
+                                {config.goot}
+                            </span>
+                        )}
+                    </div>
+                )}
+            </div>
         </div>
     );
 
@@ -512,7 +600,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm font-sans"
+                    className="fixed inset-0 z-[100] bg-white lg:bg-black/40 lg:backdrop-blur-sm font-sans overflow-hidden"
                 >
                     {/* Info Modal */}
                     <AnimatePresence>
@@ -521,20 +609,20 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
-                                className="absolute inset-0 z-[110] flex items-center justify-center p-4"
+                                className="absolute inset-0 z-[150] flex items-center justify-center p-4 bg-black/50"
                                 onClick={() => setInfoModal(null)}
                             >
                                 <MotionDiv
-                                    initial={{ scale: 0.9, opacity: 0 }}
+                                    initial={{ scale: 0.95, opacity: 0 }}
                                     animate={{ scale: 1, opacity: 1 }}
-                                    exit={{ scale: 0.9, opacity: 0 }}
-                                    className="bg-white rounded-xl p-6 max-w-md w-full shadow-2xl"
+                                    exit={{ scale: 0.95, opacity: 0 }}
+                                    className="bg-white rounded-xl p-5 max-w-sm w-full shadow-xl"
                                     onClick={e => e.stopPropagation()}
                                 >
-                                    <div className="flex justify-between items-start mb-4">
-                                        <h4 className="font-bold text-lg text-gray-900">{infoModal.title}</h4>
-                                        <button onClick={() => setInfoModal(null)} className="p-1 hover:bg-gray-100 rounded-full transition-colors">
-                                            <X size={20} />
+                                    <div className="flex justify-between items-start mb-3">
+                                        <h4 className="font-bold text-base text-gray-900">{infoModal.title}</h4>
+                                        <button onClick={() => setInfoModal(null)} className="p-1 hover:bg-gray-100 rounded-full">
+                                            <X size={18} />
                                         </button>
                                     </div>
                                     <p className="text-gray-600 text-sm leading-relaxed">{infoModal.text}</p>
@@ -543,126 +631,163 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                         )}
                     </AnimatePresence>
 
-                    {/* Main Modal Container */}
+                    {/* Mobile Bottom Sheet */}
+                    <BottomSheet />
+
+                    {/* Main Container */}
                     <MotionDiv
                         initial={{ y: "100%" }}
                         animate={{ y: 0 }}
                         exit={{ y: "100%" }}
-                        transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                        className="bg-white w-full h-full md:h-[95vh] md:w-[95vw] md:max-w-[1400px] md:rounded-2xl shadow-2xl overflow-hidden flex flex-col relative"
+                        transition={{ type: "spring", damping: 30, stiffness: 300 }}
+                        className="h-full w-full lg:h-[95vh] lg:w-[95vw] lg:max-w-[1200px] lg:mx-auto lg:my-auto lg:rounded-2xl bg-white overflow-hidden flex flex-col lg:absolute lg:inset-0 lg:m-auto"
                     >
                         {/* Close Button */}
                         <button
                             onClick={closeConfigurator}
-                            className="absolute top-4 right-4 z-50 bg-white p-2.5 rounded-full hover:bg-gray-100 shadow-md transition-all text-gray-600 hover:text-gray-900"
+                            className="absolute top-4 right-4 z-50 p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-500 hover:text-gray-900"
                         >
                             <X size={22} />
                         </button>
 
-                        {/* Header */}
-                        <div className="bg-[#EDF0F2] border-b-2 border-gray-200 px-6 py-5 md:px-8">
-                            <h2 className="text-xl md:text-2xl font-black text-[#003878] pr-12">{productTitle}</h2>
-                            <p className="text-gray-600 text-sm mt-1 font-medium">
-                                Stap {currentStepIndex + 1} van {STEPS.length} — {currentStep.title}
-                            </p>
-                        </div>
-
-                        {/* Main Content Area */}
-                        <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+                        {/* Scrollable Content */}
+                        <div className="flex-1 overflow-y-auto pb-32 lg:pb-24">
                             
-                            {/* LEFT: Step Content */}
-                            <div className="flex-1 lg:w-[60%] overflow-y-auto p-6 md:p-8 pb-32 lg:pb-8">
-                                {renderProgressIndicator()}
-                                
-                                <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">{currentStep.title}</h3>
-                                <p className="text-gray-600 mb-6">{currentStep.description}</p>
-                                
-                                <AnimatePresence mode="wait">
-                                    <MotionDiv
-                                        key={currentStepIndex}
-                                        initial={{ opacity: 0, x: 20 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        exit={{ opacity: 0, x: -20 }}
-                                        transition={{ duration: 0.3 }}
-                                    >
-                                        {renderOptionSelector()}
-                                    </MotionDiv>
-                                </AnimatePresence>
+                            {/* Header with Title */}
+                            <div className="px-5 pt-5 pb-4 lg:px-8 lg:pt-6">
+                                <h1 className="text-xl lg:text-2xl font-black text-[#003878] pr-10">{productTitle}</h1>
+                                <p className="text-sm text-gray-500 mt-1">
+                                    Stap {currentStepIndex + 1} van {STEPS.length} — {currentStep.title}
+                                </p>
                             </div>
 
-                            {/* RIGHT: Preview + Summary (Desktop) */}
-                            <div className="hidden lg:flex lg:w-[40%] flex-col bg-[#EDF0F2] border-l-2 border-gray-200 p-6 overflow-y-auto">
-                                <div className="mb-6 flex-shrink-0">
-                                    {renderPreviewPlaceholder()}
-                                </div>
-                                <div className="flex-shrink-0">
-                                    {renderSummarySidebar()}
-                                </div>
+                            {/* Visualization - Always visible */}
+                            <div className="px-5 lg:px-8 mb-6">
+                                <Visualization />
                             </div>
-                        </div>
 
-                        {/* Footer Navigation (Fixed on mobile, static on desktop) */}
-                        <div className="fixed lg:relative bottom-0 left-0 right-0 bg-white border-t-2 border-gray-200 p-4 md:p-5 shadow-[0_-4px_20px_rgba(0,0,0,0.1)] z-30">
-                            <div className="flex items-center justify-between gap-4 max-w-[1400px] mx-auto">
-                                {/* Info badges (desktop) */}
-                                <div className="hidden md:flex items-center gap-4 text-xs text-gray-600 font-semibold">
-                                    <span className="flex items-center gap-1.5">
-                                        <Truck size={14} className="text-[#003878]" /> 1-2 weken levertijd
-                                    </span>
-                                    <span className="flex items-center gap-1.5">
-                                        <ShieldCheck size={14} className="text-[#003878]" /> 10 jaar garantie
-                                    </span>
-                                </div>
+                            {/* Divider */}
+                            <div className="h-px bg-gray-100 mx-5 lg:mx-8 mb-6" />
 
-                                {/* Mobile Price Display */}
-                                <div className="lg:hidden">
-                                    <span className="text-xs text-gray-600 font-medium">Totaal (incl. BTW)</span>
-                                    <span className="block text-xl font-black text-[#003878]">€ {currentPrice.toLocaleString()},-</span>
-                                </div>
+                            {/* Main Content Grid */}
+                            <div className="px-5 lg:px-8">
+                                <div className="lg:grid lg:grid-cols-[1fr,320px] lg:gap-8">
+                                    
+                                    {/* Left Column - Steps/Options */}
+                                    <div>
+                                        {renderProgressIndicator()}
+                                        
+                                        <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-1">{currentStep.title}</h2>
+                                        <p className="text-sm text-gray-500 mb-6">{currentStep.description}</p>
+                                        
+                                        <AnimatePresence mode="wait">
+                                            <MotionDiv
+                                                key={currentStepIndex}
+                                                initial={{ opacity: 0, y: 10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, y: -10 }}
+                                                transition={{ duration: 0.2 }}
+                                            >
+                                                {renderOptionSelector()}
+                                            </MotionDiv>
+                                        </AnimatePresence>
+                                    </div>
 
-                                {/* Navigation Buttons */}
-                                <div className="flex items-center gap-3">
-                                    {currentStepIndex > 0 && (
-                                        <button
-                                            onClick={handleBack}
-                                            className="px-4 py-3 bg-white border-2 border-gray-300 text-gray-700 font-bold rounded-xl hover:bg-gray-50 transition-colors text-sm flex items-center gap-2 shadow-sm"
-                                        >
-                                            <ChevronLeft size={18} />
-                                            <span className="hidden sm:inline">Vorige</span>
-                                        </button>
-                                    )}
-
-                                    {!isLastStep ? (
-                                        <button
-                                            onClick={handleNext}
-                                            disabled={!canProceed}
-                                            className={`px-6 py-3 font-bold rounded-xl text-sm flex items-center gap-2 transition-all shadow-md ${
-                                                canProceed
-                                                    ? 'bg-[#003878] text-white hover:bg-[#002050]'
-                                                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                            }`}
-                                        >
-                                            Verdergaan
-                                            <ChevronRight size={18} />
-                                        </button>
-                                    ) : (
-                                        <button
-                                            onClick={handleAddToCart}
-                                            disabled={!agreed}
-                                            className={`px-6 py-3 font-bold rounded-xl text-sm flex items-center gap-2 transition-all shadow-md ${
-                                                agreed
-                                                    ? 'bg-[#FF7300] text-white hover:bg-[#E66600]'
-                                                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                            }`}
-                                        >
-                                            Toevoegen aan winkelwagen
-                                            <ArrowRight size={18} />
-                                        </button>
-                                    )}
+                                    {/* Right Column - Selection Summary (Desktop only) */}
+                                    <div className="hidden lg:block">
+                                        <div className="sticky top-4">
+                                            <div className="bg-gray-50 rounded-xl p-5">
+                                                <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-4">Uw selectie</h3>
+                                                <SelectionSummary showEditButtons={false} />
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
+                        {/* Footer - Fixed */}
+                        <div className="fixed lg:absolute bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40">
+                            {/* Mobile: Selection Button */}
+                            <div className="lg:hidden px-5 py-3 border-b border-gray-100">
+                                <button
+                                    onClick={() => setSelectionOpen(true)}
+                                    className="w-full flex items-center justify-between py-2.5 px-4 bg-gray-50 rounded-lg text-left hover:bg-gray-100 transition-colors"
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <ShoppingBag size={18} className="text-[#003878]" />
+                                        <span className="font-semibold text-gray-900 text-sm">Uw selectie</span>
+                                        {selectionCount > 0 && (
+                                            <span className="px-1.5 py-0.5 bg-[#003878] text-white text-[10px] font-bold rounded-full">
+                                                {selectionCount}
+                                            </span>
+                                        )}
+                                    </div>
+                                    <ChevronUp size={18} className="text-gray-400" />
+                                </button>
+                            </div>
+
+                            {/* Price + Navigation */}
+                            <div className="px-5 py-4 lg:px-8">
+                                <div className="flex items-center justify-between gap-4">
+                                    {/* Price */}
+                                    <div>
+                                        <span className="text-[10px] text-gray-500 uppercase tracking-wide font-medium">Totaalprijs incl. BTW</span>
+                                        <span className="block text-2xl lg:text-3xl font-black text-[#003878]">€ {currentPrice.toLocaleString()},-</span>
+                                    </div>
+
+                                    {/* Navigation Buttons */}
+                                    <div className="flex items-center gap-2">
+                                        {currentStepIndex > 0 && (
+                                            <button
+                                                onClick={handleBack}
+                                                className="p-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
+                                            >
+                                                <ChevronLeft size={20} />
+                                            </button>
+                                        )}
+
+                                        {!isLastStep ? (
+                                            <button
+                                                onClick={handleNext}
+                                                disabled={!canProceed}
+                                                className={`px-5 py-3 font-bold rounded-xl text-sm flex items-center gap-2 transition-all ${
+                                                    canProceed
+                                                        ? 'bg-[#003878] text-white hover:bg-[#002050]'
+                                                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                                }`}
+                                            >
+                                                <span className="hidden sm:inline">Verdergaan</span>
+                                                <ChevronRight size={18} />
+                                            </button>
+                                        ) : (
+                                            <button
+                                                onClick={handleAddToCart}
+                                                disabled={!agreed}
+                                                className={`px-5 py-3 font-bold rounded-xl text-sm flex items-center gap-2 transition-all ${
+                                                    agreed
+                                                        ? 'bg-[#FF7300] text-white hover:bg-[#E66600]'
+                                                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                                }`}
+                                            >
+                                                <span className="hidden sm:inline">Toevoegen</span>
+                                                <ArrowRight size={18} />
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Desktop Info badges */}
+                                <div className="hidden lg:flex items-center gap-4 mt-3 text-xs text-gray-500">
+                                    <span className="flex items-center gap-1.5">
+                                        <Truck size={12} /> 1-2 weken levertijd
+                                    </span>
+                                    <span className="flex items-center gap-1.5">
+                                        <ShieldCheck size={12} /> 10 jaar garantie
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
                     </MotionDiv>
                 </MotionDiv>
             )}

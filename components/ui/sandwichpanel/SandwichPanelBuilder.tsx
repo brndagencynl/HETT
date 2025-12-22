@@ -1,36 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { Check, ShoppingCart, Info, Minus, Plus, ShieldCheck } from 'lucide-react';
+import { Check, ShoppingCart, Minus, Plus, ShieldCheck } from 'lucide-react';
 import { DEFAULT_SANDWICH_CONFIG } from './SandwichPanelConfig';
 import { Product } from '../../../types';
 
 interface Props {
     product: Product;
     basePrice: number;
-    initialConfig?: Record<string, string | string[]>;
-    onConfigChange?: (config: Record<string, string | string[]>, price: number, isValid: boolean) => void;
     onAddToCart?: (payload: any) => void;
-    existingCartItem?: any;
 }
 
-const SandwichPanelBuilder: React.FC<Props> = ({ product, basePrice, initialConfig, onConfigChange, onAddToCart, existingCartItem }) => {
+const SandwichPanelBuilder: React.FC<Props> = ({ product, basePrice, onAddToCart }) => {
     const [selections, setSelections] = useState<Record<string, string | string[]>>({});
     const [quantity, setQuantity] = useState(1);
     const [touched, setTouched] = useState(false);
 
-    // Initialize defaults or load initial config
+    // Initialize with defaults only (no persistence)
     useEffect(() => {
-        if (initialConfig && Object.keys(initialConfig).length > 0) {
-            setSelections(initialConfig);
-        } else {
-            const defaults: Record<string, string> = {};
-            DEFAULT_SANDWICH_CONFIG.forEach(group => {
-                if (group.type === 'included' && group.choices.length > 0) {
-                    defaults[group.id] = group.choices[0].id;
-                }
-            });
-            setSelections(prev => ({ ...defaults, ...prev }));
-        }
-    }, [initialConfig]);
+        const defaults: Record<string, string> = {};
+        DEFAULT_SANDWICH_CONFIG.forEach(group => {
+            if (group.type === 'included' && group.choices.length > 0) {
+                defaults[group.id] = group.choices[0].id;
+            }
+        });
+        setSelections(defaults);
+    }, []);
 
     const handleSelect = (groupId: string, choiceId: string) => {
         setSelections(prev => {
@@ -84,13 +77,6 @@ const SandwichPanelBuilder: React.FC<Props> = ({ product, basePrice, initialConf
     };
     const missing = getMissingRequired();
     const isValid = missing.length === 0;
-
-    // Emit changes
-    useEffect(() => {
-        if (onConfigChange) {
-            onConfigChange(selections, total, isValid);
-        }
-    }, [selections, total, isValid, onConfigChange]);
 
     const handleAddToCartClick = () => {
         setTouched(true);
@@ -296,7 +282,7 @@ const SandwichPanelBuilder: React.FC<Props> = ({ product, basePrice, initialConf
                         className={`flex-1 flex items-center justify-center gap-2 rounded-lg font-bold text-sm transition-all py-3 ${isValid ? 'bg-hett-primary text-white hover:bg-hett-dark shadow-lg shadow-hett-primary/20' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}
                     >
                         <ShoppingCart size={18} />
-                        {existingCartItem ? 'Update in winkelwagen' : 'In winkelwagen'}
+                        In winkelwagen
                     </button>
                 </div>
                 {!isValid && touched && (

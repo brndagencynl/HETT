@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { VERANDA_OPTIONS_UI, DEFAULT_VERANDA_CONFIG, VerandaConfig } from '../src/configurator/schemas/veranda';
 import { calcVerandaPrice } from '../src/configurator/pricing/veranda';
 import { getVerandaLayers } from '../src/configurator/visual/verandaLayers';
+import { t } from '../src/utils/i18n';
 
 const MotionDiv = motion.div as any;
 
@@ -33,50 +34,50 @@ interface StepDefinition {
 const STEPS: StepDefinition[] = [
     { 
         id: 'daktype', 
-        title: 'Daktype', 
-        description: 'Kies het materiaal voor uw overkapping',
+        title: t('configurator.steps.daktype.title'), 
+        description: t('configurator.steps.daktype.description'),
         optionKey: 'daktype',
         required: true 
     },
     { 
         id: 'goot', 
-        title: 'Goot', 
-        description: 'Selecteer uw gootsysteem',
+        title: t('configurator.steps.goot.title'), 
+        description: t('configurator.steps.goot.description'),
         optionKey: 'goot',
         required: true 
     },
     { 
         id: 'voorzijde', 
-        title: 'Voorzijde', 
-        description: 'Wilt u de voorzijde afsluiten?',
+        title: t('configurator.steps.voorzijde.title'), 
+        description: t('configurator.steps.voorzijde.description'),
         optionKey: 'voorzijde',
         required: false 
     },
     { 
         id: 'zijwand_links', 
-        title: 'Zijwand links', 
-        description: 'Kies de afwerking voor de linker zijde',
+        title: t('configurator.steps.zijwand_links.title'), 
+        description: t('configurator.steps.zijwand_links.description'),
         optionKey: 'zijwand_links',
         required: false 
     },
     { 
         id: 'zijwand_rechts', 
-        title: 'Zijwand rechts', 
-        description: 'Kies de afwerking voor de rechter zijde',
+        title: t('configurator.steps.zijwand_rechts.title'), 
+        description: t('configurator.steps.zijwand_rechts.description'),
         optionKey: 'zijwand_rechts',
         required: false 
     },
     { 
         id: 'verlichting', 
-        title: "Extra's", 
-        description: 'Verlichting toevoegen aan uw veranda',
+        title: t('configurator.steps.verlichting.title'), 
+        description: t('configurator.steps.verlichting.description'),
         optionKey: 'verlichting',
         required: false 
     },
     { 
         id: 'overzicht', 
-        title: 'Overzicht', 
-        description: 'Controleer uw configuratie',
+        title: t('configurator.steps.overzicht.title'), 
+        description: t('configurator.steps.overzicht.description'),
         required: false 
     },
 ];
@@ -155,7 +156,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
         
         // Validation
         if (!config.daktype || !config.goot) {
-            alert('Vul alle verplichte velden in');
+            alert(t('configurator.validation.fillRequiredFields'));
             return;
         }
 
@@ -179,7 +180,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
         } catch (error) {
             // If add-to-cart fails, keep configurator open and show error
             console.error('Add to cart failed:', error);
-            alert('Er is een fout opgetreden. Probeer het opnieuw.');
+            alert(t('configurator.validation.errorOccurred'));
         } finally {
             setIsSubmitting(false);
         }
@@ -188,7 +189,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
     // Handle quote request (separate from add-to-cart)
     const handleQuoteRequest = () => {
         if (!config.daktype || !config.goot) {
-            alert('Vul alle verplichte velden in');
+            alert(t('configurator.validation.fillRequiredFields'));
             return;
         }
 
@@ -204,8 +205,8 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
     };
 
     const getOptionLabel = (key: string, value: any): string => {
-        if (value === undefined || value === null) return 'Geen';
-        if (typeof value === 'boolean') return value ? 'Ja' : 'Nee';
+        if (value === undefined || value === null) return t('configurator.selection.none');
+        if (typeof value === 'boolean') return value ? t('configurator.selection.yes') : t('configurator.selection.no');
         
         const field = VERANDA_OPTIONS_UI.find(f => f.key === key);
         if (!field) return String(value);
@@ -307,7 +308,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                     </div>
                     {!currentStep.required && (
                         <p className="mt-4 text-sm text-gray-500 italic px-2">
-                            Deze stap is optioneel. Klik op "Verdergaan" om door te gaan zonder selectie.
+                            {t('configurator.hints.optionalStep')}
                         </p>
                     )}
                 </div>
@@ -359,12 +360,12 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
 
     const renderOverview = () => {
         const summaryItems = [
-            { stepIndex: 0, label: 'Daktype', value: getOptionLabel('daktype', config.daktype), key: 'daktype' },
-            { stepIndex: 1, label: 'Goot', value: getOptionLabel('goot', config.goot), key: 'goot' },
-            { stepIndex: 2, label: 'Voorzijde', value: getOptionLabel('voorzijde', config.voorzijde), key: 'voorzijde' },
-            { stepIndex: 3, label: 'Zijwand links', value: getOptionLabel('zijwand_links', config.zijwand_links), key: 'zijwand_links' },
-            { stepIndex: 4, label: 'Zijwand rechts', value: getOptionLabel('zijwand_rechts', config.zijwand_rechts), key: 'zijwand_rechts' },
-            { stepIndex: 5, label: 'Verlichting', value: config.verlichting ? 'Ja (LED spots)' : 'Nee', key: 'verlichting' },
+            { stepIndex: 0, label: t('configurator.steps.daktype.title'), value: getOptionLabel('daktype', config.daktype), key: 'daktype' },
+            { stepIndex: 1, label: t('configurator.steps.goot.title'), value: getOptionLabel('goot', config.goot), key: 'goot' },
+            { stepIndex: 2, label: t('configurator.steps.voorzijde.title'), value: getOptionLabel('voorzijde', config.voorzijde), key: 'voorzijde' },
+            { stepIndex: 3, label: t('configurator.steps.zijwand_links.title'), value: getOptionLabel('zijwand_links', config.zijwand_links), key: 'zijwand_links' },
+            { stepIndex: 4, label: t('configurator.steps.zijwand_rechts.title'), value: getOptionLabel('zijwand_rechts', config.zijwand_rechts), key: 'zijwand_rechts' },
+            { stepIndex: 5, label: t('configurator.steps.verlichting.title'), value: config.verlichting ? t('configurator.selection.yesLedSpots') : t('configurator.selection.no'), key: 'verlichting' },
         ];
 
         return (
@@ -374,8 +375,8 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                         <Check size={20} />
                     </div>
                     <div>
-                        <h4 className="font-bold text-green-800 text-lg">Configuratie compleet!</h4>
-                        <p className="text-sm text-green-700">Controleer hieronder uw gekozen opties en rond uw bestelling af.</p>
+                        <h4 className="font-bold text-green-800 text-lg">{t('configurator.overview.completeTitle')}</h4>
+                        <p className="text-sm text-green-700">{t('configurator.overview.completeDescription')}</p>
                     </div>
                 </div>
 
@@ -392,7 +393,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                                 className="flex items-center gap-1.5 text-[#003878] hover:text-[#002050] font-semibold text-sm transition-colors"
                             >
                                 <Edit2 size={14} />
-                                Bewerk
+                                {t('configurator.navigation.edit')}
                             </button>
                         </div>
                     ))}
@@ -400,10 +401,10 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
 
                 {/* Price Breakdown */}
                 <div className="bg-[#EDF0F2] rounded-xl p-6 space-y-3">
-                    <h4 className="font-bold text-gray-900 text-lg">Prijsoverzicht</h4>
+                    <h4 className="font-bold text-gray-900 text-lg">{t('configurator.overview.priceOverview')}</h4>
                     <div className="space-y-2 text-sm">
                         <div className="flex justify-between">
-                            <span className="text-gray-600">Basisprijs veranda</span>
+                            <span className="text-gray-600">{t('configurator.overview.basePrice')}</span>
                             <span className="font-semibold text-gray-900">€ {calcBasePrice.toLocaleString()},-</span>
                         </div>
                         {priceItems.map((item, idx) => (
@@ -413,7 +414,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                             </div>
                         ))}
                         <div className="border-t-2 border-gray-300 pt-3 mt-3 flex justify-between items-center">
-                            <span className="font-bold text-gray-900 text-base">Totaal (incl. BTW)</span>
+                            <span className="font-bold text-gray-900 text-base">{t('configurator.overview.totalInclVat')}</span>
                             <span className="font-black text-2xl text-[#003878]">€ {currentPrice.toLocaleString()},-</span>
                         </div>
                     </div>
@@ -428,7 +429,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                         className="mt-1 w-5 h-5 rounded border-gray-300 text-[#003878] focus:ring-[#003878] cursor-pointer"
                     />
                     <span className="text-sm text-gray-700">
-                        Ik heb de configuratie gecontroleerd en ga akkoord met de getoonde opties en prijs.
+                        {t('configurator.overview.agreement')}
                     </span>
                 </label>
             </div>
@@ -481,12 +482,12 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
             {config.daktype && (
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
                     <div>
-                        <span className="text-xs text-gray-500 uppercase tracking-wide">Daktype</span>
+                        <span className="text-xs text-gray-500 uppercase tracking-wide">{t('configurator.steps.daktype.title')}</span>
                         <span className="block text-sm font-semibold text-gray-900">{getOptionLabel('daktype', config.daktype)}</span>
                     </div>
                     {showEditButtons && (
                         <button onClick={() => { goToStep(0); setSelectionOpen(false); }} className="text-xs text-[#003878] font-medium hover:underline">
-                            Wijzig
+                            {t('configurator.navigation.change')}
                         </button>
                     )}
                 </div>
@@ -494,12 +495,12 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
             {config.goot && (
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
                     <div>
-                        <span className="text-xs text-gray-500 uppercase tracking-wide">Goot</span>
+                        <span className="text-xs text-gray-500 uppercase tracking-wide">{t('configurator.steps.goot.title')}</span>
                         <span className="block text-sm font-semibold text-gray-900">{getOptionLabel('goot', config.goot)}</span>
                     </div>
                     {showEditButtons && (
                         <button onClick={() => { goToStep(1); setSelectionOpen(false); }} className="text-xs text-[#003878] font-medium hover:underline">
-                            Wijzig
+                            {t('configurator.navigation.change')}
                         </button>
                     )}
                 </div>
@@ -507,12 +508,12 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
             {config.voorzijde && (
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
                     <div>
-                        <span className="text-xs text-gray-500 uppercase tracking-wide">Voorzijde</span>
+                        <span className="text-xs text-gray-500 uppercase tracking-wide">{t('configurator.steps.voorzijde.title')}</span>
                         <span className="block text-sm font-semibold text-gray-900">{getOptionLabel('voorzijde', config.voorzijde)}</span>
                     </div>
                     {showEditButtons && (
                         <button onClick={() => { goToStep(2); setSelectionOpen(false); }} className="text-xs text-[#003878] font-medium hover:underline">
-                            Wijzig
+                            {t('configurator.navigation.change')}
                         </button>
                     )}
                 </div>
@@ -520,12 +521,12 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
             {config.zijwand_links && (
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
                     <div>
-                        <span className="text-xs text-gray-500 uppercase tracking-wide">Zijwand links</span>
+                        <span className="text-xs text-gray-500 uppercase tracking-wide">{t('configurator.steps.zijwand_links.title')}</span>
                         <span className="block text-sm font-semibold text-gray-900">{getOptionLabel('zijwand_links', config.zijwand_links)}</span>
                     </div>
                     {showEditButtons && (
                         <button onClick={() => { goToStep(3); setSelectionOpen(false); }} className="text-xs text-[#003878] font-medium hover:underline">
-                            Wijzig
+                            {t('configurator.navigation.change')}
                         </button>
                     )}
                 </div>
@@ -533,24 +534,24 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
             {config.zijwand_rechts && (
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
                     <div>
-                        <span className="text-xs text-gray-500 uppercase tracking-wide">Zijwand rechts</span>
+                        <span className="text-xs text-gray-500 uppercase tracking-wide">{t('configurator.steps.zijwand_rechts.title')}</span>
                         <span className="block text-sm font-semibold text-gray-900">{getOptionLabel('zijwand_rechts', config.zijwand_rechts)}</span>
                     </div>
                     {showEditButtons && (
                         <button onClick={() => { goToStep(4); setSelectionOpen(false); }} className="text-xs text-[#003878] font-medium hover:underline">
-                            Wijzig
+                            {t('configurator.navigation.change')}
                         </button>
                     )}
                 </div>
             )}
             <div className="flex justify-between items-center py-2">
                 <div>
-                    <span className="text-xs text-gray-500 uppercase tracking-wide">Verlichting</span>
-                    <span className="block text-sm font-semibold text-gray-900">{config.verlichting ? 'Ja (LED spots)' : 'Nee'}</span>
+                    <span className="text-xs text-gray-500 uppercase tracking-wide">{t('configurator.steps.verlichting.title')}</span>
+                    <span className="block text-sm font-semibold text-gray-900">{config.verlichting ? t('configurator.selection.yesLedSpots') : t('configurator.selection.no')}</span>
                 </div>
                 {showEditButtons && (
                     <button onClick={() => { goToStep(5); setSelectionOpen(false); }} className="text-xs text-[#003878] font-medium hover:underline">
-                        Wijzig
+                        {t('configurator.navigation.change')}
                     </button>
                 )}
             </div>
@@ -584,7 +585,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                         </div>
                         {/* Header */}
                         <div className="flex items-center justify-between px-5 pb-4 border-b border-gray-100">
-                            <h3 className="text-lg font-bold text-gray-900">Uw selectie</h3>
+                            <h3 className="text-lg font-bold text-gray-900">{t('configurator.selection.title')}</h3>
                             <button
                                 onClick={() => setSelectionOpen(false)}
                                 className="p-2 hover:bg-gray-100 rounded-full transition-colors"
@@ -609,7 +610,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                 {/* Placeholder for future overlay rendering */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
                     <Eye size={40} className="text-gray-300 mb-3" />
-                    <p className="text-sm text-gray-400 font-medium">Preview visualisatie</p>
+                    <p className="text-sm text-gray-400 font-medium">{t('configurator.visualization.previewPlaceholder')}</p>
                 </div>
                 {/* Config badges */}
                 {(config.daktype || config.goot) && (
@@ -694,7 +695,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                             <div className="px-5 pt-5 pb-4 lg:px-8 lg:pt-6">
                                 <h1 className="text-xl lg:text-2xl font-black text-[#003878] pr-10">{productTitle}</h1>
                                 <p className="text-sm text-gray-500 mt-1">
-                                    Stap {currentStepIndex + 1} van {STEPS.length} — {currentStep.title}
+                                    {t('configurator.navigation.stepOf', { current: currentStepIndex + 1, total: STEPS.length })} — {currentStep.title}
                                 </p>
                             </div>
 
@@ -734,7 +735,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                                     <div className="hidden lg:block">
                                         <div className="sticky top-4">
                                             <div className="bg-gray-50 rounded-xl p-5">
-                                                <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-4">Uw selectie</h3>
+                                                <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-4">{t('configurator.selection.title')}</h3>
                                                 <SelectionSummary showEditButtons={false} />
                                             </div>
                                         </div>
@@ -753,7 +754,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                                 >
                                     <div className="flex items-center gap-2">
                                         <ShoppingBag size={18} className="text-[#003878]" />
-                                        <span className="font-semibold text-gray-900 text-sm">Uw selectie</span>
+                                        <span className="font-semibold text-gray-900 text-sm">{t('configurator.selection.title')}</span>
                                         {selectionCount > 0 && (
                                             <span className="px-1.5 py-0.5 bg-[#003878] text-white text-[10px] font-bold rounded-full">
                                                 {selectionCount}
@@ -769,7 +770,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                                 <div className="flex items-center justify-between gap-4">
                                     {/* Price */}
                                     <div>
-                                        <span className="text-[10px] text-gray-500 uppercase tracking-wide font-medium">Totaalprijs incl. BTW</span>
+                                        <span className="text-[10px] text-gray-500 uppercase tracking-wide font-medium">{t('configurator.footer.totalPriceInclVat')}</span>
                                         <span className="block text-2xl lg:text-3xl font-black text-[#003878]">€ {currentPrice.toLocaleString()},-</span>
                                     </div>
 
@@ -794,7 +795,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                                                         : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                                                 }`}
                                             >
-                                                <span className="hidden sm:inline">Verdergaan</span>
+                                                <span className="hidden sm:inline">{t('configurator.navigation.next')}</span>
                                                 <ChevronRight size={18} />
                                             </button>
                                         ) : (
@@ -810,11 +811,11 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                                                 {isSubmitting ? (
                                                     <>
                                                         <Loader2 size={18} className="animate-spin" />
-                                                        <span className="hidden sm:inline">Toevoegen...</span>
+                                                        <span className="hidden sm:inline">{t('configurator.navigation.adding')}</span>
                                                     </>
                                                 ) : (
                                                     <>
-                                                        <span className="hidden sm:inline">Toevoegen</span>
+                                                        <span className="hidden sm:inline">{t('configurator.navigation.add')}</span>
                                                         <ArrowRight size={18} />
                                                     </>
                                                 )}
@@ -826,10 +827,10 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                                 {/* Desktop Info badges */}
                                 <div className="hidden lg:flex items-center gap-4 mt-3 text-xs text-gray-500">
                                     <span className="flex items-center gap-1.5">
-                                        <Truck size={12} /> 1-2 weken levertijd
+                                        <Truck size={12} /> {t('configurator.footer.deliveryTime')}
                                     </span>
                                     <span className="flex items-center gap-1.5">
-                                        <ShieldCheck size={12} /> 10 jaar garantie
+                                        <ShieldCheck size={12} /> {t('configurator.footer.warranty')}
                                     </span>
                                 </div>
                             </div>

@@ -114,7 +114,7 @@ export const ROOF_TYPE_OPTIONS: OptionChoice[] = [
     label: 'Polycarbonate opal',
     labelNL: 'Polycarbonaat opaal',
     description: 'Melkwit polycarbonaat. Laat licht door maar weert directe hitte.',
-    pricing: { type: 'fixed', price: 125 },
+    pricing: { type: 'fixed', price: 0 },
   },
 ] as const;
 

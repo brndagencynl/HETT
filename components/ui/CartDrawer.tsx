@@ -143,7 +143,7 @@ const CartDrawer: React.FC = () => {
                                 </div>
                                 <div className="space-y-3">
                                     <button
-                                        onClick={() => { closeCart(); navigate('/checkout'); }}
+                                        onClick={() => { closeCart(); navigate('/cart'); }}
                                         className="w-full py-4 bg-hett-primary text-white rounded-xl font-bold text-lg hover:bg-hett-dark transition-colors flex items-center justify-center gap-2 shadow-lg shadow-hett-primary/20"
                                     >
                                         Afrekenen <ArrowRight size={20} />

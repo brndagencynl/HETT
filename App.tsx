@@ -66,7 +66,7 @@ const AnimatedRoutes: React.FC = () => {
         <Route path="/categorie/:categorySlug" element={<PageTransition><Category /></PageTransition>} />
         <Route path="/product/:id" element={<PageTransition><ProductDetailShop /></PageTransition>} />
         <Route path="/cart" element={<PageTransition><Cart /></PageTransition>} />
-        <Route path="/checkout" element={<PageTransition><Checkout /></PageTransition>} />
+        <Route path="/afrekenen" element={<PageTransition><Checkout /></PageTransition>} />
         <Route path="/my-account" element={<PageTransition><MyAccount /></PageTransition>} />
         <Route path="/order-received" element={<PageTransition><OrderReceived /></PageTransition>} />
         <Route path="/search" element={<PageTransition><Search /></PageTransition>} />

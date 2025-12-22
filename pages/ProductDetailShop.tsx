@@ -50,8 +50,10 @@ const ProductDetailShop: React.FC = () => {
     };
 
     // Callback from Veranda Configurator (Modal)
+    // Note: Configurator closes itself after calling onSubmit
+    // Cart drawer opens automatically via CartContext.addToCart
     const handleVerandaSubmit = (config: any, mode: 'order' | 'quote', price: number, details: any[]) => {
-        // Save
+        // Save config to local storage
         const productConfig: ProductConfig = { category: 'verandas', data: config };
         saveConfig(product.id, productConfig);
         setLocalConfig(config);
@@ -65,12 +67,14 @@ const ProductDetailShop: React.FC = () => {
                 details: details,
                 isConfigured: true
             };
+            // Add to cart - cart drawer will open automatically via CartContext
+            // No redirect to /cart - user stays on PDP
             addToCart(product, 1, payload);
-            navigate('/cart');
+            // Configurator is closed by the wizard component itself
         } else {
+            // Quote flow: redirect to quote page
             navigate('/offerte', { state: config });
         }
-        configuratorRef.current?.close();
     };
 
     // Callback from Sandwich Builder
@@ -84,16 +88,18 @@ const ProductDetailShop: React.FC = () => {
     };
 
     const handleSandwichAddToCart = (payload: any) => {
+        // Add to cart - cart drawer opens automatically via CartContext
+        // No redirect to /cart - user stays on PDP
         addToCart(product, payload.quantity, payload);
-        navigate('/cart');
     };
 
     // Accessories Add
     const handleAccessoryAdd = () => {
+        // Add to cart - cart drawer opens automatically via CartContext
+        // No redirect to /cart - user stays on PDP
         addToCart(product, 1, {
             color: product.options?.colors?.[0] || 'Standaard'
         });
-        navigate('/cart');
     };
 
     const galleryImages = [product.imageUrl, "https://picsum.photos/1200/900?random=10", "https://picsum.photos/1200/900?random=11"];

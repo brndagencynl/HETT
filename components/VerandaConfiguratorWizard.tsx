@@ -1,5 +1,5 @@
 import React, { useState, forwardRef, useImperativeHandle, useMemo } from 'react';
-import { X, Check, Info, ChevronLeft, ChevronRight, Truck, ShieldCheck, ArrowRight, Lightbulb, Edit2, Eye, ChevronUp, ShoppingBag } from 'lucide-react';
+import { X, Check, Info, ChevronLeft, ChevronRight, Truck, ShieldCheck, ArrowRight, Lightbulb, Edit2, Eye, ChevronUp, ShoppingBag, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { VERANDA_OPTIONS_UI, DEFAULT_VERANDA_CONFIG, VerandaConfig } from '../src/configurator/schemas/veranda';
 import { calcVerandaPrice } from '../src/configurator/pricing/veranda';
@@ -100,6 +100,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
     const [infoModal, setInfoModal] = useState<{ title: string, text: string } | null>(null);
     const [agreed, setAgreed] = useState(false);
     const [isSelectionOpen, setSelectionOpen] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false); // Loading state for add-to-cart
 
     // Price calculation
     const { total: currentPrice, items: priceItems, basePrice: calcBasePrice } = calcVerandaPrice(basePrice, config as VerandaConfig);
@@ -148,8 +149,44 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
         }
     };
 
-    const handleAddToCart = () => {
+    const handleAddToCart = async () => {
+        // Prevent double submits
+        if (isSubmitting) return;
+        
         // Validation
+        if (!config.daktype || !config.goot) {
+            alert('Vul alle verplichte velden in');
+            return;
+        }
+
+        setIsSubmitting(true);
+
+        try {
+            if (onSubmit) {
+                const details = Object.keys(config).map(key => ({
+                    label: VERANDA_OPTIONS_UI.find(f => f.key === key)?.label || key,
+                    value: getOptionLabel(key, config[key as keyof VerandaConfig])
+                }));
+                
+                // Call parent handler which adds to cart
+                // Cart drawer will open automatically via CartContext.addToCart
+                onSubmit(config as VerandaConfig, 'order', currentPrice, details);
+            }
+            
+            // Close configurator after successful add-to-cart
+            // User stays on PDP, cart drawer opens via CartContext
+            closeConfigurator();
+        } catch (error) {
+            // If add-to-cart fails, keep configurator open and show error
+            console.error('Add to cart failed:', error);
+            alert('Er is een fout opgetreden. Probeer het opnieuw.');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    // Handle quote request (separate from add-to-cart)
+    const handleQuoteRequest = () => {
         if (!config.daktype || !config.goot) {
             alert('Vul alle verplichte velden in');
             return;
@@ -160,7 +197,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                 label: VERANDA_OPTIONS_UI.find(f => f.key === key)?.label || key,
                 value: getOptionLabel(key, config[key as keyof VerandaConfig])
             }));
-            onSubmit(config as VerandaConfig, 'order', currentPrice, details);
+            onSubmit(config as VerandaConfig, 'quote', currentPrice, details);
         }
         
         closeConfigurator();
@@ -763,15 +800,24 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                                         ) : (
                                             <button
                                                 onClick={handleAddToCart}
-                                                disabled={!agreed}
+                                                disabled={!agreed || isSubmitting}
                                                 className={`px-5 py-3 font-bold rounded-xl text-sm flex items-center gap-2 transition-all ${
-                                                    agreed
+                                                    agreed && !isSubmitting
                                                         ? 'bg-[#FF7300] text-white hover:bg-[#E66600]'
                                                         : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                                                 }`}
                                             >
-                                                <span className="hidden sm:inline">Toevoegen</span>
-                                                <ArrowRight size={18} />
+                                                {isSubmitting ? (
+                                                    <>
+                                                        <Loader2 size={18} className="animate-spin" />
+                                                        <span className="hidden sm:inline">Toevoegen...</span>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <span className="hidden sm:inline">Toevoegen</span>
+                                                        <ArrowRight size={18} />
+                                                    </>
+                                                )}
                                             </button>
                                         )}
                                     </div>

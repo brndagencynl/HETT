@@ -1,7 +1,7 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Heart, Star } from 'lucide-react';
-import { Product } from '../../types';
+import { Link, useNavigate } from 'react-router-dom';
+import { Heart, Star, Settings, ShoppingCart } from 'lucide-react';
+import { Product, CategorySlug } from '../../types';
 import { useCart } from '../../context/CartContext';
 
 interface ProductCardProps {
@@ -9,13 +9,15 @@ interface ProductCardProps {
     viewMode?: 'grid' | 'list';
 }
 
+// Categories that require configuration before adding to cart
+const CONFIG_REQUIRED_CATEGORIES: CategorySlug[] = ['verandas', 'sandwichpanelen'];
+
 const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'grid' }) => {
     const navigate = useNavigate();
-    const { addToCart } = useCart();
+    const { addToCart, openCart } = useCart();
 
-    const handleCardClick = () => {
-        navigate(`/product/${product.id}`);
-    };
+    // Determine if this product requires configuration
+    const requiresConfiguration = CONFIG_REQUIRED_CATEGORIES.includes(product.category);
 
     const handleWishlistClick = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -23,17 +25,36 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'grid' })
         console.log('Toggle wishlist', product.id);
     };
 
+    // Direct add to cart for accessoires only
     const handleAddToCart = (e: React.MouseEvent) => {
         e.stopPropagation();
+        e.preventDefault();
+        
+        // Only allow direct add for accessoires
+        if (requiresConfiguration) {
+            // Navigate to product detail for configuration
+            navigate(`/product/${product.id}`);
+            return;
+        }
+        
+        // Add accessoire directly to cart
         addToCart(product, 1, {
             color: product.options?.colors?.[0] || 'Standaard',
             size: product.options?.sizes?.[0] || 'Standaard'
         });
+        // Cart drawer opens automatically via CartContext
+    };
+
+    // Navigate to product detail page for configuration
+    const handleConfigureClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        e.preventDefault();
+        navigate(`/product/${product.id}`);
     };
 
     return (
-        <div
-            onClick={handleCardClick}
+        <Link
+            to={`/product/${product.id}`}
             className={`bg-white border border-gray-200 rounded-lg shadow-soft hover:shadow-md transition-all flex flex-col group overflow-hidden cursor-pointer ${viewMode === 'list' ? 'md:flex-row' : ''}`}
         >
             {/* Action Bar (Wishlist) */}
@@ -89,14 +110,22 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'grid' })
                 </div>
 
                 <div className="mb-3 sm:mb-4">
-                    <div className="text-base sm:text-2xl font-black text-hett-dark leading-none">€ {product.price},-</div>
+                    <div className="text-base sm:text-2xl font-black text-hett-dark leading-none">
+                        {requiresConfiguration ? (
+                            <>€ {product.price},- <span className="text-xs font-medium text-gray-500">vanaf</span></>
+                        ) : (
+                            <>€ {product.price},-</>
+                        )}
+                    </div>
                 </div>
 
                 <div className="mt-auto">
-                    {product.requiresConfiguration ? (
+                    {requiresConfiguration ? (
                         <button
+                            onClick={handleConfigureClick}
                             className="w-full rounded-md py-2 sm:py-3 text-[11px] sm:text-sm font-bold flex items-center justify-center gap-1.5 sm:gap-2 shadow-sm transition-colors bg-hett-dark text-white hover:bg-hett-primary"
                         >
+                            <Settings size={16} />
                             Stel samen
                         </button>
                     ) : (
@@ -104,12 +133,13 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'grid' })
                             onClick={handleAddToCart}
                             className="w-full rounded-md py-2 sm:py-3 text-[11px] sm:text-sm font-bold flex items-center justify-center gap-1.5 sm:gap-2 shadow-sm transition-colors bg-hett-primary text-white hover:bg-hett-dark"
                         >
+                            <ShoppingCart size={16} />
                             In winkelwagen
                         </button>
                     )}
                 </div>
             </div>
-        </div>
+        </Link>
     );
 };
 

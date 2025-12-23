@@ -92,6 +92,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         config: configCandidate,
         configHash,
         displayConfigSummary: summary,
+        // Store detailed breakdown for config popup
+        priceBreakdown: options.priceBreakdown,
+        details: options.details,
         // Legacy mapping for UI safety until updated
         selectedColor: 'Configured',
         selectedSize: 'Custom'

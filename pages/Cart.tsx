@@ -56,69 +56,69 @@ const Cart: React.FC = () => {
                                         const initialConfig = item.config?.category === 'verandas' ? (item.config.data as any) : undefined;
                     return (
                     <Card key={item.id || String(idx)} padding="normal" className="hover:shadow-md transition-shadow">
-                        <div className="flex gap-4">
+                        <div className="flex gap-3 md:gap-4">
                             {/* Image */}
-                            <div className="w-20 h-20 md:w-24 md:h-24 bg-gray-50 rounded-lg overflow-hidden flex-shrink-0 border border-gray-100">
+                            <div className="w-16 h-16 md:w-24 md:h-24 bg-gray-50 rounded-lg overflow-hidden flex-shrink-0 border border-gray-100">
                                 <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
                             </div>
 
                             {/* Content */}
                             <div className="flex-1 min-w-0">
-                                <div className="flex justify-between items-start mb-2">
-                                                                        <div className="flex items-start gap-2 min-w-0 pr-4">
-                                                                            <h3 className="font-bold text-hett-dark text-base md:text-lg">{item.title}</h3>
-                                                                            {/* Edit icon for verandas only */}
-                                                                            {isVeranda && (
-                                                                                <Button
-                                                                                    type="button"
-                                                                                    variant="ghost"
-                                                                                    size="sm"
-                                                                                    onClick={() => openEditConfigurator({
-                                                                                        cartIndex: idx,
-                                                                                        productTitle: item.title,
-                                                                                        basePrice,
-                                                                                        initialConfig,
-                                                                                    })}
-                                                                                    className="relative z-10 text-gray-400 hover:text-hett-primary pointer-events-auto min-w-[44px] min-h-[44px]"
-                                                                                    title="Bewerken"
-                                                                                    aria-label="Configuratie bewerken"
-                                                                                >
-                                                                                    <Pencil size={18} />
-                                                                                </Button>
-                                                                            )}
-                                                                            {shouldShowInfo ? (
-                                                                                <CartItemConfigInfo
-                                                                                    key={popupKey}
-                                                                                    title={item.title}
-                                                                                    breakdown={item}
-                                                                                    debugId={item.id || item.slug || item.title}
-                                                                                />
-                                                                            ) : null}
-                                                                        </div>
-                                                                        <Button
-                                                                            type="button"
-                                                                            variant="ghost"
-                                                                            size="sm"
-                                                                            onClick={() => removeFromCart(idx)}
-                                                                            className="text-gray-500 hover:text-red-500"
-                                                                            title="Verwijderen"
-                                                                        >
-                                                                            <Trash2 size={18} />
-                                                                        </Button>
+                                {/* Header row: Title + Actions */}
+                                <div className="flex justify-between items-start gap-2 mb-2">
+                                    <h3 className="font-bold text-hett-dark text-sm md:text-lg leading-tight flex-1 min-w-0">{item.title}</h3>
+                                    
+                                    {/* Action icons - always visible */}
+                                    <div className="flex items-center gap-1 flex-shrink-0">
+                                        {/* Edit icon for verandas only */}
+                                        {isVeranda && (
+                                            <button
+                                                type="button"
+                                                onClick={() => openEditConfigurator({
+                                                    cartIndex: idx,
+                                                    productTitle: item.title,
+                                                    basePrice,
+                                                    initialConfig,
+                                                })}
+                                                className="p-2 text-gray-400 hover:text-hett-primary transition-colors rounded-lg hover:bg-gray-100"
+                                                title="Bewerken"
+                                                aria-label="Configuratie bewerken"
+                                            >
+                                                <Pencil size={16} />
+                                            </button>
+                                        )}
+                                        {shouldShowInfo && (
+                                            <CartItemConfigInfo
+                                                key={popupKey}
+                                                title={item.title}
+                                                breakdown={item}
+                                                debugId={item.id || item.slug || item.title}
+                                            />
+                                        )}
+                                        <button
+                                            type="button"
+                                            onClick={() => removeFromCart(idx)}
+                                            className="p-2 text-gray-400 hover:text-red-500 transition-colors rounded-lg hover:bg-gray-100"
+                                            title="Verwijderen"
+                                            aria-label="Verwijderen"
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </div>
                                 </div>
                                 
                                 {/* Configuration details */}
                                 {item.details && item.details.length > 0 ? (
-                                    <div className="text-xs text-gray-600 mt-2 space-y-1 bg-gray-50 p-3 rounded-md border border-gray-200">
+                                    <div className="text-[11px] md:text-xs text-gray-600 mt-2 space-y-0.5 bg-gray-50 p-2 md:p-3 rounded-md border border-gray-200">
                                         {item.details.map((detail, i) => (
-                                            <div key={i} className="flex justify-between gap-4">
-                                                <span className="font-medium text-gray-500">{detail.label}:</span>
-                                                <span className="font-semibold text-gray-700">{detail.value}</span>
+                                            <div key={i} className="flex justify-between gap-2">
+                                                <span className="font-medium text-gray-500 truncate">{detail.label}:</span>
+                                                <span className="font-semibold text-gray-700 text-right flex-shrink-0">{detail.value}</span>
                                             </div>
                                         ))}
                                     </div>
                                 ) : (
-                                    <div className="text-sm text-gray-500 space-y-0.5">
+                                    <div className="text-xs text-gray-500 space-y-0.5 mt-1">
                                         {item.selectedSize && <p>Afmeting: {item.selectedSize}</p>}
                                         {item.selectedColor && <p>Kleur: {item.selectedColor}</p>}
                                         {item.selectedRoof && <p>Dak: {item.selectedRoof}</p>}
@@ -126,40 +126,40 @@ const Cart: React.FC = () => {
                                 )}
 
                                 {/* Price and quantity */}
-                                <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mt-4">
-                                    <div className="flex items-center gap-3">
-                                        <span className="text-xs font-bold text-gray-500 uppercase tracking-wide">Aantal</span>
-                                        <div className="flex items-center gap-2">
-                                            <Button
+                                <div className="flex items-center justify-between gap-3 mt-3 pt-3 border-t border-gray-100">
+                                    {/* Quantity controls */}
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-wide hidden md:inline">Aantal</span>
+                                        <div className="flex items-center gap-1">
+                                            <button
                                               type="button"
-                                              variant="outline"
-                                              size="sm"
                                               onClick={() => updateQuantity(idx, item.quantity - 1)}
                                               disabled={item.quantity <= 1}
                                               aria-label="Minder"
+                                              className="w-8 h-8 flex items-center justify-center rounded-md border border-gray-200 text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
                                             >
-                                              <Minus size={16} />
-                                            </Button>
-                                            <span className="min-w-[2.75rem] text-center font-black text-hett-dark">
+                                              <Minus size={14} />
+                                            </button>
+                                            <span className="min-w-[2rem] text-center font-black text-hett-dark text-sm">
                                               {item.quantity}
                                             </span>
-                                            <Button
+                                            <button
                                               type="button"
-                                              variant="outline"
-                                              size="sm"
                                               onClick={() => updateQuantity(idx, item.quantity + 1)}
                                               aria-label="Meer"
+                                              className="w-8 h-8 flex items-center justify-center rounded-md border border-gray-200 text-gray-600 hover:bg-gray-100"
                                             >
-                                              <Plus size={16} />
-                                            </Button>
+                                              <Plus size={14} />
+                                            </button>
                                         </div>
                                     </div>
 
+                                    {/* Price */}
                                     <div className="text-right">
-                                        <div className="text-xs text-gray-500 font-bold uppercase tracking-wide">Per stuk</div>
-                                        <div className="font-extrabold text-hett-dark">{formatMoney(unitPrice)}</div>
-                                        <div className="text-xs text-gray-500 font-bold uppercase tracking-wide mt-2">Regeltotaal</div>
-                                        <div className="font-black text-xl text-hett-dark">{formatMoney(item.totalPrice)}</div>
+                                        <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wide">Per stuk</div>
+                                        <div className="font-bold text-hett-dark text-sm">{formatMoney(unitPrice)}</div>
+                                        <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wide mt-1">Regeltotaal</div>
+                                        <div className="font-black text-lg md:text-xl text-hett-dark">{formatMoney(item.totalPrice)}</div>
                                     </div>
                                 </div>
                             </div>
@@ -227,17 +227,15 @@ function CartItemConfigInfo({ title, breakdown, debugId }: { title: string; brea
 
     return (
         <>
-            <Button
+            <button
                 type="button"
-                variant="ghost"
-                size="sm"
-                className="relative z-10 text-hett-dark hover:text-hett-primary pointer-events-auto"
                 onClick={() => setOpen(true)}
+                className="p-2 text-gray-400 hover:text-hett-primary transition-colors rounded-lg hover:bg-gray-100"
                 title="Bekijk configuratie & prijsopbouw"
                 aria-label="Bekijk configuratie & prijsopbouw"
             >
-                <Info size={18} />
-            </Button>
+                <Info size={16} />
+            </button>
             <ConfigBreakdownPopup
                 open={open}
                 onOpenChange={setOpen}

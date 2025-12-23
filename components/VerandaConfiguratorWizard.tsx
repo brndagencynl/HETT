@@ -14,10 +14,22 @@ export interface VerandaConfiguratorWizardRef {
     close: () => void;
 }
 
+export interface PriceBreakdownItem {
+    label: string;
+    amount: number;
+}
+
+export interface VerandaPriceBreakdown {
+    basePrice: number;
+    items: PriceBreakdownItem[];
+    optionsTotal: number;
+    grandTotal: number;
+}
+
 interface VerandaConfiguratorWizardProps {
     productTitle?: string;
     basePrice?: number;
-    onSubmit?: (config: VerandaConfig, mode: 'order' | 'quote', price: number, details: { label: string, value: string }[]) => void;
+    onSubmit?: (config: VerandaConfig, mode: 'order' | 'quote', price: number, details: { label: string, value: string }[], priceBreakdown: VerandaPriceBreakdown) => void;
     /** 'new' (default) adds to cart, 'edit' updates existing item */
     mode?: 'new' | 'edit';
     /** Show message when config was reset to defaults due to missing data */
@@ -181,12 +193,20 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                     value: getOptionLabel(key, config[key as keyof VerandaConfig])
                 }));
                 
+                // Build price breakdown for the popup
+                const priceBreakdown: VerandaPriceBreakdown = {
+                    basePrice: calcBasePrice,
+                    items: priceItems,
+                    optionsTotal: priceItems.reduce((sum, item) => sum + item.amount, 0),
+                    grandTotal: currentPrice,
+                };
+                
                 // Mark as submitted before calling onSubmit (prevents onCancel from being called)
                 setDidSubmit(true);
                 
                 // Call parent handler which adds to cart
                 // Cart drawer will open automatically via CartContext.addToCart
-                onSubmit(config as VerandaConfig, 'order', currentPrice, details);
+                onSubmit(config as VerandaConfig, 'order', currentPrice, details, priceBreakdown);
             }
             
             // Close configurator after successful add-to-cart
@@ -213,7 +233,16 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                 label: VERANDA_OPTIONS_UI.find(f => f.key === key)?.label || key,
                 value: getOptionLabel(key, config[key as keyof VerandaConfig])
             }));
-            onSubmit(config as VerandaConfig, 'quote', currentPrice, details);
+            
+            // Build price breakdown for the popup
+            const priceBreakdown: VerandaPriceBreakdown = {
+                basePrice: calcBasePrice,
+                items: priceItems,
+                optionsTotal: priceItems.reduce((sum, item) => sum + item.amount, 0),
+                grandTotal: currentPrice,
+            };
+            
+            onSubmit(config as VerandaConfig, 'quote', currentPrice, details, priceBreakdown);
         }
         
         closeConfigurator();

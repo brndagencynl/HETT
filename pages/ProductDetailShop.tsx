@@ -28,7 +28,7 @@ const ProductDetailShop: React.FC = () => {
     // Callback from Veranda Configurator (Modal)
     // Note: Configurator closes itself after calling onSubmit
     // Cart drawer opens automatically via CartContext.addToCart
-    const handleVerandaSubmit = (config: any, mode: 'order' | 'quote', price: number, details: any[]) => {
+    const handleVerandaSubmit = (config: any, mode: 'order' | 'quote', price: number, details: any[], priceBreakdown: any) => {
         const productConfig: ProductConfig = { category: 'verandas', data: config };
 
         if (mode === 'order') {
@@ -37,6 +37,7 @@ const ProductDetailShop: React.FC = () => {
                 config: productConfig,
                 configuration: config, // legacy
                 details: details,
+                priceBreakdown: priceBreakdown,
                 isConfigured: true
             };
             // Add to cart - cart drawer will open automatically via CartContext

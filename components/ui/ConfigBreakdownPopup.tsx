@@ -102,6 +102,12 @@ function toNumber(value: unknown): number | null {
 function normalizeBreakdown(breakdown: unknown): NormalizedBreakdown | null {
   if (!breakdown) return null;
 
+  // 0) Cart item with priceBreakdown property - extract and normalize it
+  if (isRecord(breakdown) && 'priceBreakdown' in breakdown && breakdown.priceBreakdown) {
+    const result = normalizeBreakdown(breakdown.priceBreakdown);
+    if (result) return result;
+  }
+
   // 1) New cart payload shape: { pricing: { breakdown: PriceBreakdown } }
   if (isRecord(breakdown) && isRecord(breakdown.breakdown)) {
     return normalizeBreakdown(breakdown.breakdown);
@@ -135,6 +141,7 @@ function normalizeBreakdown(breakdown: unknown): NormalizedBreakdown | null {
   }
 
   // 3) verandapricing.ts result: { basePrice, items[], optionsTotal, grandTotal }
+  // Items can have either 'price' or 'amount' property
   if (isRecord(breakdown) && Array.isArray((breakdown as any).items)) {
     const basePrice = toNumber((breakdown as any).basePrice);
     const optionsTotal = toNumber((breakdown as any).optionsTotal);
@@ -143,7 +150,8 @@ function normalizeBreakdown(breakdown: unknown): NormalizedBreakdown | null {
 
     const rows: NormalizedRow[] = ((breakdown as any).items as any[])
       .map((it) => {
-        const price = toNumber(it?.price);
+        // Support both 'price' and 'amount' property names
+        const price = toNumber(it?.price) ?? toNumber(it?.amount);
         if (price === null) return null;
 
         const groupLabel = typeof it?.groupLabel === 'string' ? it.groupLabel : '';

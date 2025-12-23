@@ -12,7 +12,7 @@
  */
 
 import React, { createContext, useContext, useRef, useState, useCallback } from 'react';
-import VerandaConfiguratorWizard, { VerandaConfiguratorWizardRef } from '../components/VerandaConfiguratorWizard';
+import VerandaConfiguratorWizard, { VerandaConfiguratorWizardRef, VerandaPriceBreakdown } from '../components/VerandaConfiguratorWizard';
 import { useCart } from './CartContext';
 import { ProductConfig } from '../types';
 // Use the schema VerandaConfig which matches the configurator's types
@@ -84,7 +84,8 @@ export const VerandaEditProvider: React.FC<{ children: React.ReactNode }> = ({ c
     config: VerandaConfig, 
     mode: 'order' | 'quote', 
     price: number, 
-    details: { label: string; value: string }[]
+    details: { label: string; value: string }[],
+    priceBreakdown: VerandaPriceBreakdown
   ) => {
     if (!editingItem) return;
 
@@ -97,6 +98,7 @@ export const VerandaEditProvider: React.FC<{ children: React.ReactNode }> = ({ c
         totalPrice: price,
         config: productConfig,
         details,
+        priceBreakdown,
         displayConfigSummary: `Dak: ${config.daktype || '-'}, Goot: ${config.goot || '-'}, Voorzijde: ${config.voorzijde || 'Geen'}`,
       });
     }

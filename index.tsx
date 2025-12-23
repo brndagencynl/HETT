@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
+import { VerandaEditProvider } from './context/VerandaEditContext';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -15,7 +16,9 @@ root.render(
   <React.StrictMode>
     <CartProvider>
       <WishlistProvider>
-        <App />
+        <VerandaEditProvider>
+          <App />
+        </VerandaEditProvider>
       </WishlistProvider>
     </CartProvider>
   </React.StrictMode>

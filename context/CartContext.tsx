@@ -1,7 +1,6 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { CartItem, Product, ProductConfig } from '../types';
-import { isConfigOnly } from '../utils/productRules';
 import { validateConfig } from '../utils/configValidation';
 import { generateConfigHash } from '../utils/hash';
 
@@ -9,6 +8,8 @@ interface CartContextType {
   cart: CartItem[];
   addToCart: (product: Product, quantity: number, options: any) => void;
   removeFromCart: (index: number) => void;
+  updateQuantity: (index: number, quantity: number) => void;
+  updateCartItem: (index: number, updates: Partial<CartItem>) => void;
   clearCart: () => void;
   total: number;
   itemCount: number;
@@ -19,40 +20,10 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-const CART_STORAGE_KEY = 'hett_cart';
-
-// Load cart from localStorage
-const loadCartFromStorage = (): CartItem[] => {
-  try {
-    const stored = localStorage.getItem(CART_STORAGE_KEY);
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      return Array.isArray(parsed) ? parsed : [];
-    }
-  } catch (e) {
-    console.warn('Failed to load cart from localStorage:', e);
-  }
-  return [];
-};
-
-// Save cart to localStorage
-const saveCartToStorage = (cart: CartItem[]): void => {
-  try {
-    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
-  } catch (e) {
-    console.warn('Failed to save cart to localStorage:', e);
-  }
-};
-
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Initialize cart from localStorage
-  const [cart, setCart] = useState<CartItem[]>(() => loadCartFromStorage());
+  // NOTE: Cart is intentionally NOT persisted (no localStorage/sessionStorage)
+  const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
-
-  // Persist cart to localStorage whenever it changes
-  useEffect(() => {
-    saveCartToStorage(cart);
-  }, [cart]);
 
   const openCart = () => setIsCartOpen(true);
   const closeCart = () => setIsCartOpen(false);
@@ -167,12 +138,45 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setCart(newCart);
   };
 
+  const updateQuantity = (index: number, quantity: number) => {
+    if (!Number.isFinite(quantity) || quantity < 1) return;
+
+    setCart(prev =>
+      prev.map((item, i) => {
+        if (i !== index) return item;
+
+        const currentQty = item.quantity || 1;
+        const unitPrice = currentQty > 0 ? item.totalPrice / currentQty : item.totalPrice;
+        return {
+          ...item,
+          quantity,
+          totalPrice: unitPrice * quantity,
+        };
+      })
+    );
+  };
+
+  /**
+   * Update an existing cart item with new values (used for editing configurations).
+   * Preserves the item's position in cart and updates only the provided fields.
+   */
+  const updateCartItem = (index: number, updates: Partial<CartItem>) => {
+    if (index < 0) return;
+
+    setCart(prev =>
+      prev.map((item, i) => {
+        if (i !== index) return item;
+        return { ...item, ...updates };
+      })
+    );
+  };
+
   const clearCart = () => {
     setCart([]);
   };
 
   return (
-    <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart, total, itemCount, isCartOpen, openCart, closeCart }}>
+    <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateQuantity, updateCartItem, clearCart, total, itemCount, isCartOpen, openCart, closeCart }}>
       {children}
     </CartContext.Provider>
   );

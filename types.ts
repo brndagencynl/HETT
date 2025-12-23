@@ -72,6 +72,9 @@ export interface CartItem extends Product {
   configHash?: string;
   displayConfigSummary?: string;
 
+  /** Optional pricing breakdown for config details popup */
+  priceBreakdown?: unknown;
+
   // Legacy/Compatibility props (to be deprecated or mapped)
   selectedSize?: string;
   selectedColor?: string;

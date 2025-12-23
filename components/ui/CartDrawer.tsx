@@ -1,15 +1,18 @@
 import React, { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Link, useNavigate } from 'react-router-dom';
-import { X, ShoppingBag, Trash2, Plus, Minus, ArrowRight, ShieldCheck } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { X, ShoppingBag, Trash2, ArrowRight, ShieldCheck, Pencil } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../../context/CartContext';
+import { useVerandaEdit } from '../../context/VerandaEditContext';
 import { isConfigOnly } from '../../utils/productRules';
+import { isVerandaCategory } from './ConfigBreakdownPopup';
 
 const MotionDiv = motion.div as any;
 
 const CartDrawer: React.FC = () => {
-    const { isCartOpen, closeCart, cart, removeFromCart, total, addToCart } = useCart();
+    const { isCartOpen, closeCart, cart, removeFromCart, total } = useCart();
+    const { openEditConfigurator } = useVerandaEdit();
     const navigate = useNavigate();
     const drawerRef = useRef<HTMLDivElement>(null);
 
@@ -27,10 +30,6 @@ const CartDrawer: React.FC = () => {
             document.body.style.overflow = 'unset';
         };
     }, [isCartOpen, closeCart]);
-
-    const handleQuantityChange = (item: any, change: number) => {
-        if (item.quantity + change < 1) return;
-    };
 
     if (!isCartOpen) return null;
 
@@ -82,7 +81,12 @@ const CartDrawer: React.FC = () => {
                                     </button>
                                 </div>
                             ) : (
-                                cart.map((item, index) => (
+                                cart.map((item, index) => {
+                                    const isVeranda = isVerandaCategory(item);
+                                    const basePrice = item.price || 1250; // fallback base price
+                                    const initialConfig = item.config?.category === 'verandas' ? item.config.data : undefined;
+                                    
+                                    return (
                                     <div key={index} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex gap-4 relative group">
                                         <div className="w-20 h-20 bg-gray-50 rounded-lg overflow-hidden flex-shrink-0 border border-gray-100">
                                             <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
@@ -90,10 +94,28 @@ const CartDrawer: React.FC = () => {
 
                                         <div className="flex-1 min-w-0">
                                             <div className="flex justify-between items-start mb-1">
-                                                <h4 className="font-bold text-sm text-hett-dark line-clamp-2 pr-6">{item.title}</h4>
+                                                <div className="flex items-center gap-2 flex-1 min-w-0 pr-2">
+                                                    <h4 className="font-bold text-sm text-hett-dark line-clamp-2">{item.title}</h4>
+                                                    {/* Edit icon for verandas only */}
+                                                    {isVeranda && (
+                                                        <button
+                                                            onClick={() => openEditConfigurator({
+                                                                cartIndex: index,
+                                                                productTitle: item.title,
+                                                                basePrice,
+                                                                initialConfig,
+                                                            })}
+                                                            className="flex-shrink-0 p-1.5 min-w-[32px] min-h-[32px] flex items-center justify-center text-gray-400 hover:text-hett-primary hover:bg-hett-light rounded-md transition-colors"
+                                                            title="Bewerken"
+                                                            aria-label="Configuratie bewerken"
+                                                        >
+                                                            <Pencil size={14} />
+                                                        </button>
+                                                    )}
+                                                </div>
                                                 <button
                                                     onClick={() => removeFromCart(index)}
-                                                    className="text-gray-300 hover:text-red-500 transition-colors"
+                                                    className="flex-shrink-0 text-gray-300 hover:text-red-500 transition-colors"
                                                 >
                                                     <Trash2 size={16} />
                                                 </button>
@@ -130,7 +152,8 @@ const CartDrawer: React.FC = () => {
                                             </div>
                                         </div>
                                     </div>
-                                ))
+                                );
+                                })
                             )}
                         </div>
 

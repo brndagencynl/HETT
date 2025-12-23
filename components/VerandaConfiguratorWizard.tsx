@@ -18,6 +18,12 @@ interface VerandaConfiguratorWizardProps {
     productTitle?: string;
     basePrice?: number;
     onSubmit?: (config: VerandaConfig, mode: 'order' | 'quote', price: number, details: { label: string, value: string }[]) => void;
+    /** 'new' (default) adds to cart, 'edit' updates existing item */
+    mode?: 'new' | 'edit';
+    /** Show message when config was reset to defaults due to missing data */
+    showResetMessage?: boolean;
+    /** Callback when user cancels (especially useful in edit mode) */
+    onCancel?: () => void;
 }
 
 // --- Step Definitions ---
@@ -93,7 +99,7 @@ const isStepComplete = (step: StepDefinition, config: Partial<VerandaConfig>): b
 };
 
 const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, VerandaConfiguratorWizardProps>(
-    ({ productTitle = "HETT Premium Veranda", basePrice = 1250, onSubmit }, ref) => {
+    ({ productTitle = "HETT Premium Veranda", basePrice = 1250, onSubmit, mode = 'new', showResetMessage = false, onCancel }, ref) => {
     
     const [isOpen, setIsOpen] = useState(false);
     const [currentStepIndex, setCurrentStepIndex] = useState(0);
@@ -102,6 +108,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
     const [agreed, setAgreed] = useState(false);
     const [isSelectionOpen, setSelectionOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false); // Loading state for add-to-cart
+    const [didSubmit, setDidSubmit] = useState(false); // Track if form was submitted successfully
 
     // Price calculation
     const { total: currentPrice, items: priceItems, basePrice: calcBasePrice } = calcVerandaPrice(basePrice, config as VerandaConfig);
@@ -120,6 +127,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
             setConfig(initialConfig ? { ...DEFAULT_VERANDA_CONFIG, ...initialConfig } : DEFAULT_VERANDA_CONFIG);
             setCurrentStepIndex(0);
             setAgreed(false);
+            setDidSubmit(false); // Reset submit flag when opening
             setIsOpen(true);
             document.body.style.overflow = 'hidden';
         },
@@ -129,6 +137,10 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
     const closeConfigurator = () => {
         setIsOpen(false);
         document.body.style.overflow = 'unset';
+        // In edit mode, call onCancel ONLY if we didn't submit (user cancelled)
+        if (mode === 'edit' && onCancel && !didSubmit) {
+            onCancel();
+        }
     };
 
     const goToStep = (stepIndex: number) => {
@@ -168,6 +180,9 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                     label: VERANDA_OPTIONS_UI.find(f => f.key === key)?.label || key,
                     value: getOptionLabel(key, config[key as keyof VerandaConfig])
                 }));
+                
+                // Mark as submitted before calling onSubmit (prevents onCancel from being called)
+                setDidSubmit(true);
                 
                 // Call parent handler which adds to cart
                 // Cart drawer will open automatically via CartContext.addToCart
@@ -370,6 +385,19 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
 
         return (
             <div className="space-y-6 max-w-3xl">
+                {/* Show reset message in edit mode if config was incomplete */}
+                {mode === 'edit' && showResetMessage && (
+                    <div className="bg-amber-50 border-2 border-amber-200 rounded-xl p-5 flex items-start gap-3">
+                        <div className="w-10 h-10 bg-amber-500 rounded-full flex items-center justify-center text-white flex-shrink-0">
+                            <Info size={20} />
+                        </div>
+                        <div>
+                            <h4 className="font-bold text-amber-800 text-lg">Configuratie hersteld</h4>
+                            <p className="text-sm text-amber-700">De vorige configuratie was onvolledig. Standaardwaarden zijn ingesteld.</p>
+                        </div>
+                    </div>
+                )}
+
                 <div className="bg-green-50 border-2 border-green-200 rounded-xl p-5 flex items-start gap-3">
                     <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white flex-shrink-0">
                         <Check size={20} />
@@ -811,11 +839,11 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                                                 {isSubmitting ? (
                                                     <>
                                                         <Loader2 size={18} className="animate-spin" />
-                                                        <span className="hidden sm:inline">{t('configurator.navigation.adding')}</span>
+                                                        <span className="hidden sm:inline">{mode === 'edit' ? 'Opslaan...' : t('configurator.navigation.adding')}</span>
                                                     </>
                                                 ) : (
                                                     <>
-                                                        <span className="hidden sm:inline">{t('configurator.navigation.add')}</span>
+                                                        <span className="hidden sm:inline">{mode === 'edit' ? 'Opslaan' : t('configurator.navigation.add')}</span>
                                                         <ArrowRight size={18} />
                                                     </>
                                                 )}

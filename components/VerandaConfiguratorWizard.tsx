@@ -645,109 +645,92 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
         return count;
     }, [config]);
 
-    // Reusable Selection Summary Component
+    // Selection items in step order - always show all options
+    const selectionItems = useMemo(() => [
+        {
+            key: 'color',
+            label: t('configurator.steps.color.title'),
+            value: config.color ? getOptionLabel('color', config.color) : null,
+            stepIndex: 0,
+            colorHex: config.color ? COLOR_OPTIONS.find(c => c.id === config.color)?.hex : null,
+        },
+        {
+            key: 'daktype',
+            label: t('configurator.steps.daktype.title'),
+            value: config.daktype ? getOptionLabel('daktype', config.daktype) : null,
+            stepIndex: 1,
+        },
+        {
+            key: 'goot',
+            label: t('configurator.steps.goot.title'),
+            value: config.goot ? getOptionLabel('goot', config.goot) : null,
+            stepIndex: 2,
+        },
+        {
+            key: 'zijwand_links',
+            label: t('configurator.steps.zijwand_links.title'),
+            value: config.zijwand_links ? getOptionLabel('zijwand_links', config.zijwand_links) : null,
+            stepIndex: 3,
+        },
+        {
+            key: 'zijwand_rechts',
+            label: t('configurator.steps.zijwand_rechts.title'),
+            value: config.zijwand_rechts ? getOptionLabel('zijwand_rechts', config.zijwand_rechts) : null,
+            stepIndex: 4,
+        },
+        {
+            key: 'voorzijde',
+            label: t('configurator.steps.voorzijde.title'),
+            value: config.voorzijde ? getOptionLabel('voorzijde', config.voorzijde) : null,
+            stepIndex: 5,
+        },
+        {
+            key: 'verlichting',
+            label: t('configurator.steps.verlichting.title'),
+            value: config.verlichting !== undefined 
+                ? (config.verlichting ? t('configurator.selection.yesLedSpots') : t('configurator.selection.no'))
+                : null,
+            stepIndex: 6,
+        },
+    ], [config, getOptionLabel, t]);
+
+    // Reusable Selection Summary Component - shows all options
     const SelectionSummary = ({ showEditButtons = true }: { showEditButtons?: boolean }) => (
         <div className="space-y-3">
-            {config.color && (
-                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+            {selectionItems.map((item, idx) => (
+                <div 
+                    key={item.key} 
+                    className={`flex justify-between items-center py-2 ${idx < selectionItems.length - 1 ? 'border-b border-gray-100' : ''}`}
+                >
                     <div className="flex items-center gap-2">
-                        <div 
-                            className="w-5 h-5 rounded border border-gray-200 shadow-inner"
-                            style={{ backgroundColor: COLOR_OPTIONS.find(c => c.id === config.color)?.hex || '#293133' }}
-                        />
+                        {item.colorHex && (
+                            <div 
+                                className="w-5 h-5 rounded border border-gray-200 shadow-inner flex-shrink-0"
+                                style={{ backgroundColor: item.colorHex }}
+                            />
+                        )}
                         <div>
-                            <span className="text-xs text-gray-500 uppercase tracking-wide">{t('configurator.steps.color.title')}</span>
-                            <span className="block text-sm font-semibold text-gray-900">{getOptionLabel('color', config.color)}</span>
+                            <span className="text-xs text-gray-500 uppercase tracking-wide">{item.label}</span>
+                            <span className={`block text-sm font-semibold ${item.value ? 'text-gray-900' : 'text-gray-400'}`}>
+                                {item.value || '—'}
+                            </span>
                         </div>
                     </div>
-                    {showEditButtons && (
-                        <button onClick={() => { goToStep(0); setSelectionOpen(false); }} className="text-xs text-[#003878] font-medium hover:underline">
+                    {showEditButtons && item.value && (
+                        <button 
+                            onClick={() => { goToStep(item.stepIndex); setSelectionOpen(false); }} 
+                            className="text-xs text-[#003878] font-medium hover:underline flex-shrink-0"
+                        >
                             {t('configurator.navigation.change')}
                         </button>
                     )}
                 </div>
-            )}
-            {config.daktype && (
-                <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <div>
-                        <span className="text-xs text-gray-500 uppercase tracking-wide">{t('configurator.steps.daktype.title')}</span>
-                        <span className="block text-sm font-semibold text-gray-900">{getOptionLabel('daktype', config.daktype)}</span>
-                    </div>
-                    {showEditButtons && (
-                        <button onClick={() => { goToStep(1); setSelectionOpen(false); }} className="text-xs text-[#003878] font-medium hover:underline">
-                            {t('configurator.navigation.change')}
-                        </button>
-                    )}
-                </div>
-            )}
-            {config.goot && (
-                <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <div>
-                        <span className="text-xs text-gray-500 uppercase tracking-wide">{t('configurator.steps.goot.title')}</span>
-                        <span className="block text-sm font-semibold text-gray-900">{getOptionLabel('goot', config.goot)}</span>
-                    </div>
-                    {showEditButtons && (
-                        <button onClick={() => { goToStep(2); setSelectionOpen(false); }} className="text-xs text-[#003878] font-medium hover:underline">
-                            {t('configurator.navigation.change')}
-                        </button>
-                    )}
-                </div>
-            )}
-            {config.voorzijde && (
-                <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <div>
-                        <span className="text-xs text-gray-500 uppercase tracking-wide">{t('configurator.steps.voorzijde.title')}</span>
-                        <span className="block text-sm font-semibold text-gray-900">{getOptionLabel('voorzijde', config.voorzijde)}</span>
-                    </div>
-                    {showEditButtons && (
-                        <button onClick={() => { goToStep(3); setSelectionOpen(false); }} className="text-xs text-[#003878] font-medium hover:underline">
-                            {t('configurator.navigation.change')}
-                        </button>
-                    )}
-                </div>
-            )}
-            {config.zijwand_links && (
-                <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <div>
-                        <span className="text-xs text-gray-500 uppercase tracking-wide">{t('configurator.steps.zijwand_links.title')}</span>
-                        <span className="block text-sm font-semibold text-gray-900">{getOptionLabel('zijwand_links', config.zijwand_links)}</span>
-                    </div>
-                    {showEditButtons && (
-                        <button onClick={() => { goToStep(4); setSelectionOpen(false); }} className="text-xs text-[#003878] font-medium hover:underline">
-                            {t('configurator.navigation.change')}
-                        </button>
-                    )}
-                </div>
-            )}
-            {config.zijwand_rechts && (
-                <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <div>
-                        <span className="text-xs text-gray-500 uppercase tracking-wide">{t('configurator.steps.zijwand_rechts.title')}</span>
-                        <span className="block text-sm font-semibold text-gray-900">{getOptionLabel('zijwand_rechts', config.zijwand_rechts)}</span>
-                    </div>
-                    {showEditButtons && (
-                        <button onClick={() => { goToStep(5); setSelectionOpen(false); }} className="text-xs text-[#003878] font-medium hover:underline">
-                            {t('configurator.navigation.change')}
-                        </button>
-                    )}
-                </div>
-            )}
-            <div className="flex justify-between items-center py-2">
-                <div>
-                    <span className="text-xs text-gray-500 uppercase tracking-wide">{t('configurator.steps.verlichting.title')}</span>
-                    <span className="block text-sm font-semibold text-gray-900">{config.verlichting ? t('configurator.selection.yesLedSpots') : t('configurator.selection.no')}</span>
-                </div>
-                {showEditButtons && (
-                    <button onClick={() => { goToStep(6); setSelectionOpen(false); }} className="text-xs text-[#003878] font-medium hover:underline">
-                        {t('configurator.navigation.change')}
-                    </button>
-                )}
-            </div>
+            ))}
         </div>
     );
 
-    // Mobile Bottom Sheet Component
-    const BottomSheet = () => (
+    // Selection Modal/Sheet Component - works for both mobile (bottom sheet) and desktop (centered modal)
+    const SelectionModal = () => (
         <AnimatePresence>
             {isSelectionOpen && (
                 <>
@@ -759,13 +742,14 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                         className="fixed inset-0 bg-black/50 z-[200]"
                         onClick={() => setSelectionOpen(false)}
                     />
-                    {/* Sheet */}
+                    
+                    {/* Mobile: Bottom Sheet */}
                     <MotionDiv
                         initial={{ y: "100%" }}
                         animate={{ y: 0 }}
                         exit={{ y: "100%" }}
                         transition={{ type: "spring", damping: 30, stiffness: 300 }}
-                        className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl z-[201] max-h-[80vh] flex flex-col"
+                        className="lg:hidden fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl z-[201] max-h-[80vh] flex flex-col"
                     >
                         {/* Handle */}
                         <div className="flex justify-center pt-3 pb-2">
@@ -784,6 +768,41 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                         {/* Content */}
                         <div className="flex-1 overflow-y-auto px-5 py-4">
                             <SelectionSummary showEditButtons={true} />
+                        </div>
+                    </MotionDiv>
+                    
+                    {/* Desktop: Centered Modal */}
+                    <MotionDiv
+                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                        transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                        className="hidden lg:flex fixed inset-0 z-[201] items-center justify-center p-6"
+                    >
+                        <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[80vh] flex flex-col">
+                            {/* Header */}
+                            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+                                <h3 className="text-lg font-bold text-gray-900">{t('configurator.selection.title')}</h3>
+                                <button
+                                    onClick={() => setSelectionOpen(false)}
+                                    className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                                >
+                                    <X size={20} />
+                                </button>
+                            </div>
+                            {/* Content */}
+                            <div className="flex-1 overflow-y-auto px-6 py-4">
+                                <SelectionSummary showEditButtons={true} />
+                            </div>
+                            {/* Footer */}
+                            <div className="px-6 py-4 border-t border-gray-100">
+                                <button
+                                    onClick={() => setSelectionOpen(false)}
+                                    className="w-full py-3 bg-[#003878] text-white font-semibold rounded-xl hover:bg-[#002050] transition-colors"
+                                >
+                                    {t('configurator.navigation.close')}
+                                </button>
+                            </div>
                         </div>
                     </MotionDiv>
                 </>
@@ -885,7 +904,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                     </AnimatePresence>
 
                     {/* Mobile Bottom Sheet */}
-                    <BottomSheet />
+                    <SelectionModal />
 
                     {/* Main Container */}
                     <MotionDiv
@@ -946,15 +965,6 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                                         </AnimatePresence>
                                     </div>
 
-                                    {/* Right Column - Selection Summary (Desktop only) */}
-                                    <div className="hidden lg:block">
-                                        <div className="sticky top-4">
-                                            <div className="bg-gray-50 rounded-xl p-5">
-                                                <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-4">{t('configurator.selection.title')}</h3>
-                                                <SelectionSummary showEditButtons={false} />
-                                            </div>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -999,6 +1009,20 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                                                 <ChevronLeft size={20} />
                                             </button>
                                         )}
+
+                                        {/* Desktop: Selection Button */}
+                                        <button
+                                            onClick={() => setSelectionOpen(true)}
+                                            className="hidden lg:flex items-center gap-2 px-4 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
+                                        >
+                                            <ShoppingBag size={18} className="text-[#003878]" />
+                                            <span className="font-semibold text-sm">{t('configurator.selection.title')}</span>
+                                            {selectionCount > 0 && (
+                                                <span className="px-1.5 py-0.5 bg-[#003878] text-white text-[10px] font-bold rounded-full">
+                                                    {selectionCount}
+                                                </span>
+                                            )}
+                                        </button>
 
                                         {!isLastStep ? (
                                             <button

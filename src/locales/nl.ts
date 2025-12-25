@@ -54,6 +54,7 @@ export const nl = {
       adding: 'Toevoegen...',
       edit: 'Bewerk',
       change: 'Wijzig',
+      close: 'Sluiten',
     },
 
     // Selection summary

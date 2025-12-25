@@ -20,6 +20,9 @@
 // TYPE DEFINITIONS
 // =============================================================================
 
+/** Color ID type for veranda profile colors */
+export type VerandaColorId = 'ral7016' | 'ral9005' | 'ral9001';
+
 /** 
  * Product size identifier format: "{width}x{depth}"
  * Width: 500, 600, 700 (cm)
@@ -98,7 +101,43 @@ export const BASE_PRICES: Record<VerandaProductSize, number> = {
 // =============================================================================
 
 /**
- * STEP 1: Roof Type (Daktype)
+ * COLOR OPTIONS (Kleur)
+ * Step 1 - No price difference, purely visual/preference
+ */
+export interface ColorOption {
+  id: VerandaColorId;
+  label: string;
+  labelNL: string;
+  hex: string;
+  description?: string;
+}
+
+export const COLOR_OPTIONS: ColorOption[] = [
+  {
+    id: 'ral7016',
+    label: 'Anthracite (RAL 7016)',
+    labelNL: 'Antraciet (RAL 7016)',
+    hex: '#293133',
+    description: 'Populaire donkergrijze kleur, past bij moderne architectuur.',
+  },
+  {
+    id: 'ral9005',
+    label: 'Black (RAL 9005)',
+    labelNL: 'Zwart (RAL 9005)',
+    hex: '#0E0E10',
+    description: 'Strakke zwarte afwerking voor een premium uitstraling.',
+  },
+  {
+    id: 'ral9001',
+    label: 'Cream white (RAL 9001)',
+    labelNL: 'Crème (RAL 9001)',
+    hex: '#FDF4E3',
+    description: 'Warme crèmewitte kleur, ideaal bij lichte gevels.',
+  },
+];
+
+/**
+ * STEP 2: Roof Type (Daktype)
  * Fixed prices - same for all sizes
  */
 export const ROOF_TYPE_OPTIONS: OptionChoice[] = [
@@ -252,19 +291,49 @@ export const EXTRAS_OPTIONS: OptionChoice[] = [
 /**
  * Complete configuration options grouped by step
  * This is the main export for UI components
+ * 
+ * STEP ORDER:
+ * 1. Kleur (Color) - required, no price
+ * 2. Daktype (Roof type) - required
+ * 3. Goot (Gutter) - required
+ * 4. Voorzijde (Front side) - optional
+ * 5. Zijwand links/rechts (Side walls) - optional
+ * 6. Verlichting (Extras) - optional
  */
 export const VERANDA_OPTION_GROUPS: OptionGroup[] = [
   {
-    id: 'daktype',
+    id: 'kleur',
     step: 1,
+    label: 'Color',
+    labelNL: 'Kleur profiel',
+    required: true,
+    choices: COLOR_OPTIONS.map(c => ({
+      id: c.id,
+      label: c.label,
+      labelNL: c.labelNL,
+      description: c.description,
+      pricing: { type: 'fixed', price: 0 },
+    })) as OptionChoice[],
+  },
+  {
+    id: 'daktype',
+    step: 2,
     label: 'Roof type',
     labelNL: 'Daktype',
     required: true,
     choices: [...ROOF_TYPE_OPTIONS],
   },
   {
+    id: 'goot',
+    step: 3,
+    label: 'Gutter',
+    labelNL: 'Goot',
+    required: true,
+    choices: [...GUTTER_OPTIONS],
+  },
+  {
     id: 'voorzijde',
-    step: 2,
+    step: 4,
     label: 'Front side',
     labelNL: 'Voorzijde',
     required: false,
@@ -272,7 +341,7 @@ export const VERANDA_OPTION_GROUPS: OptionGroup[] = [
   },
   {
     id: 'zijwand_links',
-    step: 3,
+    step: 5,
     label: 'Side wall left',
     labelNL: 'Zijwand links',
     required: false,
@@ -280,23 +349,15 @@ export const VERANDA_OPTION_GROUPS: OptionGroup[] = [
   },
   {
     id: 'zijwand_rechts',
-    step: 3,
+    step: 5,
     label: 'Side wall right',
     labelNL: 'Zijwand rechts',
     required: false,
     choices: [...SIDE_WALL_OPTIONS],
   },
   {
-    id: 'goot',
-    step: 4,
-    label: 'Gutter',
-    labelNL: 'Goot',
-    required: true,
-    choices: [...GUTTER_OPTIONS],
-  },
-  {
     id: 'verlichting',
-    step: 5,
+    step: 6,
     label: 'Extras',
     labelNL: "Extra's",
     required: false,

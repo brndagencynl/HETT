@@ -3,6 +3,7 @@
  * 
  * This file defines the TypeScript types and UI configuration for the veranda configurator.
  * Pricing data is centralized in ../pricing/verandapricing.ts
+ * Asset paths are centralized in ../visual/verandaAssets.ts
  * 
  * IMPORTANT: Each size is a SEPARATE PRODUCT, not a variation.
  * The configurator does NOT allow changing dimensions - only options.
@@ -15,22 +16,32 @@ import {
     SIDE_WALL_OPTIONS,
     GUTTER_OPTIONS,
     EXTRAS_OPTIONS,
+    COLOR_OPTIONS,
     type VerandaProductSize,
+    type VerandaColorId,
     type OptionChoice,
     getOptionPrice,
 } from '../pricing/verandapricing';
+
+import {
+    DEFAULT_COLOR,
+} from '../visual/verandaAssets';
 
 // =============================================================================
 // TYPE DEFINITIONS
 // =============================================================================
 
 export type VerandaOptionKey =
+    | "kleur"
     | "daktype"
     | "goot"
     | "voorzijde"
     | "zijwand_links"
     | "zijwand_rechts"
     | "verlichting";
+
+/** Color options */
+export type KleurValue = VerandaColorId;
 
 /** Roof type options */
 export type DaktypeValue = 'poly_helder' | 'poly_opaal';
@@ -44,20 +55,22 @@ export type ZijwandValue = 'geen' | 'poly_spie' | 'sandwich_polyspie' | 'sandwic
 /** Gutter options */
 export type GootValue = 'classic' | 'cube' | 'deluxe';
 
-/** Profile color options */
+/** Profile color options - DEPRECATED, use kleur instead */
 export type ProfileColorValue = 'Antraciet (RAL7016)' | 'Crèmewit (RAL9001)' | 'Zwart (RAL9005)';
 
 /**
  * Complete veranda configuration
  */
 export type VerandaConfig = {
+    kleur: KleurValue;
     daktype: DaktypeValue;
     goot: GootValue;
     voorzijde: VoorzijdeValue;
     zijwand_links: ZijwandValue;
     zijwand_rechts: ZijwandValue;
     verlichting: boolean;
-    profileColor: ProfileColorValue;
+    /** @deprecated Use kleur instead */
+    profileColor?: ProfileColorValue;
 };
 
 /**
@@ -74,16 +87,20 @@ export type VerandaConfigWithSize = VerandaConfig & {
 
 /**
  * Default configuration for new configurator sessions
- * Required fields (daktype, goot) are undefined to force user selection
+ * - kleur defaults to ral7016 (Antraciet) for immediate visualization
+ * - Required fields (daktype, goot) are undefined to force user selection
+ * - Optional fields default to 'geen' or false
+ * 
+ * NOTE: No persistence - config resets on refresh
  */
 export const DEFAULT_VERANDA_CONFIG: Partial<VerandaConfig> = {
+    kleur: DEFAULT_COLOR,  // Default to Antraciet for visualization
     // daktype: undefined, // Force choice - REQUIRED
     // goot: undefined,    // Force choice - REQUIRED
     voorzijde: "geen",
     zijwand_links: "geen",
     zijwand_rechts: "geen",
     verlichting: false,
-    profileColor: 'Antraciet (RAL7016)'
 };
 
 // =============================================================================
@@ -111,24 +128,37 @@ function toUIChoice(choice: OptionChoice, defaultSize: VerandaProductSize = '600
  * UI Configuration for the configurator wizard
  * This maps the centralized pricing to the UI component format
  * 
+ * STEP ORDER:
+ * 1. Kleur (Color) - required, no price
+ * 2. Daktype (Roof type) - required
+ * 3. Goot (Gutter) - required
+ * 4. Voorzijde (Front side) - optional
+ * 5. Zijwand links (Side wall left) - optional
+ * 6. Zijwand rechts (Side wall right) - optional
+ * 7. Verlichting (Extras) - optional
+ * 
  * Note: Prices shown are for default size (600x300). 
  * Actual prices are calculated dynamically based on selected product size.
  */
 export const VERANDA_OPTIONS_UI = [
     {
-        key: "profileColor",
+        key: "kleur",
         label: "Kleur profiel",
-        type: "radio",
-        choices: [
-            { value: 'Antraciet (RAL7016)', label: 'Antraciet (RAL7016)', hex: '#293133', price: 0 },
-            { value: 'Crèmewit (RAL9001)', label: 'Crèmewit (RAL9001)', hex: '#FDF4E3', price: 0 },
-            { value: 'Zwart (RAL9005)', label: 'Zwart (RAL9005)', hex: '#0E0E10', price: 0 }
-        ]
+        step: 1,
+        type: "color",
+        required: true,
+        choices: COLOR_OPTIONS.map(c => ({
+            value: c.id,
+            label: c.labelNL,
+            hex: c.hex,
+            description: c.description || '',
+            price: 0,
+        })),
     },
     {
         key: "daktype",
         label: "Daktype",
-        step: 1,
+        step: 2,
         type: "card",
         required: true,
         choices: ROOF_TYPE_OPTIONS.map(c => ({
@@ -139,9 +169,17 @@ export const VERANDA_OPTIONS_UI = [
         })),
     },
     {
+        key: "goot",
+        label: "Goot optie",
+        step: 3,
+        type: "select",
+        required: true,
+        choices: GUTTER_OPTIONS.map(c => toUIChoice(c)),
+    },
+    {
         key: "voorzijde",
         label: "Voorzijde",
-        step: 2,
+        step: 4,
         type: "select",
         required: false,
         choices: FRONT_SIDE_OPTIONS.map(c => toUIChoice(c)),
@@ -149,7 +187,7 @@ export const VERANDA_OPTIONS_UI = [
     {
         key: "zijwand_links",
         label: "Zijwand links",
-        step: 3,
+        step: 5,
         type: "select",
         required: false,
         choices: SIDE_WALL_OPTIONS.map(c => toUIChoice(c)),
@@ -157,23 +195,15 @@ export const VERANDA_OPTIONS_UI = [
     {
         key: "zijwand_rechts",
         label: "Zijwand rechts",
-        step: 3,
+        step: 5,
         type: "select",
         required: false,
         choices: SIDE_WALL_OPTIONS.map(c => toUIChoice(c)),
     },
     {
-        key: "goot",
-        label: "Goot optie",
-        step: 4,
-        type: "select",
-        required: true,
-        choices: GUTTER_OPTIONS.map(c => toUIChoice(c)),
-    },
-    {
         key: "verlichting",
         label: "Extra's",
-        step: 5,
+        step: 6,
         type: "toggle",
         required: false,
         choices: EXTRAS_OPTIONS.map(c => ({
@@ -189,5 +219,11 @@ export const VERANDA_OPTIONS_UI = [
 
 export { 
     VERANDA_OPTION_GROUPS,
+    COLOR_OPTIONS,
     type VerandaProductSize,
+    type VerandaColorId,
 } from '../pricing/verandapricing';
+
+export {
+    DEFAULT_COLOR,
+} from '../visual/verandaAssets';

@@ -60,12 +60,12 @@ const Quote: React.FC = () => {
                     <div className="space-y-4 mb-8">
                         <SummaryRow label="Breedte" value={`${config.widthCm} cm`} />
                         <SummaryRow label="Diepte" value={`${config.depthCm} cm`} />
-                        <SummaryRow label="Kleur" value={config.profileColor} />
-                        <SummaryRow label="Daktype" value={config.roofType} />
-                        <SummaryRow label="Zijwand Links" value={config.wallLeft === 'none' ? 'Geen' : config.wallLeft} />
-                        <SummaryRow label="Zijwand Rechts" value={config.wallRight === 'none' ? 'Geen' : config.wallRight} />
-                        <SummaryRow label="Voorzijde" value={config.front === 'open' ? 'Volledig open' : config.front} />
-                        <SummaryRow label="Verlichting" value={config.lighting ? 'LED Set (6 spots)' : 'Geen'} />
+                        <SummaryRow label="Kleur" value={config.kleur || config.profileColor} />
+                        <SummaryRow label="Daktype" value={config.roofType || config.daktype} />
+                        <SummaryRow label="Zijwand Links" value={config.wallLeft === 'none' || config.wallLeft === 'geen' ? 'Geen' : (config.wallLeft || config.zijwand_links)} />
+                        <SummaryRow label="Zijwand Rechts" value={config.wallRight === 'none' || config.wallRight === 'geen' ? 'Geen' : (config.wallRight || config.zijwand_rechts)} />
+                        <SummaryRow label="Voorzijde" value={config.front === 'open' || config.front === 'geen' ? 'Volledig open' : (config.front || config.voorzijde)} />
+                        <SummaryRow label="Verlichting" value={config.lighting || config.verlichting ? 'LED Set (6 spots)' : 'Geen'} />
                     </div>
 
                     <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100">

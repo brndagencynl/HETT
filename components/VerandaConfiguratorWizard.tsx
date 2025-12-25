@@ -1,9 +1,9 @@
-import React, { useState, forwardRef, useImperativeHandle, useMemo } from 'react';
+import React, { useState, forwardRef, useImperativeHandle, useMemo, useCallback } from 'react';
 import { X, Check, Info, ChevronLeft, ChevronRight, Truck, ShieldCheck, ArrowRight, Lightbulb, Edit2, Eye, ChevronUp, ShoppingBag, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { VERANDA_OPTIONS_UI, DEFAULT_VERANDA_CONFIG, VerandaConfig } from '../src/configurator/schemas/veranda';
+import { VERANDA_OPTIONS_UI, DEFAULT_VERANDA_CONFIG, VerandaConfig, COLOR_OPTIONS, DEFAULT_COLOR } from '../src/configurator/schemas/veranda';
 import { calcVerandaPrice } from '../src/configurator/pricing/veranda';
-import { getVerandaLayers } from '../src/configurator/visual/verandaLayers';
+import { buildVisualizationLayers, type VisualizationLayer, FALLBACK_IMAGE, type VerandaColorId } from '../src/configurator/visual/verandaAssets';
 import { t } from '../src/utils/i18n';
 
 const MotionDiv = motion.div as any;
@@ -39,7 +39,7 @@ interface VerandaConfiguratorWizardProps {
 }
 
 // --- Step Definitions ---
-type StepId = 'daktype' | 'voorzijde' | 'zijwand_links' | 'zijwand_rechts' | 'goot' | 'verlichting' | 'overzicht';
+type StepId = 'kleur' | 'daktype' | 'goot' | 'voorzijde' | 'zijwand_links' | 'zijwand_rechts' | 'verlichting' | 'overzicht';
 
 interface StepDefinition {
     id: StepId;
@@ -50,6 +50,13 @@ interface StepDefinition {
 }
 
 const STEPS: StepDefinition[] = [
+    { 
+        id: 'kleur', 
+        title: t('configurator.steps.kleur.title'), 
+        description: t('configurator.steps.kleur.description'),
+        optionKey: 'kleur',
+        required: true 
+    },
     { 
         id: 'daktype', 
         title: t('configurator.steps.daktype.title'), 
@@ -110,6 +117,35 @@ const isStepComplete = (step: StepDefinition, config: Partial<VerandaConfig>): b
     return value !== undefined && value !== null;
 };
 
+// --- Image Error Handler Component ---
+const SafeImage = ({ src, alt, className, fallback = FALLBACK_IMAGE }: { src: string; alt: string; className?: string; fallback?: string }) => {
+    const [imgSrc, setImgSrc] = useState(src);
+    const [hasError, setHasError] = useState(false);
+    
+    const handleError = useCallback(() => {
+        if (!hasError) {
+            console.warn(`[VerandaConfigurator] Image failed to load: ${src}`);
+            setHasError(true);
+            setImgSrc(fallback);
+        }
+    }, [src, fallback, hasError]);
+    
+    // Reset error state when src changes
+    React.useEffect(() => {
+        setImgSrc(src);
+        setHasError(false);
+    }, [src]);
+    
+    return (
+        <img 
+            src={imgSrc} 
+            alt={alt} 
+            className={className}
+            onError={handleError}
+        />
+    );
+};
+
 const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, VerandaConfiguratorWizardProps>(
     ({ productTitle = "HETT Premium Veranda", basePrice = 1250, onSubmit, mode = 'new', showResetMessage = false, onCancel }, ref) => {
     
@@ -125,9 +161,18 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
     // Price calculation
     const { total: currentPrice, items: priceItems, basePrice: calcBasePrice } = calcVerandaPrice(basePrice, config as VerandaConfig);
 
-    // Visual layers (for future rendering)
-    const layers = useMemo(() => {
-        return config.daktype ? getVerandaLayers(config as VerandaConfig) : [];
+    // Visual layers for rendering
+    const visualLayers = useMemo((): VisualizationLayer[] => {
+        const kleur = (config.kleur || DEFAULT_COLOR) as VerandaColorId;
+        return buildVisualizationLayers({
+            kleur,
+            daktype: config.daktype,
+            voorzijde: config.voorzijde,
+            zijwand_links: config.zijwand_links,
+            zijwand_rechts: config.zijwand_rechts,
+            goot: config.goot,
+            verlichting: config.verlichting,
+        });
     }, [config]);
 
     const currentStep = STEPS[currentStepIndex];
@@ -178,8 +223,8 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
         // Prevent double submits
         if (isSubmitting) return;
         
-        // Validation
-        if (!config.daktype || !config.goot) {
+        // Validation - include kleur as required
+        if (!config.kleur || !config.daktype || !config.goot) {
             alert(t('configurator.validation.fillRequiredFields'));
             return;
         }
@@ -223,7 +268,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
 
     // Handle quote request (separate from add-to-cart)
     const handleQuoteRequest = () => {
-        if (!config.daktype || !config.goot) {
+        if (!config.kleur || !config.daktype || !config.goot) {
             alert(t('configurator.validation.fillRequiredFields'));
             return;
         }
@@ -269,6 +314,42 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
         if (!optionDef) return null;
 
         const currentValue = config[currentStep.optionKey as keyof VerandaConfig];
+
+        // Color selector (for kleur step)
+        if (optionDef.type === 'color') {
+            return (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl">
+                    {optionDef.choices.map((choice: any) => (
+                        <div
+                            key={choice.value}
+                            onClick={() => setConfig(prev => ({ ...prev, [optionDef.key]: choice.value }))}
+                            className={`relative rounded-xl overflow-hidden cursor-pointer transition-all border-2 p-4 ${
+                                currentValue === choice.value 
+                                    ? 'border-[#003878] ring-2 ring-[#003878]/20 shadow-lg bg-[#003878]/5' 
+                                    : 'border-gray-200 hover:border-gray-300 hover:shadow-md bg-white'
+                            }`}
+                        >
+                            {currentValue === choice.value && (
+                                <div className="absolute top-2 right-2 w-6 h-6 bg-[#003878] rounded-full flex items-center justify-center text-white shadow-sm">
+                                    <Check size={14} strokeWidth={3} />
+                                </div>
+                            )}
+                            
+                            {/* Color swatch */}
+                            <div 
+                                className="w-full aspect-square rounded-lg mb-3 border border-gray-200 shadow-inner"
+                                style={{ backgroundColor: choice.hex }}
+                            />
+                            
+                            <span className="block text-sm font-bold text-gray-900 text-center">{choice.label}</span>
+                            {choice.description && (
+                                <span className="block text-xs text-gray-500 text-center mt-1">{choice.description}</span>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            );
+        }
 
         // Card-based selector (for daktype)
         if (optionDef.type === 'card') {
@@ -404,12 +485,13 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
 
     const renderOverview = () => {
         const summaryItems = [
-            { stepIndex: 0, label: t('configurator.steps.daktype.title'), value: getOptionLabel('daktype', config.daktype), key: 'daktype' },
-            { stepIndex: 1, label: t('configurator.steps.goot.title'), value: getOptionLabel('goot', config.goot), key: 'goot' },
-            { stepIndex: 2, label: t('configurator.steps.voorzijde.title'), value: getOptionLabel('voorzijde', config.voorzijde), key: 'voorzijde' },
-            { stepIndex: 3, label: t('configurator.steps.zijwand_links.title'), value: getOptionLabel('zijwand_links', config.zijwand_links), key: 'zijwand_links' },
-            { stepIndex: 4, label: t('configurator.steps.zijwand_rechts.title'), value: getOptionLabel('zijwand_rechts', config.zijwand_rechts), key: 'zijwand_rechts' },
-            { stepIndex: 5, label: t('configurator.steps.verlichting.title'), value: config.verlichting ? t('configurator.selection.yesLedSpots') : t('configurator.selection.no'), key: 'verlichting' },
+            { stepIndex: 0, label: t('configurator.steps.kleur.title'), value: getOptionLabel('kleur', config.kleur), key: 'kleur' },
+            { stepIndex: 1, label: t('configurator.steps.daktype.title'), value: getOptionLabel('daktype', config.daktype), key: 'daktype' },
+            { stepIndex: 2, label: t('configurator.steps.goot.title'), value: getOptionLabel('goot', config.goot), key: 'goot' },
+            { stepIndex: 3, label: t('configurator.steps.voorzijde.title'), value: getOptionLabel('voorzijde', config.voorzijde), key: 'voorzijde' },
+            { stepIndex: 4, label: t('configurator.steps.zijwand_links.title'), value: getOptionLabel('zijwand_links', config.zijwand_links), key: 'zijwand_links' },
+            { stepIndex: 5, label: t('configurator.steps.zijwand_rechts.title'), value: getOptionLabel('zijwand_rechts', config.zijwand_rechts), key: 'zijwand_rechts' },
+            { stepIndex: 6, label: t('configurator.steps.verlichting.title'), value: config.verlichting ? t('configurator.selection.yesLedSpots') : t('configurator.selection.no'), key: 'verlichting' },
         ];
 
         return (
@@ -524,6 +606,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
     // Count selected options for mobile button
     const selectionCount = useMemo(() => {
         let count = 0;
+        if (config.kleur) count++;
         if (config.daktype) count++;
         if (config.goot) count++;
         if (config.voorzijde && config.voorzijde !== 'geen') count++;
@@ -536,6 +619,25 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
     // Reusable Selection Summary Component
     const SelectionSummary = ({ showEditButtons = true }: { showEditButtons?: boolean }) => (
         <div className="space-y-3">
+            {config.kleur && (
+                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                    <div className="flex items-center gap-2">
+                        <div 
+                            className="w-5 h-5 rounded border border-gray-200 shadow-inner"
+                            style={{ backgroundColor: COLOR_OPTIONS.find(c => c.id === config.kleur)?.hex || '#293133' }}
+                        />
+                        <div>
+                            <span className="text-xs text-gray-500 uppercase tracking-wide">{t('configurator.steps.kleur.title')}</span>
+                            <span className="block text-sm font-semibold text-gray-900">{getOptionLabel('kleur', config.kleur)}</span>
+                        </div>
+                    </div>
+                    {showEditButtons && (
+                        <button onClick={() => { goToStep(0); setSelectionOpen(false); }} className="text-xs text-[#003878] font-medium hover:underline">
+                            {t('configurator.navigation.change')}
+                        </button>
+                    )}
+                </div>
+            )}
             {config.daktype && (
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
                     <div>
@@ -543,7 +645,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                         <span className="block text-sm font-semibold text-gray-900">{getOptionLabel('daktype', config.daktype)}</span>
                     </div>
                     {showEditButtons && (
-                        <button onClick={() => { goToStep(0); setSelectionOpen(false); }} className="text-xs text-[#003878] font-medium hover:underline">
+                        <button onClick={() => { goToStep(1); setSelectionOpen(false); }} className="text-xs text-[#003878] font-medium hover:underline">
                             {t('configurator.navigation.change')}
                         </button>
                     )}
@@ -556,7 +658,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                         <span className="block text-sm font-semibold text-gray-900">{getOptionLabel('goot', config.goot)}</span>
                     </div>
                     {showEditButtons && (
-                        <button onClick={() => { goToStep(1); setSelectionOpen(false); }} className="text-xs text-[#003878] font-medium hover:underline">
+                        <button onClick={() => { goToStep(2); setSelectionOpen(false); }} className="text-xs text-[#003878] font-medium hover:underline">
                             {t('configurator.navigation.change')}
                         </button>
                     )}
@@ -569,7 +671,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                         <span className="block text-sm font-semibold text-gray-900">{getOptionLabel('voorzijde', config.voorzijde)}</span>
                     </div>
                     {showEditButtons && (
-                        <button onClick={() => { goToStep(2); setSelectionOpen(false); }} className="text-xs text-[#003878] font-medium hover:underline">
+                        <button onClick={() => { goToStep(3); setSelectionOpen(false); }} className="text-xs text-[#003878] font-medium hover:underline">
                             {t('configurator.navigation.change')}
                         </button>
                     )}
@@ -582,7 +684,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                         <span className="block text-sm font-semibold text-gray-900">{getOptionLabel('zijwand_links', config.zijwand_links)}</span>
                     </div>
                     {showEditButtons && (
-                        <button onClick={() => { goToStep(3); setSelectionOpen(false); }} className="text-xs text-[#003878] font-medium hover:underline">
+                        <button onClick={() => { goToStep(4); setSelectionOpen(false); }} className="text-xs text-[#003878] font-medium hover:underline">
                             {t('configurator.navigation.change')}
                         </button>
                     )}
@@ -595,7 +697,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                         <span className="block text-sm font-semibold text-gray-900">{getOptionLabel('zijwand_rechts', config.zijwand_rechts)}</span>
                     </div>
                     {showEditButtons && (
-                        <button onClick={() => { goToStep(4); setSelectionOpen(false); }} className="text-xs text-[#003878] font-medium hover:underline">
+                        <button onClick={() => { goToStep(5); setSelectionOpen(false); }} className="text-xs text-[#003878] font-medium hover:underline">
                             {t('configurator.navigation.change')}
                         </button>
                     )}
@@ -607,7 +709,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                     <span className="block text-sm font-semibold text-gray-900">{config.verlichting ? t('configurator.selection.yesLedSpots') : t('configurator.selection.no')}</span>
                 </div>
                 {showEditButtons && (
-                    <button onClick={() => { goToStep(5); setSelectionOpen(false); }} className="text-xs text-[#003878] font-medium hover:underline">
+                    <button onClick={() => { goToStep(6); setSelectionOpen(false); }} className="text-xs text-[#003878] font-medium hover:underline">
                         {t('configurator.navigation.change')}
                     </button>
                 )}
@@ -660,18 +762,45 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
         </AnimatePresence>
     );
 
-    // Visualization Component
-    const Visualization = ({ className = "" }: { className?: string }) => (
-        <div className={`bg-gradient-to-br from-gray-100 to-gray-50 rounded-xl overflow-hidden ${className}`}>
-            <div className="aspect-[16/9] lg:aspect-[21/9] relative flex items-center justify-center">
-                {/* Placeholder for future overlay rendering */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
-                    <Eye size={40} className="text-gray-300 mb-3" />
-                    <p className="text-sm text-gray-400 font-medium">{t('configurator.visualization.previewPlaceholder')}</p>
-                </div>
-                {/* Config badges */}
-                {(config.daktype || config.goot) && (
+    // Visualization Component with layer rendering
+    const Visualization = ({ className = "" }: { className?: string }) => {
+        const selectedColor = COLOR_OPTIONS.find(c => c.id === config.kleur);
+        
+        return (
+            <div className={`bg-gradient-to-br from-gray-100 to-gray-50 rounded-xl overflow-hidden ${className}`}>
+                <div className="aspect-[16/9] lg:aspect-[21/9] relative flex items-center justify-center">
+                    {/* Render stacked layers */}
+                    {visualLayers.length > 0 ? (
+                        visualLayers.map((layer) => (
+                            <SafeImage
+                                key={layer.id}
+                                src={layer.src}
+                                alt={layer.alt}
+                                className="absolute inset-0 w-full h-full object-contain"
+                            />
+                        ))
+                    ) : (
+                        /* Placeholder when no layers */
+                        <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
+                            <Eye size={40} className="text-gray-300 mb-3" />
+                            <p className="text-sm text-gray-400 font-medium">{t('configurator.visualization.previewPlaceholder')}</p>
+                        </div>
+                    )}
+                    
+                    {/* Config badges */}
                     <div className="absolute bottom-3 left-3 flex flex-wrap gap-1.5">
+                        {selectedColor && (
+                            <span 
+                                className="px-2.5 py-1 text-white text-[10px] font-bold rounded-full uppercase tracking-wide flex items-center gap-1.5"
+                                style={{ backgroundColor: selectedColor.hex === '#FDF4E3' ? '#8B8685' : selectedColor.hex }}
+                            >
+                                <span 
+                                    className="w-2.5 h-2.5 rounded-full border border-white/30"
+                                    style={{ backgroundColor: selectedColor.hex }}
+                                />
+                                {config.kleur?.replace('ral', 'RAL ')}
+                            </span>
+                        )}
                         {config.daktype && (
                             <span className="px-2.5 py-1 bg-[#003878] text-white text-[10px] font-bold rounded-full uppercase tracking-wide">
                                 {config.daktype.replace('_', ' ')}
@@ -683,10 +812,10 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                             </span>
                         )}
                     </div>
-                )}
+                </div>
             </div>
-        </div>
-    );
+        );
+    };
 
     return (
         <AnimatePresence>

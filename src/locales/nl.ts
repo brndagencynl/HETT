@@ -6,6 +6,10 @@ export const nl = {
   configurator: {
     // Step definitions
     steps: {
+      kleur: {
+        title: 'Kleur profiel',
+        description: 'Kies de kleur van uw aluminium profielen',
+      },
       daktype: {
         title: 'Daktype',
         description: 'Kies het materiaal voor uw overkapping',

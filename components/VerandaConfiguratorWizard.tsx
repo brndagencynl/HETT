@@ -65,20 +65,6 @@ const STEPS: StepDefinition[] = [
         required: true 
     },
     { 
-        id: 'goot', 
-        title: t('configurator.steps.goot.title'), 
-        description: t('configurator.steps.goot.description'),
-        optionKey: 'goot',
-        required: true 
-    },
-    { 
-        id: 'voorzijde', 
-        title: t('configurator.steps.voorzijde.title'), 
-        description: t('configurator.steps.voorzijde.description'),
-        optionKey: 'voorzijde',
-        required: false 
-    },
-    { 
         id: 'zijwand_links', 
         title: t('configurator.steps.zijwand_links.title'), 
         description: t('configurator.steps.zijwand_links.description'),
@@ -91,6 +77,20 @@ const STEPS: StepDefinition[] = [
         description: t('configurator.steps.zijwand_rechts.description'),
         optionKey: 'zijwand_rechts',
         required: false 
+    },
+    { 
+        id: 'voorzijde', 
+        title: t('configurator.steps.voorzijde.title'), 
+        description: t('configurator.steps.voorzijde.description'),
+        optionKey: 'voorzijde',
+        required: false 
+    },
+    { 
+        id: 'goot', 
+        title: t('configurator.steps.goot.title'), 
+        description: t('configurator.steps.goot.description'),
+        optionKey: 'goot',
+        required: true 
     },
     { 
         id: 'verlichting', 

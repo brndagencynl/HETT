@@ -32,16 +32,18 @@ export interface Product {
 export type ProductCategory = 'verandas' | 'sandwichpanelen' | 'accessoires';
 
 export type VerandaConfig = {
-  kleur?: 'ral7016' | 'ral9005' | 'ral9001';
+  color?: 'ral7016' | 'ral9005' | 'ral9001';
   daktype?: 'poly_helder' | 'poly_opaal' | 'glas';
-  goot?: 'deluxe' | 'cube' | 'classic'; // NEW (required)
-  voorzijde?: 'geen' | 'glazen_schuifwand' | 'glas_schuifwand';
+  goot?: 'deluxe' | 'cube' | 'classic'; // Required
   zijwand_links?: 'geen' | 'poly_spie' | 'sandwich_poly_spie' | 'sandwich_volledig' | 'sandwich_polyspie' | 'sandwich_vol';
   zijwand_rechts?: 'geen' | 'poly_spie' | 'sandwich_poly_spie' | 'sandwich_volledig' | 'sandwich_polyspie' | 'sandwich_vol';
-  extra_verlichting?: boolean;
+  voorzijde?: 'geen' | 'glazen_schuifwand' | 'glas_schuifwand';
   verlichting?: boolean;
+  extra_verlichting?: boolean;
   // Common visual options
-  /** @deprecated Use kleur instead */
+  /** @deprecated Use color instead */
+  kleur?: 'ral7016' | 'ral9005' | 'ral9001';
+  /** @deprecated Use color instead */
   profileColor?: string;
   widthCm?: number;
   depthCm?: number;

@@ -60,8 +60,9 @@ const Quote: React.FC = () => {
                     <div className="space-y-4 mb-8">
                         <SummaryRow label="Breedte" value={`${config.widthCm} cm`} />
                         <SummaryRow label="Diepte" value={`${config.depthCm} cm`} />
-                        <SummaryRow label="Kleur" value={config.kleur || config.profileColor} />
+                        <SummaryRow label="Kleur" value={config.color || config.kleur || config.profileColor} />
                         <SummaryRow label="Daktype" value={config.roofType || config.daktype} />
+                        <SummaryRow label="Goot" value={config.goot} />
                         <SummaryRow label="Zijwand Links" value={config.wallLeft === 'none' || config.wallLeft === 'geen' ? 'Geen' : (config.wallLeft || config.zijwand_links)} />
                         <SummaryRow label="Zijwand Rechts" value={config.wallRight === 'none' || config.wallRight === 'geen' ? 'Geen' : (config.wallRight || config.zijwand_rechts)} />
                         <SummaryRow label="Voorzijde" value={config.front === 'open' || config.front === 'geen' ? 'Volledig open' : (config.front || config.voorzijde)} />

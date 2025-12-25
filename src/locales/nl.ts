@@ -4,9 +4,9 @@
 
 export const nl = {
   configurator: {
-    // Step definitions
+    // Step definitions - in exact order
     steps: {
-      kleur: {
+      color: {
         title: 'Kleur profiel',
         description: 'Kies de kleur van uw aluminium profielen',
       },
@@ -18,10 +18,6 @@ export const nl = {
         title: 'Goot',
         description: 'Selecteer uw gootsysteem',
       },
-      voorzijde: {
-        title: 'Voorzijde',
-        description: 'Wilt u de voorzijde afsluiten?',
-      },
       zijwand_links: {
         title: 'Zijwand links',
         description: 'Kies de afwerking voor de linker zijde',
@@ -30,6 +26,10 @@ export const nl = {
         title: 'Zijwand rechts',
         description: 'Kies de afwerking voor de rechter zijde',
       },
+      voorzijde: {
+        title: 'Voorzijde',
+        description: 'Wilt u de voorzijde afsluiten?',
+      },
       verlichting: {
         title: "Extra's",
         description: 'Verlichting toevoegen aan uw veranda',
@@ -37,6 +37,11 @@ export const nl = {
       overzicht: {
         title: 'Overzicht',
         description: 'Controleer uw configuratie',
+      },
+      // Legacy alias
+      kleur: {
+        title: 'Kleur profiel',
+        description: 'Kies de kleur van uw aluminium profielen',
       },
     },
 

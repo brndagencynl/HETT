@@ -5,6 +5,15 @@
  * Pricing data is centralized in ../pricing/verandapricing.ts
  * Asset paths are centralized in ../visual/verandaAssets.ts
  * 
+ * STEP ORDER (single source of truth):
+ * 1. color - RAL color selection
+ * 2. daktype - Roof type
+ * 3. goot - Gutter system
+ * 4. zijwand_links - Left side wall
+ * 5. zijwand_rechts - Right side wall
+ * 6. voorzijde - Front side (glazen schuifwand)
+ * 7. verlichting - Extras (LED lighting)
+ * 
  * IMPORTANT: Each size is a SEPARATE PRODUCT, not a variation.
  * The configurator does NOT allow changing dimensions - only options.
  */
@@ -32,16 +41,16 @@ import {
 // =============================================================================
 
 export type VerandaOptionKey =
-    | "kleur"
+    | "color"
     | "daktype"
     | "goot"
-    | "voorzijde"
     | "zijwand_links"
     | "zijwand_rechts"
+    | "voorzijde"
     | "verlichting";
 
 /** Color options */
-export type KleurValue = VerandaColorId;
+export type ColorValue = VerandaColorId;
 
 /** Roof type options */
 export type DaktypeValue = 'poly_helder' | 'poly_opaal';
@@ -55,22 +64,24 @@ export type ZijwandValue = 'geen' | 'poly_spie' | 'sandwich_polyspie' | 'sandwic
 /** Gutter options */
 export type GootValue = 'classic' | 'cube' | 'deluxe';
 
-/** Profile color options - DEPRECATED, use kleur instead */
+/** Profile color options - DEPRECATED, use color instead */
 export type ProfileColorValue = 'Antraciet (RAL7016)' | 'Crèmewit (RAL9001)' | 'Zwart (RAL9005)';
 
 /**
  * Complete veranda configuration
  */
 export type VerandaConfig = {
-    kleur: KleurValue;
+    color: ColorValue;
     daktype: DaktypeValue;
     goot: GootValue;
-    voorzijde: VoorzijdeValue;
     zijwand_links: ZijwandValue;
     zijwand_rechts: ZijwandValue;
+    voorzijde: VoorzijdeValue;
     verlichting: boolean;
-    /** @deprecated Use kleur instead */
+    /** @deprecated Use color instead */
     profileColor?: ProfileColorValue;
+    /** @deprecated Use color instead */
+    kleur?: ColorValue;
 };
 
 /**
@@ -87,19 +98,19 @@ export type VerandaConfigWithSize = VerandaConfig & {
 
 /**
  * Default configuration for new configurator sessions
- * - kleur defaults to ral7016 (Antraciet) for immediate visualization
+ * - color defaults to ral7016 (Antraciet) for immediate visualization
  * - Required fields (daktype, goot) are undefined to force user selection
  * - Optional fields default to 'geen' or false
  * 
  * NOTE: No persistence - config resets on refresh
  */
 export const DEFAULT_VERANDA_CONFIG: Partial<VerandaConfig> = {
-    kleur: DEFAULT_COLOR,  // Default to Antraciet for visualization
+    color: DEFAULT_COLOR,  // Default to Antraciet for visualization
     // daktype: undefined, // Force choice - REQUIRED
     // goot: undefined,    // Force choice - REQUIRED
-    voorzijde: "geen",
     zijwand_links: "geen",
     zijwand_rechts: "geen",
+    voorzijde: "geen",
     verlichting: false,
 };
 
@@ -128,13 +139,13 @@ function toUIChoice(choice: OptionChoice, defaultSize: VerandaProductSize = '600
  * UI Configuration for the configurator wizard
  * This maps the centralized pricing to the UI component format
  * 
- * STEP ORDER:
- * 1. Kleur (Color) - required, no price
+ * STEP ORDER (single source of truth):
+ * 1. Color - required, no price
  * 2. Daktype (Roof type) - required
  * 3. Goot (Gutter) - required
- * 4. Voorzijde (Front side) - optional
- * 5. Zijwand links (Side wall left) - optional
- * 6. Zijwand rechts (Side wall right) - optional
+ * 4. Zijwand links (Side wall left) - optional
+ * 5. Zijwand rechts (Side wall right) - optional
+ * 6. Voorzijde (Front side) - optional
  * 7. Verlichting (Extras) - optional
  * 
  * Note: Prices shown are for default size (600x300). 
@@ -142,7 +153,7 @@ function toUIChoice(choice: OptionChoice, defaultSize: VerandaProductSize = '600
  */
 export const VERANDA_OPTIONS_UI = [
     {
-        key: "kleur",
+        key: "color",
         label: "Kleur profiel",
         step: 1,
         type: "color",
@@ -169,9 +180,17 @@ export const VERANDA_OPTIONS_UI = [
         })),
     },
     {
+        key: "goot",
+        label: "Goot optie",
+        step: 3,
+        type: "select",
+        required: true,
+        choices: GUTTER_OPTIONS.map(c => toUIChoice(c)),
+    },
+    {
         key: "zijwand_links",
         label: "Zijwand links",
-        step: 3,
+        step: 4,
         type: "select",
         required: false,
         choices: SIDE_WALL_OPTIONS.map(c => toUIChoice(c)),
@@ -179,7 +198,7 @@ export const VERANDA_OPTIONS_UI = [
     {
         key: "zijwand_rechts",
         label: "Zijwand rechts",
-        step: 4,
+        step: 5,
         type: "select",
         required: false,
         choices: SIDE_WALL_OPTIONS.map(c => toUIChoice(c)),
@@ -187,18 +206,10 @@ export const VERANDA_OPTIONS_UI = [
     {
         key: "voorzijde",
         label: "Voorzijde",
-        step: 5,
+        step: 6,
         type: "select",
         required: false,
         choices: FRONT_SIDE_OPTIONS.map(c => toUIChoice(c)),
-    },
-    {
-        key: "goot",
-        label: "Goot optie",
-        step: 6,
-        type: "select",
-        required: true,
-        choices: GUTTER_OPTIONS.map(c => toUIChoice(c)),
     },
     {
         key: "verlichting",

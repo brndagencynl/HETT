@@ -292,17 +292,18 @@ export const EXTRAS_OPTIONS: OptionChoice[] = [
  * Complete configuration options grouped by step
  * This is the main export for UI components
  * 
- * STEP ORDER:
- * 1. Kleur (Color) - required, no price
+ * STEP ORDER (single source of truth):
+ * 1. Color - required, no price
  * 2. Daktype (Roof type) - required
  * 3. Goot (Gutter) - required
- * 4. Voorzijde (Front side) - optional
- * 5. Zijwand links/rechts (Side walls) - optional
- * 6. Verlichting (Extras) - optional
+ * 4. Zijwand links (Left side wall) - optional
+ * 5. Zijwand rechts (Right side wall) - optional
+ * 6. Voorzijde (Front side) - optional
+ * 7. Verlichting (Extras) - optional
  */
 export const VERANDA_OPTION_GROUPS: OptionGroup[] = [
   {
-    id: 'kleur',
+    id: 'color',
     step: 1,
     label: 'Color',
     labelNL: 'Kleur profiel',
@@ -332,17 +333,9 @@ export const VERANDA_OPTION_GROUPS: OptionGroup[] = [
     choices: [...GUTTER_OPTIONS],
   },
   {
-    id: 'voorzijde',
-    step: 4,
-    label: 'Front side',
-    labelNL: 'Voorzijde',
-    required: false,
-    choices: [...FRONT_SIDE_OPTIONS],
-  },
-  {
     id: 'zijwand_links',
-    step: 5,
-    label: 'Side wall left',
+    step: 4,
+    label: 'Left side wall',
     labelNL: 'Zijwand links',
     required: false,
     choices: [...SIDE_WALL_OPTIONS],
@@ -350,14 +343,22 @@ export const VERANDA_OPTION_GROUPS: OptionGroup[] = [
   {
     id: 'zijwand_rechts',
     step: 5,
-    label: 'Side wall right',
+    label: 'Right side wall',
     labelNL: 'Zijwand rechts',
     required: false,
     choices: [...SIDE_WALL_OPTIONS],
   },
   {
-    id: 'verlichting',
+    id: 'voorzijde',
     step: 6,
+    label: 'Front side',
+    labelNL: 'Voorzijde',
+    required: false,
+    choices: [...FRONT_SIDE_OPTIONS],
+  },
+  {
+    id: 'verlichting',
+    step: 7,
     label: 'Extras',
     labelNL: "Extra's",
     required: false,

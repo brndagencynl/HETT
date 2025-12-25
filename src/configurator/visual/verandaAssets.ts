@@ -7,15 +7,24 @@
  * 
  * ASSET STRUCTURE:
  * /public/renders/veranda/
- *   ├── {kleur}/                    (ral7016, ral9005, ral9001)
+ *   ├── {color}/                    (ral7016, ral9005, ral9001)
  *   │   ├── base.png               (base image for color)
  *   │   ├── daktype/{choiceId}.png
- *   │   ├── voorzijde/{choiceId}.png
+ *   │   ├── goot/{choiceId}.png
  *   │   ├── zijwand_links/{choiceId}.png
  *   │   ├── zijwand_rechts/{choiceId}.png
- *   │   └── goot/{choiceId}.png
+ *   │   └── voorzijde/{choiceId}.png
  *   └── shared/
- *       └── extras/{choiceId}.png  (verlichting - not color dependent)
+ *       └── thumbnails/            (shared thumbnails)
+ * 
+ * OVERLAY STACK ORDER (z-index):
+ * 1. base.png (z: 0)
+ * 2. daktype overlay (z: 10)
+ * 3. goot overlay (z: 20)
+ * 4. zijwand_links overlay (z: 30)
+ * 5. zijwand_rechts overlay (z: 40)
+ * 6. voorzijde overlay (z: 50)
+ * Note: verlichting has no visual overlay
  */
 
 // =============================================================================
@@ -26,10 +35,16 @@
 export type VerandaColorId = 'ral7016' | 'ral9005' | 'ral9001';
 
 /** Option groups that are color-dependent (have overlay images) */
-export type ColorDependentGroup = 'daktype' | 'voorzijde' | 'zijwand_links' | 'zijwand_rechts' | 'goot';
+export type ColorDependentGroup = 'daktype' | 'goot' | 'zijwand_links' | 'zijwand_rechts' | 'voorzijde';
 
-/** All visual option groups (groups that render overlays) */
-export type VisualOptionGroup = ColorDependentGroup;
+/** All visual option groups (groups that render overlays) - in exact stack order */
+export const OVERLAY_GROUPS: readonly ColorDependentGroup[] = [
+  'daktype',
+  'goot',
+  'zijwand_links',
+  'zijwand_rechts',
+  'voorzijde',
+] as const;
 
 /** Asset type for different use cases */
 export type AssetType = 'base' | 'overlay' | 'thumbnail';
@@ -51,7 +66,7 @@ export const FALLBACK_IMAGE = '/renders/veranda/fallback.png';
 const NO_OVERLAY_CHOICES = ['geen', 'none', 'false', ''];
 
 /** Groups that do NOT render overlays (option-only, no images) */
-const NO_OVERLAY_GROUPS: string[] = ['verlichting'];
+const NO_OVERLAY_GROUPS: string[] = ['verlichting', 'color'];
 
 // =============================================================================
 // HELPER FUNCTIONS
@@ -69,7 +84,7 @@ export function shouldRenderOverlay(choiceId: string | boolean | undefined | nul
 
 /**
  * Check if a group has overlay images
- * Verlichting is an option-only toggle without visual overlays
+ * Verlichting and color are option-only without visual overlays
  */
 export function hasOverlayImages(groupId: string): boolean {
   return !NO_OVERLAY_GROUPS.includes(groupId);
@@ -104,8 +119,8 @@ export function normalizeColorId(color: string | undefined | null): VerandaColor
 /**
  * Get the base image path for a color
  */
-export function getBaseImagePath(kleur: VerandaColorId = DEFAULT_COLOR): string {
-  return `${RENDER_BASE_PATH}/${kleur}/base.png`;
+export function getBaseImagePath(color: VerandaColorId = DEFAULT_COLOR): string {
+  return `${RENDER_BASE_PATH}/${color}/base.png`;
 }
 
 /**
@@ -113,13 +128,13 @@ export function getBaseImagePath(kleur: VerandaColorId = DEFAULT_COLOR): string 
  * 
  * @param groupId - The option group (e.g., 'daktype', 'voorzijde')
  * @param choiceId - The selected choice ID (e.g., 'poly_helder', 'glas_schuifwand')
- * @param kleur - The selected color
+ * @param color - The selected color
  * @returns Path to overlay image, or null if no overlay should be rendered
  */
 export function getOverlayPath(
   groupId: string,
   choiceId: string | boolean | undefined | null,
-  kleur: VerandaColorId = DEFAULT_COLOR
+  color: VerandaColorId = DEFAULT_COLOR
 ): string | null {
   // No overlay for groups without images (e.g., verlichting)
   if (!hasOverlayImages(groupId)) return null;
@@ -131,7 +146,7 @@ export function getOverlayPath(
   if (typeof choiceId === 'boolean') return null;
   
   // Color-dependent path
-  return `${RENDER_BASE_PATH}/${kleur}/${groupId}/${choiceId}.png`;
+  return `${RENDER_BASE_PATH}/${color}/${groupId}/${choiceId}.png`;
 }
 
 /**
@@ -141,7 +156,7 @@ export function getOverlayPath(
 export function getThumbnailPath(
   groupId: string,
   choiceId: string,
-  kleur: VerandaColorId = DEFAULT_COLOR
+  color: VerandaColorId = DEFAULT_COLOR
 ): string {
   // 'geen' option uses a generic "none" thumbnail
   if (NO_OVERLAY_CHOICES.includes(choiceId.toLowerCase())) {
@@ -154,21 +169,21 @@ export function getThumbnailPath(
   }
   
   // Color-dependent thumbnail
-  return `${RENDER_BASE_PATH}/${kleur}/thumbnails/${groupId}/${choiceId}.png`;
+  return `${RENDER_BASE_PATH}/${color}/thumbnails/${groupId}/${choiceId}.png`;
 }
 
 /**
  * Get color swatch/preview image for color selector
  */
-export function getColorSwatchPath(kleur: VerandaColorId): string {
-  return `${RENDER_BASE_PATH}/${kleur}/swatch.png`;
+export function getColorSwatchPath(color: VerandaColorId): string {
+  return `${RENDER_BASE_PATH}/${color}/swatch.png`;
 }
 
 /**
  * Get color preview image (larger than swatch, for cards)
  */
-export function getColorPreviewPath(kleur: VerandaColorId): string {
-  return `${RENDER_BASE_PATH}/${kleur}/preview.png`;
+export function getColorPreviewPath(color: VerandaColorId): string {
+  return `${RENDER_BASE_PATH}/${color}/preview.png`;
 }
 
 // =============================================================================
@@ -183,89 +198,121 @@ export interface VisualizationLayer {
 }
 
 export interface VerandaVisualizationConfig {
-  kleur?: VerandaColorId;
+  color?: VerandaColorId;
   daktype?: string;
-  voorzijde?: string;
+  goot?: string;
   zijwand_links?: string;
   zijwand_rechts?: string;
-  goot?: string;
+  voorzijde?: string;
   verlichting?: boolean;
 }
 
 /**
+ * Z-index values for each overlay layer
+ * Follows the exact order: daktype → goot → zijwand_links → zijwand_rechts → voorzijde
+ */
+const OVERLAY_Z_INDEX: Record<ColorDependentGroup, number> = {
+  daktype: 10,
+  goot: 20,
+  zijwand_links: 30,
+  zijwand_rechts: 40,
+  voorzijde: 50,
+};
+
+/**
  * Build the complete visualization layer stack
  * Returns layers in correct z-order for rendering
+ * 
+ * LAYER ORDER:
+ * 1. Base image (color-specific)
+ * 2. Daktype overlay
+ * 3. Goot overlay
+ * 4. Zijwand links overlay
+ * 5. Zijwand rechts overlay
+ * 6. Voorzijde overlay
+ * (verlichting has no visual overlay)
  */
 export function buildVisualizationLayers(config: VerandaVisualizationConfig): VisualizationLayer[] {
-  const kleur = normalizeColorId(config.kleur);
+  const color = normalizeColorId(config.color);
   const layers: VisualizationLayer[] = [];
   
   // 1. Base image (always present)
   layers.push({
     id: 'base',
-    src: getBaseImagePath(kleur),
+    src: getBaseImagePath(color),
     zIndex: 0,
     alt: 'Veranda basis',
   });
   
-  // 2. Daktype overlay (z: 10)
-  const daktypeOverlay = getOverlayPath('daktype', config.daktype, kleur);
-  if (daktypeOverlay) {
-    layers.push({
-      id: `daktype-${config.daktype}`,
-      src: daktypeOverlay,
-      zIndex: 10,
-      alt: `Daktype: ${config.daktype}`,
-    });
-  }
-  
-  // 3. Goot overlay (z: 20)
-  const gootOverlay = getOverlayPath('goot', config.goot, kleur);
-  if (gootOverlay) {
-    layers.push({
-      id: `goot-${config.goot}`,
-      src: gootOverlay,
-      zIndex: 20,
-      alt: `Goot: ${config.goot}`,
-    });
-  }
-  
-  // 4. Voorzijde overlay (z: 30)
-  const voorzijdeOverlay = getOverlayPath('voorzijde', config.voorzijde, kleur);
-  if (voorzijdeOverlay) {
-    layers.push({
-      id: `voorzijde-${config.voorzijde}`,
-      src: voorzijdeOverlay,
-      zIndex: 30,
-      alt: `Voorzijde: ${config.voorzijde}`,
-    });
-  }
-  
-  // 5. Zijwand links overlay (z: 40)
-  const zijwandLinksOverlay = getOverlayPath('zijwand_links', config.zijwand_links, kleur);
-  if (zijwandLinksOverlay) {
-    layers.push({
-      id: `zijwand_links-${config.zijwand_links}`,
-      src: zijwandLinksOverlay,
-      zIndex: 40,
-      alt: `Zijwand links: ${config.zijwand_links}`,
-    });
-  }
-  
-  // 6. Zijwand rechts overlay (z: 50)
-  const zijwandRechtsOverlay = getOverlayPath('zijwand_rechts', config.zijwand_rechts, kleur);
-  if (zijwandRechtsOverlay) {
-    layers.push({
-      id: `zijwand_rechts-${config.zijwand_rechts}`,
-      src: zijwandRechtsOverlay,
-      zIndex: 50,
-      alt: `Zijwand rechts: ${config.zijwand_rechts}`,
-    });
+  // Add overlays in the exact order defined by OVERLAY_GROUPS
+  for (const groupId of OVERLAY_GROUPS) {
+    const choiceId = config[groupId];
+    const overlayPath = getOverlayPath(groupId, choiceId, color);
+    
+    if (overlayPath) {
+      layers.push({
+        id: `${groupId}-${choiceId}`,
+        src: overlayPath,
+        zIndex: OVERLAY_Z_INDEX[groupId],
+        alt: `${groupId}: ${choiceId}`,
+      });
+    }
   }
   
   // Note: Verlichting is an option-only toggle without visual overlays
   
   return layers.sort((a, b) => a.zIndex - b.zIndex);
+}
+
+/**
+ * Get overlay stack for the current configuration
+ * Alias for buildVisualizationLayers for clarity
+ */
+export const getOverlayStack = buildVisualizationLayers;
+
+// =============================================================================
+// PRELOADING
+// =============================================================================
+
+/**
+ * Get paths to preload for current step
+ * Only preloads base image + current and next step overlays
+ */
+export function getPreloadPaths(
+  currentStepIndex: number,
+  config: VerandaVisualizationConfig
+): string[] {
+  const color = normalizeColorId(config.color);
+  const paths: string[] = [];
+  
+  // Always preload base image for selected color
+  paths.push(getBaseImagePath(color));
+  
+  // Get overlay groups to preload (current - 1 to current + 1)
+  const startIdx = Math.max(0, currentStepIndex - 2); // Adjust for color step offset
+  const endIdx = Math.min(OVERLAY_GROUPS.length, currentStepIndex + 1);
+  const groupsToPreload = OVERLAY_GROUPS.slice(startIdx, endIdx);
+  
+  // Add overlay paths for steps to preload
+  for (const groupId of groupsToPreload) {
+    const choiceId = config[groupId];
+    const overlayPath = getOverlayPath(groupId, choiceId, color);
+    if (overlayPath) {
+      paths.push(overlayPath);
+    }
+  }
+  
+  return paths;
+}
+
+/**
+ * Preload images for better UX
+ */
+export function preloadImages(paths: string[]): void {
+  paths.forEach(path => {
+    const img = new Image();
+    img.src = path;
+  });
 }
 
 // =============================================================================

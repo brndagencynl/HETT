@@ -25,14 +25,11 @@
 /** Valid color IDs */
 export type VerandaColorId = 'ral7016' | 'ral9005' | 'ral9001';
 
-/** Option groups that are color-dependent */
+/** Option groups that are color-dependent (have overlay images) */
 export type ColorDependentGroup = 'daktype' | 'voorzijde' | 'zijwand_links' | 'zijwand_rechts' | 'goot';
 
-/** Option groups that use shared assets */
-export type SharedGroup = 'verlichting';
-
-/** All visual option groups */
-export type VisualOptionGroup = ColorDependentGroup | SharedGroup;
+/** All visual option groups (groups that render overlays) */
+export type VisualOptionGroup = ColorDependentGroup;
 
 /** Asset type for different use cases */
 export type AssetType = 'base' | 'overlay' | 'thumbnail';
@@ -53,8 +50,8 @@ export const FALLBACK_IMAGE = '/renders/veranda/fallback.png';
 /** Choice IDs that should not have overlays */
 const NO_OVERLAY_CHOICES = ['geen', 'none', 'false', ''];
 
-/** Groups that use shared assets (not color-dependent) */
-const SHARED_ASSET_GROUPS: SharedGroup[] = ['verlichting'];
+/** Groups that do NOT render overlays (option-only, no images) */
+const NO_OVERLAY_GROUPS: string[] = ['verlichting'];
 
 // =============================================================================
 // HELPER FUNCTIONS
@@ -71,10 +68,11 @@ export function shouldRenderOverlay(choiceId: string | boolean | undefined | nul
 }
 
 /**
- * Check if a group uses shared assets (not color-dependent)
+ * Check if a group has overlay images
+ * Verlichting is an option-only toggle without visual overlays
  */
-export function isSharedAssetGroup(groupId: string): boolean {
-  return SHARED_ASSET_GROUPS.includes(groupId as SharedGroup);
+export function hasOverlayImages(groupId: string): boolean {
+  return !NO_OVERLAY_GROUPS.includes(groupId);
 }
 
 /**
@@ -123,23 +121,17 @@ export function getOverlayPath(
   choiceId: string | boolean | undefined | null,
   kleur: VerandaColorId = DEFAULT_COLOR
 ): string | null {
+  // No overlay for groups without images (e.g., verlichting)
+  if (!hasOverlayImages(groupId)) return null;
+  
   // No overlay for 'geen' or undefined selections
   if (!shouldRenderOverlay(choiceId)) return null;
   
-  // Convert boolean (verlichting) to choice ID
-  const resolvedChoiceId = typeof choiceId === 'boolean' 
-    ? (choiceId ? 'led_verlichting' : null)
-    : choiceId;
-  
-  if (!resolvedChoiceId) return null;
-  
-  // Use shared path for non-color-dependent groups (extras/verlichting)
-  if (isSharedAssetGroup(groupId)) {
-    return `${RENDER_BASE_PATH}/shared/extras/${resolvedChoiceId}.png`;
-  }
+  // Convert boolean to null (booleans are for option-only toggles)
+  if (typeof choiceId === 'boolean') return null;
   
   // Color-dependent path
-  return `${RENDER_BASE_PATH}/${kleur}/${groupId}/${resolvedChoiceId}.png`;
+  return `${RENDER_BASE_PATH}/${kleur}/${groupId}/${choiceId}.png`;
 }
 
 /**
@@ -156,8 +148,8 @@ export function getThumbnailPath(
     return `${RENDER_BASE_PATH}/shared/thumbnails/geen.png`;
   }
   
-  // Shared asset groups
-  if (isSharedAssetGroup(groupId)) {
+  // Groups without overlay images (verlichting) - use shared thumbnails
+  if (!hasOverlayImages(groupId)) {
     return `${RENDER_BASE_PATH}/shared/thumbnails/${groupId}/${choiceId}.png`;
   }
   
@@ -271,16 +263,7 @@ export function buildVisualizationLayers(config: VerandaVisualizationConfig): Vi
     });
   }
   
-  // 7. Verlichting overlay (z: 60) - uses shared assets
-  const verlichtingOverlay = getOverlayPath('verlichting', config.verlichting, kleur);
-  if (verlichtingOverlay) {
-    layers.push({
-      id: 'verlichting-led',
-      src: verlichtingOverlay,
-      zIndex: 60,
-      alt: 'LED Verlichting',
-    });
-  }
+  // Note: Verlichting is an option-only toggle without visual overlays
   
   return layers.sort((a, b) => a.zIndex - b.zIndex);
 }

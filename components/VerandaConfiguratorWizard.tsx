@@ -816,7 +816,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
         
         return (
             <div className={`bg-gradient-to-br from-gray-100 to-gray-50 rounded-xl overflow-hidden ${className}`}>
-                <div className="aspect-[16/9] lg:aspect-[21/9] relative flex items-center justify-center">
+                <div className="aspect-[16/10] relative flex items-center justify-center">
                     {/* Render stacked layers */}
                     {visualLayers.length > 0 ? (
                         visualLayers.map((layer) => (
@@ -912,7 +912,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                         animate={{ y: 0 }}
                         exit={{ y: "100%" }}
                         transition={{ type: "spring", damping: 30, stiffness: 300 }}
-                        className="h-full w-full lg:h-[95vh] lg:w-[95vw] lg:max-w-[1200px] lg:mx-auto lg:my-auto lg:rounded-2xl bg-white overflow-hidden flex flex-col lg:absolute lg:inset-0 lg:m-auto"
+                        className="h-full w-full lg:h-[95vh] lg:w-[95vw] lg:max-w-[1400px] lg:mx-auto lg:my-auto lg:rounded-2xl bg-white overflow-hidden flex flex-col lg:absolute lg:inset-0 lg:m-auto"
                     >
                         {/* Close Button */}
                         <button
@@ -922,57 +922,181 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                             <X size={22} />
                         </button>
 
-                        {/* Scrollable Content */}
-                        <div className="flex-1 overflow-y-auto pb-32 lg:pb-24">
-                            
+                        {/* ========== MOBILE LAYOUT (<1024px) ========== */}
+                        <div className="lg:hidden flex-1 overflow-y-auto pb-32">
                             {/* Header with Title */}
-                            <div className="px-5 pt-5 pb-4 lg:px-8 lg:pt-6">
-                                <h1 className="text-xl lg:text-2xl font-black text-[#003878] pr-10">{productTitle}</h1>
+                            <div className="px-5 pt-5 pb-4">
+                                <h1 className="text-xl font-black text-[#003878] pr-10">{productTitle}</h1>
                                 <p className="text-sm text-gray-500 mt-1">
                                     {t('configurator.navigation.stepOf', { current: currentStepIndex + 1, total: STEPS.length })} — {currentStep.title}
                                 </p>
                             </div>
 
-                            {/* Visualization - Always visible */}
-                            <div className="px-5 lg:px-8 mb-6">
+                            {/* Visualization */}
+                            <div className="px-5 mb-6">
                                 <Visualization />
                             </div>
 
                             {/* Divider */}
-                            <div className="h-px bg-gray-100 mx-5 lg:mx-8 mb-6" />
+                            <div className="h-px bg-gray-100 mx-5 mb-6" />
 
-                            {/* Main Content Grid */}
-                            <div className="px-5 lg:px-8">
-                                <div className="lg:grid lg:grid-cols-[1fr,320px] lg:gap-8">
+                            {/* Steps/Options */}
+                            <div className="px-5">
+                                {renderProgressIndicator()}
+                                
+                                <h2 className="text-xl font-bold text-gray-900 mb-1">{currentStep.title}</h2>
+                                <p className="text-sm text-gray-500 mb-6">{currentStep.description}</p>
+                                
+                                <AnimatePresence mode="wait">
+                                    <MotionDiv
+                                        key={currentStepIndex}
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -10 }}
+                                        transition={{ duration: 0.2 }}
+                                    >
+                                        {renderOptionSelector()}
+                                    </MotionDiv>
+                                </AnimatePresence>
+                            </div>
+                        </div>
+
+                        {/* ========== DESKTOP LAYOUT (≥1024px) ========== */}
+                        {/* 2-column grid: Preview (left) | Config (right) */}
+                        <div className="hidden lg:grid lg:grid-cols-[1fr,420px] lg:gap-6 flex-1 min-h-0">
+                            
+                            {/* LEFT COLUMN - Preview/Visualization */}
+                            <div className="flex flex-col p-6 pr-0 min-h-0">
+                                {/* Product Title */}
+                                <div className="mb-4 pr-12">
+                                    <h1 className="text-2xl font-black text-[#003878]">{productTitle}</h1>
+                                </div>
+                                
+                                {/* Visualization - fills available space */}
+                                <div className="flex-1 min-h-0 flex items-center justify-center">
+                                    <Visualization className="w-full h-full max-h-[calc(95vh-200px)]" />
+                                </div>
+                            </div>
+
+                            {/* RIGHT COLUMN - Configuration Panel */}
+                            <div className="flex flex-col min-h-0 border-l border-gray-100 bg-gray-50/50">
+                                
+                                {/* Sticky Header - Progress + Step Title */}
+                                <div className="sticky top-0 z-10 bg-white border-b border-gray-100 px-6 pt-6 pb-4">
+                                    {/* Step Progress */}
+                                    {renderProgressIndicator()}
                                     
-                                    {/* Left Column - Steps/Options */}
-                                    <div>
-                                        {renderProgressIndicator()}
-                                        
-                                        <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-1">{currentStep.title}</h2>
-                                        <p className="text-sm text-gray-500 mb-6">{currentStep.description}</p>
-                                        
-                                        <AnimatePresence mode="wait">
-                                            <MotionDiv
-                                                key={currentStepIndex}
-                                                initial={{ opacity: 0, y: 10 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                exit={{ opacity: 0, y: -10 }}
-                                                transition={{ duration: 0.2 }}
-                                            >
-                                                {renderOptionSelector()}
-                                            </MotionDiv>
-                                        </AnimatePresence>
+                                    {/* Step Title & Description */}
+                                    <h2 className="text-xl font-bold text-gray-900 mt-4 mb-1">{currentStep.title}</h2>
+                                    <p className="text-sm text-gray-500">{currentStep.description}</p>
+                                </div>
+
+                                {/* Scrollable Content - Options */}
+                                <div className="flex-1 overflow-y-auto px-6 py-6">
+                                    <AnimatePresence mode="wait">
+                                        <MotionDiv
+                                            key={currentStepIndex}
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: -10 }}
+                                            transition={{ duration: 0.2 }}
+                                        >
+                                            {renderOptionSelector()}
+                                        </MotionDiv>
+                                    </AnimatePresence>
+                                </div>
+
+                                {/* Sticky Footer - Price + Navigation */}
+                                <div className="sticky bottom-0 z-10 bg-white border-t border-gray-200 px-6 py-4">
+                                    {/* Price */}
+                                    <div className="mb-4">
+                                        <span className="text-[10px] text-gray-500 uppercase tracking-wide font-medium">{t('configurator.footer.totalPriceInclVat')}</span>
+                                        <span className="block text-2xl font-black text-[#003878]">€ {currentPrice.toLocaleString()},-</span>
                                     </div>
 
+                                    {/* Navigation Buttons */}
+                                    <div className="flex items-center gap-2">
+                                        {currentStepIndex > 0 && (
+                                            <button
+                                                onClick={handleBack}
+                                                className="p-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
+                                            >
+                                                <ChevronLeft size={20} />
+                                            </button>
+                                        )}
+
+                                        {/* Selection Button */}
+                                        <button
+                                            onClick={() => setSelectionOpen(true)}
+                                            className="flex items-center gap-2 px-4 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
+                                        >
+                                            <ShoppingBag size={18} className="text-[#003878]" />
+                                            <span className="font-semibold text-sm">{t('configurator.selection.title')}</span>
+                                            {selectionCount > 0 && (
+                                                <span className="px-1.5 py-0.5 bg-[#003878] text-white text-[10px] font-bold rounded-full">
+                                                    {selectionCount}
+                                                </span>
+                                            )}
+                                        </button>
+
+                                        {/* Spacer */}
+                                        <div className="flex-1" />
+
+                                        {!isLastStep ? (
+                                            <button
+                                                onClick={handleNext}
+                                                disabled={!canProceed}
+                                                className={`px-5 py-3 font-bold rounded-xl text-sm flex items-center gap-2 transition-all ${
+                                                    canProceed
+                                                        ? 'bg-[#003878] text-white hover:bg-[#002050]'
+                                                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                                }`}
+                                            >
+                                                {t('configurator.navigation.next')}
+                                                <ChevronRight size={18} />
+                                            </button>
+                                        ) : (
+                                            <button
+                                                onClick={handleAddToCart}
+                                                disabled={!agreed || isSubmitting}
+                                                className={`px-5 py-3 font-bold rounded-xl text-sm flex items-center gap-2 transition-all ${
+                                                    agreed && !isSubmitting
+                                                        ? 'bg-[#FF7300] text-white hover:bg-[#E66600]'
+                                                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                                }`}
+                                            >
+                                                {isSubmitting ? (
+                                                    <>
+                                                        <Loader2 size={18} className="animate-spin" />
+                                                        {mode === 'edit' ? 'Opslaan...' : t('configurator.navigation.adding')}
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        {mode === 'edit' ? 'Opslaan' : t('configurator.navigation.add')}
+                                                        <ArrowRight size={18} />
+                                                    </>
+                                                )}
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    {/* Info badges */}
+                                    <div className="flex items-center gap-4 mt-3 text-xs text-gray-500">
+                                        <span className="flex items-center gap-1.5">
+                                            <Truck size={12} /> {t('configurator.footer.deliveryTime')}
+                                        </span>
+                                        <span className="flex items-center gap-1.5">
+                                            <ShieldCheck size={12} /> {t('configurator.footer.warranty')}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Footer - Fixed */}
-                        <div className="fixed lg:absolute bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40">
+                        {/* ========== MOBILE FOOTER (only <1024px) ========== */}
+                        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40">
                             {/* Mobile: Selection Button */}
-                            <div className="lg:hidden px-5 py-3 border-b border-gray-100">
+                            <div className="px-5 py-3 border-b border-gray-100">
                                 <button
                                     onClick={() => setSelectionOpen(true)}
                                     className="w-full flex items-center justify-between py-2.5 px-4 bg-gray-50 rounded-lg text-left hover:bg-gray-100 transition-colors"
@@ -991,12 +1115,12 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                             </div>
 
                             {/* Price + Navigation */}
-                            <div className="px-5 py-4 lg:px-8">
+                            <div className="px-5 py-4">
                                 <div className="flex items-center justify-between gap-4">
                                     {/* Price */}
                                     <div>
                                         <span className="text-[10px] text-gray-500 uppercase tracking-wide font-medium">{t('configurator.footer.totalPriceInclVat')}</span>
-                                        <span className="block text-2xl lg:text-3xl font-black text-[#003878]">€ {currentPrice.toLocaleString()},-</span>
+                                        <span className="block text-2xl font-black text-[#003878]">€ {currentPrice.toLocaleString()},-</span>
                                     </div>
 
                                     {/* Navigation Buttons */}
@@ -1009,20 +1133,6 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                                                 <ChevronLeft size={20} />
                                             </button>
                                         )}
-
-                                        {/* Desktop: Selection Button */}
-                                        <button
-                                            onClick={() => setSelectionOpen(true)}
-                                            className="hidden lg:flex items-center gap-2 px-4 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
-                                        >
-                                            <ShoppingBag size={18} className="text-[#003878]" />
-                                            <span className="font-semibold text-sm">{t('configurator.selection.title')}</span>
-                                            {selectionCount > 0 && (
-                                                <span className="px-1.5 py-0.5 bg-[#003878] text-white text-[10px] font-bold rounded-full">
-                                                    {selectionCount}
-                                                </span>
-                                            )}
-                                        </button>
 
                                         {!isLastStep ? (
                                             <button
@@ -1061,16 +1171,6 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                                             </button>
                                         )}
                                     </div>
-                                </div>
-
-                                {/* Desktop Info badges */}
-                                <div className="hidden lg:flex items-center gap-4 mt-3 text-xs text-gray-500">
-                                    <span className="flex items-center gap-1.5">
-                                        <Truck size={12} /> {t('configurator.footer.deliveryTime')}
-                                    </span>
-                                    <span className="flex items-center gap-1.5">
-                                        <ShieldCheck size={12} /> {t('configurator.footer.warranty')}
-                                    </span>
                                 </div>
                             </div>
                         </div>

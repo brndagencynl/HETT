@@ -1,9 +1,9 @@
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useCart } from '../context/CartContext';
 import { useVerandaEdit } from '../context/VerandaEditContext';
-import { Link } from 'react-router-dom';
-import { Trash2, ArrowRight, Plus, Minus, ShoppingBag, Info, Pencil, MapPin, Truck } from 'lucide-react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Trash2, ArrowRight, Plus, Minus, ShoppingBag, Info, Pencil, MapPin, Truck, Lock } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import Button from '../components/ui/button';
 import { Card } from '../components/ui/card';
@@ -31,8 +31,35 @@ const Cart: React.FC = () => {
       setShippingMethod,
       setShippingCountry,
       grandTotal,
+      isShippingLocked,
+      unlockShipping,
+      lockShipping,
     } = useCart();
     const { openEditConfigurator } = useVerandaEdit();
+    const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
+    const shippingSectionRef = useRef<HTMLDivElement>(null);
+
+    // Handle ?editShipping=1 query param
+    useEffect(() => {
+      if (searchParams.get('editShipping') === '1') {
+        // Unlock shipping
+        unlockShipping();
+        // Remove query param
+        searchParams.delete('editShipping');
+        setSearchParams(searchParams, { replace: true });
+        // Scroll to shipping section
+        setTimeout(() => {
+          shippingSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+      }
+    }, [searchParams, setSearchParams, unlockShipping]);
+
+    // Handle navigation to checkout
+    const handleProceedToCheckout = () => {
+      lockShipping();
+      navigate('/afrekenen');
+    };
 
     const VAT_RATE = 0.21;
     const totalInclVat = grandTotal; // Now includes shipping
@@ -203,14 +230,24 @@ const Cart: React.FC = () => {
             <div className="lg:col-span-1">
                 <div className="sticky top-32 space-y-4">
                   {/* Shipping Selection Card */}
-                  <Card padding="wide">
+                  <Card padding="wide" ref={shippingSectionRef}>
                     <h3 className="text-lg font-black text-hett-dark mb-4 pb-3 border-b border-gray-100">Verzending</h3>
                     
+                    {/* Lock Banner */}
+                    {isShippingLocked && (
+                      <div className="flex items-center gap-2 p-3 mb-4 bg-amber-50 border border-amber-200 rounded-xl text-amber-800">
+                        <Lock size={16} className="flex-shrink-0" />
+                        <span className="text-sm">Bezorgmethode is vergrendeld tijdens het afrekenen.</span>
+                      </div>
+                    )}
+                    
                     {/* Shipping Method Radio Cards */}
-                    <div className="space-y-3 mb-4">
+                    <div className={`space-y-3 mb-4 ${isShippingLocked ? 'opacity-60 pointer-events-none' : ''}`}>
                       {/* Pickup Option */}
                       <label 
-                        className={`flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                        className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${
+                          isShippingLocked ? 'cursor-not-allowed' : 'cursor-pointer'
+                        } ${
                           shippingMethod === 'pickup' 
                             ? 'border-hett-primary bg-hett-light/30' 
                             : 'border-gray-200 hover:border-gray-300'
@@ -222,6 +259,7 @@ const Cart: React.FC = () => {
                           value="pickup"
                           checked={shippingMethod === 'pickup'}
                           onChange={() => setShippingMethod('pickup')}
+                          disabled={isShippingLocked}
                           className="sr-only"
                         />
                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
@@ -241,7 +279,9 @@ const Cart: React.FC = () => {
 
                       {/* Delivery Option */}
                       <label 
-                        className={`flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                        className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${
+                          isShippingLocked ? 'cursor-not-allowed' : 'cursor-pointer'
+                        } ${
                           shippingMethod === 'delivery' 
                             ? 'border-hett-primary bg-hett-light/30' 
                             : 'border-gray-200 hover:border-gray-300'
@@ -253,6 +293,7 @@ const Cart: React.FC = () => {
                           value="delivery"
                           checked={shippingMethod === 'delivery'}
                           onChange={() => setShippingMethod('delivery')}
+                          disabled={isShippingLocked}
                           className="sr-only"
                         />
                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
@@ -275,14 +316,15 @@ const Cart: React.FC = () => {
 
                     {/* Country Selector (only enabled for delivery) */}
                     {shippingMethod === 'delivery' && (
-                      <div className="pt-3 border-t border-gray-100">
+                      <div className={`pt-3 border-t border-gray-100 ${isShippingLocked ? 'opacity-60 pointer-events-none' : ''}`}>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           Bezorgland
                         </label>
                         <select
                           value={shippingCountry}
                           onChange={(e) => setShippingCountry(e.target.value as CountryCode)}
-                          className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white text-gray-900 font-medium focus:outline-none focus:ring-2 focus:ring-hett-primary focus:border-transparent"
+                          disabled={isShippingLocked}
+                          className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white text-gray-900 font-medium focus:outline-none focus:ring-2 focus:ring-hett-primary focus:border-transparent disabled:cursor-not-allowed"
                         >
                           {AVAILABLE_COUNTRIES.map((code) => (
                             <option key={code} value={code}>
@@ -324,12 +366,12 @@ const Cart: React.FC = () => {
                     </div>
                     
                     <div className="space-y-3">
-                        <Link 
-                            to="/afrekenen" 
+                        <button 
+                            onClick={handleProceedToCheckout}
                             className="btn btn-primary btn-lg w-full"
                         >
                             Verder naar afrekenen <ArrowRight size={20} />
-                        </Link>
+                        </button>
                         <Link 
                             to="/shop" 
                             className="btn btn-outline btn-md w-full"

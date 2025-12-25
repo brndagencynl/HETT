@@ -1,8 +1,8 @@
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { useVerandaEdit } from '../context/VerandaEditContext';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate, Link } from 'react-router-dom';
 import { Package, Info, Pencil } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import Button from '../components/ui/button';
@@ -25,9 +25,16 @@ type CheckoutForm = {
 };
 
 const Checkout: React.FC = () => {
-  const { cart, total, clearCart, shippingMethod, shippingCountry, shippingFee, grandTotal } = useCart();
+  const { cart, total, clearCart, shippingMethod, shippingCountry, shippingFee, grandTotal, lockShipping } = useCart();
   const { openEditConfigurator } = useVerandaEdit();
   const navigate = useNavigate();
+
+  // Lock shipping on checkout page mount
+  useEffect(() => {
+    if (cart.length > 0) {
+      lockShipping();
+    }
+  }, []);
 
     const [form, setForm] = useState<CheckoutForm>({
         firstName: '',
@@ -319,8 +326,14 @@ const Checkout: React.FC = () => {
                                             <span className="font-bold">{formatMoney(vatAmount)}</span>
                                         </div>
                                         <div className="flex justify-between text-gray-600 text-sm">
-                                            <span className="font-medium">
+                                            <span className="font-medium flex items-center gap-2">
                                               {getShippingLabel(shippingMethod, shippingCountry)}
+                                              <Link 
+                                                to="/cart?editShipping=1" 
+                                                className="text-xs text-hett-primary hover:underline font-semibold"
+                                              >
+                                                Wijzigen
+                                              </Link>
                                             </span>
                                             <span className={`font-bold ${shippingFee === 0 ? 'text-green-600' : ''}`}>
                                               {formatShippingFee(shippingFee)}

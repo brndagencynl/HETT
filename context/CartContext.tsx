@@ -32,6 +32,10 @@ interface CartContextType {
   setShippingCountry: (country: CountryCode) => void;
   /** Total including shipping */
   grandTotal: number;
+  // Shipping lock
+  isShippingLocked: boolean;
+  lockShipping: () => void;
+  unlockShipping: () => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -44,6 +48,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Shipping state
   const [shippingMethod, setShippingMethodState] = useState<ShippingMethod>(DEFAULT_SHIPPING_METHOD);
   const [shippingCountry, setShippingCountryState] = useState<CountryCode>(DEFAULT_SHIPPING_COUNTRY);
+  const [isShippingLocked, setIsShippingLocked] = useState(false);
 
   const openCart = () => setIsCartOpen(true);
   const closeCart = () => setIsCartOpen(false);
@@ -60,14 +65,20 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Grand total including shipping
   const grandTotal = total + shippingFee;
 
-  // Shipping setters
+  // Shipping setters (guarded by lock)
   const setShippingMethod = (method: ShippingMethod) => {
+    if (isShippingLocked) return; // No-op when locked
     setShippingMethodState(method);
   };
   
   const setShippingCountry = (country: CountryCode) => {
+    if (isShippingLocked) return; // No-op when locked
     setShippingCountryState(country);
   };
+
+  // Shipping lock/unlock
+  const lockShipping = () => setIsShippingLocked(true);
+  const unlockShipping = () => setIsShippingLocked(false);
 
   // New imports needed at top:
   // import { validateConfig } from '../utils/configValidation';
@@ -252,6 +263,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setShippingMethod,
       setShippingCountry,
       grandTotal,
+      // Shipping lock
+      isShippingLocked,
+      lockShipping,
+      unlockShipping,
     }}>
       {children}
     </CartContext.Provider>

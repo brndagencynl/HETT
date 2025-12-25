@@ -3,21 +3,15 @@ import React, { useEffect, useRef } from 'react';
 import { useCart } from '../context/CartContext';
 import { useVerandaEdit } from '../context/VerandaEditContext';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Trash2, ArrowRight, Plus, Minus, ShoppingBag, Info, Pencil, MapPin, Truck, Lock } from 'lucide-react';
+import { Trash2, ArrowRight, Plus, Minus, ShoppingBag, Info, Pencil } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import Button from '../components/ui/button';
 import { Card } from '../components/ui/card';
 import { formatMoney } from '../src/pricing/pricingHelpers';
 import ConfigBreakdownPopup, { getCartItemPriceBreakdown, isConfigurableCategory, isVerandaCategory } from '../components/ui/ConfigBreakdownPopup';
 import { CartItemPreview } from '../components/ui/ConfigPreviewImage';
-import { 
-  type ShippingMethod, 
-  type CountryCode, 
-  AVAILABLE_COUNTRIES, 
-  getCountryLabel, 
-  getShippingFee,
-  formatShippingFee 
-} from '../src/pricing/shipping';
+import { ShippingSelector } from '../src/components/cart/ShippingSelector';
+import { formatShippingCost } from '../src/utils/shipping';
 
 const Cart: React.FC = () => {
     const { 
@@ -25,15 +19,19 @@ const Cart: React.FC = () => {
       removeFromCart, 
       updateQuantity, 
       total,
+      // Shipping - postcode based
       shippingMethod,
+      shippingPostcode,
       shippingCountry,
-      shippingFee,
-      setShippingMethod,
-      setShippingCountry,
-      grandTotal,
+      shippingCost,
+      shippingIsValid,
       isShippingLocked,
+      setShippingMethod,
+      setShippingPostcode,
+      updateShippingValidation,
       unlockShipping,
       lockShipping,
+      grandTotal,
     } = useCart();
     const { openEditConfigurator } = useVerandaEdit();
     const navigate = useNavigate();
@@ -57,9 +55,17 @@ const Cart: React.FC = () => {
 
     // Handle navigation to checkout
     const handleProceedToCheckout = () => {
+      if (!shippingIsValid) {
+        // Scroll to shipping section if not valid
+        shippingSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+      }
       lockShipping();
       navigate('/afrekenen');
     };
+
+    // Can proceed to checkout?
+    const canCheckout = shippingIsValid;
 
     const VAT_RATE = 0.21;
     const totalInclVat = grandTotal; // Now includes shipping
@@ -228,113 +234,19 @@ const Cart: React.FC = () => {
 
             {/* Order Summary */}
             <div className="lg:col-span-1">
-                <div className="sticky top-32 space-y-4">
-                  {/* Shipping Selection Card */}
-                  <Card padding="wide" ref={shippingSectionRef}>
-                    <h3 className="text-lg font-black text-hett-dark mb-4 pb-3 border-b border-gray-100">Verzending</h3>
-                    
-                    {/* Lock Banner */}
-                    {isShippingLocked && (
-                      <div className="flex items-center gap-2 p-3 mb-4 bg-amber-50 border border-amber-200 rounded-xl text-amber-800">
-                        <Lock size={16} className="flex-shrink-0" />
-                        <span className="text-sm">Bezorgmethode is vergrendeld tijdens het afrekenen.</span>
-                      </div>
-                    )}
-                    
-                    {/* Shipping Method Radio Cards */}
-                    <div className={`space-y-3 mb-4 ${isShippingLocked ? 'opacity-60 pointer-events-none' : ''}`}>
-                      {/* Pickup Option */}
-                      <label 
-                        className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${
-                          isShippingLocked ? 'cursor-not-allowed' : 'cursor-pointer'
-                        } ${
-                          shippingMethod === 'pickup' 
-                            ? 'border-hett-primary bg-hett-light/30' 
-                            : 'border-gray-200 hover:border-gray-300'
-                        }`}
-                      >
-                        <input
-                          type="radio"
-                          name="shippingMethod"
-                          value="pickup"
-                          checked={shippingMethod === 'pickup'}
-                          onChange={() => setShippingMethod('pickup')}
-                          disabled={isShippingLocked}
-                          className="sr-only"
-                        />
-                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                          shippingMethod === 'pickup' ? 'border-hett-primary' : 'border-gray-300'
-                        }`}>
-                          {shippingMethod === 'pickup' && (
-                            <div className="w-2.5 h-2.5 rounded-full bg-hett-primary" />
-                          )}
-                        </div>
-                        <MapPin size={20} className={shippingMethod === 'pickup' ? 'text-hett-primary' : 'text-gray-400'} />
-                        <div className="flex-1">
-                          <div className="font-bold text-gray-900">Afhalen</div>
-                          <div className="text-xs text-gray-500">Op ons magazijn</div>
-                        </div>
-                        <span className="font-bold text-green-600">Gratis</span>
-                      </label>
-
-                      {/* Delivery Option */}
-                      <label 
-                        className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${
-                          isShippingLocked ? 'cursor-not-allowed' : 'cursor-pointer'
-                        } ${
-                          shippingMethod === 'delivery' 
-                            ? 'border-hett-primary bg-hett-light/30' 
-                            : 'border-gray-200 hover:border-gray-300'
-                        }`}
-                      >
-                        <input
-                          type="radio"
-                          name="shippingMethod"
-                          value="delivery"
-                          checked={shippingMethod === 'delivery'}
-                          onChange={() => setShippingMethod('delivery')}
-                          disabled={isShippingLocked}
-                          className="sr-only"
-                        />
-                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                          shippingMethod === 'delivery' ? 'border-hett-primary' : 'border-gray-300'
-                        }`}>
-                          {shippingMethod === 'delivery' && (
-                            <div className="w-2.5 h-2.5 rounded-full bg-hett-primary" />
-                          )}
-                        </div>
-                        <Truck size={20} className={shippingMethod === 'delivery' ? 'text-hett-primary' : 'text-gray-400'} />
-                        <div className="flex-1">
-                          <div className="font-bold text-gray-900">Bezorgen</div>
-                          <div className="text-xs text-gray-500">Aan huis geleverd</div>
-                        </div>
-                        <span className={`font-bold ${getShippingFee('delivery', shippingCountry) === 0 ? 'text-green-600' : 'text-gray-900'}`}>
-                          {formatShippingFee(getShippingFee('delivery', shippingCountry))}
-                        </span>
-                      </label>
-                    </div>
-
-                    {/* Country Selector (only enabled for delivery) */}
-                    {shippingMethod === 'delivery' && (
-                      <div className={`pt-3 border-t border-gray-100 ${isShippingLocked ? 'opacity-60 pointer-events-none' : ''}`}>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Bezorgland
-                        </label>
-                        <select
-                          value={shippingCountry}
-                          onChange={(e) => setShippingCountry(e.target.value as CountryCode)}
-                          disabled={isShippingLocked}
-                          className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white text-gray-900 font-medium focus:outline-none focus:ring-2 focus:ring-hett-primary focus:border-transparent disabled:cursor-not-allowed"
-                        >
-                          {AVAILABLE_COUNTRIES.map((code) => (
-                            <option key={code} value={code}>
-                              {getCountryLabel(code)} {code !== 'NL' && `(+€${getShippingFee('delivery', code)})`}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    )}
-                  </Card>
+                <div className="sticky top-32 space-y-4" ref={shippingSectionRef}>
+                  {/* Shipping Selection */}
+                  <ShippingSelector
+                    method={shippingMethod}
+                    postcode={shippingPostcode}
+                    country={shippingCountry}
+                    cost={shippingCost}
+                    isValid={shippingIsValid}
+                    isLocked={isShippingLocked}
+                    onMethodChange={setShippingMethod}
+                    onPostcodeChange={setShippingPostcode}
+                    onValidationChange={updateShippingValidation}
+                  />
 
                   {/* Order Summary Card */}
                   <Card padding="wide">
@@ -351,8 +263,8 @@ const Cart: React.FC = () => {
                         </div>
                         <div className="flex justify-between text-gray-600">
                             <span className="font-medium">Bezorgkosten</span>
-                            <span className={`font-bold ${shippingFee === 0 ? 'text-green-600' : ''}`}>
-                              {formatShippingFee(shippingFee)}
+                            <span className={`font-bold ${shippingCost === 0 ? 'text-green-600' : ''}`}>
+                              {shippingIsValid ? formatShippingCost(shippingCost) : '—'}
                             </span>
                         </div>
                     </div>
@@ -368,10 +280,20 @@ const Cart: React.FC = () => {
                     <div className="space-y-3">
                         <button 
                             onClick={handleProceedToCheckout}
-                            className="btn btn-primary btn-lg w-full"
+                            disabled={!canCheckout}
+                            className={`btn btn-lg w-full flex items-center justify-center gap-2 ${
+                              canCheckout 
+                                ? 'btn-primary' 
+                                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            }`}
                         >
                             Verder naar afrekenen <ArrowRight size={20} />
                         </button>
+                        {!canCheckout && shippingMethod === 'delivery' && (
+                          <p className="text-xs text-red-500 text-center">
+                            Voer een geldige postcode in (NL/BE/DE) om verder te gaan
+                          </p>
+                        )}
                         <Link 
                             to="/shop" 
                             className="btn btn-outline btn-md w-full"

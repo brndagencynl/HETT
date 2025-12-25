@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, useMemo } from 'react';
+import React, { createContext, useContext, useState, useMemo, useEffect } from 'react';
 import { CartItem, Product, ProductConfig } from '../types';
 import { validateConfig } from '../utils/configValidation';
 import { generateConfigHash } from '../utils/hash';
@@ -7,10 +7,24 @@ import { buildRenderSnapshot, type VerandaVisualizationConfig } from '../src/con
 import { 
   type ShippingMethod, 
   type CountryCode, 
-  getShippingFee, 
-  DEFAULT_SHIPPING_METHOD, 
-  DEFAULT_SHIPPING_COUNTRY 
-} from '../src/pricing/shipping';
+  getShippingCost,
+  validateShipping,
+  SHIPPING_STORAGE_KEY,
+  DEFAULT_SHIPPING_STATE,
+} from '../src/utils/shipping';
+
+// =============================================================================
+// TYPES
+// =============================================================================
+
+interface ShippingState {
+  method: ShippingMethod;
+  postcode: string;
+  country: CountryCode | null;
+  cost: number;
+  isValid: boolean;
+  isLocked: boolean;
+}
 
 interface CartContextType {
   cart: CartItem[];
@@ -24,31 +38,76 @@ interface CartContextType {
   isCartOpen: boolean;
   openCart: () => void;
   closeCart: () => void;
-  // Shipping
+  // Shipping - new postcode-based system
   shippingMethod: ShippingMethod;
-  shippingCountry: CountryCode;
-  shippingFee: number;
-  setShippingMethod: (method: ShippingMethod) => void;
-  setShippingCountry: (country: CountryCode) => void;
-  /** Total including shipping */
-  grandTotal: number;
-  // Shipping lock
+  shippingPostcode: string;
+  shippingCountry: CountryCode | null;
+  shippingCost: number;
+  shippingIsValid: boolean;
   isShippingLocked: boolean;
+  setShippingMethod: (method: ShippingMethod) => void;
+  setShippingPostcode: (postcode: string) => void;
+  updateShippingValidation: (isValid: boolean, country: CountryCode | null, cost: number) => void;
   lockShipping: () => void;
   unlockShipping: () => void;
+  /** Total including shipping */
+  grandTotal: number;
+  // Legacy aliases (for backward compatibility)
+  shippingCountry: CountryCode | null;
+  shippingFee: number;
+  setShippingCountry: (country: CountryCode) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
+
+// =============================================================================
+// STORAGE HELPERS
+// =============================================================================
+
+function loadShippingFromStorage(): ShippingState {
+  try {
+    const stored = localStorage.getItem(SHIPPING_STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      return {
+        method: parsed.method || DEFAULT_SHIPPING_STATE.method,
+        postcode: parsed.postcode || '',
+        country: parsed.country || null,
+        cost: parsed.cost || 0,
+        isValid: parsed.isValid || false,
+        isLocked: parsed.isLocked || false,
+      };
+    }
+  } catch (e) {
+    console.warn('Failed to load shipping from storage:', e);
+  }
+  return { ...DEFAULT_SHIPPING_STATE, isLocked: false };
+}
+
+function saveShippingToStorage(state: ShippingState): void {
+  try {
+    localStorage.setItem(SHIPPING_STORAGE_KEY, JSON.stringify(state));
+  } catch (e) {
+    console.warn('Failed to save shipping to storage:', e);
+  }
+}
+
+// =============================================================================
+// PROVIDER
+// =============================================================================
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // NOTE: Cart is intentionally NOT persisted (no localStorage/sessionStorage)
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   
-  // Shipping state
-  const [shippingMethod, setShippingMethodState] = useState<ShippingMethod>(DEFAULT_SHIPPING_METHOD);
-  const [shippingCountry, setShippingCountryState] = useState<CountryCode>(DEFAULT_SHIPPING_COUNTRY);
-  const [isShippingLocked, setIsShippingLocked] = useState(false);
+  // Shipping state - loaded from storage
+  const [shipping, setShipping] = useState<ShippingState>(() => loadShippingFromStorage());
+
+  // Persist shipping state to storage
+  useEffect(() => {
+    saveShippingToStorage(shipping);
+  }, [shipping]);
 
   const openCart = () => setIsCartOpen(true);
   const closeCart = () => setIsCartOpen(false);
@@ -57,28 +116,43 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const total = cart.reduce((sum, item) => sum + item.totalPrice, 0);
   const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
   
-  // Shipping fee (derived from method + country)
-  const shippingFee = useMemo(() => {
-    return getShippingFee(shippingMethod, shippingCountry);
-  }, [shippingMethod, shippingCountry]);
-  
-  // Grand total including shipping
-  const grandTotal = total + shippingFee;
+  // Grand total including shipping (only if shipping is valid)
+  const grandTotal = total + (shipping.isValid ? shipping.cost : 0);
 
   // Shipping setters (guarded by lock)
   const setShippingMethod = (method: ShippingMethod) => {
-    if (isShippingLocked) return; // No-op when locked
-    setShippingMethodState(method);
+    if (shipping.isLocked) return;
+    // Re-validate with new method
+    const result = validateShipping(method, shipping.postcode);
+    setShipping(prev => ({
+      ...prev,
+      method,
+      isValid: result.isValid,
+      country: result.country,
+      cost: result.cost,
+    }));
   };
   
+  const setShippingPostcode = (postcode: string) => {
+    if (shipping.isLocked) return;
+    setShipping(prev => ({ ...prev, postcode }));
+  };
+
+  const updateShippingValidation = (isValid: boolean, country: CountryCode | null, cost: number) => {
+    if (shipping.isLocked) return;
+    setShipping(prev => ({ ...prev, isValid, country, cost }));
+  };
+
+  // Legacy setter for backward compatibility
   const setShippingCountry = (country: CountryCode) => {
-    if (isShippingLocked) return; // No-op when locked
-    setShippingCountryState(country);
+    if (shipping.isLocked) return;
+    const cost = getShippingCost('delivery', country);
+    setShipping(prev => ({ ...prev, country, cost, isValid: true }));
   };
 
   // Shipping lock/unlock
-  const lockShipping = () => setIsShippingLocked(true);
-  const unlockShipping = () => setIsShippingLocked(false);
+  const lockShipping = () => setShipping(prev => ({ ...prev, isLocked: true }));
+  const unlockShipping = () => setShipping(prev => ({ ...prev, isLocked: false }));
 
   // New imports needed at top:
   // import { validateConfig } from '../utils/configValidation';
@@ -256,17 +330,22 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isCartOpen, 
       openCart, 
       closeCart,
-      // Shipping
-      shippingMethod,
-      shippingCountry,
-      shippingFee,
+      // Shipping - new postcode-based system
+      shippingMethod: shipping.method,
+      shippingPostcode: shipping.postcode,
+      shippingCountry: shipping.country,
+      shippingCost: shipping.cost,
+      shippingIsValid: shipping.isValid,
+      isShippingLocked: shipping.isLocked,
       setShippingMethod,
-      setShippingCountry,
-      grandTotal,
-      // Shipping lock
-      isShippingLocked,
+      setShippingPostcode,
+      updateShippingValidation,
       lockShipping,
       unlockShipping,
+      grandTotal,
+      // Legacy aliases
+      shippingFee: shipping.cost,
+      setShippingCountry,
     }}>
       {children}
     </CartContext.Provider>

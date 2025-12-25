@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { useVerandaEdit } from '../context/VerandaEditContext';
 import { Navigate, useNavigate, Link } from 'react-router-dom';
-import { Package, Info, Pencil } from 'lucide-react';
+import { Package, Info, Pencil, AlertTriangle, ShoppingCart } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import Button from '../components/ui/button';
 import { Card } from '../components/ui/card';
@@ -11,7 +11,7 @@ import Input from '../components/ui/input';
 import { formatMoney } from '../src/pricing/pricingHelpers';
 import ConfigBreakdownPopup, { getCartItemPriceBreakdown, isConfigurableCategory, isVerandaCategory } from '../components/ui/ConfigBreakdownPopup';
 import { CartItemPreview } from '../components/ui/ConfigPreviewImage';
-import { getShippingLabel, formatShippingFee } from '../src/pricing/shipping';
+import { getShippingSummary, formatShippingCost } from '../src/utils/shipping';
 
 type CheckoutForm = {
     firstName: string;
@@ -25,16 +25,58 @@ type CheckoutForm = {
 };
 
 const Checkout: React.FC = () => {
-  const { cart, total, clearCart, shippingMethod, shippingCountry, shippingFee, grandTotal, lockShipping } = useCart();
+  const { 
+    cart, 
+    total, 
+    clearCart, 
+    shippingMethod, 
+    shippingPostcode,
+    shippingCountry, 
+    shippingCost, 
+    shippingIsValid,
+    grandTotal, 
+    lockShipping 
+  } = useCart();
   const { openEditConfigurator } = useVerandaEdit();
   const navigate = useNavigate();
 
   // Lock shipping on checkout page mount
   useEffect(() => {
-    if (cart.length > 0) {
+    if (cart.length > 0 && shippingIsValid) {
       lockShipping();
     }
   }, []);
+
+  // Guard: If shipping is not valid, show blocking notice
+  if (cart.length > 0 && !shippingIsValid) {
+    return (
+      <div className="min-h-screen bg-[#f6f8fa] font-sans">
+        <PageHeader title="Afrekenen" description="Rond uw bestelling veilig af." image="https://picsum.photos/1200/400?random=98" />
+        
+        <div className="container py-12 md:py-20">
+          <Card padding="wide" className="max-w-lg mx-auto text-center">
+            <div className="flex justify-center mb-6">
+              <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center">
+                <AlertTriangle size={32} className="text-amber-600" />
+              </div>
+            </div>
+            <h2 className="text-2xl font-black text-[#003878] mb-4">Bezorgmethode vereist</h2>
+            <p className="text-gray-600 mb-8">
+              Selecteer eerst een bezorgmethode en vul een geldige postcode in (voor NL/BE/DE) 
+              voordat u kunt afrekenen.
+            </p>
+            <Link 
+              to="/cart" 
+              className="btn btn-primary btn-lg inline-flex items-center gap-2"
+            >
+              <ShoppingCart size={20} />
+              Ga naar winkelmand
+            </Link>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
     const [form, setForm] = useState<CheckoutForm>({
         firstName: '',
@@ -327,16 +369,16 @@ const Checkout: React.FC = () => {
                                         </div>
                                         <div className="flex justify-between text-gray-600 text-sm">
                                             <span className="font-medium flex items-center gap-2">
-                                              {getShippingLabel(shippingMethod, shippingCountry)}
+                                              {getShippingSummary(shippingMethod, shippingCountry, shippingPostcode)}
                                               <Link 
                                                 to="/cart?editShipping=1" 
-                                                className="text-xs text-hett-primary hover:underline font-semibold"
+                                                className="text-xs text-[#003878] hover:underline font-semibold"
                                               >
                                                 Wijzigen
                                               </Link>
                                             </span>
-                                            <span className={`font-bold ${shippingFee === 0 ? 'text-green-600' : ''}`}>
-                                              {formatShippingFee(shippingFee)}
+                                            <span className={`font-bold ${shippingCost === 0 ? 'text-green-600' : ''}`}>
+                                              {formatShippingCost(shippingCost)}
                                             </span>
                                         </div>
                                     </div>

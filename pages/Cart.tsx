@@ -9,6 +9,7 @@ import Button from '../components/ui/button';
 import { Card } from '../components/ui/card';
 import { formatMoney } from '../src/pricing/pricingHelpers';
 import ConfigBreakdownPopup, { getCartItemPriceBreakdown, isConfigurableCategory, isVerandaCategory } from '../components/ui/ConfigBreakdownPopup';
+import { CartItemPreview } from '../components/ui/ConfigPreviewImage';
 
 const Cart: React.FC = () => {
     const { cart, removeFromCart, updateQuantity, total } = useCart();
@@ -57,10 +58,20 @@ const Cart: React.FC = () => {
                     return (
                     <Card key={item.id || String(idx)} padding="normal" className="hover:shadow-md transition-shadow">
                         <div className="flex gap-3 md:gap-4">
-                            {/* Image */}
-                            <div className="w-16 h-16 md:w-24 md:h-24 bg-gray-50 rounded-lg overflow-hidden flex-shrink-0 border border-gray-100">
-                                <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
-                            </div>
+                            {/* Image - use ConfigPreviewImage for verandas */}
+                            {isVeranda ? (
+                                <CartItemPreview
+                                    render={item.render}
+                                    config={initialConfig}
+                                    fallbackImageUrl={item.imageUrl}
+                                    size="lg"
+                                    className="md:w-24 md:h-24"
+                                />
+                            ) : (
+                                <div className="w-16 h-16 md:w-24 md:h-24 bg-gray-50 rounded-lg overflow-hidden flex-shrink-0 border border-gray-100">
+                                    <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
+                                </div>
+                            )}
 
                             {/* Content */}
                             <div className="flex-1 min-w-0">

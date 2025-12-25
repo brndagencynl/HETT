@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState } from 'react';
 import { CartItem, Product, ProductConfig } from '../types';
 import { validateConfig } from '../utils/configValidation';
 import { generateConfigHash } from '../utils/hash';
+import { buildRenderSnapshot, type VerandaVisualizationConfig } from '../src/configurator/visual/verandaAssets';
 
 interface CartContextType {
   cart: CartItem[];
@@ -83,6 +84,21 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Let's generate a unique cart ID: product.id + hash
       const cartId = `${product.id}-${configHash}`;
 
+      // 6. Compute render snapshot for verandas (visual preview in cart/checkout)
+      let renderSnapshot: CartItem['render'] | undefined;
+      if (configCandidate.category === 'verandas') {
+        const visualConfig: VerandaVisualizationConfig = {
+          color: (configCandidate.data.color || configCandidate.data.kleur) as any,
+          daktype: configCandidate.data.daktype,
+          goot: configCandidate.data.goot,
+          zijwand_links: configCandidate.data.zijwand_links,
+          zijwand_rechts: configCandidate.data.zijwand_rechts,
+          voorzijde: configCandidate.data.voorzijde,
+          verlichting: configCandidate.data.verlichting,
+        };
+        renderSnapshot = buildRenderSnapshot(visualConfig);
+      }
+
       const newItem: CartItem = {
         ...product,
         id: cartId, // Override ID for cart uniqueness
@@ -95,6 +111,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Store detailed breakdown for config popup
         priceBreakdown: options.priceBreakdown,
         details: options.details,
+        // Store render snapshot for visual preview
+        render: renderSnapshot,
         // Legacy mapping for UI safety until updated
         selectedColor: 'Configured',
         selectedSize: 'Custom'

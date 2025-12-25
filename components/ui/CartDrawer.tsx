@@ -7,6 +7,7 @@ import { useCart } from '../../context/CartContext';
 import { useVerandaEdit } from '../../context/VerandaEditContext';
 import { isConfigOnly } from '../../utils/productRules';
 import { isVerandaCategory } from './ConfigBreakdownPopup';
+import { CartItemPreview } from './ConfigPreviewImage';
 
 const MotionDiv = motion.div as any;
 
@@ -88,9 +89,19 @@ const CartDrawer: React.FC = () => {
                                     
                                     return (
                                     <div key={index} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex gap-4 relative group">
-                                        <div className="w-20 h-20 bg-gray-50 rounded-lg overflow-hidden flex-shrink-0 border border-gray-100">
-                                            <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
-                                        </div>
+                                        {/* Product image - use ConfigPreviewImage for verandas */}
+                                        {isVeranda ? (
+                                            <CartItemPreview
+                                                render={item.render}
+                                                config={initialConfig}
+                                                fallbackImageUrl={item.imageUrl}
+                                                size="md"
+                                            />
+                                        ) : (
+                                            <div className="w-20 h-20 bg-gray-50 rounded-lg overflow-hidden flex-shrink-0 border border-gray-100">
+                                                <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
+                                            </div>
+                                        )}
 
                                         <div className="flex-1 min-w-0">
                                             <div className="flex justify-between items-start mb-1">

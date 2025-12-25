@@ -80,6 +80,13 @@ export interface CartItem extends Product {
   /** Optional pricing breakdown for config details popup */
   priceBreakdown?: unknown;
 
+  /** Render snapshot for visual preview (configurable products) */
+  render?: {
+    baseImageUrl: string;
+    overlayUrls: string[];
+    capturedAt?: string;
+  };
+
   // Legacy/Compatibility props (to be deprecated or mapped)
   selectedSize?: string;
   selectedColor?: string;

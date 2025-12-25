@@ -10,6 +10,7 @@ import { Card } from '../components/ui/card';
 import Input from '../components/ui/input';
 import { formatMoney } from '../src/pricing/pricingHelpers';
 import ConfigBreakdownPopup, { getCartItemPriceBreakdown, isConfigurableCategory, isVerandaCategory } from '../components/ui/ConfigBreakdownPopup';
+import { CartItemPreview } from '../components/ui/ConfigPreviewImage';
 
 type CheckoutForm = {
     firstName: string;
@@ -229,9 +230,19 @@ const Checkout: React.FC = () => {
                                             const initialConfig = item.config?.category === 'verandas' ? (item.config.data as any) : undefined;
                                             return (
                                             <div key={item.id} className="flex gap-3 pb-4 border-b border-gray-100 last:border-0">
-                                                <div className="w-16 h-16 bg-gray-50 rounded-md overflow-hidden flex-shrink-0 border border-gray-100">
-                                                    <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
-                                                </div>
+                                                {/* Image - use ConfigPreviewImage for verandas */}
+                                                {isVeranda ? (
+                                                    <CartItemPreview
+                                                        render={item.render}
+                                                        config={initialConfig}
+                                                        fallbackImageUrl={item.imageUrl}
+                                                        size="sm"
+                                                    />
+                                                ) : (
+                                                    <div className="w-16 h-16 bg-gray-50 rounded-md overflow-hidden flex-shrink-0 border border-gray-100">
+                                                        <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
+                                                    </div>
+                                                )}
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex items-start gap-2">
                                                         <h4 className="font-bold text-sm text-gray-800 mb-1 line-clamp-2 flex-1">{item.title}</h4>

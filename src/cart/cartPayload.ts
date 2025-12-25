@@ -83,6 +83,31 @@ export interface PricingSnapshot {
 }
 
 // =============================================================================
+// RENDER SNAPSHOT (for configurable product previews)
+// =============================================================================
+
+/**
+ * Render snapshot for visual preview of configured product
+ * 
+ * Captured at add-to-cart time to ensure consistent preview across:
+ * - Cart drawer
+ * - Cart page (/cart)
+ * - Checkout page (/afrekenen)
+ * 
+ * This avoids re-running overlay stack logic in multiple places.
+ */
+export interface RenderSnapshot {
+  /** Base image URL (e.g., color-specific base) */
+  baseImageUrl: string;
+  
+  /** Overlay URLs in z-order (already sorted, render bottom to top) */
+  overlayUrls: string[];
+  
+  /** ISO timestamp when snapshot was captured */
+  capturedAt: string;
+}
+
+// =============================================================================
 // CART ITEM PAYLOAD (Before ID assignment)
 // =============================================================================
 
@@ -110,6 +135,9 @@ export interface VerandaCartItemPayload {
   
   /** Frozen pricing snapshot */
   pricing: PricingSnapshot;
+  
+  /** Render snapshot for visual preview */
+  render?: RenderSnapshot;
   
   /** Optional metadata for future extensibility */
   meta?: Record<string, unknown>;

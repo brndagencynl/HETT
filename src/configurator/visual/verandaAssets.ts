@@ -271,6 +271,40 @@ export function buildVisualizationLayers(config: VerandaVisualizationConfig): Vi
 export const getOverlayStack = buildVisualizationLayers;
 
 // =============================================================================
+// RENDER SNAPSHOT BUILDER
+// =============================================================================
+
+/**
+ * RenderSnapshot structure for cart storage
+ */
+export interface RenderSnapshot {
+  baseImageUrl: string;
+  overlayUrls: string[];
+  capturedAt: string;
+}
+
+/**
+ * Build a render snapshot from veranda configuration
+ * Use this when adding to cart to capture the visual state
+ * 
+ * @param config - Veranda configuration with color and options
+ * @returns RenderSnapshot ready for cart storage
+ */
+export function buildRenderSnapshot(config: VerandaVisualizationConfig): RenderSnapshot {
+  const layers = buildVisualizationLayers(config);
+  
+  // First layer is always base
+  const baseLayer = layers.find(l => l.id === 'base');
+  const overlayLayers = layers.filter(l => l.id !== 'base');
+  
+  return {
+    baseImageUrl: baseLayer?.src || FALLBACK_IMAGE,
+    overlayUrls: overlayLayers.map(l => l.src),
+    capturedAt: new Date().toISOString(),
+  };
+}
+
+// =============================================================================
 // PRELOADING
 // =============================================================================
 

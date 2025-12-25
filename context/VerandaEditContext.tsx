@@ -17,6 +17,7 @@ import { useCart } from './CartContext';
 import { ProductConfig } from '../types';
 // Use the schema VerandaConfig which matches the configurator's types
 import { VerandaConfig } from '../src/configurator/schemas/veranda';
+import { buildRenderSnapshot, type VerandaVisualizationConfig } from '../src/configurator/visual/verandaAssets';
 
 interface EditingCartItem {
   cartIndex: number;
@@ -93,6 +94,18 @@ export const VerandaEditProvider: React.FC<{ children: React.ReactNode }> = ({ c
       // Cast to any to bridge schema VerandaConfig and types.ts ProductConfig
       const productConfig: ProductConfig = { category: 'verandas', data: config as any };
 
+      // Compute render snapshot for visual preview
+      const visualConfig: VerandaVisualizationConfig = {
+        color: config.color,
+        daktype: config.daktype,
+        goot: config.goot,
+        zijwand_links: config.zijwand_links,
+        zijwand_rechts: config.zijwand_rechts,
+        voorzijde: config.voorzijde,
+        verlichting: config.verlichting,
+      };
+      const renderSnapshot = buildRenderSnapshot(visualConfig);
+
       // Update the existing cart item
       updateCartItem(editingItem.cartIndex, {
         totalPrice: price,
@@ -100,6 +113,7 @@ export const VerandaEditProvider: React.FC<{ children: React.ReactNode }> = ({ c
         details,
         priceBreakdown,
         displayConfigSummary: `Dak: ${config.daktype || '-'}, Goot: ${config.goot || '-'}, Voorzijde: ${config.voorzijde || 'Geen'}`,
+        render: renderSnapshot,
       });
     }
 

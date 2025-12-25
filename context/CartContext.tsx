@@ -1,9 +1,16 @@
 
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useMemo } from 'react';
 import { CartItem, Product, ProductConfig } from '../types';
 import { validateConfig } from '../utils/configValidation';
 import { generateConfigHash } from '../utils/hash';
 import { buildRenderSnapshot, type VerandaVisualizationConfig } from '../src/configurator/visual/verandaAssets';
+import { 
+  type ShippingMethod, 
+  type CountryCode, 
+  getShippingFee, 
+  DEFAULT_SHIPPING_METHOD, 
+  DEFAULT_SHIPPING_COUNTRY 
+} from '../src/pricing/shipping';
 
 interface CartContextType {
   cart: CartItem[];
@@ -17,6 +24,14 @@ interface CartContextType {
   isCartOpen: boolean;
   openCart: () => void;
   closeCart: () => void;
+  // Shipping
+  shippingMethod: ShippingMethod;
+  shippingCountry: CountryCode;
+  shippingFee: number;
+  setShippingMethod: (method: ShippingMethod) => void;
+  setShippingCountry: (country: CountryCode) => void;
+  /** Total including shipping */
+  grandTotal: number;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -25,13 +40,34 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // NOTE: Cart is intentionally NOT persisted (no localStorage/sessionStorage)
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  
+  // Shipping state
+  const [shippingMethod, setShippingMethodState] = useState<ShippingMethod>(DEFAULT_SHIPPING_METHOD);
+  const [shippingCountry, setShippingCountryState] = useState<CountryCode>(DEFAULT_SHIPPING_COUNTRY);
 
   const openCart = () => setIsCartOpen(true);
   const closeCart = () => setIsCartOpen(false);
 
-  // Calculate total
+  // Calculate totals
   const total = cart.reduce((sum, item) => sum + item.totalPrice, 0);
   const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  
+  // Shipping fee (derived from method + country)
+  const shippingFee = useMemo(() => {
+    return getShippingFee(shippingMethod, shippingCountry);
+  }, [shippingMethod, shippingCountry]);
+  
+  // Grand total including shipping
+  const grandTotal = total + shippingFee;
+
+  // Shipping setters
+  const setShippingMethod = (method: ShippingMethod) => {
+    setShippingMethodState(method);
+  };
+  
+  const setShippingCountry = (country: CountryCode) => {
+    setShippingCountryState(country);
+  };
 
   // New imports needed at top:
   // import { validateConfig } from '../utils/configValidation';
@@ -197,7 +233,26 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateQuantity, updateCartItem, clearCart, total, itemCount, isCartOpen, openCart, closeCart }}>
+    <CartContext.Provider value={{ 
+      cart, 
+      addToCart, 
+      removeFromCart, 
+      updateQuantity, 
+      updateCartItem, 
+      clearCart, 
+      total, 
+      itemCount, 
+      isCartOpen, 
+      openCart, 
+      closeCart,
+      // Shipping
+      shippingMethod,
+      shippingCountry,
+      shippingFee,
+      setShippingMethod,
+      setShippingCountry,
+      grandTotal,
+    }}>
       {children}
     </CartContext.Provider>
   );

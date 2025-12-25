@@ -11,6 +11,7 @@ import Input from '../components/ui/input';
 import { formatMoney } from '../src/pricing/pricingHelpers';
 import ConfigBreakdownPopup, { getCartItemPriceBreakdown, isConfigurableCategory, isVerandaCategory } from '../components/ui/ConfigBreakdownPopup';
 import { CartItemPreview } from '../components/ui/ConfigPreviewImage';
+import { getShippingLabel, formatShippingFee } from '../src/pricing/shipping';
 
 type CheckoutForm = {
     firstName: string;
@@ -24,7 +25,7 @@ type CheckoutForm = {
 };
 
 const Checkout: React.FC = () => {
-  const { cart, total, clearCart } = useCart();
+  const { cart, total, clearCart, shippingMethod, shippingCountry, shippingFee, grandTotal } = useCart();
   const { openEditConfigurator } = useVerandaEdit();
   const navigate = useNavigate();
 
@@ -42,9 +43,9 @@ const Checkout: React.FC = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const VAT_RATE = 0.21;
-    const totalInclVat = total;
-    const subtotalExVat = Math.round(totalInclVat / (1 + VAT_RATE));
-    const vatAmount = Math.round(totalInclVat - subtotalExVat);
+    const totalInclVat = grandTotal; // Now includes shipping
+    const subtotalExVat = Math.round(total / (1 + VAT_RATE)); // Items only
+    const vatAmount = Math.round(total - subtotalExVat);
 
     const isEmailValid = (email: string) => /\S+@\S+\.\S+/.test(email);
 
@@ -318,8 +319,12 @@ const Checkout: React.FC = () => {
                                             <span className="font-bold">{formatMoney(vatAmount)}</span>
                                         </div>
                                         <div className="flex justify-between text-gray-600 text-sm">
-                                            <span className="font-medium">Verzending</span>
-                                            <span className="text-green-600 font-bold">Gratis</span>
+                                            <span className="font-medium">
+                                              {getShippingLabel(shippingMethod, shippingCountry)}
+                                            </span>
+                                            <span className={`font-bold ${shippingFee === 0 ? 'text-green-600' : ''}`}>
+                                              {formatShippingFee(shippingFee)}
+                                            </span>
                                         </div>
                                     </div>
 
@@ -328,7 +333,7 @@ const Checkout: React.FC = () => {
                                             <span className="text-lg font-bold text-gray-700">Totaal</span>
                                             <span className="text-2xl font-black text-hett-dark">{formatMoney(totalInclVat)}</span>
                                         </div>
-                                        <p className="text-xs text-gray-500 mt-2">Totaal (incl. BTW)</p>
+                                        <p className="text-xs text-gray-500 mt-2">Totaal (incl. BTW en verzending)</p>
                                     </div>
                                 </Card>
                             </div>

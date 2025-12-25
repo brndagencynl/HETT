@@ -3,22 +3,41 @@ import React from 'react';
 import { useCart } from '../context/CartContext';
 import { useVerandaEdit } from '../context/VerandaEditContext';
 import { Link } from 'react-router-dom';
-import { Trash2, ArrowRight, Plus, Minus, ShoppingBag, Info, Pencil } from 'lucide-react';
+import { Trash2, ArrowRight, Plus, Minus, ShoppingBag, Info, Pencil, MapPin, Truck } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import Button from '../components/ui/button';
 import { Card } from '../components/ui/card';
 import { formatMoney } from '../src/pricing/pricingHelpers';
 import ConfigBreakdownPopup, { getCartItemPriceBreakdown, isConfigurableCategory, isVerandaCategory } from '../components/ui/ConfigBreakdownPopup';
 import { CartItemPreview } from '../components/ui/ConfigPreviewImage';
+import { 
+  type ShippingMethod, 
+  type CountryCode, 
+  AVAILABLE_COUNTRIES, 
+  getCountryLabel, 
+  getShippingFee,
+  formatShippingFee 
+} from '../src/pricing/shipping';
 
 const Cart: React.FC = () => {
-    const { cart, removeFromCart, updateQuantity, total } = useCart();
+    const { 
+      cart, 
+      removeFromCart, 
+      updateQuantity, 
+      total,
+      shippingMethod,
+      shippingCountry,
+      shippingFee,
+      setShippingMethod,
+      setShippingCountry,
+      grandTotal,
+    } = useCart();
     const { openEditConfigurator } = useVerandaEdit();
 
     const VAT_RATE = 0.21;
-    const totalInclVat = total;
-    const subtotalExVat = Math.round(totalInclVat / (1 + VAT_RATE));
-    const vatAmount = Math.round(totalInclVat - subtotalExVat);
+    const totalInclVat = grandTotal; // Now includes shipping
+    const subtotalExVat = Math.round(total / (1 + VAT_RATE)); // Items only
+    const vatAmount = Math.round(total - subtotalExVat);
 
   if (cart.length === 0) {
     return (
@@ -182,7 +201,100 @@ const Cart: React.FC = () => {
 
             {/* Order Summary */}
             <div className="lg:col-span-1">
-                <div className="sticky top-32">
+                <div className="sticky top-32 space-y-4">
+                  {/* Shipping Selection Card */}
+                  <Card padding="wide">
+                    <h3 className="text-lg font-black text-hett-dark mb-4 pb-3 border-b border-gray-100">Verzending</h3>
+                    
+                    {/* Shipping Method Radio Cards */}
+                    <div className="space-y-3 mb-4">
+                      {/* Pickup Option */}
+                      <label 
+                        className={`flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                          shippingMethod === 'pickup' 
+                            ? 'border-hett-primary bg-hett-light/30' 
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="shippingMethod"
+                          value="pickup"
+                          checked={shippingMethod === 'pickup'}
+                          onChange={() => setShippingMethod('pickup')}
+                          className="sr-only"
+                        />
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                          shippingMethod === 'pickup' ? 'border-hett-primary' : 'border-gray-300'
+                        }`}>
+                          {shippingMethod === 'pickup' && (
+                            <div className="w-2.5 h-2.5 rounded-full bg-hett-primary" />
+                          )}
+                        </div>
+                        <MapPin size={20} className={shippingMethod === 'pickup' ? 'text-hett-primary' : 'text-gray-400'} />
+                        <div className="flex-1">
+                          <div className="font-bold text-gray-900">Afhalen</div>
+                          <div className="text-xs text-gray-500">Op ons magazijn</div>
+                        </div>
+                        <span className="font-bold text-green-600">Gratis</span>
+                      </label>
+
+                      {/* Delivery Option */}
+                      <label 
+                        className={`flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                          shippingMethod === 'delivery' 
+                            ? 'border-hett-primary bg-hett-light/30' 
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="shippingMethod"
+                          value="delivery"
+                          checked={shippingMethod === 'delivery'}
+                          onChange={() => setShippingMethod('delivery')}
+                          className="sr-only"
+                        />
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                          shippingMethod === 'delivery' ? 'border-hett-primary' : 'border-gray-300'
+                        }`}>
+                          {shippingMethod === 'delivery' && (
+                            <div className="w-2.5 h-2.5 rounded-full bg-hett-primary" />
+                          )}
+                        </div>
+                        <Truck size={20} className={shippingMethod === 'delivery' ? 'text-hett-primary' : 'text-gray-400'} />
+                        <div className="flex-1">
+                          <div className="font-bold text-gray-900">Bezorgen</div>
+                          <div className="text-xs text-gray-500">Aan huis geleverd</div>
+                        </div>
+                        <span className={`font-bold ${getShippingFee('delivery', shippingCountry) === 0 ? 'text-green-600' : 'text-gray-900'}`}>
+                          {formatShippingFee(getShippingFee('delivery', shippingCountry))}
+                        </span>
+                      </label>
+                    </div>
+
+                    {/* Country Selector (only enabled for delivery) */}
+                    {shippingMethod === 'delivery' && (
+                      <div className="pt-3 border-t border-gray-100">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Bezorgland
+                        </label>
+                        <select
+                          value={shippingCountry}
+                          onChange={(e) => setShippingCountry(e.target.value as CountryCode)}
+                          className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white text-gray-900 font-medium focus:outline-none focus:ring-2 focus:ring-hett-primary focus:border-transparent"
+                        >
+                          {AVAILABLE_COUNTRIES.map((code) => (
+                            <option key={code} value={code}>
+                              {getCountryLabel(code)} {code !== 'NL' && `(+€${getShippingFee('delivery', code)})`}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+                  </Card>
+
+                  {/* Order Summary Card */}
                   <Card padding="wide">
                     <h3 className="text-xl font-black text-hett-dark mb-6 pb-4 border-b border-gray-100">Overzicht</h3>
                     
@@ -196,8 +308,10 @@ const Cart: React.FC = () => {
                             <span className="font-bold">{formatMoney(vatAmount)}</span>
                         </div>
                         <div className="flex justify-between text-gray-600">
-                            <span className="font-medium">Verzending</span>
-                            <span className="text-green-600 font-bold">Gratis</span>
+                            <span className="font-medium">Bezorgkosten</span>
+                            <span className={`font-bold ${shippingFee === 0 ? 'text-green-600' : ''}`}>
+                              {formatShippingFee(shippingFee)}
+                            </span>
                         </div>
                     </div>
                     
@@ -206,7 +320,7 @@ const Cart: React.FC = () => {
                             <span className="text-lg font-bold text-gray-700">Totaal</span>
                             <span className="text-2xl font-black text-hett-dark">{formatMoney(totalInclVat)}</span>
                         </div>
-                        <p className="text-xs text-gray-500 mt-2">Totaal (incl. BTW)</p>
+                        <p className="text-xs text-gray-500 mt-2">Totaal (incl. BTW en verzending)</p>
                     </div>
                     
                     <div className="space-y-3">

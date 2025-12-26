@@ -11,7 +11,7 @@ import Input from '../components/ui/input';
 import { formatMoney } from '../src/pricing/pricingHelpers';
 import ConfigBreakdownPopup, { getCartItemPriceBreakdown, isConfigurableCategory, isVerandaCategory } from '../components/ui/ConfigBreakdownPopup';
 import { CartItemPreview } from '../components/ui/ConfigPreviewImage';
-import { getShippingSummary, formatShippingCost } from '../src/utils/shipping';
+import { formatShippingCost, getAddressSummary, COUNTRY_LABELS } from '../src/services/addressValidation';
 
 type CheckoutForm = {
     firstName: string;
@@ -30,8 +30,7 @@ const Checkout: React.FC = () => {
     total, 
     clearCart, 
     shippingMethod, 
-    shippingPostcode,
-    shippingCountry, 
+    shippingAddress,
     shippingCost, 
     shippingIsValid,
     grandTotal, 
@@ -60,10 +59,9 @@ const Checkout: React.FC = () => {
                 <AlertTriangle size={32} className="text-amber-600" />
               </div>
             </div>
-            <h2 className="text-2xl font-black text-[#003878] mb-4">Bezorgmethode vereist</h2>
+            <h2 className="text-2xl font-black text-[#003878] mb-4">Adresvalidatie vereist</h2>
             <p className="text-gray-600 mb-8">
-              Selecteer eerst een bezorgmethode en vul een geldige postcode in (voor NL/BE/DE) 
-              voordat u kunt afrekenen.
+              Valideer eerst uw bezorgadres in de winkelwagen voordat u kunt afrekenen.
             </p>
             <Link 
               to="/cart" 
@@ -369,7 +367,12 @@ const Checkout: React.FC = () => {
                                         </div>
                                         <div className="flex justify-between text-gray-600 text-sm">
                                             <span className="font-medium flex items-center gap-2">
-                                              {getShippingSummary(shippingMethod, shippingCountry, shippingPostcode)}
+                                              {shippingMethod === 'pickup' 
+                                                ? 'Afhalen in Eindhoven' 
+                                                : shippingAddress.normalizedAddress 
+                                                  ? getAddressSummary(shippingAddress.normalizedAddress)
+                                                  : `Bezorgen naar ${COUNTRY_LABELS[shippingAddress.country] || shippingAddress.country}`
+                                              }
                                               <Link 
                                                 to="/cart?editShipping=1" 
                                                 className="text-xs text-[#003878] hover:underline font-semibold"

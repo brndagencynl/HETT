@@ -10,8 +10,8 @@ import { Card } from '../components/ui/card';
 import { formatMoney } from '../src/pricing/pricingHelpers';
 import ConfigBreakdownPopup, { getCartItemPriceBreakdown, isConfigurableCategory, isVerandaCategory } from '../components/ui/ConfigBreakdownPopup';
 import { CartItemPreview } from '../components/ui/ConfigPreviewImage';
-import { ShippingSelector } from '../src/components/cart/ShippingSelector';
-import { formatShippingCost } from '../src/utils/shipping';
+import { AddressDeliverySelector } from '../src/components/cart/AddressDeliverySelector';
+import { formatShippingCost } from '../src/services/addressValidation';
 
 const Cart: React.FC = () => {
     const { 
@@ -19,16 +19,15 @@ const Cart: React.FC = () => {
       removeFromCart, 
       updateQuantity, 
       total,
-      // Shipping - postcode based
+      // Shipping - address based with Google validation
       shippingMethod,
-      shippingPostcode,
-      shippingCountry,
+      shippingAddress,
       shippingCost,
       shippingIsValid,
       isShippingLocked,
       setShippingMethod,
-      setShippingPostcode,
-      updateShippingValidation,
+      setShippingAddress,
+      updateShippingCost,
       unlockShipping,
       lockShipping,
       grandTotal,
@@ -235,17 +234,15 @@ const Cart: React.FC = () => {
             {/* Order Summary */}
             <div className="lg:col-span-1">
                 <div className="sticky top-32 space-y-4" ref={shippingSectionRef}>
-                  {/* Shipping Selection */}
-                  <ShippingSelector
+                  {/* Address & Delivery Selection */}
+                  <AddressDeliverySelector
                     method={shippingMethod}
-                    postcode={shippingPostcode}
-                    country={shippingCountry}
-                    cost={shippingCost}
-                    isValid={shippingIsValid}
+                    address={shippingAddress}
+                    shippingCost={shippingCost}
                     isLocked={isShippingLocked}
                     onMethodChange={setShippingMethod}
-                    onPostcodeChange={setShippingPostcode}
-                    onValidationChange={updateShippingValidation}
+                    onAddressChange={setShippingAddress}
+                    onShippingCostChange={updateShippingCost}
                   />
 
                   {/* Order Summary Card */}
@@ -291,7 +288,7 @@ const Cart: React.FC = () => {
                         </button>
                         {!canCheckout && shippingMethod === 'delivery' && (
                           <p className="text-xs text-red-500 text-center">
-                            Voer een geldige postcode in (NL/BE/DE) om verder te gaan
+                            Valideer uw adres om verder te gaan naar afrekenen
                           </p>
                         )}
                         <Link 

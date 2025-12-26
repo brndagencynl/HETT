@@ -4,23 +4,33 @@ import { CartItem, Product, ProductConfig } from '../types';
 import { validateConfig } from '../utils/configValidation';
 import { generateConfigHash } from '../utils/hash';
 import { buildRenderSnapshot, type VerandaVisualizationConfig } from '../src/configurator/visual/verandaAssets';
-import { 
-  type ShippingMethod, 
-  type CountryCode, 
-  getShippingCost,
-  validateShipping,
-  SHIPPING_STORAGE_KEY,
-  DEFAULT_SHIPPING_STATE,
-} from '../src/utils/shipping';
 
 // =============================================================================
 // TYPES
 // =============================================================================
 
+export type ShippingMethod = 'pickup' | 'delivery';
+export type CountryCode = 'NL' | 'BE' | 'DE';
+
+export interface NormalizedAddress {
+  street: string;
+  postalCode: string;
+  city: string;
+  country: string;
+}
+
+export interface DeliveryAddress {
+  street: string;
+  postalCode: string;
+  city: string;
+  country: CountryCode;
+  isValidated: boolean;
+  normalizedAddress: NormalizedAddress | null;
+}
+
 interface ShippingState {
   method: ShippingMethod;
-  postcode: string;
-  country: CountryCode | null;
+  address: DeliveryAddress;
   cost: number;
   isValid: boolean;
   isLocked: boolean;
@@ -38,16 +48,15 @@ interface CartContextType {
   isCartOpen: boolean;
   openCart: () => void;
   closeCart: () => void;
-  // Shipping - new postcode-based system
+  // Shipping - address-based system with Google validation
   shippingMethod: ShippingMethod;
-  shippingPostcode: string;
-  shippingCountry: CountryCode | null;
+  shippingAddress: DeliveryAddress;
   shippingCost: number;
   shippingIsValid: boolean;
   isShippingLocked: boolean;
   setShippingMethod: (method: ShippingMethod) => void;
-  setShippingPostcode: (postcode: string) => void;
-  updateShippingValidation: (isValid: boolean, country: CountryCode | null, cost: number) => void;
+  setShippingAddress: (address: DeliveryAddress) => void;
+  updateShippingCost: (cost: number, isValid: boolean) => void;
   lockShipping: () => void;
   unlockShipping: () => void;
   /** Total including shipping */
@@ -55,10 +64,33 @@ interface CartContextType {
   // Legacy aliases (for backward compatibility)
   shippingCountry: CountryCode | null;
   shippingFee: number;
-  setShippingCountry: (country: CountryCode) => void;
+  shippingPostcode: string;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
+
+// =============================================================================
+// CONSTANTS
+// =============================================================================
+
+const SHIPPING_STORAGE_KEY = 'hett_shipping_v2';
+
+const DEFAULT_ADDRESS: DeliveryAddress = {
+  street: '',
+  postalCode: '',
+  city: '',
+  country: 'NL',
+  isValidated: false,
+  normalizedAddress: null,
+};
+
+const DEFAULT_SHIPPING_STATE: ShippingState = {
+  method: 'delivery',
+  address: DEFAULT_ADDRESS,
+  cost: 0,
+  isValid: false,
+  isLocked: false,
+};
 
 // =============================================================================
 // STORAGE HELPERS
@@ -71,8 +103,14 @@ function loadShippingFromStorage(): ShippingState {
       const parsed = JSON.parse(stored);
       return {
         method: parsed.method || DEFAULT_SHIPPING_STATE.method,
-        postcode: parsed.postcode || '',
-        country: parsed.country || null,
+        address: {
+          street: parsed.address?.street || '',
+          postalCode: parsed.address?.postalCode || '',
+          city: parsed.address?.city || '',
+          country: parsed.address?.country || 'NL',
+          isValidated: parsed.address?.isValidated || false,
+          normalizedAddress: parsed.address?.normalizedAddress || null,
+        },
         cost: parsed.cost || 0,
         isValid: parsed.isValid || false,
         isLocked: parsed.isLocked || false,
@@ -81,7 +119,7 @@ function loadShippingFromStorage(): ShippingState {
   } catch (e) {
     console.warn('Failed to load shipping from storage:', e);
   }
-  return { ...DEFAULT_SHIPPING_STATE, isLocked: false };
+  return { ...DEFAULT_SHIPPING_STATE };
 }
 
 function saveShippingToStorage(state: ShippingState): void {
@@ -122,32 +160,34 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Shipping setters (guarded by lock)
   const setShippingMethod = (method: ShippingMethod) => {
     if (shipping.isLocked) return;
-    // Re-validate with new method
-    const result = validateShipping(method, shipping.postcode);
-    setShipping(prev => ({
-      ...prev,
-      method,
-      isValid: result.isValid,
-      country: result.country,
-      cost: result.cost,
-    }));
+    
+    // If switching to pickup, mark as valid with 0 cost
+    if (method === 'pickup') {
+      setShipping(prev => ({
+        ...prev,
+        method,
+        cost: 0,
+        isValid: true,
+      }));
+    } else {
+      // If switching to delivery, use address validation state
+      setShipping(prev => ({
+        ...prev,
+        method,
+        isValid: prev.address.isValidated,
+        cost: prev.address.isValidated ? prev.cost : 0,
+      }));
+    }
   };
   
-  const setShippingPostcode = (postcode: string) => {
+  const setShippingAddress = (address: DeliveryAddress) => {
     if (shipping.isLocked) return;
-    setShipping(prev => ({ ...prev, postcode }));
+    setShipping(prev => ({ ...prev, address }));
   };
 
-  const updateShippingValidation = (isValid: boolean, country: CountryCode | null, cost: number) => {
+  const updateShippingCost = (cost: number, isValid: boolean) => {
     if (shipping.isLocked) return;
-    setShipping(prev => ({ ...prev, isValid, country, cost }));
-  };
-
-  // Legacy setter for backward compatibility
-  const setShippingCountry = (country: CountryCode) => {
-    if (shipping.isLocked) return;
-    const cost = getShippingCost('delivery', country);
-    setShipping(prev => ({ ...prev, country, cost, isValid: true }));
+    setShipping(prev => ({ ...prev, cost, isValid }));
   };
 
   // Shipping lock/unlock
@@ -330,22 +370,22 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isCartOpen, 
       openCart, 
       closeCart,
-      // Shipping - new postcode-based system
+      // Shipping - address-based system with Google validation
       shippingMethod: shipping.method,
-      shippingPostcode: shipping.postcode,
-      shippingCountry: shipping.country,
+      shippingAddress: shipping.address,
       shippingCost: shipping.cost,
       shippingIsValid: shipping.isValid,
       isShippingLocked: shipping.isLocked,
       setShippingMethod,
-      setShippingPostcode,
-      updateShippingValidation,
+      setShippingAddress,
+      updateShippingCost,
       lockShipping,
       unlockShipping,
       grandTotal,
-      // Legacy aliases
+      // Legacy aliases (for backward compatibility)
+      shippingCountry: shipping.address.isValidated ? shipping.address.country : null,
       shippingFee: shipping.cost,
-      setShippingCountry,
+      shippingPostcode: shipping.address.postalCode,
     }}>
       {children}
     </CartContext.Provider>

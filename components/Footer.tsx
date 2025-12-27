@@ -1,46 +1,54 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Phone, Mail, Facebook, Instagram, Linkedin, MapPin } from 'lucide-react';
+import { getFooterColumns, FooterColumn, FALLBACK_FOOTER_COLUMNS } from '../services/shopify';
 
 const Footer: React.FC = () => {
+    const [columns, setColumns] = useState<FooterColumn[]>(FALLBACK_FOOTER_COLUMNS);
+
+    useEffect(() => {
+        const fetchFooter = async () => {
+            try {
+                const data = await getFooterColumns();
+                if (data.length > 0) {
+                    setColumns(data);
+                }
+            } catch (error) {
+                console.error('Failed to fetch footer columns:', error);
+            }
+        };
+
+        fetchFooter();
+    }, []);
+
     return (
         <footer className="bg-hett-primary text-white pt-16 pb-8 border-t-4 border-hett-secondary">
             <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
 
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-12 mb-16">
 
-                    {/* Product Navigation */}
-                    <div className="grid grid-cols-2 gap-8 lg:contents">
-                        <div className="col-span-1">
-                            <h3 className="text-lg font-bold uppercase tracking-widest mb-6 border-b border-white pb-2">Producten</h3>
-                            <li><Link to="/categorie/verandas" className="text-white hover:text-[#FF7300] transition-colors flex items-center gap-2"><span>&rsaquo;</span> Veranda's</Link></li>
-                            <li><Link to="/categorie/sandwichpanelen" className="text-white hover:text-[#FF7300] transition-colors flex items-center gap-2"><span>&rsaquo;</span> Sandwichpanelen</Link></li>
-                            <li><Link to="/categorie/accessoires" className="text-white hover:text-[#FF7300] transition-colors flex items-center gap-2"><span>&rsaquo;</span> Accessoires</Link></li>
-                        </div>
-
-                        <div className="col-span-1">
-                            <h3 className="text-lg font-bold uppercase tracking-widest mb-6 border-b border-white pb-2">Over HETT</h3>
+                    {/* Dynamic Footer Columns from Shopify */}
+                    {columns.map((column, index) => (
+                        <div key={index} className={index < 2 ? "col-span-1" : ""}>
+                            <h3 className="text-lg font-bold uppercase tracking-widest mb-6 border-b border-white pb-2">
+                                {column.title}
+                            </h3>
                             <ul className="space-y-3 text-sm font-medium">
-                                <li><Link to="/over-ons" className="text-white hover:text-[#FF7300] transition-colors flex items-center gap-2"><span>&rsaquo;</span> Over ons</Link></li>
-                                <li><Link to="/showroom" className="text-white hover:text-[#FF7300] transition-colors flex items-center gap-2"><span>&rsaquo;</span> Showroom</Link></li>
-                                <li><Link to="/projecten" className="text-white hover:text-[#FF7300] transition-colors flex items-center gap-2"><span>&rsaquo;</span> Projecten</Link></li>
-                                <li><Link to="/blogs" className="text-white hover:text-[#FF7300] transition-colors flex items-center gap-2"><span>&rsaquo;</span> Nieuws</Link></li>
+                                {column.links.map((link, linkIndex) => (
+                                    <li key={linkIndex}>
+                                        <Link
+                                            to={link.url}
+                                            className="text-white hover:text-[#FF7300] transition-colors flex items-center gap-2"
+                                        >
+                                            <span>&rsaquo;</span> {link.label}
+                                        </Link>
+                                    </li>
+                                ))}
                             </ul>
                         </div>
-                    </div>
+                    ))}
 
-                    {/* Service Column */}
-                    <div>
-                        <h3 className="text-lg font-bold uppercase tracking-widest mb-6 border-b border-white pb-2">Service</h3>
-                        <ul className="space-y-3 text-sm font-medium">
-                            <li><Link to="/veelgestelde-vragen" className="text-white hover:text-[#FF7300] transition-colors">Veelgestelde vragen</Link></li>
-                            <li><Link to="/bezorging" className="text-white hover:text-[#FF7300] transition-colors">Bezorging</Link></li>
-                            <li><Link to="/montage-handleiding" className="text-white hover:text-[#FF7300] transition-colors">Montage</Link></li>
-                            <li><Link to="/garantie-en-klachten" className="text-white hover:text-[#FF7300] transition-colors">Garantie</Link></li>
-                        </ul>
-                    </div>
-
-                    {/* Contact Block: Single Column on mobile, 100% width */}
+                    {/* Contact Block */}
                     <div className="w-full lg:w-auto">
                         <h3 className="text-lg font-bold uppercase tracking-widest mb-6 border-b border-white pb-2">Contact</h3>
                         <div className="bg-white/5 p-6 rounded-xl border border-white/20 space-y-4 text-white">

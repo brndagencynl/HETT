@@ -1,8 +1,13 @@
 
 import { mockProvider } from './mockProvider';
-import { wpProvider } from './wpProvider';
+import { shopifyProvider } from './shopifyProvider';
 import { ContentProvider } from './provider';
 
-const providerName = import.meta.env.VITE_CONTENT_PROVIDER || 'mock';
+/**
+ * Content provider selection
+ * - 'shopify': Use Shopify Storefront API (production)
+ * - 'mock': Use mock data (development/testing)
+ */
+const providerName = import.meta.env.VITE_CONTENT_PROVIDER || 'shopify';
 
-export const content: ContentProvider = providerName === 'wp' ? wpProvider : mockProvider;
+export const content: ContentProvider = providerName === 'mock' ? mockProvider : shopifyProvider;

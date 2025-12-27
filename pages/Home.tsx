@@ -1,44 +1,78 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Check, Star } from 'lucide-react';
-import { PROJECTS, PRODUCTS } from '../constants';
+import { ArrowRight, Check, Star, Wrench, Truck, Package, Award } from 'lucide-react';
+import { PRODUCTS } from '../constants';
 import { Post } from '../types';
-import { content } from '../services/content'; // Using Content Provider
+import { content } from '../services/content';
+import {
+    getHomepageHero,
+    getHomepageUsps,
+    getHomepageFaq,
+    getHomepageInspiration,
+    HomepageHero,
+    HomepageUsp,
+    FaqItem,
+    InspirationCard,
+    FALLBACK_HERO,
+    FALLBACK_USPS,
+    FALLBACK_FAQ,
+    FALLBACK_INSPIRATION,
+} from '../services/shopify';
 import InspirationStrip from '../components/ui/InspirationStrip';
 import BlogCarousel from '../components/ui/BlogCarousel';
 import HomeFeatureBlock from '../components/ui/HomeFeatureBlock';
 import HomeFAQ from '../components/ui/HomeFAQ';
 
-const NEW_USPS = [
-    "Eenvoudig zelf te monteren",
-    "Binnen 10 werkdagen geleverd",
-    "Gratis thuisbezorgd",
-    "Duitse Precisie & Vakmanschap"
-];
+// Icon mapping for USPs
+const iconMap: Record<string, React.ComponentType<{ size?: number; className?: string; strokeWidth?: number }>> = {
+    Wrench,
+    Truck,
+    Package,
+    Award,
+    Check,
+};
 
 const Home: React.FC = () => {
-    const bestsellerProducts = PRODUCTS.filter(p =>
-        ['veranda-306-250-opaal', 'veranda-306-250-helder'].includes(p.id)
-    );
+    // Shopify content state
+    const [hero, setHero] = useState<HomepageHero>(FALLBACK_HERO);
+    const [usps, setUsps] = useState<HomepageUsp[]>(FALLBACK_USPS);
+    const [faqItems, setFaqItems] = useState<FaqItem[]>(FALLBACK_FAQ);
+    const [inspirationItems, setInspirationItems] = useState<InspirationCard[]>(FALLBACK_INSPIRATION);
 
-    const [blogPosts, setBlogPosts] = useState<Post[]>([]); // Using Post type
+    // Blog posts
+    const [blogPosts, setBlogPosts] = useState<Post[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
 
+    // Fetch all Shopify content
     useEffect(() => {
-        const fetchPosts = async () => {
+        const fetchContent = async () => {
             try {
-                const posts = await content.getPosts(6); // Fetch via provider
-                setBlogPosts(posts);
+                // Fetch all content in parallel
+                const [heroData, uspsData, faqData, inspirationData, postsData] = await Promise.all([
+                    getHomepageHero(),
+                    getHomepageUsps(),
+                    getHomepageFaq(),
+                    getHomepageInspiration(),
+                    content.getPosts(6),
+                ]);
+
+                // Update state with fetched data or keep fallbacks
+                if (heroData) setHero(heroData);
+                if (uspsData.length > 0) setUsps(uspsData);
+                if (faqData.length > 0) setFaqItems(faqData);
+                if (inspirationData.length > 0) setInspirationItems(inspirationData);
+
+                setBlogPosts(postsData);
                 setLoading(false);
             } catch (err) {
-                console.error(err);
+                console.error('Failed to fetch homepage content:', err);
                 setError(true);
                 setLoading(false);
             }
         };
 
-        fetchPosts();
+        fetchContent();
     }, []);
 
     return (
@@ -49,23 +83,30 @@ const Home: React.FC = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div className="lg:col-span-2 relative rounded-xl overflow-hidden group min-h-[400px] md:min-h-[500px] card-retail p-0">
                         <img
-                            src="/assets/images/hero_veranda.png"
-                            alt="Terrasoverkapping"
+                            src={hero.image?.url || '/assets/images/hero_veranda.png'}
+                            alt={hero.title}
                             className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
                         />
                         <div className="absolute inset-0 bg-gradient-to-r from-hett-dark/70 to-transparent"></div>
                         <div className="absolute inset-0 p-8 md:p-12 flex flex-col justify-center max-w-xl">
-                            <span className="text-hett-secondary uppercase tracking-widest text-sm font-bold mb-3">HETT Premium</span>
+                            <span className="text-hett-secondary uppercase tracking-widest text-sm font-bold mb-3">
+                                {hero.subtitle}
+                            </span>
                             <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-4 leading-tight">
-                                Terrasoverkappingen <br /> vanaf €839
+                                {hero.title}
                             </h2>
                             <p className="text-white/90 text-lg md:text-xl font-medium mb-8">
-                                De beste en voordeligste in de markt voor de doe-het-zelver!
+                                {hero.description}
                             </p>
-                            <div>
-                                <Link to="/categorie/overkappingen" className="btn-secondary px-10 py-4 text-lg">
-                                    Bekijk assortiment
+                            <div className="flex flex-wrap gap-4">
+                                <Link to={hero.primaryCtaUrl} className="btn-secondary px-10 py-4 text-lg">
+                                    {hero.primaryCtaLabel}
                                 </Link>
+                                {hero.secondaryCtaLabel && (
+                                    <Link to={hero.secondaryCtaUrl} className="btn-outline-white px-8 py-4 text-lg">
+                                        {hero.secondaryCtaLabel}
+                                    </Link>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -91,16 +132,21 @@ const Home: React.FC = () => {
                 </div>
             </div>
 
-            {/* USP Bar - Retail Layout */}
+            {/* USP Bar - Dynamic from Shopify */}
             <div className="bg-hett-light py-6 border-y border-gray-200 mb-0">
                 <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between gap-8 overflow-x-auto no-scrollbar snap-x">
-                        {NEW_USPS.map((usp, i) => (
-                            <div key={i} className="flex items-center gap-3 flex-shrink-0 snap-center">
-                                <Check size={18} className="text-hett-secondary" strokeWidth={4} />
-                                <span className="text-hett-dark font-bold text-sm whitespace-nowrap uppercase tracking-tight">{usp}</span>
-                            </div>
-                        ))}
+                        {usps.map((usp, i) => {
+                            const IconComponent = iconMap[usp.iconName] || Check;
+                            return (
+                                <div key={i} className="flex items-center gap-3 flex-shrink-0 snap-center">
+                                    <IconComponent size={18} className="text-hett-secondary" strokeWidth={4} />
+                                    <span className="text-hett-dark font-bold text-sm whitespace-nowrap uppercase tracking-tight">
+                                        {usp.text}
+                                    </span>
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
             </div>
@@ -109,16 +155,14 @@ const Home: React.FC = () => {
             <HomeFeatureBlock />
 
             {/* Inspiratie Section */}
-            <InspirationStrip />
+            <InspirationStrip items={inspirationItems} />
 
             {/* Blog & Nieuws Section */}
             {loading ? (
                 <div className="py-24 text-center bg-white border-b border-gray-100">
                     <span className="text-hett-muted font-medium animate-pulse">Nieuws laden...</span>
                 </div>
-            ) : error ? (
-                // On error, we could optionally hide the section or show a fallback. 
-                // Showing nothing effectively hides the broken section.
+            ) : error || blogPosts.length === 0 ? (
                 <div className="hidden"></div>
             ) : (
                 <BlogCarousel items={blogPosts} />
@@ -169,7 +213,7 @@ const Home: React.FC = () => {
             </div>
 
             {/* FAQ Section */}
-            <HomeFAQ />
+            <HomeFAQ items={faqItems} />
         </div>
     );
 };

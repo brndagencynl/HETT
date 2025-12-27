@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronRight, ArrowRight } from 'lucide-react';
+import { InspirationCard, FALLBACK_INSPIRATION } from '../../services/shopify';
 
 interface InspirationItem {
     id: string;
@@ -9,7 +10,8 @@ interface InspirationItem {
     path: string;
 }
 
-const inspirationItems: InspirationItem[] = [
+// Static fallback for when Shopify is not configured
+const staticItems: InspirationItem[] = [
     {
         id: '1',
         title: 'Overkappingen',
@@ -48,8 +50,22 @@ const inspirationItems: InspirationItem[] = [
     }
 ];
 
-const InspirationStrip: React.FC = () => {
+interface InspirationStripProps {
+    items?: InspirationCard[];
+}
+
+const InspirationStrip: React.FC<InspirationStripProps> = ({ items }) => {
     const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+    // Convert Shopify items to local format or use static fallback
+    const inspirationItems: InspirationItem[] = items && items.length > 0
+        ? items.map((item, index) => ({
+            id: String(index + 1),
+            title: item.title,
+            image: item.image?.url || '',
+            path: item.url,
+        }))
+        : staticItems;
 
     const scrollNext = () => {
         if (scrollContainerRef.current) {
@@ -58,6 +74,7 @@ const InspirationStrip: React.FC = () => {
             scrollContainerRef.current.scrollBy({ left: cardWidth + gap, behavior: 'smooth' });
         }
     };
+
 
     return (
         <section className="py-12 md:py-16 overflow-hidden">

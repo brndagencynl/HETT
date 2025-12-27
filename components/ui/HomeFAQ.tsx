@@ -1,40 +1,15 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronDown, ChevronUp, MessageCircle } from 'lucide-react';
+import { FaqItem, FALLBACK_FAQ } from '../../services/shopify';
 
-interface FAQItem {
-    question: string;
-    answer: string;
+interface HomeFAQProps {
+    items?: FaqItem[];
 }
 
-const faqs: FAQItem[] = [
-    {
-        question: 'Wat is de levertijd van een terrasoverkapping?',
-        answer: 'Omdat wij uit eigen voorraad leveren in Eindhoven, kunnen wij de meeste terrasoverkappingen en sandwichpanelen binnen 1 tot 2 weken bij u thuis bezorgen in heel Nederland en België.'
-    },
-    {
-        question: 'Zijn de overkappingen eenvoudig zelf te monteren?',
-        answer: 'Ja, onze systemen zijn ontworpen als slimme bouwpakketten voor de doe-het-zelver. We leveren altijd een duidelijke handleiding mee en alle profielen zijn voorbereid voor snelle montage.'
-    },
-    {
-        question: 'Hoe zit het met de garantie op de producten?',
-        answer: 'Wij bieden standaard 10 jaar fabrieksgarantie op de aluminium constructie en de kleurvastheid van de poedercoating van onze HETT Premium systemen.'
-    },
-    {
-        question: 'Kan ik de producten ook bekijken in een showroom?',
-        answer: 'Zeker! U bent van harte welkom in onze showroom in Eindhoven. Hier kunt u verschillende opstellingen bekijken en direct advies krijgen van onze experts.'
-    },
-    {
-        question: 'Leveren jullie ook maatwerk oplossingen?',
-        answer: 'Ja, naast onze standaardmaten kunnen wij veel systemen exact op de door u gewenste afmeting produceren. Neem contact op voor een offerte op maat.'
-    },
-    {
-        question: 'Wat zijn de mogelijkheden voor bezorgen of afhalen?',
-        answer: 'U kunt kiezen voor bezorging aan huis (€75,- NL / €95,- BE) of gratis afhalen bij ons magazijn in Eindhoven. Bij bestellingen boven de €2.500,- is bezorging gratis.'
-    }
-];
-
-const HomeFAQ: React.FC = () => {
+const HomeFAQ: React.FC<HomeFAQProps> = ({ items }) => {
+    // Use provided items or fallback
+    const faqs = items && items.length > 0 ? items : FALLBACK_FAQ;
     const [openIndex, setOpenIndex] = useState<number | null>(0);
 
     const toggle = (index: number) => {
@@ -108,3 +83,4 @@ const HomeFAQ: React.FC = () => {
 };
 
 export default HomeFAQ;
+

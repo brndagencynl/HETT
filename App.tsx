@@ -13,8 +13,6 @@ import Contact from './pages/Contact';
 import Documents from './pages/Documents';
 import About from './pages/About';
 import FAQ from './pages/FAQ';
-import News from './pages/News';
-import NewsDetail from './pages/NewsDetail';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
 import Cookies from './pages/Cookies';
@@ -43,6 +41,11 @@ import Search from './pages/Search';
 import Quote from './pages/Quote';
 import Wishlist from './pages/Wishlist';
 import CartDrawer from './components/ui/CartDrawer';
+
+// Shopify Blog & Page Routes
+import Blog from './pages/Blog';
+import BlogDetail from './pages/BlogDetail';
+import Page from './pages/Page';
 
 // ScrollToTop helper
 const ScrollToTop = () => {
@@ -78,11 +81,22 @@ const AnimatedRoutes: React.FC = () => {
         <Route path="/betaalmethoden" element={<PageTransition><PaymentMethods /></PageTransition>} />
         <Route path="/montage-handleiding" element={<PageTransition><Mounting /></PageTransition>} />
         <Route path="/afhalen" element={<PageTransition><Pickup /></PageTransition>} />
-        <Route path="/blogs" element={<PageTransition><News /></PageTransition>} />
         <Route path="/garantie-en-klachten" element={<PageTransition><Warranty /></PageTransition>} />
         <Route path="/retourneren" element={<PageTransition><Returns /></PageTransition>} />
         <Route path="/leveringsvoorwaarden" element={<PageTransition><DeliveryTerms /></PageTransition>} />
         <Route path="/showroom" element={<PageTransition><Showroom /></PageTransition>} />
+
+        {/* Blog Routes (Shopify) */}
+        <Route path="/blog" element={<PageTransition><Blog /></PageTransition>} />
+        <Route path="/blog/:handle" element={<PageTransition><BlogDetail /></PageTransition>} />
+        
+        {/* Generic Shopify Page Route */}
+        <Route path="/pagina/:handle" element={<PageTransition><Page /></PageTransition>} />
+
+        {/* Legacy Blog Redirects (WordPress → Shopify) */}
+        <Route path="/blogs" element={<Navigate to="/blog" replace />} />
+        <Route path="/nieuws" element={<Navigate to="/blog" replace />} />
+        <Route path="/nieuws/:id" element={<Navigate to="/blog" replace />} />
 
         {/* Legacy/Other Routes */}
         {/* Redirect Legacy Routes */}
@@ -95,8 +109,6 @@ const AnimatedRoutes: React.FC = () => {
         <Route path="/downloads" element={<PageTransition><Documents /></PageTransition>} />
         <Route path="/over-ons" element={<PageTransition><About /></PageTransition>} />
         <Route path="/veelgestelde-vragen" element={<PageTransition><FAQ /></PageTransition>} />
-        <Route path="/nieuws" element={<PageTransition><News /></PageTransition>} />
-        <Route path="/nieuws/:id" element={<PageTransition><NewsDetail /></PageTransition>} />
         <Route path="/algemene-voorwaarden" element={<PageTransition><Terms /></PageTransition>} />
         <Route path="/privacy" element={<PageTransition><Privacy /></PageTransition>} />
         <Route path="/cookies" element={<PageTransition><Cookies /></PageTransition>} />

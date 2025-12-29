@@ -50,6 +50,9 @@ import Page from './pages/Page';
 // Maatwerk Configurator
 import MaatwerkConfiguratorPage from './pages/MaatwerkConfigurator';
 
+// Shopify Test
+import ShopifyTest from './pages/ShopifyTest';
+
 // ScrollToTop helper
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -81,6 +84,9 @@ const AnimatedRoutes: React.FC = () => {
 
         {/* Maatwerk Configurator */}
         <Route path="/maatwerk-configurator" element={<PageTransition><MaatwerkConfiguratorPage /></PageTransition>} />
+
+        {/* Shopify Test */}
+        <Route path="/shopify-test" element={<ShopifyTest />} />
 
         {/* Information Pages */}
         <Route path="/bezorging" element={<PageTransition><Delivery /></PageTransition>} />

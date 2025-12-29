@@ -43,10 +43,15 @@ export const validateConfig = (category: string, config: ProductConfig | undefin
     } else if (category === 'sandwichpanelen') {
         const data = config.data as SandwichConfig;
 
-        // Rule: must pick at least 1 option if UI presents them
-        // Assuming current simple flow: thickness and color often essential.
-        if (!data.dikte && !data.kleur) {
-            errors.push('Selecteer de gewenste opties (dikte/kleur).');
+        // New rules: length + color are required
+        const hasLength = typeof (data as any).lengthMm === 'number' || typeof (data as any).length === 'number';
+        const hasColor = typeof (data as any).color === 'string' || typeof (data as any).kleur === 'string';
+
+        if (!hasLength) {
+            errors.push('Kies een lengte.');
+        }
+        if (!hasColor) {
+            errors.push('Kies een kleur.');
         }
     }
 

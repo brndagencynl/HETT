@@ -67,11 +67,22 @@ export type VerandaConfig = {
 };
 
 export type SandwichConfig = {
+  /** New sandwichpanelen configurator fields */
+  workingWidthMm?: number;
+  lengthMm?: 2500 | 3000 | 3500 | 4000 | 4500 | 5000;
+  color?: 'ral7016' | 'ral9001' | 'ral9005';
+  extras?: {
+    uProfiles?: {
+      enabled: boolean;
+      meters: number;
+    };
+  };
+
+  /** Legacy fields (kept for backward compatibility) */
   dikte?: string;
   kleur?: string;
   afwerking?: string;
   extra_u_profielen_m?: number;
-  // Common visual options
   length?: number;
 };
 
@@ -144,8 +155,16 @@ export interface CartItem extends Product {
   quantity: number;
   totalPrice: number;
 
-  /** Line item type (used for maatwerk edit detection) */
-  type?: 'custom_veranda' | 'product';
+  /** Line item type (used for edit detection and payload contracts) */
+  type?: 'custom_veranda' | 'sandwichpanelen' | 'product';
+
+  /** Optional structured pricing block (used for sandwichpanelen and other configurable items) */
+  pricing?: {
+    basePrice: number;
+    extrasTotal: number;
+    total: number;
+    breakdown: Array<{ label: string; amount: number }>;
+  };
 
   // Config props
   config?: ProductConfig;

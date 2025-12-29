@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../../context/CartContext';
 import { useVerandaEdit } from '../../context/VerandaEditContext';
 import { useMaatwerkEdit } from '../../context/MaatwerkEditContext';
+import { useSandwichpanelenEdit } from '../../context/SandwichpanelenEditContext';
 import { isConfigOnly } from '../../utils/productRules';
 import { isVerandaCategory, isMaatwerkVerandaItem } from './ConfigBreakdownPopup';
 import { CartItemPreview } from './ConfigPreviewImage';
@@ -17,6 +18,7 @@ const CartDrawer: React.FC = () => {
     const { isCartOpen, closeCart, cart, removeFromCart, total } = useCart();
     const { openEditConfigurator } = useVerandaEdit();
     const { openMaatwerkEdit } = useMaatwerkEdit();
+    const { openSandwichpanelenEdit } = useSandwichpanelenEdit();
     const navigate = useNavigate();
     const drawerRef = useRef<HTMLDivElement>(null);
     const [breakdownPopupKey, setBreakdownPopupKey] = useState<string | null>(null);
@@ -89,6 +91,7 @@ const CartDrawer: React.FC = () => {
                 cart.map((item, index) => {
                                     const isVeranda = isVerandaCategory(item);
                                     const isMaatwerk = isMaatwerkVerandaItem(item);
+                                    const isSandwichpanelen = item.type === 'sandwichpanelen';
                                     const basePrice = item.price || 1250; // fallback base price
                                     const initialConfig = item.config?.category === 'verandas' ? item.config.data : undefined;
                                     const popupKey = `drawer-breakdown-${item.id || index}`;
@@ -149,6 +152,18 @@ const CartDrawer: React.FC = () => {
                                                                 <Info size={14} />
                                                             </button>
                                                         </>
+                                                    )}
+
+                                                    {/* Edit icon for sandwichpanelen items */}
+                                                    {isSandwichpanelen && item.id && (
+                                                        <button
+                                                            onClick={() => openSandwichpanelenEdit({ lineId: item.id, item })}
+                                                            className="flex-shrink-0 p-1.5 min-w-[32px] min-h-[32px] flex items-center justify-center text-gray-400 hover:text-hett-primary hover:bg-hett-light rounded-md transition-colors"
+                                                            title="Bewerken"
+                                                            aria-label="Bewerken"
+                                                        >
+                                                            <Pencil size={14} />
+                                                        </button>
                                                     )}
                                                 </div>
                                                 <button

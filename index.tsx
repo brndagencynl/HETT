@@ -6,6 +6,7 @@ import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
 import { VerandaEditProvider } from './context/VerandaEditContext';
 import { MaatwerkEditProvider } from './context/MaatwerkEditContext';
+import { SandwichpanelenEditProvider } from './context/SandwichpanelenEditContext';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -19,7 +20,9 @@ root.render(
       <WishlistProvider>
         <VerandaEditProvider>
           <MaatwerkEditProvider>
+          <SandwichpanelenEditProvider>
             <App />
+          </SandwichpanelenEditProvider>
           </MaatwerkEditProvider>
         </VerandaEditProvider>
       </WishlistProvider>

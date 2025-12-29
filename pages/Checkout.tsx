@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { useVerandaEdit } from '../context/VerandaEditContext';
 import { useMaatwerkEdit } from '../context/MaatwerkEditContext';
+import { useSandwichpanelenEdit } from '../context/SandwichpanelenEditContext';
 import { Navigate, useNavigate, Link } from 'react-router-dom';
 import { Package, Info, Pencil, AlertTriangle, ShoppingCart } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
@@ -39,6 +40,7 @@ const Checkout: React.FC = () => {
   } = useCart();
   const { openEditConfigurator } = useVerandaEdit();
     const { openMaatwerkEdit } = useMaatwerkEdit();
+        const { openSandwichpanelenEdit } = useSandwichpanelenEdit();
   const navigate = useNavigate();
 
   // Lock shipping on checkout page mount
@@ -276,6 +278,7 @@ const Checkout: React.FC = () => {
                                             const showInfo = isConfigurableCategory(item);
                                             const isVeranda = isVerandaCategory(item);
                                             const isMaatwerk = isMaatwerkVerandaItem(item);
+                                            const isSandwichpanelen = item.type === 'sandwichpanelen';
                                             const basePrice = item.price || 1250;
                                             // Cast to schema's VerandaConfig type for the edit context
                                             const initialConfig = item.config?.category === 'verandas' ? (item.config.data as any) : undefined;
@@ -334,6 +337,21 @@ const Checkout: React.FC = () => {
                                                                 className="relative z-10 text-gray-400 hover:text-hett-primary pointer-events-auto min-w-[36px] min-h-[36px]"
                                                                 title="Bewerken"
                                                                 aria-label="Maatwerk configuratie bewerken"
+                                                            >
+                                                                <Pencil size={14} />
+                                                            </Button>
+                                                        )}
+
+                                                        {/* Edit icon for sandwichpanelen */}
+                                                        {isSandwichpanelen && item.id && (
+                                                            <Button
+                                                                type="button"
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={() => openSandwichpanelenEdit({ lineId: item.id, item })}
+                                                                className="relative z-10 text-gray-400 hover:text-hett-primary pointer-events-auto min-w-[36px] min-h-[36px]"
+                                                                title="Bewerken"
+                                                                aria-label="Bewerken"
                                                             >
                                                                 <Pencil size={14} />
                                                             </Button>

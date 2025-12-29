@@ -263,9 +263,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // 4. Create summary string
       // Logic to create a readable string from config data
       // For now simple JSON dump or specific field map
-      const summary = configCandidate.category === 'verandas'
-        ? `Dak: ${configCandidate.data.daktype}, Goot: ${configCandidate.data.goot?.charAt(0).toUpperCase() + configCandidate.data.goot?.slice(1) || '-'}, Voorzijde: ${configCandidate.data.voorzijde || 'Geen'}`
-        : `Sandwichpaneel`; // todo better summary
+      const summary =
+        typeof options?.displayConfigSummary === 'string'
+          ? options.displayConfigSummary
+          : configCandidate.category === 'verandas'
+            ? `Dak: ${configCandidate.data.daktype}, Goot: ${configCandidate.data.goot?.charAt(0).toUpperCase() + configCandidate.data.goot?.slice(1) || '-'}, Voorzijde: ${configCandidate.data.voorzijde || 'Geen'}`
+            : `Sandwichpaneel`;
 
       // 5. Add/Update Item
       // Check if item with same ID AND same Hash exists?
@@ -293,6 +296,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         ...product,
         id: cartId, // Override ID for cart uniqueness
         slug: product.id, // Keep original slug/id ref
+        type: options?.type,
         quantity,
         totalPrice: (options.price || product.price) * quantity,
         config: configCandidate,
@@ -300,6 +304,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         displayConfigSummary: summary,
         // Store detailed breakdown for config popup
         priceBreakdown: options.priceBreakdown,
+        pricing: options.pricing,
         details: options.details,
         // Store render snapshot for visual preview
         render: renderSnapshot,

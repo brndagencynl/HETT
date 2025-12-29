@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Check, ShoppingCart, Minus, Plus, ShieldCheck } from 'lucide-react';
-import { DEFAULT_SANDWICH_CONFIG } from './SandwichPanelConfig';
+import { DEFAULT_SANDWICHPANEL_CONFIG, type SandwichpanelenConfig } from './SandwichPanelConfig';
 import { Product } from '../../../types';
+import {
+    SANDWICH_COLOR_OPTIONS,
+    SANDWICH_LENGTH_MM_OPTIONS,
+    SANDWICH_WORKING_WIDTH_MM,
+    calculateSandwichpanelenPricing,
+} from '../../../src/pricing/sandwichpanelen';
 
 interface Props {
     product: Product;
@@ -10,112 +16,86 @@ interface Props {
 }
 
 const SandwichPanelBuilder: React.FC<Props> = ({ product, basePrice, onAddToCart }) => {
-    const [selections, setSelections] = useState<Record<string, string | string[]>>({});
+    const [config, setConfig] = useState<SandwichpanelenConfig>({ ...DEFAULT_SANDWICHPANEL_CONFIG });
     const [quantity, setQuantity] = useState(1);
     const [touched, setTouched] = useState(false);
 
-    // Initialize with defaults only (no persistence)
     useEffect(() => {
-        const defaults: Record<string, string> = {};
-        DEFAULT_SANDWICH_CONFIG.forEach(group => {
-            if (group.type === 'included' && group.choices.length > 0) {
-                defaults[group.id] = group.choices[0].id;
-            }
-        });
-        setSelections(defaults);
-    }, []);
+        setConfig({ ...DEFAULT_SANDWICHPANEL_CONFIG });
+    }, [product?.id]);
 
-    const handleSelect = (groupId: string, choiceId: string) => {
-        setSelections(prev => {
-            const group = DEFAULT_SANDWICH_CONFIG.find(g => g.id === groupId);
-            if (group?.type === 'addons') {
-                const current = (prev[groupId] as string[]) || [];
-                if (current.includes(choiceId)) {
-                    return { ...prev, [groupId]: current.filter(id => id !== choiceId) };
-                } else {
-                    return { ...prev, [groupId]: [...current, choiceId] };
-                }
-            }
-            return { ...prev, [groupId]: choiceId };
-        });
-        setTouched(true);
-    };
+    const pricing = calculateSandwichpanelenPricing({
+        basePrice,
+        config: config as any,
+    });
 
-    // Helper
-    const getSelection = (groupId: string): string | string[] | undefined => selections[groupId];
-
-    // Calculate Price
-    const calculateTotal = () => {
-        let optionsTotal = 0;
-        DEFAULT_SANDWICH_CONFIG.forEach(group => {
-            const selection = selections[group.id];
-            if (!selection) return;
-
-            if (Array.isArray(selection)) {
-                selection.forEach(selId => {
-                    const choice = group.choices.find(c => c.id === selId);
-                    if (choice) optionsTotal += choice.priceDelta;
-                });
-            } else {
-                const choice = group.choices.find(c => c.id === selection);
-                if (choice) optionsTotal += choice.priceDelta;
-            }
-        });
-
-        return {
-            base: basePrice,
-            options: optionsTotal,
-            total: basePrice + optionsTotal
-        };
-    };
-
-    const { base, options, total } = calculateTotal();
-
-    // Validation
-    const getMissingRequired = () => {
-        return DEFAULT_SANDWICH_CONFIG.filter(g => g.required && !selections[g.id]);
-    };
-    const missing = getMissingRequired();
-    const isValid = missing.length === 0;
+    const isLengthValid = Boolean(config.lengthMm);
+    const isColorValid = Boolean(config.color);
+    const isValid = isLengthValid && isColorValid;
 
     const handleAddToCartClick = () => {
         setTouched(true);
         if (!isValid) return;
 
-        const configPayload = { ...selections };
-        const configLabel: string[] = [];
+        const selectedColor = SANDWICH_COLOR_OPTIONS.find(c => c.id === config.color);
+        const details = [
+            { label: 'Breedte', value: `${SANDWICH_WORKING_WIDTH_MM} mm` },
+            { label: 'Lengte', value: `${config.lengthMm} mm` },
+            { label: 'Kleur', value: selectedColor?.label || String(config.color) },
+            ...(config.extras.uProfiles.enabled ? [{ label: 'U-profielen', value: `${config.extras.uProfiles.meters} m` }] : []),
+        ];
 
-        DEFAULT_SANDWICH_CONFIG.forEach(group => {
-            const val = selections[group.id];
-            if (val) {
-                if (Array.isArray(val)) {
-                    val.forEach(v => {
-                        const c = group.choices.find(ch => ch.id === v);
-                        if (c) configLabel.push(`${group.label}: ${c.label}`);
-                    });
-                } else {
-                    const c = group.choices.find(ch => ch.id === val);
-                    if (c) configLabel.push(`${group.label}: ${c.label}`);
-                }
-            }
-        });
+        const displayConfigSummary = [
+            `Breedte: ${SANDWICH_WORKING_WIDTH_MM} mm`,
+            `Lengte: ${config.lengthMm} mm`,
+            `Kleur: ${selectedColor?.label || String(config.color)}`,
+            ...(config.extras.uProfiles.enabled ? [`U-profielen: ${config.extras.uProfiles.meters} m`] : []),
+        ].join(' • ');
 
         // Strict ProductConfig structure
         const productConfig = {
             category: 'sandwichpanelen',
-            data: configPayload
+            data: {
+                workingWidthMm: SANDWICH_WORKING_WIDTH_MM,
+                lengthMm: config.lengthMm,
+                color: config.color,
+                extras: {
+                    uProfiles: {
+                        enabled: config.extras.uProfiles.enabled,
+                        meters: config.extras.uProfiles.meters,
+                    },
+                },
+            }
+        };
+
+        const unitTotal = pricing.total;
+        const breakdownItems = pricing.breakdown.map((row) => ({
+            groupLabel: 'Extra opties',
+            choiceLabel: row.label,
+            price: row.amount,
+        }));
+
+        const priceBreakdown = {
+            basePrice: pricing.basePrice,
+            items: breakdownItems,
+            optionsTotal: pricing.extrasTotal,
+            grandTotal: unitTotal,
         };
 
         const payload = {
-            price: total,
+            type: 'sandwichpanelen',
+            price: unitTotal,
             quantity: quantity,
             config: productConfig,
-            configuration: configPayload,
-            configurationLabel: configLabel,
-            details: configLabel.map(l => {
-                const [label, value] = l.split(': ');
-                return { label, value };
-            }),
+            details,
+            displayConfigSummary,
+            pricing: {
+                basePrice: pricing.basePrice,
+                extrasTotal: pricing.extrasTotal,
+                total: unitTotal,
+                breakdown: pricing.breakdown,
+            },
+            priceBreakdown,
             isConfigured: true
         };
 
@@ -132,141 +112,204 @@ const SandwichPanelBuilder: React.FC<Props> = ({ product, basePrice, onAddToCart
             </div>
 
             <div className="p-6 space-y-8">
-                {DEFAULT_SANDWICH_CONFIG.map(group => {
-                    const currentVal = getSelection(group.id);
-                    return (
-                        <div key={group.id} className="space-y-3">
-                            <div className="flex justify-between">
-                                <label className="text-sm font-bold text-hett-dark uppercase tracking-wide">
-                                    {group.label} {group.required && <span className="text-red-500">*</span>}
-                                </label>
-                                {touched && group.required && !currentVal && (
-                                    <span className="text-xs text-red-500 font-bold animate-pulse">Verplicht veld</span>
-                                )}
-                            </div>
+                {/* 1) Werkende breedte (locked) */}
+                <div className="space-y-3">
+                    <div className="flex justify-between">
+                        <label className="text-sm font-bold text-hett-dark uppercase tracking-wide">Werkende breedte</label>
+                    </div>
+                    <div className="relative">
+                        <select
+                            disabled
+                            className="w-full p-3 bg-white border rounded-lg appearance-none font-medium text-hett-dark border-gray-200 opacity-80 cursor-not-allowed"
+                            value={String(SANDWICH_WORKING_WIDTH_MM)}
+                            onChange={() => undefined}
+                        >
+                            <option value={String(SANDWICH_WORKING_WIDTH_MM)}>{SANDWICH_WORKING_WIDTH_MM} mm (standaard)</option>
+                        </select>
+                    </div>
+                </div>
 
-                            {group.type === 'select' && (
-                                <div className="relative">
-                                    <select
-                                        className={`w-full p-3 bg-white border rounded-lg appearance-none font-medium text-hett-dark focus:outline-none focus:ring-2 focus:ring-hett-primary/20 ${touched && group.required && !currentVal ? 'border-red-300' : 'border-gray-200'}`}
-                                        value={currentVal as string || ''}
-                                        onChange={(e) => handleSelect(group.id, e.target.value)}
-                                    >
-                                        <option value="" disabled>Maak een keuze...</option>
-                                        {group.choices.map(c => (
-                                            <option key={c.id} value={c.id}>
-                                                {c.label} {c.priceDelta > 0 && `(+€${c.priceDelta})`}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                            )}
+                {/* 2) Lengte (required) */}
+                <div className="space-y-3">
+                    <div className="flex justify-between">
+                        <label className="text-sm font-bold text-hett-dark uppercase tracking-wide">
+                            Lengte (mm) <span className="text-red-500">*</span>
+                        </label>
+                        {touched && !isLengthValid && (
+                            <span className="text-xs text-red-500 font-bold animate-pulse">Verplicht veld</span>
+                        )}
+                    </div>
+                    <div className="relative">
+                        <select
+                            className={`w-full p-3 bg-white border rounded-lg appearance-none font-medium text-hett-dark focus:outline-none focus:ring-2 focus:ring-hett-primary/20 ${touched && !isLengthValid ? 'border-red-300' : 'border-gray-200'}`}
+                            value={config.lengthMm ? String(config.lengthMm) : ''}
+                            onChange={(e) => {
+                                setConfig((p) => ({ ...p, lengthMm: Number(e.target.value) as any }));
+                                setTouched(true);
+                            }}
+                        >
+                            <option value="" disabled>Maak een keuze...</option>
+                            {SANDWICH_LENGTH_MM_OPTIONS.map((mm) => (
+                                <option key={mm} value={String(mm)}>{mm}</option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
 
-                            {group.type === 'tiles' && (
-                                <div className="grid grid-cols-2 gap-3">
-                                    {group.choices.map(c => {
-                                        const isSelected = currentVal === c.id;
-                                        return (
-                                            <button
-                                                key={c.id}
-                                                onClick={() => handleSelect(group.id, c.id)}
-                                                className={`relative p-4 rounded-lg border-2 text-left transition-all group ${isSelected ? 'border-hett-secondary bg-orange-50/10' : 'border-gray-100 bg-gray-50 hover:border-gray-300'}`}
-                                            >
-                                                {isSelected && (
-                                                    <div className="absolute -top-2 -right-2 bg-hett-secondary text-white rounded-full p-1 shadow-sm">
-                                                        <Check size={12} strokeWidth={3} />
-                                                    </div>
-                                                )}
-                                                <div className="font-bold text-hett-dark mb-1">{c.label}</div>
-                                                {c.badge && <div className="text-[10px] uppercase font-bold text-green-600 mb-1">{c.badge}</div>}
-                                                {c.priceDelta > 0 && <div className="text-xs text-gray-500 font-medium">+ €{c.priceDelta}</div>}
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            )}
-
-                            {group.type === 'swatches' && (
-                                <div className="flex gap-3">
-                                    {group.choices.map(c => {
-                                        const isSelected = currentVal === c.id;
-                                        // Simple mapping for demo colors
-                                        const bgMap: any = { ral9002: '#E9E9E9', ral9010: '#FFFFFF', ral7016: '#293133' };
-                                        const bg = bgMap[c.id] || '#ccc';
-
-                                        return (
-                                            <button
-                                                key={c.id}
-                                                onClick={() => handleSelect(group.id, c.id)}
-                                                className={`group relative w-12 h-12 rounded-lg shadow-sm border-2 transition-all ${isSelected ? 'border-hett-primary scale-110 ring-2 ring-hett-primary/20' : 'border-gray-200 hover:border-gray-300'}`}
-                                                style={{ backgroundColor: bg }}
-                                                title={c.label}
-                                            >
-                                                {isSelected && <div className="absolute inset-0 flex items-center justify-center text-hett-primary drop-shadow-md"><Check size={20} /></div>}
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            )}
-
-                            {group.type === 'addons' && (
-                                <div className="space-y-2">
-                                    {group.choices.map(c => {
-                                        const isSelected = Array.isArray(currentVal) && currentVal.includes(c.id);
-                                        return (
-                                            <div
-                                                key={c.id}
-                                                onClick={() => handleSelect(group.id, c.id)}
-                                                className={`flex items-center p-3 rounded-lg border transition-all cursor-pointer select-none ${isSelected ? 'border-hett-primary bg-hett-primary/5 ring-1 ring-hett-primary' : 'border-gray-200 bg-white hover:border-gray-300'}`}
-                                            >
-                                                <div className="flex-grow min-w-0">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="font-bold text-hett-dark text-sm truncate">{c.label}</span>
-                                                        {c.badge && <span className="text-[9px] bg-hett-secondary text-white px-1.5 py-0.5 rounded font-bold uppercase">{c.badge}</span>}
-                                                    </div>
-                                                </div>
-                                                <div className="text-right pl-3">
-                                                    <div className="text-sm font-bold text-hett-dark">+€{c.priceDelta.toFixed(2)}</div>
-                                                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center mt-1 ml-auto transition-colors ${isSelected ? 'bg-hett-primary border-hett-primary text-white' : 'border-gray-300'}`}>
-                                                        {isSelected && <Check size={12} />}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            )}
-
-                            {group.type === 'included' && (
-                                <div className="space-y-2">
-                                    {group.choices.map(c => (
-                                        <div key={c.id} className="flex items-center p-4 rounded-lg bg-green-50 border border-green-100">
-                                            <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600 mr-3">
-                                                <ShieldCheck size={18} />
-                                            </div>
-                                            <div className="flex-grow font-bold text-hett-dark text-sm">{c.label}</div>
+                {/* 3) Kleur (required swatches) */}
+                <div className="space-y-3">
+                    <div className="flex justify-between">
+                        <label className="text-sm font-bold text-hett-dark uppercase tracking-wide">
+                            Kleur <span className="text-red-500">*</span>
+                        </label>
+                        {touched && !isColorValid && (
+                            <span className="text-xs text-red-500 font-bold animate-pulse">Verplicht veld</span>
+                        )}
+                    </div>
+                    <div className="flex gap-3">
+                        {SANDWICH_COLOR_OPTIONS.map((c) => {
+                            const isSelected = config.color === c.id;
+                            return (
+                                <button
+                                    key={c.id}
+                                    onClick={() => {
+                                        setConfig((p) => ({ ...p, color: c.id as any }));
+                                        setTouched(true);
+                                    }}
+                                    className={`group relative w-12 h-12 rounded-lg shadow-sm border-2 transition-all ${isSelected ? 'border-hett-primary scale-110 ring-2 ring-hett-primary/20' : 'border-gray-200 hover:border-gray-300'}`}
+                                    style={{ backgroundColor: c.hex }}
+                                    title={c.label}
+                                    aria-label={c.label}
+                                >
+                                    {isSelected && (
+                                        <div className="absolute inset-0 flex items-center justify-center text-hett-primary drop-shadow-md">
+                                            <Check size={20} />
                                         </div>
-                                    ))}
-                                </div>
-                            )}
+                                    )}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                {/* 4) Extra opties */}
+                <div className="space-y-3">
+                    <div className="flex justify-between">
+                        <label className="text-sm font-bold text-hett-dark uppercase tracking-wide">Extra opties</label>
+                    </div>
+
+                    <div
+                        onClick={() => {
+                            setConfig((p) => ({
+                                ...p,
+                                extras: {
+                                    ...p.extras,
+                                    uProfiles: {
+                                        ...p.extras.uProfiles,
+                                        enabled: !p.extras.uProfiles.enabled,
+                                        meters: p.extras.uProfiles.enabled ? p.extras.uProfiles.meters : (p.extras.uProfiles.meters || 1),
+                                    },
+                                },
+                            }));
+                            setTouched(true);
+                        }}
+                        className={`flex items-center p-3 rounded-lg border transition-all cursor-pointer select-none ${config.extras.uProfiles.enabled ? 'border-hett-primary bg-hett-primary/5 ring-1 ring-hett-primary' : 'border-gray-200 bg-white hover:border-gray-300'}`}
+                        role="button"
+                        tabIndex={0}
+                    >
+                        <div className="flex-grow min-w-0">
+                            <div className="flex items-center gap-2">
+                                <span className="font-bold text-hett-dark text-sm truncate">U-profielen per meter</span>
+                            </div>
+                            <div className="text-xs text-gray-500 font-medium">Optioneel</div>
                         </div>
-                    );
-                })}
+                        <div className="text-right pl-3">
+                            <div className="text-sm font-bold text-hett-dark">
+                                {config.extras.uProfiles.enabled ? `+€${pricing.extrasTotal.toFixed(2)}` : '—'}
+                            </div>
+                            <div className={`w-5 h-5 rounded-full border flex items-center justify-center mt-1 ml-auto transition-colors ${config.extras.uProfiles.enabled ? 'bg-hett-primary border-hett-primary text-white' : 'border-gray-300'}`}>
+                                {config.extras.uProfiles.enabled && <Check size={12} />}
+                            </div>
+                        </div>
+                    </div>
+
+                    {config.extras.uProfiles.enabled && (
+                        <div className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg p-3">
+                            <div className="text-xs font-bold text-gray-600 uppercase tracking-wide">Aantal (m)</div>
+                            <div className="flex items-center bg-white border border-gray-300 rounded-lg px-2 w-32">
+                                <button
+                                    type="button"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setConfig((p) => ({
+                                            ...p,
+                                            extras: {
+                                                ...p.extras,
+                                                uProfiles: {
+                                                    ...p.extras.uProfiles,
+                                                    meters: Math.max(1, p.extras.uProfiles.meters - 1),
+                                                },
+                                            },
+                                        }));
+                                    }}
+                                    className="p-2 text-gray-400 hover:text-hett-dark"
+                                    aria-label="Minder meters"
+                                >
+                                    <Minus size={16} />
+                                </button>
+                                <span className="flex-grow text-center font-bold text-hett-dark">{config.extras.uProfiles.meters}</span>
+                                <button
+                                    type="button"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setConfig((p) => ({
+                                            ...p,
+                                            extras: {
+                                                ...p.extras,
+                                                uProfiles: {
+                                                    ...p.extras.uProfiles,
+                                                    meters: p.extras.uProfiles.meters + 1,
+                                                },
+                                            },
+                                        }));
+                                    }}
+                                    className="p-2 text-gray-400 hover:text-hett-dark"
+                                    aria-label="Meer meters"
+                                >
+                                    <Plus size={16} />
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* Included warranty (unchanged style) */}
+                <div className="space-y-3">
+                    <div className="flex justify-between">
+                        <label className="text-sm font-bold text-hett-dark uppercase tracking-wide">Garantie</label>
+                    </div>
+                    <div className="flex items-center p-4 rounded-lg bg-green-50 border border-green-100">
+                        <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600 mr-3">
+                            <ShieldCheck size={18} />
+                        </div>
+                        <div className="flex-grow font-bold text-hett-dark text-sm">10 Jaar Fabrieksgarantie</div>
+                    </div>
+                </div>
             </div>
 
             <div className="bg-gray-50 p-6 border-t border-gray-200">
                 <div className="space-y-2 mb-6 text-sm">
                     <div className="flex justify-between text-gray-500">
                         <span>Product totaal</span>
-                        <span>€ {base.toLocaleString()},-</span>
+                        <span>€ {pricing.basePrice.toLocaleString()},-</span>
                     </div>
                     <div className="flex justify-between text-gray-500">
                         <span>Opties totaal</span>
-                        <span>€ {options.toLocaleString()},-</span>
+                        <span>€ {pricing.extrasTotal.toLocaleString()},-</span>
                     </div>
                     <div className="flex justify-between text-lg font-black text-hett-dark pt-2 border-t border-gray-200">
                         <span>Totaal</span>
-                        <span>€ {total.toLocaleString()},-</span>
+                        <span>€ {pricing.total.toLocaleString()},-</span>
                     </div>
                 </div>
 

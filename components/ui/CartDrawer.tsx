@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
-import { X, ShoppingBag, Trash2, ArrowRight, ShieldCheck, Pencil, Info } from 'lucide-react';
+import { X, ShoppingBag, Trash2, ArrowRight, ShieldCheck, Pencil, Info, Loader2, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../../context/CartContext';
 import { useVerandaEdit } from '../../context/VerandaEditContext';
@@ -11,6 +11,7 @@ import { isConfigOnly } from '../../utils/productRules';
 import { isVerandaCategory, isMaatwerkVerandaItem } from './ConfigBreakdownPopup';
 import { CartItemPreview } from './ConfigPreviewImage';
 import ConfigBreakdownPopup from './ConfigBreakdownPopup';
+import { beginCheckout, isShopifyConfigured } from '../../src/lib/shopify';
 
 const MotionDiv = motion.div as any;
 
@@ -22,6 +23,10 @@ const CartDrawer: React.FC = () => {
     const navigate = useNavigate();
     const drawerRef = useRef<HTMLDivElement>(null);
     const [breakdownPopupKey, setBreakdownPopupKey] = useState<string | null>(null);
+    
+    // Checkout state
+    const [isCheckingOut, setIsCheckingOut] = useState(false);
+    const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
     // Close on escape key
     useEffect(() => {
@@ -37,6 +42,50 @@ const CartDrawer: React.FC = () => {
             document.body.style.overflow = 'unset';
         };
     }, [isCartOpen, closeCart]);
+    
+    // Reset checkout state when drawer opens
+    useEffect(() => {
+        if (isCartOpen) {
+            setCheckoutError(null);
+            setIsCheckingOut(false);
+        }
+    }, [isCartOpen]);
+    
+    // Handle Shopify checkout from drawer
+    const handleCheckout = async () => {
+        // Check if Shopify is configured
+        if (!isShopifyConfigured()) {
+            // Fallback to cart page
+            closeCart();
+            navigate('/cart');
+            return;
+        }
+        
+        // Start Shopify checkout
+        setIsCheckingOut(true);
+        setCheckoutError(null);
+        
+        try {
+            const result = await beginCheckout({
+                cartItems: cart,
+                onError: (error) => {
+                    console.error('[CartDrawer] Checkout error:', error);
+                },
+            });
+            
+            if (result.success && result.checkoutUrl) {
+                // Redirect to Shopify checkout
+                window.location.href = result.checkoutUrl;
+            } else {
+                setCheckoutError(result.error || 'Er is een fout opgetreden.');
+                setIsCheckingOut(false);
+            }
+        } catch (error) {
+            console.error('[CartDrawer] Unexpected error:', error);
+            setCheckoutError('Er is een onverwachte fout opgetreden.');
+            setIsCheckingOut(false);
+        }
+    };
 
     if (!isCartOpen) return null;
 
@@ -232,16 +281,37 @@ const CartDrawer: React.FC = () => {
                                     <span className="text-gray-500 font-bold text-sm">Subtotaal (incl. BTW)</span>
                                     <span className="text-3xl font-black text-hett-dark">€ {total.toLocaleString()},-</span>
                                 </div>
+                                {checkoutError && (
+                                    <div className="flex items-start gap-2 p-3 mb-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+                                        <AlertCircle size={16} className="flex-shrink-0 mt-0.5" />
+                                        <p>{checkoutError}</p>
+                                    </div>
+                                )}
                                 <div className="space-y-3">
                                     <button
-                                        onClick={() => { closeCart(); navigate('/cart'); }}
-                                        className="w-full py-4 bg-hett-primary text-white rounded-xl font-bold text-lg hover:bg-hett-dark transition-colors flex items-center justify-center gap-2 shadow-lg shadow-hett-primary/20"
+                                        onClick={handleCheckout}
+                                        disabled={isCheckingOut}
+                                        className={`w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 shadow-lg transition-colors ${
+                                            isCheckingOut
+                                                ? 'bg-gray-400 text-white cursor-not-allowed'
+                                                : 'bg-hett-primary text-white hover:bg-hett-dark shadow-hett-primary/20'
+                                        }`}
                                     >
-                                        Afrekenen <ArrowRight size={20} />
+                                        {isCheckingOut ? (
+                                            <>
+                                                <Loader2 size={20} className="animate-spin" />
+                                                Bezig...
+                                            </>
+                                        ) : (
+                                            <>
+                                                Afrekenen <ArrowRight size={20} />
+                                            </>
+                                        )}
                                     </button>
                                     <button
                                         onClick={closeCart}
-                                        className="w-full py-3 bg-white border-2 border-gray-100 text-gray-600 rounded-xl font-bold hover:border-gray-300 hover:text-gray-800 transition-colors"
+                                        disabled={isCheckingOut}
+                                        className="w-full py-3 bg-white border-2 border-gray-100 text-gray-600 rounded-xl font-bold hover:border-gray-300 hover:text-gray-800 transition-colors disabled:opacity-50"
                                     >
                                         Verder winkelen
                                     </button>

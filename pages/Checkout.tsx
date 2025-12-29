@@ -4,9 +4,8 @@ import { useCart } from '../context/CartContext';
 import { useVerandaEdit } from '../context/VerandaEditContext';
 import { useMaatwerkEdit } from '../context/MaatwerkEditContext';
 import { useSandwichpanelenEdit } from '../context/SandwichpanelenEditContext';
-import { useShopifyCart } from '../context/ShopifyCartContext';
 import { Navigate, useNavigate, Link } from 'react-router-dom';
-import { Package, Info, Pencil, AlertTriangle, ShoppingCart, ExternalLink } from 'lucide-react';
+import { Package, Info, Pencil, AlertTriangle, ShoppingCart, ExternalLink, Loader2 } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import Button from '../components/ui/button';
 import { Card } from '../components/ui/card';
@@ -15,6 +14,7 @@ import { formatMoney } from '../src/pricing/pricingHelpers';
 import ConfigBreakdownPopup, { getCartItemPriceBreakdown, isConfigurableCategory, isVerandaCategory, isMaatwerkVerandaItem } from '../components/ui/ConfigBreakdownPopup';
 import { CartItemPreview } from '../components/ui/ConfigPreviewImage';
 import { formatShippingCost, getAddressSummary, COUNTRY_LABELS } from '../src/services/addressValidation';
+import { beginCheckout, isShopifyConfigured } from '../src/lib/shopify';
 
 type CheckoutForm = {
     firstName: string;
@@ -42,9 +42,9 @@ const Checkout: React.FC = () => {
   const { openEditConfigurator } = useVerandaEdit();
     const { openMaatwerkEdit } = useMaatwerkEdit();
         const { openSandwichpanelenEdit } = useSandwichpanelenEdit();
-  const { cart: shopifyCart, redirectToCheckout, isLoading: shopifyLoading, error: shopifyError } = useShopifyCart();
   const navigate = useNavigate();
   const [isRedirecting, setIsRedirecting] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   // Lock shipping on checkout page mount
   useEffect(() => {
@@ -57,16 +57,31 @@ const Checkout: React.FC = () => {
   const handleShopifyCheckout = async () => {
     if (isRedirecting) return;
     setIsRedirecting(true);
+    setCheckoutError(null);
+    
     try {
-      await redirectToCheckout();
+      const result = await beginCheckout({
+        cartItems: cart,
+        onError: (error) => {
+          console.error('[Checkout] Error:', error);
+        },
+      });
+      
+      if (result.success && result.checkoutUrl) {
+        window.location.href = result.checkoutUrl;
+      } else {
+        setCheckoutError(result.error || 'Er is een fout opgetreden bij het afrekenen.');
+        setIsRedirecting(false);
+      }
     } catch (error) {
       console.error('Failed to redirect to Shopify checkout:', error);
+      setCheckoutError('Er is een onverwachte fout opgetreden.');
       setIsRedirecting(false);
     }
   };
 
-  // Check if Shopify cart has items
-  const hasShopifyCart = shopifyCart && shopifyCart.lines.length > 0;
+  // Check if Shopify is configured
+  const shopifyEnabled = isShopifyConfigured();
 
   // Guard: If shipping is not valid, show blocking notice
   if (cart.length > 0 && !shippingIsValid) {
@@ -268,25 +283,34 @@ const Checkout: React.FC = () => {
                                     </div>
 
                                     <div className="pt-4 space-y-3">
-                                        {/* Shopify Checkout Button - Primary when Shopify cart has items */}
-                                        {hasShopifyCart && (
+                                        {/* Shopify Checkout Button - Primary when Shopify is configured */}
+                                        {shopifyEnabled && (
                                           <Button
                                             type="button"
                                             variant="primary"
                                             size="lg"
                                             className="w-full"
-                                            disabled={isRedirecting || shopifyLoading}
+                                            disabled={isRedirecting}
                                             onClick={handleShopifyCheckout}
                                           >
                                             <span className="flex items-center justify-center gap-2">
-                                              {isRedirecting ? 'Doorsturen…' : 'Verder naar betalen'}
-                                              {!isRedirecting && <ExternalLink size={18} />}
+                                              {isRedirecting ? (
+                                                <>
+                                                  <Loader2 size={18} className="animate-spin" />
+                                                  Doorsturen...
+                                                </>
+                                              ) : (
+                                                <>
+                                                  Verder naar betalen
+                                                  <ExternalLink size={18} />
+                                                </>
+                                              )}
                                             </span>
                                           </Button>
                                         )}
                                         
-                                        {/* Local Checkout Button - Fallback when no Shopify cart */}
-                                        {!hasShopifyCart && (
+                                        {/* Local Checkout Button - Fallback when Shopify is not configured */}
+                                        {!shopifyEnabled && (
                                           <Button
                                             type="submit"
                                             variant="primary"
@@ -298,9 +322,9 @@ const Checkout: React.FC = () => {
                                           </Button>
                                         )}
                                         
-                                        {shopifyError && (
+                                        {checkoutError && (
                                           <p className="text-red-600 text-sm text-center">
-                                            Er is een fout opgetreden. Probeer het opnieuw.
+                                            {checkoutError}
                                           </p>
                                         )}
                                     </div>

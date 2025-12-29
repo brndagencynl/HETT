@@ -37,6 +37,7 @@ import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import MyAccount from './pages/MyAccount';
 import OrderReceived from './pages/OrderReceived';
+import ThankYou from './pages/ThankYou';
 import Search from './pages/Search';
 import Quote from './pages/Quote';
 import Wishlist from './pages/Wishlist';
@@ -78,6 +79,7 @@ const AnimatedRoutes: React.FC = () => {
         <Route path="/afrekenen" element={<PageTransition><Checkout /></PageTransition>} />
         <Route path="/my-account" element={<PageTransition><MyAccount /></PageTransition>} />
         <Route path="/order-received" element={<PageTransition><OrderReceived /></PageTransition>} />
+        <Route path="/bedankt" element={<PageTransition><ThankYou /></PageTransition>} />
         <Route path="/search" element={<PageTransition><Search /></PageTransition>} />
         <Route path="/offerte" element={<PageTransition><Quote /></PageTransition>} />
         <Route path="/wishlist" element={<PageTransition><Wishlist /></PageTransition>} />

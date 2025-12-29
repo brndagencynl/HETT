@@ -45,5 +45,9 @@ export {
   resetCart,
 } from './cartStore';
 
+// Checkout
+export { beginCheckout, redirectToShopifyCheckout } from './beginCheckout';
+export type { BeginCheckoutOptions, BeginCheckoutResult } from './beginCheckout';
+
 // Queries (for advanced usage)
 export * from './queries';

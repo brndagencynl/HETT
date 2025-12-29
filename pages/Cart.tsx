@@ -1,11 +1,11 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { useVerandaEdit } from '../context/VerandaEditContext';
 import { useMaatwerkEdit } from '../context/MaatwerkEditContext';
 import { useSandwichpanelenEdit } from '../context/SandwichpanelenEditContext';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Trash2, ArrowRight, Plus, Minus, ShoppingBag, Info, Pencil } from 'lucide-react';
+import { Trash2, ArrowRight, Plus, Minus, ShoppingBag, Info, Pencil, Loader2, AlertCircle } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import Button from '../components/ui/button';
 import { Card } from '../components/ui/card';
@@ -14,6 +14,7 @@ import ConfigBreakdownPopup, { getCartItemPriceBreakdown, isConfigurableCategory
 import { CartItemPreview } from '../components/ui/ConfigPreviewImage';
 import { AddressDeliverySelector } from '../src/components/cart/AddressDeliverySelector';
 import { formatShippingCost } from '../src/services/addressValidation';
+import { beginCheckout, isShopifyConfigured } from '../src/lib/shopify';
 
 const Cart: React.FC = () => {
     const { 
@@ -21,6 +22,7 @@ const Cart: React.FC = () => {
       removeFromCart, 
       updateQuantity, 
       total,
+      clearCart,
       // Shipping - address based with Google validation
       shippingMethod,
       shippingAddress,
@@ -40,6 +42,10 @@ const Cart: React.FC = () => {
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
     const shippingSectionRef = useRef<HTMLDivElement>(null);
+    
+    // Checkout state
+    const [isCheckingOut, setIsCheckingOut] = useState(false);
+    const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
     // Handle ?editShipping=1 query param
     useEffect(() => {
@@ -56,19 +62,59 @@ const Cart: React.FC = () => {
       }
     }, [searchParams, setSearchParams, unlockShipping]);
 
-    // Handle navigation to checkout
-    const handleProceedToCheckout = () => {
+    // Handle Shopify checkout
+    const handleProceedToCheckout = async () => {
       if (!shippingIsValid) {
         // Scroll to shipping section if not valid
         shippingSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         return;
       }
-      lockShipping();
-      navigate('/afrekenen');
+      
+      // Check if Shopify is configured
+      if (!isShopifyConfigured()) {
+        // Fallback to local checkout page
+        lockShipping();
+        navigate('/afrekenen');
+        return;
+      }
+      
+      // Start Shopify checkout
+      setIsCheckingOut(true);
+      setCheckoutError(null);
+      
+      try {
+        const result = await beginCheckout({
+          cartItems: cart,
+          onStart: () => {
+            console.log('[Checkout] Starting Shopify checkout...');
+          },
+          onCartCreated: (cartId, checkoutUrl) => {
+            console.log('[Checkout] Cart created:', cartId);
+            console.log('[Checkout] Redirecting to:', checkoutUrl);
+          },
+          onError: (error) => {
+            console.error('[Checkout] Error:', error);
+          },
+        });
+        
+        if (result.success && result.checkoutUrl) {
+          // Clear local cart before redirect (optional - can also do after return)
+          // clearCart();
+          // Redirect to Shopify checkout
+          window.location.href = result.checkoutUrl;
+        } else {
+          setCheckoutError(result.error || 'Er is een fout opgetreden bij het afrekenen.');
+          setIsCheckingOut(false);
+        }
+      } catch (error) {
+        console.error('[Checkout] Unexpected error:', error);
+        setCheckoutError('Er is een onverwachte fout opgetreden. Probeer het opnieuw.');
+        setIsCheckingOut(false);
+      }
     };
 
     // Can proceed to checkout?
-    const canCheckout = shippingIsValid;
+    const canCheckout = shippingIsValid && !isCheckingOut;
 
     const VAT_RATE = 0.21;
     const totalInclVat = grandTotal; // Now includes shipping
@@ -324,9 +370,27 @@ const Cart: React.FC = () => {
                                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                             }`}
                         >
-                            Verder naar afrekenen <ArrowRight size={20} />
+                            {isCheckingOut ? (
+                              <>
+                                <Loader2 size={20} className="animate-spin" />
+                                Bezig met afrekenen...
+                              </>
+                            ) : (
+                              <>
+                                Afrekenen <ArrowRight size={20} />
+                              </>
+                            )}
                         </button>
-                        {!canCheckout && shippingMethod === 'delivery' && (
+                        {checkoutError && (
+                          <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+                            <AlertCircle size={18} className="flex-shrink-0 mt-0.5" />
+                            <div>
+                              <p className="font-medium">Afrekenen mislukt</p>
+                              <p className="text-red-600">{checkoutError}</p>
+                            </div>
+                          </div>
+                        )}
+                        {!canCheckout && shippingMethod === 'delivery' && !isCheckingOut && (
                           <p className="text-xs text-red-500 text-center">
                             Valideer uw adres om verder te gaan naar afrekenen
                           </p>

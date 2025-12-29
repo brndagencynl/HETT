@@ -1,0 +1,967 @@
+/**
+ * Maatwerk Veranda Configurator Component
+ * ========================================
+ * 
+ * Standalone configurator for custom/maatwerk verandas.
+ * NOT tied to product pages. NO localStorage persistence.
+ * 
+ * Step order:
+ * 1. Afmetingen (Width × Depth)
+ * 2. Color
+ * 3. Daktype
+ * 4. Goot
+ * 5. Zijwand links
+ * 6. Zijwand rechts
+ * 7. Voorzijde
+ * 8. Verlichting
+ * 9. Overzicht
+ */
+
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import { X, Check, Info, ChevronLeft, ChevronRight, Truck, ShieldCheck, ArrowRight, Lightbulb, Edit2, Eye, ChevronUp, ShoppingBag, Loader2, Ruler } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+
+// Custom maatwerk types and pricing - completely isolated
+import {
+  type PartialMaatwerkConfig,
+  type MaatwerkConfig,
+  type MaatwerkSize,
+  type MaatwerkColorId,
+  DEFAULT_MAATWERK_CONFIG,
+  MAATWERK_COLOR_OPTIONS,
+  MAATWERK_WIDTH_MIN,
+  MAATWERK_WIDTH_MAX,
+  MAATWERK_DEPTH_MIN,
+  MAATWERK_DEPTH_MAX,
+  clampMaatwerkWidth,
+  clampMaatwerkDepth,
+  isMaatwerkVeranda,
+} from '../src/configurators/custom/customTypes';
+
+import {
+  calculateMaatwerkPrice,
+  formatMaatwerkPrice,
+  getMaatwerkOptionLabel,
+  MAATWERK_OPTION_GROUPS,
+  MAATWERK_ROOF_OPTIONS,
+  MAATWERK_GUTTER_OPTIONS,
+  MAATWERK_SIDEWALL_OPTIONS,
+  MAATWERK_FRONT_OPTIONS,
+  MAATWERK_EXTRAS_OPTIONS,
+  getMaatwerkOptionPrice,
+} from '../src/configurators/custom/customPricing';
+
+import {
+  type MaatwerkStepId,
+  MAATWERK_STEPS,
+  isMaatwerkStepComplete,
+  formatMaatwerkSize,
+  buildMaatwerkCartPayload,
+  isMaatwerkConfigComplete,
+  getMaatwerkValidationErrors,
+} from '../src/configurators/custom/customHelpers';
+
+// Reuse visual layer system for preview (but from existing assets)
+import { buildVisualizationLayers, type VisualizationLayer, FALLBACK_IMAGE, type VerandaColorId } from '../src/configurator/visual/verandaAssets';
+
+const MotionDiv = motion.div as any;
+
+// =============================================================================
+// TYPES
+// =============================================================================
+
+interface MaatwerkVerandaConfiguratorProps {
+  onAddToCart: (payload: ReturnType<typeof buildMaatwerkCartPayload>) => void;
+  onClose?: () => void;
+}
+
+// =============================================================================
+// SAFE IMAGE COMPONENT
+// =============================================================================
+
+const SafeImage = ({ src, alt, className, fallback = FALLBACK_IMAGE }: { src: string; alt: string; className?: string; fallback?: string }) => {
+  const [imgSrc, setImgSrc] = useState(src);
+  const [hasError, setHasError] = useState(false);
+  
+  const handleError = useCallback(() => {
+    if (!hasError) {
+      console.warn(`[MaatwerkConfigurator] Image failed to load: ${src}`);
+      setHasError(true);
+      setImgSrc(fallback);
+    }
+  }, [src, fallback, hasError]);
+  
+  React.useEffect(() => {
+    setImgSrc(src);
+    setHasError(false);
+  }, [src]);
+  
+  return (
+    <img 
+      src={imgSrc} 
+      alt={alt} 
+      className={className}
+      onError={handleError}
+    />
+  );
+};
+
+// =============================================================================
+// MAIN COMPONENT
+// =============================================================================
+
+const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = ({
+  onAddToCart,
+  onClose,
+}) => {
+  // STATE - completely isolated, NO localStorage
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [config, setConfig] = useState<PartialMaatwerkConfig>({ ...DEFAULT_MAATWERK_CONFIG });
+  const [infoModal, setInfoModal] = useState<{ title: string; text: string } | null>(null);
+  const [agreed, setAgreed] = useState(false);
+  const [isSelectionOpen, setSelectionOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Current step
+  const currentStep = MAATWERK_STEPS[currentStepIndex];
+  const canProceed = isMaatwerkStepComplete(currentStep.id, config);
+  const isLastStep = currentStepIndex === MAATWERK_STEPS.length - 1;
+
+  // Price calculation
+  const priceBreakdown = useMemo(() => calculateMaatwerkPrice(config), [config]);
+
+  // Visual layers - reuse existing asset system
+  const visualLayers = useMemo((): VisualizationLayer[] => {
+    const color = (config.color || 'ral7016') as VerandaColorId;
+    return buildVisualizationLayers({
+      color,
+      daktype: config.daktype,
+      goot: config.goot,
+      zijwand_links: config.zijwand_links,
+      zijwand_rechts: config.zijwand_rechts,
+      voorzijde: config.voorzijde,
+      verlichting: config.verlichting,
+    });
+  }, [config]);
+
+  // ==========================================================================
+  // HANDLERS
+  // ==========================================================================
+
+  const goToStep = (stepIndex: number) => {
+    if (stepIndex <= currentStepIndex && stepIndex >= 0) {
+      setCurrentStepIndex(stepIndex);
+    }
+  };
+
+  const handleNext = () => {
+    if (canProceed && currentStepIndex < MAATWERK_STEPS.length - 1) {
+      setCurrentStepIndex(prev => prev + 1);
+    }
+  };
+
+  const handleBack = () => {
+    if (currentStepIndex > 0) {
+      setCurrentStepIndex(prev => prev - 1);
+    }
+  };
+
+  const handleAddToCart = async () => {
+    if (isSubmitting) return;
+    
+    // Validate
+    const errors = getMaatwerkValidationErrors(config);
+    if (errors.length > 0) {
+      alert(`Configuratie incompleet:\n${errors.join('\n')}`);
+      return;
+    }
+
+    if (!isMaatwerkConfigComplete(config)) {
+      alert('Vul alle verplichte velden in.');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const payload = buildMaatwerkCartPayload(config);
+      onAddToCart(payload);
+    } catch (error) {
+      console.error('Add to cart failed:', error);
+      alert('Er is een fout opgetreden. Probeer het opnieuw.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // ==========================================================================
+  // SIZE SELECTOR (Step 1) - Sliders with 1cm increments
+  // ==========================================================================
+
+  const renderSizeSelector = () => {
+    const currentSize = config.size || { width: 600, depth: 300 };
+    
+    // Handle slider change
+    const handleWidthChange = (value: number) => {
+      const clampedValue = clampMaatwerkWidth(value);
+      setConfig(prev => ({
+        ...prev,
+        size: { ...prev.size!, width: clampedValue }
+      }));
+    };
+
+    const handleDepthChange = (value: number) => {
+      const clampedValue = clampMaatwerkDepth(value);
+      setConfig(prev => ({
+        ...prev,
+        size: { ...prev.size!, depth: clampedValue }
+      }));
+    };
+
+    // Handle numeric input
+    const handleWidthInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = parseInt(e.target.value, 10);
+      if (!isNaN(value)) {
+        handleWidthChange(value);
+      }
+    };
+
+    const handleDepthInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = parseInt(e.target.value, 10);
+      if (!isNaN(value)) {
+        handleDepthChange(value);
+      }
+    };
+
+    // Calculate area in m²
+    const areaM2 = (currentSize.width / 100) * (currentSize.depth / 100);
+    
+    return (
+      <div className="space-y-8 max-w-2xl">
+        {/* Width selection - Slider with numeric input */}
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <label className="block text-sm font-bold text-gray-700">
+              Breedte
+            </label>
+            <span className="text-xs text-gray-500">
+              {MAATWERK_WIDTH_MIN} - {MAATWERK_WIDTH_MAX} cm
+            </span>
+          </div>
+          
+          {/* Input + Unit */}
+          <div className="flex items-center gap-3 mb-3">
+            <div className="relative flex-1 max-w-[140px]">
+              <input
+                type="number"
+                min={MAATWERK_WIDTH_MIN}
+                max={MAATWERK_WIDTH_MAX}
+                value={currentSize.width}
+                onChange={handleWidthInput}
+                className="w-full py-3 px-4 pr-12 rounded-lg font-semibold text-lg text-center border-2 border-gray-200 focus:border-[#003878] focus:ring-2 focus:ring-[#003878]/20 outline-none transition-all"
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-gray-400 font-medium">
+                cm
+              </span>
+            </div>
+          </div>
+
+          {/* Slider */}
+          <div className="relative">
+            <input
+              type="range"
+              min={MAATWERK_WIDTH_MIN}
+              max={MAATWERK_WIDTH_MAX}
+              step={1}
+              value={currentSize.width}
+              onChange={(e) => handleWidthChange(parseInt(e.target.value, 10))}
+              className="w-full h-3 bg-gray-200 rounded-full appearance-none cursor-pointer accent-[#003878] 
+                [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 
+                [&::-webkit-slider-thumb]:bg-[#003878] [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer
+                [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white
+                [&::-moz-range-thumb]:w-6 [&::-moz-range-thumb]:h-6 [&::-moz-range-thumb]:bg-[#003878] 
+                [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white"
+              style={{
+                background: `linear-gradient(to right, #003878 ${((currentSize.width - MAATWERK_WIDTH_MIN) / (MAATWERK_WIDTH_MAX - MAATWERK_WIDTH_MIN)) * 100}%, #e5e7eb ${((currentSize.width - MAATWERK_WIDTH_MIN) / (MAATWERK_WIDTH_MAX - MAATWERK_WIDTH_MIN)) * 100}%)`
+              }}
+            />
+            {/* Min/Max labels */}
+            <div className="flex justify-between mt-1 text-xs text-gray-400">
+              <span>{MAATWERK_WIDTH_MIN} cm</span>
+              <span>{MAATWERK_WIDTH_MAX} cm</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Depth selection - Slider with numeric input */}
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <label className="block text-sm font-bold text-gray-700">
+              Diepte
+            </label>
+            <span className="text-xs text-gray-500">
+              {MAATWERK_DEPTH_MIN} - {MAATWERK_DEPTH_MAX} cm
+            </span>
+          </div>
+          
+          {/* Input + Unit */}
+          <div className="flex items-center gap-3 mb-3">
+            <div className="relative flex-1 max-w-[140px]">
+              <input
+                type="number"
+                min={MAATWERK_DEPTH_MIN}
+                max={MAATWERK_DEPTH_MAX}
+                value={currentSize.depth}
+                onChange={handleDepthInput}
+                className="w-full py-3 px-4 pr-12 rounded-lg font-semibold text-lg text-center border-2 border-gray-200 focus:border-[#003878] focus:ring-2 focus:ring-[#003878]/20 outline-none transition-all"
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-gray-400 font-medium">
+                cm
+              </span>
+            </div>
+          </div>
+
+          {/* Slider */}
+          <div className="relative">
+            <input
+              type="range"
+              min={MAATWERK_DEPTH_MIN}
+              max={MAATWERK_DEPTH_MAX}
+              step={1}
+              value={currentSize.depth}
+              onChange={(e) => handleDepthChange(parseInt(e.target.value, 10))}
+              className="w-full h-3 bg-gray-200 rounded-full appearance-none cursor-pointer accent-[#003878] 
+                [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 
+                [&::-webkit-slider-thumb]:bg-[#003878] [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer
+                [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white
+                [&::-moz-range-thumb]:w-6 [&::-moz-range-thumb]:h-6 [&::-moz-range-thumb]:bg-[#003878] 
+                [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white"
+              style={{
+                background: `linear-gradient(to right, #003878 ${((currentSize.depth - MAATWERK_DEPTH_MIN) / (MAATWERK_DEPTH_MAX - MAATWERK_DEPTH_MIN)) * 100}%, #e5e7eb ${((currentSize.depth - MAATWERK_DEPTH_MIN) / (MAATWERK_DEPTH_MAX - MAATWERK_DEPTH_MIN)) * 100}%)`
+              }}
+            />
+            {/* Min/Max labels */}
+            <div className="flex justify-between mt-1 text-xs text-gray-400">
+              <span>{MAATWERK_DEPTH_MIN} cm</span>
+              <span>{MAATWERK_DEPTH_MAX} cm</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Size summary */}
+        <div className="bg-[#003878]/5 border-2 border-[#003878]/20 rounded-xl p-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-[#003878] rounded-lg flex items-center justify-center">
+              <Ruler size={20} className="text-white" />
+            </div>
+            <div>
+              <span className="text-sm text-gray-500">Geselecteerde afmeting</span>
+              <span className="block text-lg font-black text-[#003878]">
+                {currentSize.width} × {currentSize.depth} cm
+              </span>
+              <span className="text-xs text-gray-500">
+                {areaM2.toFixed(2)} m²
+              </span>
+            </div>
+            <div className="ml-auto text-right">
+              <span className="text-sm text-gray-500">Basisprijs</span>
+              <span className="block text-lg font-black text-[#003878]">
+                {formatMaatwerkPrice(priceBreakdown.basePrice)}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Info text */}
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start gap-3">
+          <Info size={18} className="text-amber-600 mt-0.5 flex-shrink-0" />
+          <div className="text-sm text-amber-800">
+            <strong>Maatwerk:</strong> U kunt elke maat tot op de centimeter nauwkeurig selecteren. 
+            De prijs wordt automatisch berekend op basis van de gekozen afmetingen.
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // ==========================================================================
+  // COLOR SELECTOR
+  // ==========================================================================
+
+  const renderColorSelector = () => {
+    const currentColor = config.color;
+
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl">
+        {MAATWERK_COLOR_OPTIONS.map((choice) => (
+          <div
+            key={choice.id}
+            onClick={() => setConfig(prev => ({ ...prev, color: choice.id }))}
+            className={`relative rounded-xl overflow-hidden cursor-pointer transition-all border-2 p-4 ${
+              currentColor === choice.id
+                ? 'border-[#003878] ring-2 ring-[#003878]/20 shadow-lg bg-[#003878]/5'
+                : 'border-gray-200 hover:border-gray-300 hover:shadow-md bg-white'
+            }`}
+          >
+            {currentColor === choice.id && (
+              <div className="absolute top-2 right-2 w-6 h-6 bg-[#003878] rounded-full flex items-center justify-center text-white shadow-sm">
+                <Check size={14} strokeWidth={3} />
+              </div>
+            )}
+            
+            <div 
+              className="w-full aspect-square rounded-lg mb-3 border border-gray-200 shadow-inner"
+              style={{ backgroundColor: choice.hex }}
+            />
+            
+            <span className="block text-sm font-bold text-gray-900 text-center">{choice.label}</span>
+            {choice.description && (
+              <span className="block text-xs text-gray-500 text-center mt-1">{choice.description}</span>
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  // ==========================================================================
+  // CARD SELECTOR (for daktype)
+  // ==========================================================================
+
+  const renderCardSelector = (options: typeof MAATWERK_ROOF_OPTIONS, configKey: keyof PartialMaatwerkConfig) => {
+    const currentValue = config[configKey];
+
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {options.map((choice) => {
+          const price = config.size ? getMaatwerkOptionPrice(choice.pricing, config.size) : 0;
+          
+          return (
+            <div
+              key={choice.id}
+              onClick={() => setConfig(prev => ({ ...prev, [configKey]: choice.id }))}
+              className={`relative rounded-xl overflow-hidden cursor-pointer transition-all border-2 ${
+                currentValue === choice.id
+                  ? 'border-[#003878] ring-2 ring-[#003878]/20 shadow-lg'
+                  : 'border-gray-200 hover:border-gray-300 hover:shadow-md'
+              }`}
+            >
+              {currentValue === choice.id && (
+                <div className="absolute top-3 left-3 z-10 w-8 h-8 bg-[#003878] rounded-full flex items-center justify-center text-white shadow-md">
+                  <Check size={18} strokeWidth={3} />
+                </div>
+              )}
+              {choice.description && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); setInfoModal({ title: choice.label, text: choice.description! }); }}
+                  className="absolute top-3 right-3 z-10 w-8 h-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center text-gray-600 hover:text-[#003878] shadow-sm transition-colors"
+                >
+                  <Info size={16} />
+                </button>
+              )}
+              <div className="aspect-[4/3] bg-gray-100 flex items-center justify-center">
+                <Eye size={40} className="text-gray-300" />
+              </div>
+              <div className="p-4 bg-white">
+                <span className="block text-base font-bold text-gray-900 mb-1">{choice.label}</span>
+                <span className="text-sm text-gray-600">{choice.description}</span>
+                {price > 0 && (
+                  <span className="inline-block mt-2 bg-[#FF7300]/10 text-[#FF7300] text-sm font-bold px-3 py-1 rounded-full">
+                    + €{price},-
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
+  // ==========================================================================
+  // RADIO/SELECT SELECTOR
+  // ==========================================================================
+
+  const renderSelectSelector = (options: typeof MAATWERK_SIDEWALL_OPTIONS, configKey: keyof PartialMaatwerkConfig) => {
+    const currentValue = config[configKey];
+
+    return (
+      <div className="space-y-3 max-w-2xl">
+        {options.map((choice) => {
+          const price = config.size ? getMaatwerkOptionPrice(choice.pricing, config.size) : 0;
+          
+          return (
+            <div
+              key={choice.id}
+              onClick={() => setConfig(prev => ({ ...prev, [configKey]: choice.id }))}
+              className={`flex items-start p-4 rounded-xl border-2 transition-all cursor-pointer group ${
+                currentValue === choice.id
+                  ? 'border-[#003878] bg-[#003878]/5 shadow-md ring-2 ring-[#003878]/10'
+                  : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
+              }`}
+            >
+              <div className={`w-12 h-12 rounded-lg flex items-center justify-center mr-4 flex-shrink-0 transition-colors ${
+                currentValue === choice.id
+                  ? 'bg-[#003878] text-white'
+                  : 'bg-gray-100 text-gray-400 group-hover:text-gray-600'
+              }`}>
+                {currentValue === choice.id ? <Check size={22} /> : <Eye size={22} />}
+              </div>
+              <div className="flex-grow">
+                <span className={`block font-bold text-base mb-1 ${
+                  currentValue === choice.id ? 'text-gray-900' : 'text-gray-700'
+                }`}>
+                  {choice.label}
+                </span>
+                <span className="text-sm text-gray-600">{choice.description}</span>
+                {price > 0 && (
+                  <span className="block text-sm text-[#FF7300] font-semibold mt-1">+ €{price},-</span>
+                )}
+              </div>
+              {choice.description && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); setInfoModal({ title: choice.label, text: choice.description! }); }}
+                  className="p-2 text-gray-300 hover:text-[#003878] transition-colors ml-2"
+                >
+                  <Info size={18} />
+                </button>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
+  // ==========================================================================
+  // TOGGLE SELECTOR (for verlichting)
+  // ==========================================================================
+
+  const renderToggleSelector = () => {
+    const choice = MAATWERK_EXTRAS_OPTIONS[0];
+    const currentValue = config.verlichting;
+    const price = config.size ? getMaatwerkOptionPrice(choice.pricing, config.size) : 0;
+
+    return (
+      <div className="max-w-2xl">
+        <div
+          onClick={() => setConfig(prev => ({ ...prev, verlichting: !currentValue }))}
+          className={`flex items-center justify-between p-6 rounded-xl border-2 cursor-pointer transition-all ${
+            currentValue
+              ? 'border-[#003878] bg-[#003878]/5 shadow-md ring-2 ring-[#003878]/10'
+              : 'border-gray-200 bg-white hover:border-gray-300'
+          }`}
+        >
+          <div className="flex items-center gap-4">
+            <div className={`w-16 h-16 rounded-xl flex items-center justify-center shadow-sm transition-colors ${
+              currentValue ? 'bg-[#FF7300] text-white' : 'bg-gray-100 text-gray-400'
+            }`}>
+              <Lightbulb size={28} fill={currentValue ? "currentColor" : "none"} />
+            </div>
+            <div>
+              <span className="font-bold text-gray-900 text-lg block">{choice.label}</span>
+              <span className="text-sm text-gray-600">{choice.description}</span>
+              {price > 0 && (
+                <span className="block text-sm text-[#FF7300] font-semibold mt-1">+ €{price},-</span>
+              )}
+            </div>
+          </div>
+          <label className="relative inline-flex items-center cursor-pointer" onClick={e => e.stopPropagation()}>
+            <input
+              type="checkbox"
+              className="sr-only peer"
+              checked={!!currentValue}
+              onChange={(e) => setConfig(prev => ({ ...prev, verlichting: e.target.checked }))}
+            />
+            <div className="w-14 h-8 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-[#003878] shadow-inner" />
+          </label>
+        </div>
+        <p className="mt-4 text-sm text-gray-500 italic px-2">
+          Deze stap is optioneel.
+        </p>
+      </div>
+    );
+  };
+
+  // ==========================================================================
+  // OVERVIEW
+  // ==========================================================================
+
+  const renderOverview = () => {
+    const summaryItems = [
+      { stepIndex: 0, label: 'Afmetingen', value: config.size ? formatMaatwerkSize(config.size) : '-', key: 'afmetingen' },
+      { stepIndex: 1, label: 'Kleur profiel', value: getMaatwerkOptionLabel('color', config.color), key: 'color' },
+      { stepIndex: 2, label: 'Daktype', value: getMaatwerkOptionLabel('daktype', config.daktype), key: 'daktype' },
+      { stepIndex: 3, label: 'Goot optie', value: getMaatwerkOptionLabel('goot', config.goot), key: 'goot' },
+      { stepIndex: 4, label: 'Zijwand links', value: getMaatwerkOptionLabel('zijwand_links', config.zijwand_links), key: 'zijwand_links' },
+      { stepIndex: 5, label: 'Zijwand rechts', value: getMaatwerkOptionLabel('zijwand_rechts', config.zijwand_rechts), key: 'zijwand_rechts' },
+      { stepIndex: 6, label: 'Voorzijde', value: getMaatwerkOptionLabel('voorzijde', config.voorzijde), key: 'voorzijde' },
+      { stepIndex: 7, label: "Extra's", value: config.verlichting ? 'Ja, LED spots' : 'Nee', key: 'verlichting' },
+    ];
+
+    return (
+      <div className="space-y-6 max-w-3xl">
+        {/* Success message */}
+        <div className="bg-green-50 border-2 border-green-200 rounded-xl p-5 flex items-start gap-3">
+          <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white flex-shrink-0">
+            <Check size={20} />
+          </div>
+          <div>
+            <h4 className="font-bold text-green-800 text-lg">Configuratie compleet!</h4>
+            <p className="text-sm text-green-700">Controleer uw selecties en voeg toe aan de winkelwagen.</p>
+          </div>
+        </div>
+
+        {/* Configuration summary */}
+        <div className="bg-white rounded-xl border-2 border-gray-200 divide-y divide-gray-100 overflow-hidden shadow-sm">
+          {summaryItems.map((item) => (
+            <div key={item.key} className="flex items-center justify-between p-4 hover:bg-[#EDF0F2] transition-colors">
+              <div>
+                <span className="text-sm text-gray-500 font-medium">{item.label}</span>
+                <span className="block font-bold text-gray-900 text-base">{item.value}</span>
+              </div>
+              <button
+                onClick={() => goToStep(item.stepIndex)}
+                className="flex items-center gap-1.5 text-[#003878] hover:text-[#002050] font-semibold text-sm transition-colors"
+              >
+                <Edit2 size={14} />
+                Wijzig
+              </button>
+            </div>
+          ))}
+        </div>
+
+        {/* Price breakdown */}
+        <div className="bg-[#EDF0F2] rounded-xl p-6 space-y-3">
+          <h4 className="font-bold text-gray-900 text-lg">Prijsoverzicht</h4>
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between">
+              <span className="text-gray-600">Basisprijs ({config.size ? formatMaatwerkSize(config.size) : '-'})</span>
+              <span className="font-semibold text-gray-900">{formatMaatwerkPrice(priceBreakdown.basePrice)}</span>
+            </div>
+            {priceBreakdown.selections.filter(s => s.price > 0).map((selection, idx) => (
+              <div key={idx} className="flex justify-between">
+                <span className="text-gray-600">{selection.choiceLabel}</span>
+                <span className="font-semibold text-gray-900">+ €{selection.price.toLocaleString('nl-NL')},-</span>
+              </div>
+            ))}
+            <div className="border-t-2 border-gray-300 pt-3 mt-3 flex justify-between items-center">
+              <span className="font-bold text-gray-900 text-base">Totaal incl. BTW</span>
+              <span className="font-black text-2xl text-[#003878]">{formatMaatwerkPrice(priceBreakdown.grandTotal)}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Agreement checkbox */}
+        <label className="flex items-start gap-3 p-4 bg-white border-2 border-gray-200 rounded-xl cursor-pointer hover:border-gray-300 transition-colors">
+          <input
+            type="checkbox"
+            checked={agreed}
+            onChange={(e) => setAgreed(e.target.checked)}
+            className="mt-1 w-5 h-5 rounded border-gray-300 text-[#003878] focus:ring-[#003878] cursor-pointer"
+          />
+          <span className="text-sm text-gray-700">
+            Ik ga akkoord met de{' '}
+            <a href="#/algemene-voorwaarden" className="text-[#003878] underline hover:no-underline" target="_blank" rel="noopener noreferrer">
+              algemene voorwaarden
+            </a>{' '}
+            en heb de{' '}
+            <a href="#/privacy" className="text-[#003878] underline hover:no-underline" target="_blank" rel="noopener noreferrer">
+              privacyverklaring
+            </a>{' '}
+            gelezen.
+          </span>
+        </label>
+      </div>
+    );
+  };
+
+  // ==========================================================================
+  // OPTION SELECTOR ROUTER
+  // ==========================================================================
+
+  const renderOptionSelector = () => {
+    switch (currentStep.id) {
+      case 'afmetingen':
+        return renderSizeSelector();
+      case 'color':
+        return renderColorSelector();
+      case 'daktype':
+        return renderCardSelector(MAATWERK_ROOF_OPTIONS, 'daktype');
+      case 'goot':
+        return renderSelectSelector(MAATWERK_GUTTER_OPTIONS, 'goot');
+      case 'zijwand_links':
+        return renderSelectSelector(MAATWERK_SIDEWALL_OPTIONS, 'zijwand_links');
+      case 'zijwand_rechts':
+        return renderSelectSelector(MAATWERK_SIDEWALL_OPTIONS, 'zijwand_rechts');
+      case 'voorzijde':
+        return renderSelectSelector(MAATWERK_FRONT_OPTIONS, 'voorzijde');
+      case 'verlichting':
+        return renderToggleSelector();
+      case 'overzicht':
+        return renderOverview();
+      default:
+        return null;
+    }
+  };
+
+  // ==========================================================================
+  // PROGRESS INDICATOR
+  // ==========================================================================
+
+  const renderProgressIndicator = () => (
+    <div className="flex items-center gap-1.5 mb-8 overflow-x-auto pb-2">
+      {MAATWERK_STEPS.map((step, idx) => (
+        <React.Fragment key={step.id}>
+          <button
+            onClick={() => goToStep(idx)}
+            disabled={idx > currentStepIndex}
+            className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+              idx === currentStepIndex
+                ? 'bg-[#003878] text-white'
+                : idx < currentStepIndex
+                  ? 'bg-[#003878]/20 text-[#003878] cursor-pointer hover:bg-[#003878]/30'
+                  : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+            }`}
+            title={step.title}
+          >
+            {idx < currentStepIndex ? <Check size={14} /> : idx + 1}
+          </button>
+          {idx < MAATWERK_STEPS.length - 1 && (
+            <div className={`h-0.5 w-4 lg:w-6 flex-shrink-0 transition-colors ${
+              idx < currentStepIndex ? 'bg-[#003878]/30' : 'bg-gray-200'
+            }`} />
+          )}
+        </React.Fragment>
+      ))}
+    </div>
+  );
+
+  // ==========================================================================
+  // VISUALIZATION
+  // ==========================================================================
+
+  const Visualization = ({ className = "" }: { className?: string }) => {
+    const selectedColor = MAATWERK_COLOR_OPTIONS.find(c => c.id === config.color);
+    
+    return (
+      <div className={`bg-gradient-to-br from-gray-100 to-gray-50 rounded-xl overflow-hidden ${className}`}>
+        <div className="aspect-[16/10] relative flex items-center justify-center">
+          {visualLayers.length > 0 ? (
+            visualLayers.map((layer) => (
+              <SafeImage
+                key={layer.id}
+                src={layer.src}
+                alt={layer.alt}
+                className="absolute inset-0 w-full h-full object-contain"
+              />
+            ))
+          ) : (
+            <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
+              <Eye size={40} className="text-gray-300 mb-3" />
+              <p className="text-sm text-gray-400 font-medium">Preview wordt geladen...</p>
+            </div>
+          )}
+          
+          {/* Config badges */}
+          <div className="absolute bottom-3 left-3 flex flex-wrap gap-1.5">
+            {config.size && (
+              <span className="px-2.5 py-1 bg-[#003878] text-white text-[10px] font-bold rounded-full uppercase tracking-wide">
+                {config.size.width}×{config.size.depth}
+              </span>
+            )}
+            {selectedColor && (
+              <span 
+                className="px-2.5 py-1 text-white text-[10px] font-bold rounded-full uppercase tracking-wide flex items-center gap-1.5"
+                style={{ backgroundColor: selectedColor.hex === '#FDF4E3' ? '#8B8685' : selectedColor.hex }}
+              >
+                <span 
+                  className="w-2.5 h-2.5 rounded-full border border-white/30"
+                  style={{ backgroundColor: selectedColor.hex }}
+                />
+                {config.color?.replace('ral', 'RAL ')}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // ==========================================================================
+  // RENDER
+  // ==========================================================================
+
+  return (
+    <div className="min-h-screen bg-white lg:bg-[#f6f8fa] font-sans">
+      {/* Info Modal */}
+      <AnimatePresence>
+        {infoModal && (
+          <MotionDiv
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/50"
+            onClick={() => setInfoModal(null)}
+          >
+            <MotionDiv
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white rounded-xl p-5 max-w-sm w-full shadow-xl"
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-start mb-3">
+                <h4 className="font-bold text-base text-gray-900">{infoModal.title}</h4>
+                <button onClick={() => setInfoModal(null)} className="p-1 hover:bg-gray-100 rounded-full">
+                  <X size={18} />
+                </button>
+              </div>
+              <p className="text-gray-600 text-sm leading-relaxed">{infoModal.text}</p>
+            </MotionDiv>
+          </MotionDiv>
+        )}
+      </AnimatePresence>
+
+      {/* Main Container */}
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="bg-white border-b border-gray-100 px-6 py-4 lg:hidden">
+          <div className="flex items-center justify-between">
+            <h1 className="text-xl font-black text-[#003878]">Maatwerk Veranda</h1>
+            {onClose && (
+              <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full">
+                <X size={20} />
+              </button>
+            )}
+          </div>
+          <p className="text-sm text-gray-500 mt-1">
+            Stap {currentStepIndex + 1} van {MAATWERK_STEPS.length} — {currentStep.title}
+          </p>
+        </div>
+
+        {/* Desktop Header */}
+        <div className="hidden lg:flex items-center justify-between px-8 py-6 bg-white border-b border-gray-100">
+          <div>
+            <h1 className="text-2xl font-black text-[#003878]">Maatwerk Veranda Configurator</h1>
+            <p className="text-gray-500 mt-1">Configureer uw veranda op maat</p>
+          </div>
+          <div className="text-right">
+            <span className="text-sm text-gray-500">Totaalprijs</span>
+            <span className="block text-2xl font-black text-[#003878]">{formatMaatwerkPrice(priceBreakdown.grandTotal)}</span>
+          </div>
+        </div>
+
+        {/* Content Grid */}
+        <div className="lg:grid lg:grid-cols-[1fr,480px] lg:min-h-[calc(100vh-100px)]">
+          {/* Left - Visualization (Desktop) */}
+          <div className="hidden lg:flex flex-col p-8">
+            <Visualization className="flex-1 min-h-[400px]" />
+          </div>
+
+          {/* Mobile Visualization */}
+          <div className="lg:hidden px-6 py-4">
+            <Visualization />
+          </div>
+
+          {/* Right - Configuration Panel */}
+          <div className="lg:border-l lg:border-gray-100 lg:bg-white flex flex-col">
+            {/* Progress + Step Content */}
+            <div className="flex-1 overflow-y-auto px-6 py-6 pb-32 lg:pb-6">
+              {renderProgressIndicator()}
+              
+              <h2 className="text-xl font-bold text-gray-900 mb-1">{currentStep.title}</h2>
+              <p className="text-sm text-gray-500 mb-6">{currentStep.description}</p>
+              
+              <AnimatePresence mode="wait">
+                <MotionDiv
+                  key={currentStepIndex}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  {renderOptionSelector()}
+                </MotionDiv>
+              </AnimatePresence>
+            </div>
+
+            {/* Footer - Navigation */}
+            <div className="fixed bottom-0 left-0 right-0 lg:static bg-white border-t border-gray-200 px-6 py-4 z-40">
+              {/* Price (Mobile) */}
+              <div className="flex items-center justify-between mb-4 lg:hidden">
+                <div>
+                  <span className="text-xs text-gray-500 uppercase tracking-wide">Totaal incl. BTW</span>
+                  <span className="block text-xl font-black text-[#003878]">{formatMaatwerkPrice(priceBreakdown.grandTotal)}</span>
+                </div>
+              </div>
+
+              {/* Navigation buttons */}
+              <div className="flex items-center gap-3">
+                {currentStepIndex > 0 && (
+                  <button
+                    onClick={handleBack}
+                    className="p-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
+                  >
+                    <ChevronLeft size={20} />
+                  </button>
+                )}
+
+                <div className="flex-1" />
+
+                {!isLastStep ? (
+                  <button
+                    onClick={handleNext}
+                    disabled={!canProceed}
+                    className={`px-6 py-3 font-bold rounded-xl text-sm flex items-center gap-2 transition-all ${
+                      canProceed
+                        ? 'bg-[#003878] text-white hover:bg-[#002050]'
+                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    }`}
+                  >
+                    Volgende
+                    <ChevronRight size={18} />
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleAddToCart}
+                    disabled={!agreed || isSubmitting}
+                    className={`px-6 py-3 font-bold rounded-xl text-sm flex items-center gap-2 transition-all ${
+                      agreed && !isSubmitting
+                        ? 'bg-[#FF7300] text-white hover:bg-[#E66600]'
+                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    }`}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 size={18} className="animate-spin" />
+                        Toevoegen...
+                      </>
+                    ) : (
+                      <>
+                        Toevoegen aan winkelwagen
+                        <ArrowRight size={18} />
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
+
+              {/* Info badges */}
+              <div className="flex items-center gap-4 mt-3 text-xs text-gray-500">
+                <span className="flex items-center gap-1.5">
+                  <Truck size={12} /> Levering 5-10 werkdagen
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <ShieldCheck size={12} /> 5 jaar garantie
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default MaatwerkVerandaConfigurator;

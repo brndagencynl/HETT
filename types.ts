@@ -61,7 +61,52 @@ export type SandwichConfig = {
 export type ProductConfig =
   | { category: 'verandas'; data: VerandaConfig }
   | { category: 'sandwichpanelen'; data: SandwichConfig }
-  | { category: 'accessoires'; data?: Record<string, never> };
+  | { category: 'accessoires'; data?: Record<string, never> }
+  | { category: 'maatwerk_veranda'; data: MaatwerkVerandaConfig };
+
+// Maatwerk Veranda Config (for cart items)
+export interface MaatwerkVerandaConfig {
+  type: 'maatwerk_veranda';
+  size: { width: number; depth: number };
+  color: string;
+  daktype: string;
+  goot: string;
+  zijwand_links: string;
+  zijwand_rechts: string;
+  voorzijde: string;
+  verlichting: boolean;
+}
+
+// Maatwerk cart item payload (used for adding to cart)
+export interface MaatwerkCartPayload {
+  type: 'maatwerk_veranda';
+  title: string;
+  quantity: number;
+  basePrice: number;
+  optionsTotal: number;
+  totalPrice: number;
+  size: { width: number; depth: number };
+  selections: Array<{
+    groupId: string;
+    groupLabel: string;
+    choiceId: string;
+    choiceLabel: string;
+    price: number;
+  }>;
+  renderPreview?: string;
+  priceBreakdown: {
+    basePrice: number;
+    selections: Array<{
+      groupId: string;
+      groupLabel: string;
+      choiceId: string;
+      choiceLabel: string;
+      price: number;
+    }>;
+    optionsTotal: number;
+    grandTotal: number;
+  };
+}
 
 export interface CartItem extends Product {
   id: string; // Unique line ID
@@ -86,6 +131,9 @@ export interface CartItem extends Product {
     overlayUrls: string[];
     capturedAt?: string;
   };
+
+  // Maatwerk veranda specific props
+  maatwerkPayload?: MaatwerkCartPayload;
 
   // Legacy/Compatibility props (to be deprecated or mapped)
   selectedSize?: string;

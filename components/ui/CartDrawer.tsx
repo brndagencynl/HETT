@@ -1,13 +1,14 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
-import { X, ShoppingBag, Trash2, ArrowRight, ShieldCheck, Pencil } from 'lucide-react';
+import { X, ShoppingBag, Trash2, ArrowRight, ShieldCheck, Pencil, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../../context/CartContext';
 import { useVerandaEdit } from '../../context/VerandaEditContext';
 import { isConfigOnly } from '../../utils/productRules';
-import { isVerandaCategory } from './ConfigBreakdownPopup';
+import { isVerandaCategory, isMaatwerkVerandaItem } from './ConfigBreakdownPopup';
 import { CartItemPreview } from './ConfigPreviewImage';
+import ConfigBreakdownPopup from './ConfigBreakdownPopup';
 
 const MotionDiv = motion.div as any;
 
@@ -16,6 +17,7 @@ const CartDrawer: React.FC = () => {
     const { openEditConfigurator } = useVerandaEdit();
     const navigate = useNavigate();
     const drawerRef = useRef<HTMLDivElement>(null);
+    const [breakdownPopupKey, setBreakdownPopupKey] = useState<string | null>(null);
 
     // Close on escape key
     useEffect(() => {
@@ -82,15 +84,17 @@ const CartDrawer: React.FC = () => {
                                     </button>
                                 </div>
                             ) : (
-                                cart.map((item, index) => {
+                cart.map((item, index) => {
                                     const isVeranda = isVerandaCategory(item);
+                                    const isMaatwerk = isMaatwerkVerandaItem(item);
                                     const basePrice = item.price || 1250; // fallback base price
                                     const initialConfig = item.config?.category === 'verandas' ? item.config.data : undefined;
+                                    const popupKey = `drawer-breakdown-${item.id || index}`;
                                     
                                     return (
                                     <div key={index} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex gap-4 relative group">
                                         {/* Product image - use ConfigPreviewImage for verandas */}
-                                        {isVeranda ? (
+                                        {isVeranda && !isMaatwerk ? (
                                             <CartItemPreview
                                                 render={item.render}
                                                 config={initialConfig}
@@ -107,8 +111,8 @@ const CartDrawer: React.FC = () => {
                                             <div className="flex justify-between items-start mb-1">
                                                 <div className="flex items-center gap-2 flex-1 min-w-0 pr-2">
                                                     <h4 className="font-bold text-sm text-hett-dark line-clamp-2">{item.title}</h4>
-                                                    {/* Edit icon for verandas only */}
-                                                    {isVeranda && (
+                                                    {/* Edit icon for regular verandas only (not maatwerk) */}
+                                                    {isVeranda && !isMaatwerk && (
                                                         <button
                                                             onClick={() => openEditConfigurator({
                                                                 cartIndex: index,
@@ -123,6 +127,17 @@ const CartDrawer: React.FC = () => {
                                                             <Pencil size={14} />
                                                         </button>
                                                     )}
+                                                    {/* Info icon for maatwerk items */}
+                                                    {isMaatwerk && (
+                                                        <button
+                                                            onClick={() => setBreakdownPopupKey(popupKey)}
+                                                            className="flex-shrink-0 p-1.5 min-w-[32px] min-h-[32px] flex items-center justify-center text-gray-400 hover:text-hett-primary hover:bg-hett-light rounded-md transition-colors"
+                                                            title="Configuratie details"
+                                                            aria-label="Bekijk configuratie details"
+                                                        >
+                                                            <Info size={14} />
+                                                        </button>
+                                                    )}
                                                 </div>
                                                 <button
                                                     onClick={() => removeFromCart(index)}
@@ -131,6 +146,13 @@ const CartDrawer: React.FC = () => {
                                                     <Trash2 size={16} />
                                                 </button>
                                             </div>
+
+                                            {/* Maatwerk size display */}
+                                            {isMaatwerk && item.maatwerkPayload?.size && (
+                                                <div className="mb-2 text-xs text-[#003878] font-semibold">
+                                                    {item.maatwerkPayload.size.width} × {item.maatwerkPayload.size.depth} cm
+                                                </div>
+                                            )}
 
                                             {/* Config Details */}
                                             {item.displayConfigSummary ? (
@@ -162,7 +184,15 @@ const CartDrawer: React.FC = () => {
                                                 <span className="font-black text-hett-dark">€ {item.totalPrice.toLocaleString()},-</span>
                                             </div>
                                         </div>
-                                    </div>
+                                        {/* Breakdown popup for maatwerk items */}
+                                        {isMaatwerk && (
+                                            <ConfigBreakdownPopup
+                                                uniqueKey={popupKey}
+                                                isOpen={breakdownPopupKey === popupKey}
+                                                onClose={() => setBreakdownPopupKey(null)}
+                                                item={item}
+                                            />
+                                        )}                                    </div>
                                 );
                                 })
                             )}

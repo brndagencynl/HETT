@@ -47,6 +47,9 @@ import Blog from './pages/Blog';
 import BlogDetail from './pages/BlogDetail';
 import Page from './pages/Page';
 
+// Maatwerk Configurator
+import MaatwerkConfiguratorPage from './pages/MaatwerkConfigurator';
+
 // ScrollToTop helper
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -75,6 +78,9 @@ const AnimatedRoutes: React.FC = () => {
         <Route path="/search" element={<PageTransition><Search /></PageTransition>} />
         <Route path="/offerte" element={<PageTransition><Quote /></PageTransition>} />
         <Route path="/wishlist" element={<PageTransition><Wishlist /></PageTransition>} />
+
+        {/* Maatwerk Configurator */}
+        <Route path="/maatwerk-configurator" element={<PageTransition><MaatwerkConfiguratorPage /></PageTransition>} />
 
         {/* Information Pages */}
         <Route path="/bezorging" element={<PageTransition><Delivery /></PageTransition>} />

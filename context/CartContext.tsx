@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useMemo, useEffect } from 'react';
-import { CartItem, Product, ProductConfig } from '../types';
+import { CartItem, Product, ProductConfig, MaatwerkCartPayload } from '../types';
 import { validateConfig } from '../utils/configValidation';
 import { generateConfigHash } from '../utils/hash';
 import { buildRenderSnapshot, type VerandaVisualizationConfig } from '../src/configurator/visual/verandaAssets';
@@ -39,6 +39,7 @@ interface ShippingState {
 interface CartContextType {
   cart: CartItem[];
   addToCart: (product: Product, quantity: number, options: any) => void;
+  addMaatwerkToCart: (payload: MaatwerkCartPayload) => void;
   removeFromCart: (index: number) => void;
   updateQuantity: (index: number, quantity: number) => void;
   updateCartItem: (index: number, updates: Partial<CartItem>) => void;
@@ -314,6 +315,89 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  /**
+   * Add a maatwerk veranda item to cart.
+   * Maatwerk items are custom-configured verandas not tied to product pages.
+   */
+  const addMaatwerkToCart = (payload: MaatwerkCartPayload) => {
+    // Generate unique cart ID based on configuration
+    const configString = JSON.stringify({
+      size: payload.size,
+      selections: payload.selections.map(s => s.choiceId).sort(),
+    });
+    const cartId = `maatwerk-${generateConfigHash({ data: configString })}`;
+
+    // Build display summary
+    const sizeSummary = `${payload.size.width}×${payload.size.depth}cm`;
+    const optionsSummary = payload.selections
+      .filter(s => s.choiceId !== 'geen' && s.price >= 0)
+      .slice(0, 3)
+      .map(s => s.choiceLabel)
+      .join(', ');
+    const displaySummary = `${sizeSummary} • ${optionsSummary}${payload.selections.length > 3 ? '...' : ''}`;
+
+    const newItem: CartItem = {
+      // Product-like fields for cart compatibility
+      id: cartId,
+      slug: 'maatwerk-veranda',
+      title: payload.title,
+      category: 'verandas', // Use verandas category for cart display logic
+      price: payload.totalPrice,
+      shortDescription: `Maatwerk veranda ${sizeSummary}`,
+      description: 'Op maat geconfigureerde aluminium veranda',
+      imageUrl: '/renders/veranda/ral7016/base.png', // Default preview
+      specs: {},
+      requiresConfiguration: false, // Already configured
+
+      // Cart item fields
+      quantity: payload.quantity,
+      totalPrice: payload.totalPrice,
+
+      // Config props
+      config: {
+        category: 'maatwerk_veranda',
+        data: {
+          type: 'maatwerk_veranda',
+          size: payload.size,
+          color: payload.selections.find(s => s.groupId === 'color')?.choiceId || 'ral7016',
+          daktype: payload.selections.find(s => s.groupId === 'daktype')?.choiceId || '',
+          goot: payload.selections.find(s => s.groupId === 'goot')?.choiceId || '',
+          zijwand_links: payload.selections.find(s => s.groupId === 'zijwand_links')?.choiceId || 'geen',
+          zijwand_rechts: payload.selections.find(s => s.groupId === 'zijwand_rechts')?.choiceId || 'geen',
+          voorzijde: payload.selections.find(s => s.groupId === 'voorzijde')?.choiceId || 'geen',
+          verlichting: payload.selections.some(s => s.groupId === 'verlichting'),
+        },
+      },
+      configHash: cartId,
+      displayConfigSummary: displaySummary,
+
+      // Maatwerk-specific payload for breakdown display
+      maatwerkPayload: payload,
+      priceBreakdown: payload.priceBreakdown,
+
+      // Details for legacy display
+      details: [
+        { label: 'Afmeting', value: sizeSummary },
+        ...payload.selections.map(s => ({ label: s.groupLabel, value: s.choiceLabel })),
+      ],
+    };
+
+    setCart(prev => {
+      // Check if same configuration exists
+      const existing = prev.find(i => i.id === cartId);
+      if (existing) {
+        return prev.map(i => 
+          i.id === cartId 
+            ? { ...i, quantity: i.quantity + 1, totalPrice: i.totalPrice + payload.totalPrice } 
+            : i
+        );
+      }
+      return [...prev, newItem];
+    });
+
+    // Note: We don't auto-open cart here - caller should handle that
+  };
+
   const removeFromCart = (index: number) => {
     const newCart = [...cart];
     newCart.splice(index, 1);
@@ -360,7 +444,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   return (
     <CartContext.Provider value={{ 
       cart, 
-      addToCart, 
+      addToCart,
+      addMaatwerkToCart,
       removeFromCart, 
       updateQuantity, 
       updateCartItem, 

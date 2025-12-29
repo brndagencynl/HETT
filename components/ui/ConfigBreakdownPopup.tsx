@@ -76,14 +76,25 @@ export function isVerandaCategory(item: any): boolean {
 
   if (hasVeranda) return true;
 
+  // Check if it's a maatwerk veranda
+  if (item?.maatwerkPayload?.type === 'maatwerk_veranda') return true;
+  if (item?.config?.category === 'maatwerk_veranda') return true;
+
   // Fallback: check title heuristics (only for veranda, exclude sandwichpaneel)
   const title = item?.title as string | undefined;
   if (title) {
     const lower = title.toLowerCase();
-    if (lower.includes('hett veranda') || (lower.includes('veranda') && !lower.includes('sandwich'))) return true;
+    if (lower.includes('hett veranda') || lower.includes('maatwerk veranda') || (lower.includes('veranda') && !lower.includes('sandwich'))) return true;
   }
 
   return false;
+}
+
+/**
+ * Check if an item is a maatwerk veranda (custom configured, not tied to product)
+ */
+export function isMaatwerkVerandaItem(item: any): boolean {
+  return item?.maatwerkPayload?.type === 'maatwerk_veranda' || item?.config?.category === 'maatwerk_veranda';
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -106,6 +117,40 @@ function normalizeBreakdown(breakdown: unknown): NormalizedBreakdown | null {
   if (isRecord(breakdown) && 'priceBreakdown' in breakdown && breakdown.priceBreakdown) {
     const result = normalizeBreakdown(breakdown.priceBreakdown);
     if (result) return result;
+  }
+
+  // 0b) Maatwerk veranda payload: { maatwerkPayload: MaatwerkCartPayload }
+  if (isRecord(breakdown) && 'maatwerkPayload' in breakdown && isRecord(breakdown.maatwerkPayload)) {
+    const payload = breakdown.maatwerkPayload as any;
+    if (payload.type === 'maatwerk_veranda' && payload.priceBreakdown) {
+      const pb = payload.priceBreakdown;
+      const basePrice = toNumber(pb.basePrice);
+      const optionsTotal = toNumber(pb.optionsTotal);
+      const grandTotal = toNumber(pb.grandTotal);
+      
+      if (basePrice !== null && optionsTotal !== null && grandTotal !== null) {
+        const sizeLabel = payload.size ? `Afmeting: ${payload.size.width}×${payload.size.depth}cm` : '';
+        const rows: NormalizedRow[] = [];
+        
+        // Add size as first row if available
+        if (sizeLabel) {
+          rows.push({ label: sizeLabel, amount: 0 });
+        }
+        
+        // Add selection rows
+        if (Array.isArray(pb.selections)) {
+          for (const sel of pb.selections) {
+            const label = sel.groupLabel && sel.choiceLabel 
+              ? `${sel.groupLabel}: ${sel.choiceLabel}` 
+              : (sel.choiceLabel || sel.groupLabel || 'Optie');
+            const amount = toNumber(sel.price) ?? 0;
+            rows.push({ label, amount });
+          }
+        }
+        
+        return { basePrice, rows, optionsTotal, grandTotal };
+      }
+    }
   }
 
   // 1) New cart payload shape: { pricing: { breakdown: PriceBreakdown } }

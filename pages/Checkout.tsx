@@ -9,7 +9,7 @@ import Button from '../components/ui/button';
 import { Card } from '../components/ui/card';
 import Input from '../components/ui/input';
 import { formatMoney } from '../src/pricing/pricingHelpers';
-import ConfigBreakdownPopup, { getCartItemPriceBreakdown, isConfigurableCategory, isVerandaCategory } from '../components/ui/ConfigBreakdownPopup';
+import ConfigBreakdownPopup, { getCartItemPriceBreakdown, isConfigurableCategory, isVerandaCategory, isMaatwerkVerandaItem } from '../components/ui/ConfigBreakdownPopup';
 import { CartItemPreview } from '../components/ui/ConfigPreviewImage';
 import { formatShippingCost, getAddressSummary, COUNTRY_LABELS } from '../src/services/addressValidation';
 
@@ -273,13 +273,14 @@ const Checkout: React.FC = () => {
                                         {orderItems.map(({ item, unitPrice }, idx) => {
                                             const showInfo = isConfigurableCategory(item);
                                             const isVeranda = isVerandaCategory(item);
+                                            const isMaatwerk = isMaatwerkVerandaItem(item);
                                             const basePrice = item.price || 1250;
                                             // Cast to schema's VerandaConfig type for the edit context
                                             const initialConfig = item.config?.category === 'verandas' ? (item.config.data as any) : undefined;
                                             return (
                                             <div key={item.id} className="flex gap-3 pb-4 border-b border-gray-100 last:border-0">
-                                                {/* Image - use ConfigPreviewImage for verandas */}
-                                                {isVeranda ? (
+                                                {/* Image - use ConfigPreviewImage for verandas (not maatwerk) */}
+                                                {isVeranda && !isMaatwerk ? (
                                                     <CartItemPreview
                                                         render={item.render}
                                                         config={initialConfig}
@@ -293,9 +294,17 @@ const Checkout: React.FC = () => {
                                                 )}
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex items-start gap-2">
-                                                        <h4 className="font-bold text-sm text-gray-800 mb-1 line-clamp-2 flex-1">{item.title}</h4>
-                                                        {/* Edit icon for verandas only */}
-                                                        {isVeranda && (
+                                                        <div className="flex-1">
+                                                            <h4 className="font-bold text-sm text-gray-800 mb-1 line-clamp-2">{item.title}</h4>
+                                                            {/* Maatwerk size display */}
+                                                            {isMaatwerk && item.maatwerkPayload?.size && (
+                                                                <div className="text-xs text-[#003878] font-semibold">
+                                                                    {item.maatwerkPayload.size.width} × {item.maatwerkPayload.size.depth} cm
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        {/* Edit icon for regular verandas only (not maatwerk) */}
+                                                        {isVeranda && !isMaatwerk && (
                                                             <Button
                                                                 type="button"
                                                                 variant="ghost"

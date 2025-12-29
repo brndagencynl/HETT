@@ -8,7 +8,7 @@ import PageHeader from '../components/PageHeader';
 import Button from '../components/ui/button';
 import { Card } from '../components/ui/card';
 import { formatMoney } from '../src/pricing/pricingHelpers';
-import ConfigBreakdownPopup, { getCartItemPriceBreakdown, isConfigurableCategory, isVerandaCategory } from '../components/ui/ConfigBreakdownPopup';
+import ConfigBreakdownPopup, { getCartItemPriceBreakdown, isConfigurableCategory, isVerandaCategory, isMaatwerkVerandaItem } from '../components/ui/ConfigBreakdownPopup';
 import { CartItemPreview } from '../components/ui/ConfigPreviewImage';
 import { AddressDeliverySelector } from '../src/components/cart/AddressDeliverySelector';
 import { formatShippingCost } from '../src/services/addressValidation';
@@ -103,14 +103,15 @@ const Cart: React.FC = () => {
                                         const popupKey = `cart-breakdown-${item.id || idx}`;
                                         const shouldShowInfo = isConfigurableCategory(item);
                                         const isVeranda = isVerandaCategory(item);
+                                        const isMaatwerk = isMaatwerkVerandaItem(item);
                                         const basePrice = item.price || 1250;
                                         // Cast to schema's VerandaConfig type for the edit context
                                         const initialConfig = item.config?.category === 'verandas' ? (item.config.data as any) : undefined;
                     return (
                     <Card key={item.id || String(idx)} padding="normal" className="hover:shadow-md transition-shadow">
                         <div className="flex gap-3 md:gap-4">
-                            {/* Image - use ConfigPreviewImage for verandas */}
-                            {isVeranda ? (
+                            {/* Image - use ConfigPreviewImage for verandas (not maatwerk) */}
+                            {isVeranda && !isMaatwerk ? (
                                 <CartItemPreview
                                     render={item.render}
                                     config={initialConfig}
@@ -128,12 +129,20 @@ const Cart: React.FC = () => {
                             <div className="flex-1 min-w-0">
                                 {/* Header row: Title + Actions */}
                                 <div className="flex justify-between items-start gap-2 mb-2">
-                                    <h3 className="font-bold text-hett-dark text-sm md:text-lg leading-tight flex-1 min-w-0">{item.title}</h3>
+                                    <div>
+                                        <h3 className="font-bold text-hett-dark text-sm md:text-lg leading-tight flex-1 min-w-0">{item.title}</h3>
+                                        {/* Maatwerk size display */}
+                                        {isMaatwerk && item.maatwerkPayload?.size && (
+                                            <div className="text-xs text-[#003878] font-semibold mt-1">
+                                                {item.maatwerkPayload.size.width} × {item.maatwerkPayload.size.depth} cm
+                                            </div>
+                                        )}
+                                    </div>
                                     
                                     {/* Action icons - always visible */}
                                     <div className="flex items-center gap-1 flex-shrink-0">
-                                        {/* Edit icon for verandas only */}
-                                        {isVeranda && (
+                                        {/* Edit icon for regular verandas only (not maatwerk) */}
+                                        {isVeranda && !isMaatwerk && (
                                             <button
                                                 type="button"
                                                 onClick={() => openEditConfigurator({
@@ -149,6 +158,7 @@ const Cart: React.FC = () => {
                                                 <Pencil size={16} />
                                             </button>
                                         )}
+                                        {/* Info popup for configurable items (including maatwerk) */}
                                         {shouldShowInfo && (
                                             <CartItemConfigInfo
                                                 key={popupKey}

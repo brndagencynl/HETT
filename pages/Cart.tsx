@@ -2,6 +2,7 @@
 import React, { useEffect, useRef } from 'react';
 import { useCart } from '../context/CartContext';
 import { useVerandaEdit } from '../context/VerandaEditContext';
+import { useMaatwerkEdit } from '../context/MaatwerkEditContext';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Trash2, ArrowRight, Plus, Minus, ShoppingBag, Info, Pencil } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
@@ -33,6 +34,7 @@ const Cart: React.FC = () => {
       grandTotal,
     } = useCart();
     const { openEditConfigurator } = useVerandaEdit();
+    const { openMaatwerkEdit } = useMaatwerkEdit();
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
     const shippingSectionRef = useRef<HTMLDivElement>(null);
@@ -154,6 +156,18 @@ const Cart: React.FC = () => {
                                                 className="p-2 text-gray-400 hover:text-hett-primary transition-colors rounded-lg hover:bg-gray-100"
                                                 title="Bewerken"
                                                 aria-label="Configuratie bewerken"
+                                            >
+                                                <Pencil size={16} />
+                                            </button>
+                                        )}
+                                        {/* Edit icon for maatwerk verandas */}
+                                        {isMaatwerk && (
+                                            <button
+                                                type="button"
+                                                onClick={() => openMaatwerkEdit({ cartIndex: idx, item })}
+                                                className="p-2 text-gray-400 hover:text-hett-primary transition-colors rounded-lg hover:bg-gray-100"
+                                                title="Bewerken"
+                                                aria-label="Maatwerk configuratie bewerken"
                                             >
                                                 <Pencil size={16} />
                                             </button>

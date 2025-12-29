@@ -5,6 +5,7 @@ import App from './App';
 import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
 import { VerandaEditProvider } from './context/VerandaEditContext';
+import { MaatwerkEditProvider } from './context/MaatwerkEditContext';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -17,7 +18,9 @@ root.render(
     <CartProvider>
       <WishlistProvider>
         <VerandaEditProvider>
-          <App />
+          <MaatwerkEditProvider>
+            <App />
+          </MaatwerkEditProvider>
         </VerandaEditProvider>
       </WishlistProvider>
     </CartProvider>

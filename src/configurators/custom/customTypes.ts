@@ -163,6 +163,18 @@ export interface MaatwerkSelection {
 }
 
 /**
+ * Anchor product info for pricing reference
+ */
+export interface MaatwerkAnchorInfo {
+  /** The anchor size key (e.g., "606x350") */
+  anchorSizeKey: string;
+  /** The anchor product's base price */
+  anchorPrice: number;
+  /** Custom fee added for maatwerk */
+  customFee: number;
+}
+
+/**
  * Price breakdown for maatwerk items
  */
 export interface MaatwerkPriceBreakdown {
@@ -170,6 +182,8 @@ export interface MaatwerkPriceBreakdown {
   selections: MaatwerkSelection[];
   optionsTotal: number;
   grandTotal: number;
+  /** Anchor product info (for reference) */
+  anchor?: MaatwerkAnchorInfo;
 }
 
 /**
@@ -182,7 +196,10 @@ export interface MaatwerkCartPayload {
   basePrice: number;
   optionsTotal: number;
   totalPrice: number;
+  /** User's requested custom dimensions */
   size: MaatwerkSize;
+  /** Anchor size used for pricing (may differ from size) */
+  anchorSizeKey: string;
   selections: MaatwerkSelection[];
   renderPreview?: string;
   priceBreakdown: MaatwerkPriceBreakdown;

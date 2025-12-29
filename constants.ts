@@ -1,4 +1,10 @@
-import { NavItem, Product, Project, NewsItem, CategorySlug } from './types';
+import { NavItem, Product, Project, NewsItem, CategorySlug, ProductVisibility } from './types';
+import { 
+  MATRIX_WIDTHS, 
+  MATRIX_DEPTHS, 
+  getProductVisibility,
+  toSizeKey,
+} from './src/catalog/matrixCatalog';
 
 export const CATEGORIES: Record<CategorySlug, { label: string; path: string; requiresConfiguration: boolean }> = {
   verandas: { label: "Veranda's", path: '/categorie/verandas', requiresConfiguration: true },
@@ -8,46 +14,100 @@ export const CATEGORIES: Record<CategorySlug, { label: string; path: string; req
 
 export const NAV_ITEMS: NavItem[] = [
   ...Object.values(CATEGORIES).map(c => ({ label: c.label, path: c.path })),
+  { label: 'Maatwerk configurator', path: '/maatwerk-configurator' },
   { label: 'Projecten', path: '/projecten' },
   { label: 'Contact', path: '/contact' },
 ];
 
-export const PRODUCTS: Product[] = [
-  {
-    id: 'veranda-306-250-opaal',
-    title: 'HETT Veranda Premium - Aluminium overkapping 3.06 x 2.5 m',
+// =============================================================================
+// VERANDA PRICE MATRIX
+// =============================================================================
+
+/**
+ * Base prices for veranda matrix (width × depth)
+ * Prices are calculated based on area with scaling factors
+ */
+function calculateVerandaBasePrice(widthCm: number, depthCm: number): number {
+  // Base price formula: area-based with minimum
+  const areaM2 = (widthCm / 100) * (depthCm / 100);
+  const baseRate = 110; // €110 per m²
+  const minimumPrice = 839;
+  const fixedCost = 300; // Fixed cost component
+  
+  return Math.max(minimumPrice, Math.round(fixedCost + (areaM2 * baseRate)));
+}
+
+/**
+ * Generate veranda product for a given size
+ */
+function createVerandaProduct(widthCm: number, depthCm: number): Product {
+  const sizeKey = toSizeKey(widthCm, depthCm);
+  const visibility = getProductVisibility(widthCm, depthCm);
+  const price = calculateVerandaBasePrice(widthCm, depthCm);
+  const priceExVat = Math.round((price / 1.21) * 100) / 100;
+  
+  // Format dimensions for display (e.g., "5.06 x 3.0 m")
+  const widthM = (widthCm / 100).toFixed(2);
+  const depthM = (depthCm / 100).toFixed(1);
+  
+  const isPublic = visibility === 'public';
+  
+  return {
+    id: `veranda-${widthCm}-${depthCm}`,
+    title: `HETT Veranda Premium - Aluminium overkapping ${widthM} x ${depthM} m`,
     category: 'verandas',
-    price: 839,
-    priceExVat: 693.39,
+    price,
+    priceExVat,
     shortDescription: 'Hittewerend polycarbonaat dak voor optimaal comfort.',
-    description: 'Complete aluminium terrasoverkapping inclusief hittewerend opaal polycarbonaat dakbedekking. Eenvoudig te monteren en onderhoudsvrij.',
+    description: `Complete aluminium terrasoverkapping ${widthCm} x ${depthCm} cm inclusief hittewerend opaal polycarbonaat dakbedekking. Eenvoudig te monteren en onderhoudsvrij.`,
     imageUrl: 'https://images.unsplash.com/photo-1628624747186-a941c476b7ef?q=80&w=2070&auto=format&fit=crop',
-    specs: { 'Materiaal': 'Aluminium T6-6063', 'Dak': 'Polycarbonaat Opaal', 'Afmeting': '306 x 250 cm' },
-    isBestseller: true,
-    badges: ['Kies & mix', 'BESTSELLER'],
+    specs: { 
+      'Materiaal': 'Aluminium T6-6063', 
+      'Dak': 'Polycarbonaat Opaal', 
+      'Afmeting': `${widthCm} x ${depthCm} cm`,
+      'Breedte': `${widthCm} cm`,
+      'Diepte': `${depthCm} cm`,
+    },
+    isBestseller: isPublic && widthCm === 606 && depthCm === 300,
+    badges: isPublic ? ['Kies & mix'] : [],
     rating: 4.8,
-    reviewCount: 1507,
-    stockStatus: '20+ op voorraad voor levering morgen',
+    reviewCount: isPublic ? Math.floor(500 + Math.random() * 1000) : 0,
+    stockStatus: isPublic ? '20+ op voorraad voor levering morgen' : 'Op aanvraag',
     requiresConfiguration: true,
-    options: { colors: ['Antraciet', 'Zwart'], sizes: ['306x250', '406x300'], roofTypes: ['Opaal', 'Helder'] }
-  },
-  {
-    id: 'veranda-306-250-helder',
-    title: 'HETT Veranda Basic - Aluminium overkapping 3.06 x 2.5 m',
-    category: 'verandas',
-    price: 839,
-    priceExVat: 693.39,
-    shortDescription: 'Helder polycarbonaat dak voor maximale lichtinval.',
-    description: 'Geniet van maximaal licht met deze aluminium overkapping voorzien van helder polycarbonaat dakplaten.',
-    imageUrl: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2070&auto=format&fit=crop',
-    specs: { 'Materiaal': 'Aluminium T6-6063', 'Dak': 'Polycarbonaat Helder', 'Afmeting': '306 x 250 cm' },
-    badges: ['4+1 GRATIS'],
-    rating: 4.5,
-    reviewCount: 221,
-    stockStatus: '20+ op voorraad voor levering morgen',
-    requiresConfiguration: true,
-    options: { colors: ['Antraciet', 'Zwart'], sizes: ['306x250', '406x300'], roofTypes: ['Opaal', 'Helder'] }
-  },
+    options: { 
+      colors: ['Antraciet', 'Zwart', 'Crème'], 
+      sizes: [sizeKey], 
+      roofTypes: ['Opaal', 'Helder'] 
+    },
+    visibility,
+    sizeKey,
+  };
+}
+
+/**
+ * Generate all veranda products from the matrix
+ * 60 total: 12 public + 48 hidden anchors
+ */
+function generateVerandaProducts(): Product[] {
+  const products: Product[] = [];
+  
+  for (const width of MATRIX_WIDTHS) {
+    for (const depth of MATRIX_DEPTHS) {
+      products.push(createVerandaProduct(width, depth));
+    }
+  }
+  
+  return products;
+}
+
+// Generate veranda matrix products
+const VERANDA_PRODUCTS = generateVerandaProducts();
+
+// =============================================================================
+// OTHER PRODUCTS
+// =============================================================================
+
+const OTHER_PRODUCTS: Product[] = [
   {
     id: 'eco-dakpaneel',
     title: 'HETT Eco+ Dakpaneel - PIR Geïsoleerd Trapezium',
@@ -64,7 +124,8 @@ export const PRODUCTS: Product[] = [
     reviewCount: 1403,
     stockStatus: 'Niet op voorraad voor Bezorgen',
     requiresConfiguration: true,
-    options: { colors: [], sizes: [] }
+    options: { colors: [], sizes: [] },
+    visibility: 'public',
   },
   {
     id: 'accessoire-led-set',
@@ -78,8 +139,22 @@ export const PRODUCTS: Product[] = [
     specs: { 'Aantal': '6 spots', 'Kleur': 'Warm wit', 'Dimbaar': 'Ja' },
     requiresConfiguration: false,
     stockStatus: 'Op voorraad',
-    options: { colors: [], sizes: [] }
+    options: { colors: [], sizes: [] },
+    visibility: 'public',
   }
+];
+
+// =============================================================================
+// COMBINED PRODUCTS
+// =============================================================================
+
+/**
+ * All products including veranda matrix and other products
+ * Use filterVisibleProducts() from productVisibility.ts to get only public products
+ */
+export const PRODUCTS: Product[] = [
+  ...VERANDA_PRODUCTS,
+  ...OTHER_PRODUCTS,
 ];
 
 export const PROJECTS: Project[] = [

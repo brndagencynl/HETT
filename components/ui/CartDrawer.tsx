@@ -5,6 +5,7 @@ import { X, ShoppingBag, Trash2, ArrowRight, ShieldCheck, Pencil, Info } from 'l
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../../context/CartContext';
 import { useVerandaEdit } from '../../context/VerandaEditContext';
+import { useMaatwerkEdit } from '../../context/MaatwerkEditContext';
 import { isConfigOnly } from '../../utils/productRules';
 import { isVerandaCategory, isMaatwerkVerandaItem } from './ConfigBreakdownPopup';
 import { CartItemPreview } from './ConfigPreviewImage';
@@ -15,6 +16,7 @@ const MotionDiv = motion.div as any;
 const CartDrawer: React.FC = () => {
     const { isCartOpen, closeCart, cart, removeFromCart, total } = useCart();
     const { openEditConfigurator } = useVerandaEdit();
+    const { openMaatwerkEdit } = useMaatwerkEdit();
     const navigate = useNavigate();
     const drawerRef = useRef<HTMLDivElement>(null);
     const [breakdownPopupKey, setBreakdownPopupKey] = useState<string | null>(null);
@@ -127,16 +129,26 @@ const CartDrawer: React.FC = () => {
                                                             <Pencil size={14} />
                                                         </button>
                                                     )}
-                                                    {/* Info icon for maatwerk items */}
+                                                    {/* Edit + Info icons for maatwerk items */}
                                                     {isMaatwerk && (
-                                                        <button
-                                                            onClick={() => setBreakdownPopupKey(popupKey)}
-                                                            className="flex-shrink-0 p-1.5 min-w-[32px] min-h-[32px] flex items-center justify-center text-gray-400 hover:text-hett-primary hover:bg-hett-light rounded-md transition-colors"
-                                                            title="Configuratie details"
-                                                            aria-label="Bekijk configuratie details"
-                                                        >
-                                                            <Info size={14} />
-                                                        </button>
+                                                        <>
+                                                            <button
+                                                                onClick={() => openMaatwerkEdit({ cartIndex: index, item })}
+                                                                className="flex-shrink-0 p-1.5 min-w-[32px] min-h-[32px] flex items-center justify-center text-gray-400 hover:text-hett-primary hover:bg-hett-light rounded-md transition-colors"
+                                                                title="Bewerken"
+                                                                aria-label="Maatwerk configuratie bewerken"
+                                                            >
+                                                                <Pencil size={14} />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => setBreakdownPopupKey(popupKey)}
+                                                                className="flex-shrink-0 p-1.5 min-w-[32px] min-h-[32px] flex items-center justify-center text-gray-400 hover:text-hett-primary hover:bg-hett-light rounded-md transition-colors"
+                                                                title="Configuratie details"
+                                                                aria-label="Bekijk configuratie details"
+                                                            >
+                                                                <Info size={14} />
+                                                            </button>
+                                                        </>
                                                     )}
                                                 </div>
                                                 <button

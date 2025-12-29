@@ -1,6 +1,13 @@
 
 export type CategorySlug = 'verandas' | 'sandwichpanelen' | 'accessoires';
 
+/**
+ * Product visibility type
+ * - 'public': Shown in listings, search, sitemaps (default)
+ * - 'hidden_anchor': Never shown to customers, only for pricing lookup in custom configurator
+ */
+export type ProductVisibility = 'public' | 'hidden_anchor';
+
 export interface Product {
   id: string;
   title: string;
@@ -26,6 +33,16 @@ export interface Product {
     roofTypes?: string[];
   };
   requiresConfiguration: boolean; // Now mandatory/explicit
+  /**
+   * Product visibility - controls whether product appears in listings
+   * Default: 'public' (shown to customers)
+   */
+  visibility?: ProductVisibility;
+  /**
+   * Size key for veranda products (e.g., "506x300")
+   * Used for price lookup in custom configurator
+   */
+  sizeKey?: string;
 }
 
 // Product Configuration Types
@@ -68,6 +85,9 @@ export type ProductConfig =
 export interface MaatwerkVerandaConfig {
   type: 'maatwerk_veranda';
   size: { width: number; depth: number };
+  /** Convenience duplicates for consumers expecting width/depth fields */
+  widthCm?: number;
+  depthCm?: number;
   color: string;
   daktype: string;
   goot: string;
@@ -86,6 +106,8 @@ export interface MaatwerkCartPayload {
   optionsTotal: number;
   totalPrice: number;
   size: { width: number; depth: number };
+  /** Anchor size key used for pricing reference (may differ from size) */
+  anchorSizeKey?: string;
   selections: Array<{
     groupId: string;
     groupLabel: string;
@@ -105,6 +127,11 @@ export interface MaatwerkCartPayload {
     }>;
     optionsTotal: number;
     grandTotal: number;
+    anchor?: {
+      anchorSizeKey: string;
+      anchorPrice: number;
+      customFee: number;
+    };
   };
 }
 
@@ -116,6 +143,9 @@ export interface CartItem extends Product {
   // Standard props
   quantity: number;
   totalPrice: number;
+
+  /** Line item type (used for maatwerk edit detection) */
+  type?: 'custom_veranda' | 'product';
 
   // Config props
   config?: ProductConfig;

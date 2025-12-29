@@ -1,13 +1,17 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { PRODUCTS, CATEGORIES } from '../constants';
 import { Filter, Check, Star, Heart } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import { Product } from '../types';
+import { filterVisibleProducts } from '../src/catalog/productVisibility';
 
 import ProductCard from '../components/ui/ProductCard';
 
 const Shop: React.FC = () => {
+    // Filter to only show public products (excludes hidden anchor products)
+    const visibleProducts = useMemo(() => filterVisibleProducts(PRODUCTS), []);
+
     return (
         <div className="min-h-screen bg-[#f6f8fa] font-sans">
             <PageHeader
@@ -48,7 +52,7 @@ const Shop: React.FC = () => {
                     <div className="lg:col-span-3">
                         <div className="flex items-center justify-between mb-8">
                             <div className="text-sm text-gray-500 font-bold">
-                                {PRODUCTS.length} Producten
+                                {visibleProducts.length} Producten
                             </div>
                             <select className="bg-white border border-gray-200 rounded-md px-4 py-2 text-sm font-bold outline-none">
                                 <option>Sorteer op: Populair</option>
@@ -58,7 +62,7 @@ const Shop: React.FC = () => {
                         </div>
 
                         <div className="grid grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-6">
-                            {PRODUCTS.map((product) => (
+                            {visibleProducts.map((product) => (
                                 <ProductCard key={product.id} product={product} />
                             ))}
                         </div>

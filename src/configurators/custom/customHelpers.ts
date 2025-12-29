@@ -112,6 +112,7 @@ export function getMaatwerkConfigSummary(config: PartialMaatwerkConfig): string 
 
 /**
  * Build cart payload for a maatwerk veranda
+ * Includes anchor size key for pricing reference
  */
 export function buildMaatwerkCartPayload(config: MaatwerkConfig): MaatwerkCartPayload {
   const priceBreakdown = calculateMaatwerkPrice(config);
@@ -123,7 +124,8 @@ export function buildMaatwerkCartPayload(config: MaatwerkConfig): MaatwerkCartPa
     basePrice: priceBreakdown.basePrice,
     optionsTotal: priceBreakdown.optionsTotal,
     totalPrice: priceBreakdown.grandTotal,
-    size: config.size,
+    size: config.size, // User's requested custom dimensions
+    anchorSizeKey: priceBreakdown.anchor?.anchorSizeKey || `${config.size.width}x${config.size.depth}`,
     selections: priceBreakdown.selections,
     priceBreakdown,
     renderPreview: undefined, // Can be added later

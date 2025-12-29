@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Check, Star, Wrench, Truck, Package, Award } from 'lucide-react';
 import { PRODUCTS } from '../constants';
 import { Post } from '../types';
+import { filterVisibleProducts } from '../src/catalog/productVisibility';
 import { content } from '../services/content';
 import {
     getHomepageHero,
@@ -33,6 +34,9 @@ const iconMap: Record<string, React.ComponentType<{ size?: number; className?: s
 };
 
 const Home: React.FC = () => {
+    // Filter to only show public products
+    const visibleProducts = useMemo(() => filterVisibleProducts(PRODUCTS), []);
+
     // Shopify content state
     const [hero, setHero] = useState<HomepageHero>(FALLBACK_HERO);
     const [usps, setUsps] = useState<HomepageUsp[]>(FALLBACK_USPS);
@@ -178,7 +182,7 @@ const Home: React.FC = () => {
                 </div>
 
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-                    {PRODUCTS.map((product) => (
+                    {visibleProducts.slice(0, 4).map((product) => (
                         <div key={product.id} className="card-retail p-0 flex flex-col group overflow-hidden bg-white">
                             <Link to={`/product/${product.id}`} className="relative block aspect-[1/1] bg-hett-light overflow-hidden">
                                 <img src={product.imageUrl} alt={product.title} className="w-full h-full object-cover mix-blend-multiply group-hover:scale-110 transition-transform duration-700" />

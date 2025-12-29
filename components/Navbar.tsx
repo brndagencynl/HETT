@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Menu, X, ShoppingCart, Search as SearchIcon, Check, Star, User, Heart, ChevronRight } from 'lucide-react';
-import { NAV_ITEMS, PRODUCTS } from '../constants';
+import { NAV_ITEMS } from '../constants';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
-import { Product } from '../types';
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -136,9 +135,6 @@ const Navbar: React.FC = () => {
                   <Link to={item.path} className="px-4 hover:text-hett-primary transition-colors">{item.label}</Link>
                 </li>
               ))}
-              <li className="ml-auto flex items-center">
-                <Link to="/shop" className="text-white bg-hett-brown px-4 py-1.5 rounded-md text-[11px] uppercase tracking-wider">Webshop</Link>
-              </li>
             </ul>
           </div>
         </div>
@@ -177,10 +173,6 @@ const Navbar: React.FC = () => {
                       <ChevronRight size={20} className="text-gray-300" />
                     </Link>
                   ))}
-                  <Link to="/shop" onClick={() => setIsOpen(false)} className="flex items-center justify-between px-6 py-4 border-b border-gray-50 text-hett-secondary font-bold text-lg">
-                    <span>Webshop</span>
-                    <ChevronRight size={20} className="text-gray-300" />
-                  </Link>
                 </nav>
               </div>
 

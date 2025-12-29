@@ -42,7 +42,8 @@ interface CartContextType {
   addMaatwerkToCart: (payload: MaatwerkCartPayload) => void;
   removeFromCart: (index: number) => void;
   updateQuantity: (index: number, quantity: number) => void;
-  updateCartItem: (index: number, updates: Partial<CartItem>) => void;
+  /** Update an existing cart item by index or by line-item id */
+  updateCartItem: (lineItemIdOrIndex: number | string, updates: Partial<CartItem>) => void;
   clearCart: () => void;
   total: number;
   itemCount: number;
@@ -151,9 +152,36 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const openCart = () => setIsCartOpen(true);
   const closeCart = () => setIsCartOpen(false);
 
+  // Normalize maatwerk items for backward compatibility (no mutation)
+  const normalizedCart = useMemo(() => {
+    return cart.map((item) => {
+      if (!item?.maatwerkPayload) return item;
+
+      const data: any = item.config?.category === 'maatwerk_veranda' ? (item.config.data as any) : undefined;
+      const width = data?.widthCm ?? data?.size?.width ?? item.maatwerkPayload?.size?.width;
+      const depth = data?.depthCm ?? data?.size?.depth ?? item.maatwerkPayload?.size?.depth;
+
+      return {
+        ...item,
+        type: item.type || 'custom_veranda',
+        config:
+          item.config?.category === 'maatwerk_veranda'
+            ? {
+                ...item.config,
+                data: {
+                  ...(item.config.data as any),
+                  widthCm: typeof width === 'number' ? width : (item.config.data as any)?.widthCm,
+                  depthCm: typeof depth === 'number' ? depth : (item.config.data as any)?.depthCm,
+                },
+              }
+            : item.config,
+      };
+    });
+  }, [cart]);
+
   // Calculate totals
-  const total = cart.reduce((sum, item) => sum + item.totalPrice, 0);
-  const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const total = normalizedCart.reduce((sum, item) => sum + item.totalPrice, 0);
+  const itemCount = normalizedCart.reduce((sum, item) => sum + item.quantity, 0);
   
   // Grand total including shipping (only if shipping is valid)
   const grandTotal = total + (shipping.isValid ? shipping.cost : 0);
@@ -337,6 +365,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const displaySummary = `${sizeSummary} • ${optionsSummary}${payload.selections.length > 3 ? '...' : ''}`;
 
     const newItem: CartItem = {
+      // Required contract flag
+      type: 'custom_veranda',
       // Product-like fields for cart compatibility
       id: cartId,
       slug: 'maatwerk-veranda',
@@ -345,7 +375,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       price: payload.totalPrice,
       shortDescription: `Maatwerk veranda ${sizeSummary}`,
       description: 'Op maat geconfigureerde aluminium veranda',
-      imageUrl: '/renders/veranda/ral7016/base.png', // Default preview
+      imageUrl: `/renders/veranda/${String(payload.selections.find(s => s.groupId === 'color')?.choiceId || 'ral7016')}/base.png`, // Default preview
       specs: {},
       requiresConfiguration: false, // Already configured
 
@@ -359,6 +389,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         data: {
           type: 'maatwerk_veranda',
           size: payload.size,
+          widthCm: payload.size.width,
+          depthCm: payload.size.depth,
           color: payload.selections.find(s => s.groupId === 'color')?.choiceId || 'ral7016',
           daktype: payload.selections.find(s => s.groupId === 'daktype')?.choiceId || '',
           goot: payload.selections.find(s => s.groupId === 'goot')?.choiceId || '',
@@ -426,15 +458,20 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
    * Update an existing cart item with new values (used for editing configurations).
    * Preserves the item's position in cart and updates only the provided fields.
    */
-  const updateCartItem = (index: number, updates: Partial<CartItem>) => {
-    if (index < 0) return;
+  const updateCartItem = (lineItemIdOrIndex: number | string, updates: Partial<CartItem>) => {
+    setCart(prev => {
+      const index =
+        typeof lineItemIdOrIndex === 'number'
+          ? lineItemIdOrIndex
+          : prev.findIndex(i => i.id === lineItemIdOrIndex);
 
-    setCart(prev =>
-      prev.map((item, i) => {
+      if (index < 0) return prev;
+
+      return prev.map((item, i) => {
         if (i !== index) return item;
         return { ...item, ...updates };
-      })
-    );
+      });
+    });
   };
 
   const clearCart = () => {
@@ -443,7 +480,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   return (
     <CartContext.Provider value={{ 
-      cart, 
+      cart: normalizedCart, 
       addToCart,
       addMaatwerkToCart,
       removeFromCart, 

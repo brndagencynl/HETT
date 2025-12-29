@@ -1,15 +1,19 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { PRODUCTS } from '../constants';
 import PageHeader from '../components/PageHeader';
 import { Search as SearchIcon, Check } from 'lucide-react';
+import { filterVisibleProducts } from '../src/catalog/productVisibility';
 
 const Search: React.FC = () => {
   const [searchParams] = useSearchParams();
   const query = searchParams.get('q') || '';
 
-  const results = PRODUCTS.filter(product => 
+  // Filter to only show public products first
+  const visibleProducts = useMemo(() => filterVisibleProducts(PRODUCTS), []);
+
+  const results = visibleProducts.filter(product => 
     product.title.toLowerCase().includes(query.toLowerCase()) ||
     product.description.toLowerCase().includes(query.toLowerCase()) ||
     product.category.toLowerCase().includes(query.toLowerCase())

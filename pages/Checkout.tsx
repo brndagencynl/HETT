@@ -2,6 +2,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { useVerandaEdit } from '../context/VerandaEditContext';
+import { useMaatwerkEdit } from '../context/MaatwerkEditContext';
 import { Navigate, useNavigate, Link } from 'react-router-dom';
 import { Package, Info, Pencil, AlertTriangle, ShoppingCart } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
@@ -37,6 +38,7 @@ const Checkout: React.FC = () => {
     lockShipping 
   } = useCart();
   const { openEditConfigurator } = useVerandaEdit();
+    const { openMaatwerkEdit } = useMaatwerkEdit();
   const navigate = useNavigate();
 
   // Lock shipping on checkout page mount
@@ -318,6 +320,20 @@ const Checkout: React.FC = () => {
                                                                 className="relative z-10 text-gray-400 hover:text-hett-primary pointer-events-auto min-w-[36px] min-h-[36px]"
                                                                 title="Bewerken"
                                                                 aria-label="Configuratie bewerken"
+                                                            >
+                                                                <Pencil size={14} />
+                                                            </Button>
+                                                        )}
+                                                        {/* Edit icon for maatwerk verandas */}
+                                                        {isMaatwerk && (
+                                                            <Button
+                                                                type="button"
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={() => openMaatwerkEdit({ cartIndex: idx, item })}
+                                                                className="relative z-10 text-gray-400 hover:text-hett-primary pointer-events-auto min-w-[36px] min-h-[36px]"
+                                                                title="Bewerken"
+                                                                aria-label="Maatwerk configuratie bewerken"
                                                             >
                                                                 <Pencil size={14} />
                                                             </Button>

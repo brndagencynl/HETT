@@ -3,10 +3,11 @@
  * ========================================
  * 
  * Isolated pricing for the custom/maatwerk veranda configurator.
- * Uses width × depth to calculate base price and option prices.
  * 
- * PRICING STRUCTURE:
- * - Base price: calculated from width × depth using interpolation formula
+ * PRICING STRATEGY (NEW):
+ * - User enters custom dimensions (any cm value within range)
+ * - We map those dimensions to the nearest anchor product (ceiling)
+ * - Base price = Anchor product price + €750 custom fee
  * - Option prices: can be fixed, byWidthRange, byDepthRange, or byArea
  * 
  * Supports continuous slider values (1cm increments).
@@ -18,6 +19,17 @@ import type {
   MaatwerkSelection,
   MaatwerkPriceBreakdown,
 } from './customTypes';
+
+import {
+  mapToAnchorWidth,
+  mapToAnchorDepth,
+  mapToAnchorSize,
+  getAnchorSizeObject,
+  MAATWERK_CUSTOM_FEE,
+} from '../../catalog/matrixCatalog';
+
+import { PRODUCTS } from '../../../constants';
+import { getVerandaBySizeKey } from '../../catalog/productVisibility';
 
 // =============================================================================
 // PRICING TYPES
@@ -45,42 +57,93 @@ export interface MaatwerkOptionGroup {
 }
 
 // =============================================================================
-// BASE PRICE CALCULATION
+// BASE PRICE CALCULATION (Using Anchor Products)
 // =============================================================================
 
 /**
- * Base pricing parameters for continuous width/depth values
- * Formula: basePrice + (width * widthRate) + (depth * depthRate) + (area * areaRate)
+ * Fallback pricing parameters (used if anchor product not found)
+ * This should rarely happen if the matrix catalog is correctly configured
  */
-const BASE_PRICING = {
+const FALLBACK_PRICING = {
   minimumPrice: 1100,
   baseFlat: 400,
-  // Price per cm of width (after minimum)
   widthRate: 1.5,
-  // Price per cm of depth (after minimum)
   depthRate: 2.0,
-  // Additional price per cm² of area
   areaRate: 0.0003,
 };
 
 /**
- * Get base price for a given size using continuous interpolation
- * Works with any width (250-1200) and depth (250-500) values
+ * Calculate fallback price (if anchor product not found)
+ */
+function getFallbackPrice(width: number, depth: number): number {
+  const area = width * depth;
+  const calculatedPrice = 
+    FALLBACK_PRICING.baseFlat +
+    (width * FALLBACK_PRICING.widthRate) +
+    (depth * FALLBACK_PRICING.depthRate) +
+    (area * FALLBACK_PRICING.areaRate);
+  
+  return Math.round(Math.max(FALLBACK_PRICING.minimumPrice, calculatedPrice));
+}
+
+/**
+ * Get the anchor product for a given custom size
+ * Returns the product info including price
+ */
+export function getAnchorProductForSize(size: MaatwerkSize): {
+  anchorWidth: number;
+  anchorDepth: number;
+  anchorSizeKey: string;
+  anchorPrice: number;
+} {
+  const anchorWidth = mapToAnchorWidth(size.width);
+  const anchorDepth = mapToAnchorDepth(size.depth);
+  const anchorSizeKey = mapToAnchorSize(size.width, size.depth);
+  
+  // Look up anchor product price from the product catalog
+  const anchorProduct = getVerandaBySizeKey(PRODUCTS, anchorSizeKey);
+  const anchorPrice = anchorProduct?.price ?? getFallbackPrice(anchorWidth, anchorDepth);
+  
+  // Log in dev mode if anchor not found
+  if (import.meta.env.DEV && !anchorProduct) {
+    console.warn(`[MaatwerkPricing] Anchor product not found for ${anchorSizeKey}, using fallback price`);
+  }
+  
+  return { anchorWidth, anchorDepth, anchorSizeKey, anchorPrice };
+}
+
+/**
+ * Get base price for a custom maatwerk configuration
+ * 
+ * PRICING: Anchor product price + €750 custom fee
+ * 
+ * @param size - User's requested custom dimensions
+ * @returns Base price including custom fee
  */
 export function getMaatwerkBasePrice(size: MaatwerkSize): number {
-  const { width, depth } = size;
+  const { anchorPrice } = getAnchorProductForSize(size);
   
-  // Calculate area-based component
-  const area = width * depth;
+  // Add custom fee to anchor price
+  return anchorPrice + MAATWERK_CUSTOM_FEE;
+}
+
+/**
+ * Get price breakdown showing anchor + custom fee separately
+ */
+export function getMaatwerkBasePriceBreakdown(size: MaatwerkSize): {
+  anchorPrice: number;
+  customFee: number;
+  total: number;
+  anchorSizeKey: string;
+} {
+  const { anchorPrice, anchorSizeKey } = getAnchorProductForSize(size);
   
-  // Linear interpolation formula that scales smoothly with dimensions
-  const calculatedPrice = 
-    BASE_PRICING.baseFlat +
-    (width * BASE_PRICING.widthRate) +
-    (depth * BASE_PRICING.depthRate) +
-    (area * BASE_PRICING.areaRate);
-  
-  return Math.round(Math.max(BASE_PRICING.minimumPrice, calculatedPrice));
+  return {
+    anchorPrice,
+    customFee: MAATWERK_CUSTOM_FEE,
+    total: anchorPrice + MAATWERK_CUSTOM_FEE,
+    anchorSizeKey,
+  };
 }
 
 // =============================================================================
@@ -311,10 +374,19 @@ export function getMaatwerkOptionLabel(groupId: string, value: any): string {
 
 /**
  * Calculate complete price breakdown for a maatwerk configuration
+ * 
+ * Includes:
+ * - Anchor product price + custom fee as base
+ * - Option prices based on user's custom dimensions
+ * - Full breakdown with anchor reference
  */
 export function calculateMaatwerkPrice(config: PartialMaatwerkConfig): MaatwerkPriceBreakdown {
   const size = config.size || { width: 600, depth: 300 };
-  const basePrice = getMaatwerkBasePrice(size);
+  
+  // Get anchor-based pricing
+  const anchorInfo = getAnchorProductForSize(size);
+  const basePrice = anchorInfo.anchorPrice + MAATWERK_CUSTOM_FEE;
+  
   const selections: MaatwerkSelection[] = [];
 
   // Process each option group
@@ -364,6 +436,11 @@ export function calculateMaatwerkPrice(config: PartialMaatwerkConfig): MaatwerkP
     selections,
     optionsTotal,
     grandTotal,
+    anchor: {
+      anchorSizeKey: anchorInfo.anchorSizeKey,
+      anchorPrice: anchorInfo.anchorPrice,
+      customFee: MAATWERK_CUSTOM_FEE,
+    },
   };
 }
 

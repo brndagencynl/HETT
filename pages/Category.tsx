@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { PRODUCTS } from '../constants';
 import { Product } from '../types';
 import { Check, Heart, ChevronDown, ChevronUp, SlidersHorizontal, LayoutGrid, List, Star } from 'lucide-react';
+import { filterVisibleProducts } from '../src/catalog/productVisibility';
 import PageHeader from '../components/PageHeader';
 import { motion, AnimatePresence } from 'framer-motion';
 import MobileFilterSheet from '../components/ui/MobileFilterSheet';
@@ -37,8 +38,11 @@ const Category: React.FC = () => {
 
     const categoryName = getCategoryName(categorySlug);
 
+    // Filter to only show public products first, then apply category/brand filters
+    const visibleProducts = useMemo(() => filterVisibleProducts(PRODUCTS), []);
+    
     // Filtering Logic
-    const products = PRODUCTS.filter(p => {
+    const products = visibleProducts.filter(p => {
         const matchesCategory = !categorySlug || p.category === categorySlug;
         const matchesBrand = activeBrands.length === 0 || activeBrands.includes(p.badges?.[0] || 'Onbekend'); // Workaround since brand field missing in interface
         // Note: PRODUCTS constant usually has a brand field, if not we fall back to logic.

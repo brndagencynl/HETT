@@ -21,6 +21,8 @@ import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { X, Check, Info, ChevronLeft, ChevronRight, Truck, ShieldCheck, ArrowRight, Lightbulb, Edit2, Eye, ChevronUp, ShoppingBag, Loader2, Ruler } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import { Card } from './ui/card';
+
 // Custom maatwerk types and pricing - completely isolated
 import {
   type PartialMaatwerkConfig,
@@ -71,7 +73,17 @@ const MotionDiv = motion.div as any;
 // =============================================================================
 
 interface MaatwerkVerandaConfiguratorProps {
-  onAddToCart: (payload: ReturnType<typeof buildMaatwerkCartPayload>) => void;
+  onAddToCart?: (payload: ReturnType<typeof buildMaatwerkCartPayload>) => void;
+  /** Edit mode: when set, the configurator saves changes instead of adding a new cart line */
+  mode?: 'create' | 'edit';
+  /** Prefill config (used for edit mode). Merged over defaults. */
+  initialConfig?: PartialMaatwerkConfig;
+  /** Called on save in edit mode (validated complete config) */
+  onSave?: (config: MaatwerkConfig) => void;
+  /** Called when user cancels in edit mode */
+  onCancel?: () => void;
+  /** Layout variant for embedding in a modal */
+  layout?: 'page' | 'modal';
   onClose?: () => void;
 }
 
@@ -112,15 +124,46 @@ const SafeImage = ({ src, alt, className, fallback = FALLBACK_IMAGE }: { src: st
 
 const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = ({
   onAddToCart,
+  mode = 'create',
+  initialConfig,
+  onSave,
+  onCancel,
+  layout = 'page',
   onClose,
 }) => {
   // STATE - completely isolated, NO localStorage
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  const [config, setConfig] = useState<PartialMaatwerkConfig>({ ...DEFAULT_MAATWERK_CONFIG });
+  const [config, setConfig] = useState<PartialMaatwerkConfig>(() => {
+    const mergedSize = {
+      ...(DEFAULT_MAATWERK_CONFIG.size || { width: 600, depth: 300 }),
+      ...(initialConfig?.size || {}),
+    };
+    return {
+      ...DEFAULT_MAATWERK_CONFIG,
+      ...initialConfig,
+      size: mergedSize,
+    };
+  });
   const [infoModal, setInfoModal] = useState<{ title: string; text: string } | null>(null);
   const [agreed, setAgreed] = useState(false);
   const [isSelectionOpen, setSelectionOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isMobilePreviewOpen, setIsMobilePreviewOpen] = useState(true);
+
+  useEffect(() => {
+    if (mode !== 'edit') return;
+    const mergedSize = {
+      ...(DEFAULT_MAATWERK_CONFIG.size || { width: 600, depth: 300 }),
+      ...(initialConfig?.size || {}),
+    };
+    setConfig({
+      ...DEFAULT_MAATWERK_CONFIG,
+      ...initialConfig,
+      size: mergedSize,
+    });
+    setCurrentStepIndex(0);
+    setAgreed(false);
+  }, [mode, initialConfig]);
 
   // Current step
   const currentStep = MAATWERK_STEPS[currentStepIndex];
@@ -185,9 +228,38 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
 
     try {
       const payload = buildMaatwerkCartPayload(config);
+      if (!onAddToCart) {
+        console.warn('[MaatwerkConfigurator] Missing onAddToCart in create mode');
+        return;
+      }
       onAddToCart(payload);
     } catch (error) {
       console.error('Add to cart failed:', error);
+      alert('Er is een fout opgetreden. Probeer het opnieuw.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleSaveEdit = async () => {
+    if (isSubmitting) return;
+
+    const errors = getMaatwerkValidationErrors(config);
+    if (errors.length > 0) {
+      alert(`Configuratie incompleet:\n${errors.join('\n')}`);
+      return;
+    }
+
+    if (!isMaatwerkConfigComplete(config)) {
+      alert('Vul alle verplichte velden in.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      onSave?.(config);
+    } catch (error) {
+      console.error('Save edit failed:', error);
       alert('Er is een fout opgetreden. Probeer het opnieuw.');
     } finally {
       setIsSubmitting(false);
@@ -236,150 +308,117 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
     // Calculate area in m²
     const areaM2 = (currentSize.width / 100) * (currentSize.depth / 100);
     
-    return (
-      <div className="space-y-8 max-w-2xl">
-        {/* Width selection - Slider with numeric input */}
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <label className="block text-sm font-bold text-gray-700">
-              Breedte
-            </label>
-            <span className="text-xs text-gray-500">
-              {MAATWERK_WIDTH_MIN} - {MAATWERK_WIDTH_MAX} cm
-            </span>
-          </div>
-          
-          {/* Input + Unit */}
-          <div className="flex items-center gap-3 mb-3">
-            <div className="relative flex-1 max-w-[140px]">
-              <input
-                type="number"
-                min={MAATWERK_WIDTH_MIN}
-                max={MAATWERK_WIDTH_MAX}
-                value={currentSize.width}
-                onChange={handleWidthInput}
-                className="w-full py-3 px-4 pr-12 rounded-lg font-semibold text-lg text-center border-2 border-gray-200 focus:border-[#003878] focus:ring-2 focus:ring-[#003878]/20 outline-none transition-all"
-              />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-gray-400 font-medium">
-                cm
-              </span>
-            </div>
+    const DimensionCard = ({
+      label,
+      value,
+      min,
+      max,
+      onInput,
+      onSlider,
+    }: {
+      label: string;
+      value: number;
+      min: number;
+      max: number;
+      onInput: (e: React.ChangeEvent<HTMLInputElement>) => void;
+      onSlider: (value: number) => void;
+    }) => {
+      const ratio = (value - min) / (max - min);
+      const percent = Math.max(0, Math.min(1, ratio)) * 100;
+
+      return (
+        <Card padding="tight" className="space-y-2">
+          <div className="flex items-end justify-between gap-4">
+            <div className="text-sm font-bold text-gray-800">{label}</div>
+            <div className="text-[11px] text-gray-500">{min}–{max} cm</div>
           </div>
 
-          {/* Slider */}
-          <div className="relative">
-            <input
-              type="range"
-              min={MAATWERK_WIDTH_MIN}
-              max={MAATWERK_WIDTH_MAX}
-              step={1}
-              value={currentSize.width}
-              onChange={(e) => handleWidthChange(parseInt(e.target.value, 10))}
-              className="w-full h-3 bg-gray-200 rounded-full appearance-none cursor-pointer accent-[#003878] 
-                [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 
-                [&::-webkit-slider-thumb]:bg-[#003878] [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer
-                [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white
-                [&::-moz-range-thumb]:w-6 [&::-moz-range-thumb]:h-6 [&::-moz-range-thumb]:bg-[#003878] 
-                [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white"
-              style={{
-                background: `linear-gradient(to right, #003878 ${((currentSize.width - MAATWERK_WIDTH_MIN) / (MAATWERK_WIDTH_MAX - MAATWERK_WIDTH_MIN)) * 100}%, #e5e7eb ${((currentSize.width - MAATWERK_WIDTH_MIN) / (MAATWERK_WIDTH_MAX - MAATWERK_WIDTH_MIN)) * 100}%)`
-              }}
-            />
-            {/* Min/Max labels */}
-            <div className="flex justify-between mt-1 text-xs text-gray-400">
-              <span>{MAATWERK_WIDTH_MIN} cm</span>
-              <span>{MAATWERK_WIDTH_MAX} cm</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Depth selection - Slider with numeric input */}
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <label className="block text-sm font-bold text-gray-700">
-              Diepte
-            </label>
-            <span className="text-xs text-gray-500">
-              {MAATWERK_DEPTH_MIN} - {MAATWERK_DEPTH_MAX} cm
-            </span>
-          </div>
-          
-          {/* Input + Unit */}
-          <div className="flex items-center gap-3 mb-3">
-            <div className="relative flex-1 max-w-[140px]">
-              <input
-                type="number"
-                min={MAATWERK_DEPTH_MIN}
-                max={MAATWERK_DEPTH_MAX}
-                value={currentSize.depth}
-                onChange={handleDepthInput}
-                className="w-full py-3 px-4 pr-12 rounded-lg font-semibold text-lg text-center border-2 border-gray-200 focus:border-[#003878] focus:ring-2 focus:ring-[#003878]/20 outline-none transition-all"
-              />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-gray-400 font-medium">
-                cm
-              </span>
-            </div>
-          </div>
-
-          {/* Slider */}
-          <div className="relative">
-            <input
-              type="range"
-              min={MAATWERK_DEPTH_MIN}
-              max={MAATWERK_DEPTH_MAX}
-              step={1}
-              value={currentSize.depth}
-              onChange={(e) => handleDepthChange(parseInt(e.target.value, 10))}
-              className="w-full h-3 bg-gray-200 rounded-full appearance-none cursor-pointer accent-[#003878] 
-                [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 
-                [&::-webkit-slider-thumb]:bg-[#003878] [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer
-                [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white
-                [&::-moz-range-thumb]:w-6 [&::-moz-range-thumb]:h-6 [&::-moz-range-thumb]:bg-[#003878] 
-                [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white"
-              style={{
-                background: `linear-gradient(to right, #003878 ${((currentSize.depth - MAATWERK_DEPTH_MIN) / (MAATWERK_DEPTH_MAX - MAATWERK_DEPTH_MIN)) * 100}%, #e5e7eb ${((currentSize.depth - MAATWERK_DEPTH_MIN) / (MAATWERK_DEPTH_MAX - MAATWERK_DEPTH_MIN)) * 100}%)`
-              }}
-            />
-            {/* Min/Max labels */}
-            <div className="flex justify-between mt-1 text-xs text-gray-400">
-              <span>{MAATWERK_DEPTH_MIN} cm</span>
-              <span>{MAATWERK_DEPTH_MAX} cm</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Size summary */}
-        <div className="bg-[#003878]/5 border-2 border-[#003878]/20 rounded-xl p-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#003878] rounded-lg flex items-center justify-center">
-              <Ruler size={20} className="text-white" />
-            </div>
-            <div>
-              <span className="text-sm text-gray-500">Geselecteerde afmeting</span>
-              <span className="block text-lg font-black text-[#003878]">
-                {currentSize.width} × {currentSize.depth} cm
-              </span>
-              <span className="text-xs text-gray-500">
-                {areaM2.toFixed(2)} m²
-              </span>
-            </div>
-            <div className="ml-auto text-right">
-              <span className="text-sm text-gray-500">Basisprijs</span>
-              <span className="block text-lg font-black text-[#003878]">
-                {formatMaatwerkPrice(priceBreakdown.basePrice)}
-              </span>
-            </div>
-          </div>
-        </div>
+            <input
+              type="range"
+              min={min}
+              max={max}
+              step={1}
+              value={value}
+              onChange={(e) => onSlider(parseInt(e.target.value, 10))}
+              className="flex-1 h-2.5 bg-gray-200 rounded-full appearance-none cursor-pointer accent-[#003878] 
+                [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 
+                [&::-webkit-slider-thumb]:bg-[#003878] [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer
+                [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white
+                [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:bg-[#003878] 
+                [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white"
+              style={{
+                background: `linear-gradient(to right, #003878 ${percent}%, #e5e7eb ${percent}%)`,
+              }}
+            />
 
-        {/* Info text */}
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start gap-3">
-          <Info size={18} className="text-amber-600 mt-0.5 flex-shrink-0" />
-          <div className="text-sm text-amber-800">
-            <strong>Maatwerk:</strong> U kunt elke maat tot op de centimeter nauwkeurig selecteren. 
-            De prijs wordt automatisch berekend op basis van de gekozen afmetingen.
+            <div className="relative w-[128px] flex-shrink-0">
+              <input
+                type="number"
+                min={min}
+                max={max}
+                value={value}
+                onChange={onInput}
+                className="w-full py-2.5 px-3 pr-10 rounded-md font-semibold text-base text-center border border-gray-200 focus:border-[#003878] focus:ring-2 focus:ring-[#003878]/20 outline-none transition-all"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-medium">cm</span>
+            </div>
           </div>
-        </div>
+
+          <div className="flex justify-between text-[11px] text-gray-400">
+            <span>{min} cm</span>
+            <span>{max} cm</span>
+          </div>
+        </Card>
+      );
+    };
+
+    return (
+      <div className="space-y-4">
+        <DimensionCard
+          label="Breedte"
+          value={currentSize.width}
+          min={MAATWERK_WIDTH_MIN}
+          max={MAATWERK_WIDTH_MAX}
+          onInput={handleWidthInput}
+          onSlider={handleWidthChange}
+        />
+
+        <DimensionCard
+          label="Diepte"
+          value={currentSize.depth}
+          min={MAATWERK_DEPTH_MIN}
+          max={MAATWERK_DEPTH_MAX}
+          onInput={handleDepthInput}
+          onSlider={handleDepthChange}
+        />
+
+        <Card padding="tight" className="flex items-start gap-3">
+          <div className="w-9 h-9 bg-[#003878] rounded-lg flex items-center justify-center flex-shrink-0">
+            <Ruler size={18} className="text-white" />
+          </div>
+          <div className="min-w-0">
+            <div className="text-xs text-gray-500">Geselecteerde afmeting</div>
+            <div className="font-black text-[#003878] text-base leading-tight">
+              {currentSize.width} × {currentSize.depth} cm
+            </div>
+            <div className="text-[11px] text-gray-500">{areaM2.toFixed(2)} m²</div>
+          </div>
+          <div className="ml-auto text-right flex-shrink-0">
+            <div className="text-xs text-gray-500">Basisprijs</div>
+            <div className="font-black text-[#003878] text-base leading-tight">{formatMaatwerkPrice(priceBreakdown.basePrice)}</div>
+            {priceBreakdown.anchor && (
+              <div className="text-[11px] text-gray-500">incl. €{priceBreakdown.anchor.customFee},- maatwerk toeslag</div>
+            )}
+          </div>
+        </Card>
+
+        <Card padding="tight" className="bg-amber-50 border border-amber-200 flex items-start gap-2.5">
+          <Info size={16} className="text-amber-600 mt-0.5 flex-shrink-0" />
+          <div className="text-sm text-amber-800 leading-snug">
+            <strong>Maatwerk:</strong> Kies elke maat tot op de centimeter. De prijs wordt automatisch berekend op basis van de gekozen afmetingen, plus €750 maatwerk toeslag.
+          </div>
+        </Card>
       </div>
     );
   };
@@ -792,8 +831,20 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
   // RENDER
   // ==========================================================================
 
+  const selectedColor = MAATWERK_COLOR_OPTIONS.find(c => c.id === config.color);
+  const selectedSize = config.size;
+  const selectedAreaM2 = selectedSize ? (selectedSize.width / 100) * (selectedSize.depth / 100) : null;
+
+  const Chip = ({ children }: { children: React.ReactNode }) => (
+    <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-gray-200 text-xs font-bold text-gray-700 shadow-sm">
+      {children}
+    </span>
+  );
+
+  const isModalLayout = layout === 'modal';
+
   return (
-    <div className="min-h-screen bg-white lg:bg-[#f6f8fa] font-sans">
+    <div className={isModalLayout ? 'font-sans bg-white' : 'bg-hett-bg font-sans'}>
       {/* Info Modal */}
       <AnimatePresence>
         {infoModal && (
@@ -823,138 +874,173 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
         )}
       </AnimatePresence>
 
-      {/* Main Container */}
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="bg-white border-b border-gray-100 px-6 py-4 lg:hidden">
-          <div className="flex items-center justify-between">
-            <h1 className="text-xl font-black text-[#003878]">Maatwerk Veranda</h1>
-            {onClose && (
-              <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full">
-                <X size={20} />
-              </button>
-            )}
+      <div className={isModalLayout ? 'py-4 sm:py-6' : 'pt-[185px] md:pt-[200px] pb-14'}>
+        <div className={isModalLayout ? 'px-3 sm:px-6' : 'container'}>
+          {!isModalLayout && (
+            <div className="flex items-start justify-between gap-6 mb-6">
+            <div className="min-w-0">
+              <div className="flex items-center justify-between gap-3">
+                <h1 className="text-2xl md:text-3xl font-black text-hett-primary">Maatwerk configurator</h1>
+                {onClose && (
+                  <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full">
+                    <X size={20} />
+                  </button>
+                )}
+              </div>
+              <p className="text-sm text-hett-muted mt-1">Configureer uw veranda op maat</p>
+            </div>
+            <div className="hidden sm:block text-right flex-shrink-0">
+              <div className="text-xs text-hett-muted uppercase tracking-wide">Totaal incl. BTW</div>
+              <div className="text-2xl font-black text-hett-primary">{formatMaatwerkPrice(priceBreakdown.grandTotal)}</div>
+            </div>
           </div>
-          <p className="text-sm text-gray-500 mt-1">
-            Stap {currentStepIndex + 1} van {MAATWERK_STEPS.length} — {currentStep.title}
-          </p>
-        </div>
+          )}
 
-        {/* Desktop Header */}
-        <div className="hidden lg:flex items-center justify-between px-8 py-6 bg-white border-b border-gray-100">
-          <div>
-            <h1 className="text-2xl font-black text-[#003878]">Maatwerk Veranda Configurator</h1>
-            <p className="text-gray-500 mt-1">Configureer uw veranda op maat</p>
-          </div>
-          <div className="text-right">
-            <span className="text-sm text-gray-500">Totaalprijs</span>
-            <span className="block text-2xl font-black text-[#003878]">{formatMaatwerkPrice(priceBreakdown.grandTotal)}</span>
-          </div>
-        </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 lg:gap-8 items-start">
+            {/* Left: Preview */}
+            <div className="space-y-3 lg:sticky lg:top-28">
+              <Card padding="tight" className="overflow-hidden">
+                <div className="flex items-center justify-between gap-3 mb-3 lg:hidden">
+                  <button
+                    type="button"
+                    onClick={() => setIsMobilePreviewOpen((v) => !v)}
+                    className="flex items-center gap-2 text-sm font-bold text-gray-800"
+                  >
+                    Preview
+                    <ChevronUp
+                      size={16}
+                      className={`transition-transform ${isMobilePreviewOpen ? 'rotate-180' : 'rotate-0'}`}
+                    />
+                  </button>
+                  <div className="text-xs text-gray-500">Stap {currentStepIndex + 1}/{MAATWERK_STEPS.length}</div>
+                </div>
 
-        {/* Content Grid */}
-        <div className="lg:grid lg:grid-cols-[1fr,480px] lg:min-h-[calc(100vh-100px)]">
-          {/* Left - Visualization (Desktop) */}
-          <div className="hidden lg:flex flex-col p-8">
-            <Visualization className="flex-1 min-h-[400px]" />
-          </div>
+                <div className={`${isMobilePreviewOpen ? 'block' : 'hidden'} lg:block`}>
+                  <Visualization />
+                </div>
+              </Card>
 
-          {/* Mobile Visualization */}
-          <div className="lg:hidden px-6 py-4">
-            <Visualization />
-          </div>
-
-          {/* Right - Configuration Panel */}
-          <div className="lg:border-l lg:border-gray-100 lg:bg-white flex flex-col">
-            {/* Progress + Step Content */}
-            <div className="flex-1 overflow-y-auto px-6 py-6 pb-32 lg:pb-6">
-              {renderProgressIndicator()}
-              
-              <h2 className="text-xl font-bold text-gray-900 mb-1">{currentStep.title}</h2>
-              <p className="text-sm text-gray-500 mb-6">{currentStep.description}</p>
-              
-              <AnimatePresence mode="wait">
-                <MotionDiv
-                  key={currentStepIndex}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  {renderOptionSelector()}
-                </MotionDiv>
-              </AnimatePresence>
+              <div className="flex flex-wrap gap-2">
+                {selectedSize && (
+                  <Chip>
+                    <span className="text-gray-500">Afmeting</span>
+                    <span className="text-gray-900">{selectedSize.width} × {selectedSize.depth} cm</span>
+                  </Chip>
+                )}
+                {selectedColor && (
+                  <Chip>
+                    <span className="text-gray-500">Kleur</span>
+                    <span className="text-gray-900">{selectedColor.label}</span>
+                  </Chip>
+                )}
+                {selectedAreaM2 != null && (
+                  <Chip>
+                    <span className="text-gray-500">Oppervlakte</span>
+                    <span className="text-gray-900">{selectedAreaM2.toFixed(2)} m²</span>
+                  </Chip>
+                )}
+              </div>
             </div>
 
-            {/* Footer - Navigation */}
-            <div className="fixed bottom-0 left-0 right-0 lg:static bg-white border-t border-gray-200 px-6 py-4 z-40">
-              {/* Price (Mobile) */}
-              <div className="flex items-center justify-between mb-4 lg:hidden">
-                <div>
-                  <span className="text-xs text-gray-500 uppercase tracking-wide">Totaal incl. BTW</span>
-                  <span className="block text-xl font-black text-[#003878]">{formatMaatwerkPrice(priceBreakdown.grandTotal)}</span>
-                </div>
-              </div>
+            {/* Right: Controls + Summary */}
+            <div className="space-y-4">
+              <Card padding="tight">
+                {renderProgressIndicator()}
 
-              {/* Navigation buttons */}
-              <div className="flex items-center gap-3">
-                {currentStepIndex > 0 && (
-                  <button
-                    onClick={handleBack}
-                    className="p-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
-                  >
-                    <ChevronLeft size={20} />
-                  </button>
-                )}
+                <h2 className="text-xl font-bold text-gray-900 mb-1">{currentStep.title}</h2>
+                <p className="text-sm text-gray-500 mb-4">{currentStep.description}</p>
 
-                <div className="flex-1" />
+                <AnimatePresence mode="wait">
+                  <MotionDiv
+                    key={currentStepIndex}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {renderOptionSelector()}
+                  </MotionDiv>
+                </AnimatePresence>
+              </Card>
 
-                {!isLastStep ? (
-                  <button
-                    onClick={handleNext}
-                    disabled={!canProceed}
-                    className={`px-6 py-3 font-bold rounded-xl text-sm flex items-center gap-2 transition-all ${
-                      canProceed
-                        ? 'bg-[#003878] text-white hover:bg-[#002050]'
-                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                    }`}
-                  >
-                    Volgende
-                    <ChevronRight size={18} />
-                  </button>
-                ) : (
-                  <button
-                    onClick={handleAddToCart}
-                    disabled={!agreed || isSubmitting}
-                    className={`px-6 py-3 font-bold rounded-xl text-sm flex items-center gap-2 transition-all ${
-                      agreed && !isSubmitting
-                        ? 'bg-[#FF7300] text-white hover:bg-[#E66600]'
-                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                    }`}
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 size={18} className="animate-spin" />
-                        Toevoegen...
-                      </>
-                    ) : (
-                      <>
-                        Toevoegen aan winkelwagen
-                        <ArrowRight size={18} />
-                      </>
+              {/* Sticky CTA row */}
+              <div className={isModalLayout ? 'sticky bottom-0 z-30' : 'sticky bottom-0 z-30'}>
+                <Card padding="tight" className="border border-gray-200">
+                  <div className="flex items-center justify-between sm:hidden mb-3">
+                    <div>
+                      <div className="text-[11px] text-gray-500 uppercase tracking-wide">Totaal incl. BTW</div>
+                      <div className="text-xl font-black text-[#003878]">{formatMaatwerkPrice(priceBreakdown.grandTotal)}</div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    {mode === 'edit' && (
+                      <button
+                        type="button"
+                        onClick={onCancel}
+                        className="px-4 py-3 font-bold rounded-xl text-sm bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors"
+                      >
+                        Annuleren
+                      </button>
                     )}
-                  </button>
-                )}
-              </div>
+                    {currentStepIndex > 0 && (
+                      <button
+                        onClick={handleBack}
+                        className="p-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
+                      >
+                        <ChevronLeft size={20} />
+                      </button>
+                    )}
 
-              {/* Info badges */}
-              <div className="flex items-center gap-4 mt-3 text-xs text-gray-500">
-                <span className="flex items-center gap-1.5">
-                  <Truck size={12} /> Levering 5-10 werkdagen
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <ShieldCheck size={12} /> 5 jaar garantie
-                </span>
+                    <div className="flex-1" />
+
+                    {!isLastStep ? (
+                      <button
+                        onClick={handleNext}
+                        disabled={!canProceed}
+                        className={`px-6 py-3 font-bold rounded-xl text-sm flex items-center gap-2 transition-all ${
+                          canProceed
+                            ? 'bg-[#003878] text-white hover:bg-[#002050]'
+                            : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                        }`}
+                      >
+                        Volgende
+                        <ChevronRight size={18} />
+                      </button>
+                    ) : (
+                      <button
+                        onClick={mode === 'edit' ? handleSaveEdit : handleAddToCart}
+                        disabled={!agreed || isSubmitting}
+                        className={`px-6 py-3 font-bold rounded-xl text-sm flex items-center gap-2 transition-all ${
+                          agreed && !isSubmitting
+                            ? 'bg-[#FF7300] text-white hover:bg-[#E66600]'
+                            : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                        }`}
+                      >
+                        {isSubmitting ? (
+                          <>
+                            <Loader2 size={18} className="animate-spin" />
+                            {mode === 'edit' ? 'Opslaan...' : 'Toevoegen...'}
+                          </>
+                        ) : (
+                          <>
+                            {mode === 'edit' ? 'Opslaan' : 'Toevoegen aan winkelwagen'}
+                            <ArrowRight size={18} />
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-4 mt-3 text-xs text-gray-500">
+                    <span className="flex items-center gap-1.5">
+                      <Truck size={12} /> Levering 5-10 werkdagen
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <ShieldCheck size={12} /> 5 jaar garantie
+                    </span>
+                  </div>
+                </Card>
               </div>
             </div>
           </div>

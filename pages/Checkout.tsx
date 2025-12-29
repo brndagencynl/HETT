@@ -4,8 +4,9 @@ import { useCart } from '../context/CartContext';
 import { useVerandaEdit } from '../context/VerandaEditContext';
 import { useMaatwerkEdit } from '../context/MaatwerkEditContext';
 import { useSandwichpanelenEdit } from '../context/SandwichpanelenEditContext';
+import { useShopifyCart } from '../context/ShopifyCartContext';
 import { Navigate, useNavigate, Link } from 'react-router-dom';
-import { Package, Info, Pencil, AlertTriangle, ShoppingCart } from 'lucide-react';
+import { Package, Info, Pencil, AlertTriangle, ShoppingCart, ExternalLink } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import Button from '../components/ui/button';
 import { Card } from '../components/ui/card';
@@ -41,7 +42,9 @@ const Checkout: React.FC = () => {
   const { openEditConfigurator } = useVerandaEdit();
     const { openMaatwerkEdit } = useMaatwerkEdit();
         const { openSandwichpanelenEdit } = useSandwichpanelenEdit();
+  const { cart: shopifyCart, redirectToCheckout, isLoading: shopifyLoading, error: shopifyError } = useShopifyCart();
   const navigate = useNavigate();
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   // Lock shipping on checkout page mount
   useEffect(() => {
@@ -49,6 +52,21 @@ const Checkout: React.FC = () => {
       lockShipping();
     }
   }, []);
+
+  // Handle Shopify checkout redirect
+  const handleShopifyCheckout = async () => {
+    if (isRedirecting) return;
+    setIsRedirecting(true);
+    try {
+      await redirectToCheckout();
+    } catch (error) {
+      console.error('Failed to redirect to Shopify checkout:', error);
+      setIsRedirecting(false);
+    }
+  };
+
+  // Check if Shopify cart has items
+  const hasShopifyCart = shopifyCart && shopifyCart.lines.length > 0;
 
   // Guard: If shipping is not valid, show blocking notice
   if (cart.length > 0 && !shippingIsValid) {
@@ -249,16 +267,42 @@ const Checkout: React.FC = () => {
                                         />
                                     </div>
 
-                                    <div className="pt-4">
-                                        <Button
+                                    <div className="pt-4 space-y-3">
+                                        {/* Shopify Checkout Button - Primary when Shopify cart has items */}
+                                        {hasShopifyCart && (
+                                          <Button
+                                            type="button"
+                                            variant="primary"
+                                            size="lg"
+                                            className="w-full"
+                                            disabled={isRedirecting || shopifyLoading}
+                                            onClick={handleShopifyCheckout}
+                                          >
+                                            <span className="flex items-center justify-center gap-2">
+                                              {isRedirecting ? 'Doorsturen…' : 'Verder naar betalen'}
+                                              {!isRedirecting && <ExternalLink size={18} />}
+                                            </span>
+                                          </Button>
+                                        )}
+                                        
+                                        {/* Local Checkout Button - Fallback when no Shopify cart */}
+                                        {!hasShopifyCart && (
+                                          <Button
                                             type="submit"
                                             variant="primary"
                                             size="lg"
                                             className="w-full"
                                             disabled={isSubmitting}
-                                        >
+                                          >
                                             {isSubmitting ? 'Bezig…' : 'Bestellen'}
-                                        </Button>
+                                          </Button>
+                                        )}
+                                        
+                                        {shopifyError && (
+                                          <p className="text-red-600 text-sm text-center">
+                                            Er is een fout opgetreden. Probeer het opnieuw.
+                                          </p>
+                                        )}
                                     </div>
                                 </form>
                             </Card>

@@ -7,6 +7,7 @@ import { WishlistProvider } from './context/WishlistContext';
 import { VerandaEditProvider } from './context/VerandaEditContext';
 import { MaatwerkEditProvider } from './context/MaatwerkEditContext';
 import { SandwichpanelenEditProvider } from './context/SandwichpanelenEditContext';
+import { ShopifyCartProvider } from './context/ShopifyCartContext';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -16,16 +17,18 @@ if (!rootElement) {
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
-    <CartProvider>
-      <WishlistProvider>
-        <VerandaEditProvider>
-          <MaatwerkEditProvider>
-          <SandwichpanelenEditProvider>
-            <App />
-          </SandwichpanelenEditProvider>
-          </MaatwerkEditProvider>
-        </VerandaEditProvider>
-      </WishlistProvider>
-    </CartProvider>
+    <ShopifyCartProvider>
+      <CartProvider>
+        <WishlistProvider>
+          <VerandaEditProvider>
+            <MaatwerkEditProvider>
+            <SandwichpanelenEditProvider>
+              <App />
+            </SandwichpanelenEditProvider>
+            </MaatwerkEditProvider>
+          </VerandaEditProvider>
+        </WishlistProvider>
+      </CartProvider>
+    </ShopifyCartProvider>
   </React.StrictMode>
 );

@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { beginCheckout, isShopifyConfigured } from "../src/lib/shopify";
+import type { CartItem, MaatwerkCartPayload } from "../types";
 
 type Result =
   | { ok: true; shopName?: string; products?: any[] }
@@ -6,6 +8,102 @@ type Result =
 
 export default function ShopifyTest() {
   const [result, setResult] = useState<Result | null>(null);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+
+  const fakeMaatwerkItem: CartItem = useMemo(() => {
+    const payload: MaatwerkCartPayload = {
+      type: "maatwerk_veranda",
+      title: "Maatwerk veranda (TEST)",
+      quantity: 1,
+      basePrice: 0,
+      optionsTotal: 750,
+      totalPrice: 750,
+      size: { width: 600, depth: 300 },
+      selections: [
+        {
+          groupId: "maatwerk_toeslag",
+          groupLabel: "Maatwerk toeslag",
+          choiceId: "ja",
+          choiceLabel: "Ja",
+          price: 750,
+        },
+      ],
+      renderPreview: undefined,
+      priceBreakdown: {
+        basePrice: 0,
+        selections: [
+          {
+            groupId: "maatwerk_toeslag",
+            groupLabel: "Maatwerk toeslag",
+            choiceId: "ja",
+            choiceLabel: "Ja",
+            price: 750,
+          },
+        ],
+        optionsTotal: 750,
+        grandTotal: 750,
+      },
+    };
+
+    return {
+      type: "custom_veranda",
+      id: "maatwerk-test",
+      slug: "maatwerk-veranda",
+      title: payload.title,
+      category: "verandas",
+      price: payload.totalPrice,
+      shortDescription: "Test maatwerk item",
+      description: "Test maatwerk item",
+      imageUrl: "/renders/veranda/ral7016/base.png",
+      specs: {},
+      requiresConfiguration: false,
+      quantity: 1,
+      totalPrice: payload.totalPrice,
+      config: {
+        category: "maatwerk_veranda",
+        data: {
+          type: "maatwerk_veranda",
+          size: payload.size,
+          widthCm: payload.size.width,
+          depthCm: payload.size.depth,
+          color: "ral7016",
+          daktype: "",
+          goot: "",
+          zijwand_links: "geen",
+          zijwand_rechts: "geen",
+          voorzijde: "geen",
+          verlichting: false,
+        },
+      },
+      displayConfigSummary: "600×300cm • maatwerk test",
+      maatwerkPayload: payload,
+      details: [{ label: "Afmeting", value: "600×300cm" }],
+    };
+  }, []);
+
+  const handleTestMaatwerkCheckout = async () => {
+    setCheckoutError(null);
+
+    if (!isShopifyConfigured()) {
+      setCheckoutError("Shopify env vars ontbreken (VITE_SHOPIFY_DOMAIN / VITE_SHOPIFY_STOREFRONT_TOKEN / VITE_SHOPIFY_API_VERSION).");
+      return;
+    }
+
+    setIsCheckingOut(true);
+    try {
+      const checkout = await beginCheckout({ cartItems: [fakeMaatwerkItem] });
+      if (!checkout.success || !checkout.checkoutUrl) {
+        setCheckoutError(checkout.error || "Checkout URL ontbreekt");
+        setIsCheckingOut(false);
+        return;
+      }
+      window.location.href = checkout.checkoutUrl;
+    } catch (e: any) {
+      setCheckoutError(e?.message ?? "Onbekende error");
+      setIsCheckingOut(false);
+    }
+  };
 
   useEffect(() => {
     const run = async () => {
@@ -70,6 +168,33 @@ export default function ShopifyTest() {
   return (
     <div style={{ padding: 24 }}>
       <h1>Shopify Storefront Test</h1>
+
+      <div style={{ margin: "16px 0", padding: 12, border: "1px solid #e5e7eb", borderRadius: 8 }}>
+        <h2 style={{ margin: "0 0 8px" }}>Checkout test</h2>
+        <p style={{ margin: "0 0 12px", color: "#6b7280" }}>
+          Test maatwerk checkout met vaste variant GID (MAATWERK_VERANDA_YES_GID).
+        </p>
+        <button
+          onClick={handleTestMaatwerkCheckout}
+          disabled={isCheckingOut}
+          style={{
+            padding: "10px 14px",
+            borderRadius: 8,
+            border: "1px solid #111827",
+            background: isCheckingOut ? "#9ca3af" : "#111827",
+            color: "white",
+            cursor: isCheckingOut ? "not-allowed" : "pointer",
+            fontWeight: 700,
+          }}
+        >
+          {isCheckingOut ? "Doorsturen…" : "Test maatwerk item toevoegen"}
+        </button>
+        {checkoutError && (
+          <p style={{ marginTop: 10, color: "crimson" }}>
+            <b>Checkout fout:</b> {checkoutError}
+          </p>
+        )}
+      </div>
 
       {!result && <p>Testen…</p>}
 

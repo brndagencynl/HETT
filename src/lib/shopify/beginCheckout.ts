@@ -7,17 +7,18 @@ import { createCart, resetCart, isShopifyConfigured, ShopifyError } from './inde
 import type { CartLineInput, ShopifyCartLineAttribute } from './types';
 import type { CartItem } from '../../../types';
 import { ATTRIBUTE_KEYS } from './attributeHelpers';
+import { resolveMerchandiseForCartItem } from '../../shopify/shopifyMerchandiseMap';
 
 // =============================================================================
 // CONFIG TYPE DETECTION
 // =============================================================================
 
-type ConfigTypeValue = 'veranda_standard' | 'veranda_custom' | 'sandwichpaneel' | 'accessoire';
+type ConfigTypeValue = 'veranda' | 'maatwerk' | 'sandwichpaneel' | 'accessoire';
 
 function detectConfigType(item: CartItem): ConfigTypeValue {
   // Maatwerk veranda
   if (item.type === 'custom_veranda' || item.maatwerkPayload) {
-    return 'veranda_custom';
+    return 'maatwerk';
   }
   
   // Sandwichpanelen
@@ -27,7 +28,7 @@ function detectConfigType(item: CartItem): ConfigTypeValue {
   
   // Standard veranda
   if (item.config?.category === 'verandas') {
-    return 'veranda_standard';
+    return 'veranda';
   }
   
   // Accessoire (default)
@@ -43,8 +44,39 @@ function detectConfigType(item: CartItem): ConfigTypeValue {
  */
 function buildLineAttributes(item: CartItem): ShopifyCartLineAttribute[] {
   const configType = detectConfigType(item);
+
+  const configJson = JSON.stringify({
+    title: item.title,
+    slug: item.slug,
+    category: item.category,
+    type: item.type,
+    quantity: item.quantity,
+    config: item.config,
+    maatwerk: item.maatwerkPayload
+      ? {
+          size: item.maatwerkPayload.size,
+          anchorSizeKey: item.maatwerkPayload.anchorSizeKey,
+          selections: item.maatwerkPayload.selections.map((s) => ({
+            groupId: s.groupId,
+            groupLabel: s.groupLabel,
+            choiceId: s.choiceId,
+            choiceLabel: s.choiceLabel,
+            price: s.price,
+          })),
+        }
+      : undefined,
+    pricing: item.pricing
+      ? {
+          basePrice: item.pricing.basePrice,
+          extrasTotal: item.pricing.extrasTotal,
+          total: item.pricing.total,
+        }
+      : undefined,
+  });
+
   const attrs: ShopifyCartLineAttribute[] = [
     { key: ATTRIBUTE_KEYS.CONFIG_TYPE, value: configType },
+    { key: 'config', value: configJson },
   ];
   
   // Add preview image if available
@@ -53,8 +85,8 @@ function buildLineAttributes(item: CartItem): ShopifyCartLineAttribute[] {
     attrs.push({ key: ATTRIBUTE_KEYS.PREVIEW_IMAGE_URL, value: previewImage });
   }
   
-  // Handle maatwerk (custom) veranda
-  if (configType === 'veranda_custom' && item.maatwerkPayload) {
+  // Handle maatwerk veranda
+  if (configType === 'maatwerk' && item.maatwerkPayload) {
     const payload = item.maatwerkPayload;
     attrs.push(
       { key: ATTRIBUTE_KEYS.CUSTOM_WIDTH_CM, value: String(payload.size.width) },
@@ -79,7 +111,7 @@ function buildLineAttributes(item: CartItem): ShopifyCartLineAttribute[] {
   }
   
   // Handle standard veranda
-  if (configType === 'veranda_standard' && item.config?.category === 'verandas') {
+  if (configType === 'veranda' && item.config?.category === 'verandas') {
     const config = item.config.data;
     
     // Product size from selected size or product title
@@ -170,32 +202,6 @@ function buildLineAttributes(item: CartItem): ShopifyCartLineAttribute[] {
 }
 
 // =============================================================================
-// VARIANT ID RESOLUTION
-// =============================================================================
-
-/**
- * Get the Shopify variant ID for a cart item.
- * For configured products, we use a base/anchor variant.
- * For simple products, we use the product ID directly.
- */
-function getVariantId(item: CartItem): string {
-  // If we have a direct variant ID stored
-  if (item.sku && item.sku.startsWith('gid://shopify/ProductVariant/')) {
-    return item.sku;
-  }
-  
-  // Convert numeric ID to Shopify global ID format
-  // Products from our local data have simple IDs
-  const productId = item.id?.replace(/[^0-9]/g, '');
-  if (productId) {
-    // For now, we assume first variant - in production this would come from Shopify
-    return `gid://shopify/ProductVariant/${productId}`;
-  }
-  
-  throw new Error(`Cannot determine variant ID for item: ${item.title}`);
-}
-
-// =============================================================================
 // MAIN CHECKOUT FUNCTION
 // =============================================================================
 
@@ -254,22 +260,26 @@ export async function beginCheckout(
     
     // Build cart lines from local cart
     const lines: CartLineInput[] = [];
-    const skippedItems: string[] = [];
     
     for (const item of cartItems) {
-      try {
-        const variantId = getVariantId(item);
-        const attributes = buildLineAttributes(item);
-        
-        lines.push({
-          merchandiseId: variantId,
-          quantity: item.quantity,
-          attributes: attributes.length > 0 ? attributes : undefined,
-        });
-      } catch (err) {
-        console.warn('[beginCheckout] Skipping item due to missing variant ID:', item.title, err);
-        skippedItems.push(item.title);
-      }
+      const { mappingKey, merchandiseId } = resolveMerchandiseForCartItem(item);
+      const attributes = buildLineAttributes(item);
+
+      // Debug helper (requested)
+      console.log('[beginCheckout] item', {
+        title: item.title,
+        internalType: item.type,
+        slug: item.slug,
+        category: item.category,
+        mappingKey,
+        merchandiseId,
+      });
+
+      lines.push({
+        merchandiseId,
+        quantity: item.quantity,
+        attributes: attributes.length > 0 ? attributes : undefined,
+      });
     }
     
     if (lines.length === 0) {
@@ -284,11 +294,6 @@ export async function beginCheckout(
     }
     
     onCartCreated?.(cart.id, cart.checkoutUrl);
-    
-    // Log if any items were skipped
-    if (skippedItems.length > 0) {
-      console.warn('[beginCheckout] Some items were skipped:', skippedItems);
-    }
     
     return {
       success: true,

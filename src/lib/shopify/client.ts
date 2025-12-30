@@ -7,8 +7,8 @@
 // CONFIG
 // =============================================================================
 
-const SHOPIFY_DOMAIN = import.meta.env.VITE_SHOPIFY_DOMAIN || 'hett-veranda.myshopify.com';
-const STOREFRONT_TOKEN = import.meta.env.VITE_SHOPIFY_STOREFRONT_TOKEN || '7b9c88c7d36a8956e672edfebc971aae';
+const SHOPIFY_DOMAIN = import.meta.env.VITE_SHOPIFY_DOMAIN;
+const STOREFRONT_TOKEN = import.meta.env.VITE_SHOPIFY_STOREFRONT_TOKEN;
 const API_VERSION = import.meta.env.VITE_SHOPIFY_API_VERSION || '2024-10';
 
 const STOREFRONT_API_URL = SHOPIFY_DOMAIN

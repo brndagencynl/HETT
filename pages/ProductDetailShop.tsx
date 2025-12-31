@@ -10,9 +10,14 @@ import ProductDetailContent from '../components/ui/ProductDetailContent';
 import QuantitySelector from '../components/ui/QuantitySelector';
 import { ProductConfig } from '../types';
 
-const ProductDetailShop: React.FC = () => {
+type ProductDetailShopProps = {
+    productId?: string;
+};
+
+const ProductDetailShop: React.FC<ProductDetailShopProps> = ({ productId }) => {
     const { id } = useParams();
-    const product = PRODUCTS.find(p => p.id === id);
+    const resolvedId = productId ?? id;
+    const product = PRODUCTS.find(p => p.id === resolvedId);
     const configuratorRef = useRef<VerandaConfiguratorRef>(null);
     const { addToCart } = useCart();
     const navigate = useNavigate();

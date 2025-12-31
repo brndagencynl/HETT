@@ -117,14 +117,14 @@ const Home: React.FC = () => {
                             <div className="absolute inset-0 bg-hett-dark/20"></div>
                             <div className="absolute bottom-3 left-3 md:bottom-6 md:left-6">
                                 <span className="bg-hett-primary text-white text-[8px] md:text-[10px] font-bold px-2 md:px-3 py-0.5 md:py-1 rounded-md mb-1 md:mb-2 inline-block uppercase">Sandwichpanelen</span>
-                                <h3 className="text-hett-dark font-black text-sm md:text-xl">Isopar® Plus Lambris</h3>
+                                <h3 className="text-hett-dark font-black text-sm md:text-xl">Isopar® Plus Lambris sandwichpanelen voor wand- en geveltoepassingen. Duurzaam, strak en eenvoudig te verwerken.</h3>
                             </div>
                         </Link>
                         <Link to="/maatwerk-configurator" className="card-retail p-0 relative overflow-hidden group flex-1 block min-h-[160px] md:min-h-0">
                             <img src="/assets/images/showroom_advice.png" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-60" alt="Maatwerk" />
                             <div className="absolute inset-0 bg-hett-dark/20"></div>
                             <div className="absolute bottom-3 left-3 md:bottom-6 md:left-6">
-                                <span className="bg-hett-primary text-white text-[8px] md:text-[10px] font-bold px-2 md:px-3 py-0.5 md:py-1 rounded-md mb-1 md:mb-2 inline-block uppercase">Toch een speciale maat?</span>
+                                <span className="bg-hett-primary text-white text-[8px] md:text-[10px] font-bold px-2 md:px-3 py-0.5 md:py-1 rounded-md mb-1 md:mb-2 inline-block uppercase">Ook mogelijk in maatwerk</span>
                                 <h3 className="text-hett-dark font-black text-sm md:text-xl">Maatwerk veranda's beschikbaar</h3>
                             </div>
                         </Link>

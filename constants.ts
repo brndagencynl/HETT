@@ -8,7 +8,7 @@ import {
 
 export const CATEGORIES: Record<CategorySlug, { label: string; path: string; requiresConfiguration: boolean }> = {
   verandas: { label: "Veranda's", path: '/categorie/verandas', requiresConfiguration: true },
-  sandwichpanelen: { label: 'Sandwichpanelen', path: '/categorie/sandwichpanelen', requiresConfiguration: true },
+  sandwichpanelen: { label: 'Sandwichpanelen', path: '/sandwichpanelen/isopar-plus-lambris', requiresConfiguration: true },
   accessoires: { label: 'Accessoires', path: '/categorie/accessoires', requiresConfiguration: false },
 };
 

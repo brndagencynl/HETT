@@ -43,6 +43,11 @@ import Quote from './pages/Quote';
 import Wishlist from './pages/Wishlist';
 import CartDrawer from './components/ui/CartDrawer';
 
+import { PRODUCTS } from './constants';
+
+const SANDWICHPANELEN_CANONICAL_URL = '/sandwichpanelen/isopar-plus-lambris';
+const SANDWICHPANELEN_PRODUCT_ID = PRODUCTS.find((p) => p.category === 'sandwichpanelen')?.id;
+
 // Shopify Blog & Page Routes
 import Blog from './pages/Blog';
 import BlogDetail from './pages/BlogDetail';
@@ -70,6 +75,22 @@ const AnimatedRoutes: React.FC = () => {
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<PageTransition><Home /></PageTransition>} />
+
+        {/* Sandwichpanelen (single product) */}
+        <Route path="/sandwichpanelen" element={<Navigate to={SANDWICHPANELEN_CANONICAL_URL} replace />} />
+        <Route path="/categorie/sandwichpanelen" element={<Navigate to={SANDWICHPANELEN_CANONICAL_URL} replace />} />
+        <Route
+          path={SANDWICHPANELEN_CANONICAL_URL}
+          element={
+            <PageTransition>
+              {SANDWICHPANELEN_PRODUCT_ID ? (
+                <ProductDetailShop productId={SANDWICHPANELEN_PRODUCT_ID} />
+              ) : (
+                <Navigate to="/shop" replace />
+              )}
+            </PageTransition>
+          }
+        />
 
         {/* Shop Routes */}
         <Route path="/shop" element={<PageTransition><Shop /></PageTransition>} />

@@ -6,6 +6,8 @@ import { getFooterColumns, FooterColumn, FALLBACK_FOOTER_COLUMNS } from '../serv
 const Footer: React.FC = () => {
     const [columns, setColumns] = useState<FooterColumn[]>(FALLBACK_FOOTER_COLUMNS);
 
+    const sandwichpanelenUrl = '/sandwichpanelen/isopar-plus-lambris';
+
     useEffect(() => {
         const fetchFooter = async () => {
             try {
@@ -37,7 +39,11 @@ const Footer: React.FC = () => {
                                 {column.links.map((link, linkIndex) => (
                                     <li key={linkIndex}>
                                         <Link
-                                            to={link.url}
+                                            to={
+                                                link.label === 'Sandwichpanelen' || link.url === '/categorie/sandwichpanelen'
+                                                    ? sandwichpanelenUrl
+                                                    : link.url
+                                            }
                                             className="text-white hover:text-[#FF7300] transition-colors flex items-center gap-2"
                                         >
                                             <span>&rsaquo;</span> {link.label}

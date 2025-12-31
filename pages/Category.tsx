@@ -38,6 +38,11 @@ const Category: React.FC = () => {
 
     const categoryName = getCategoryName(categorySlug);
 
+    const categoryIntro =
+        categorySlug === 'accessoires'
+            ? 'Bij HETT Veranda vindt u accessoires die perfect aansluiten op onze veranda’s en panelen, zoals LED-verlichting en afwerkingscomponenten. Eenvoudig mee te bestellen.'
+            : `Bij HETT.nl vind je een ruime selectie aan hoogwaardige ${categoryName.toLowerCase()} van topmerken. Onze systemen zijn verkrijgbaar in verschillende maten en materialen, waaronder aluminium en gepoedercoat staal, zodat je altijd de juiste oplossing hebt voor jouw tuinproject.`;
+
     // Filter to only show public products first, then apply category/brand filters
     const visibleProducts = useMemo(() => filterVisibleProducts(PRODUCTS), []);
     
@@ -108,7 +113,7 @@ const Category: React.FC = () => {
                     <h1 className="text-3xl md:text-4xl font-bold text-hett-dark mb-4">{categoryName}</h1>
                     <div className="max-w-4xl">
                         <p className={`text-sm text-gray-600 leading-relaxed transition-all ${showMoreDesc ? '' : 'line-clamp-2'}`}>
-                            Bij HETT.nl vind je een ruime selectie aan hoogwaardige {categoryName.toLowerCase()} van topmerken. Onze systemen zijn verkrijgbaar in verschillende maten en materialen, waaronder aluminium en gepoedercoat staal, zodat je altijd de juiste oplossing hebt voor jouw tuinproject.
+                            {categoryIntro}
                         </p>
                         <button onClick={() => setShowMoreDesc(!showMoreDesc)} className="text-blue-700 font-bold text-sm mt-1 hover:underline">
                             {showMoreDesc ? 'Minder weergeven' : 'Lees meer'}

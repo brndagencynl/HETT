@@ -276,18 +276,24 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
     // Handle slider change
     const handleWidthChange = (value: number) => {
       const clampedValue = clampMaatwerkWidth(value);
-      setConfig(prev => ({
-        ...prev,
-        size: { ...prev.size!, width: clampedValue }
-      }));
+      setConfig((prev) => {
+        const prevSize = prev.size || { width: 600, depth: 300 };
+        return {
+          ...prev,
+          size: { ...prevSize, width: clampedValue },
+        };
+      });
     };
 
     const handleDepthChange = (value: number) => {
       const clampedValue = clampMaatwerkDepth(value);
-      setConfig(prev => ({
-        ...prev,
-        size: { ...prev.size!, depth: clampedValue }
-      }));
+      setConfig((prev) => {
+        const prevSize = prev.size || { width: 600, depth: 300 };
+        return {
+          ...prev,
+          size: { ...prevSize, depth: clampedValue },
+        };
+      });
     };
 
     // Handle numeric input

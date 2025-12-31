@@ -58,7 +58,7 @@ const Navbar: React.FC = () => {
               <button onClick={() => setIsOpen(true)} className="text-hett-dark p-1 -ml-1">
                 <Menu size={28} />
               </button>
-              <Link to="/" className="flex-shrink-0"><img src="/logo.png" alt="HETT" className="h-6" /></Link>
+              <Link to="/" className="flex-shrink-0"><img src="/assets/images/hett-logo-navbar.png" alt="HETT" className="h-6" /></Link>
             </div>
             <div className="flex items-center gap-3 text-hett-dark">
               <Link to="/my-account" className="p-1 relative">
@@ -100,7 +100,7 @@ const Navbar: React.FC = () => {
         {/* DESKTOP MAIN BAR */}
         <div className={`hidden md:flex border-b border-gray-100 transition-all ${isScrolled ? 'py-2' : 'py-4'}`}>
           <div className="max-w-[1400px] mx-auto px-6 flex items-center justify-between gap-10 w-full">
-            <Link to="/" className="flex-shrink-0"><img src="/logo.png" alt="HETT" className="h-9" /></Link>
+            <Link to="/" className="flex-shrink-0"><img src="/assets/images/hett-logo-navbar.png" alt="HETT" className="h-9" /></Link>
 
             <form onSubmit={handleSearch} className={`relative flex flex-grow max-w-xl transition-all ${showSearchForm ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
               <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Waar ben je naar op zoek?" className="w-full pl-5 pr-12 py-2.5 border border-gray-200 bg-gray-50 rounded-md text-sm outline-none focus:border-hett-primary focus:bg-white" />
@@ -159,7 +159,7 @@ const Navbar: React.FC = () => {
               className="fixed inset-y-0 left-0 w-[85%] max-w-sm bg-white z-[101] shadow-2xl flex flex-col"
             >
               <div className="flex items-center justify-between p-4 border-b border-gray-100">
-                <img src="/logo.png" alt="HETT" className="h-6" />
+                <img src="/assets/images/hett-logo-navbar.png" alt="HETT" className="h-6" />
                 <button onClick={() => setIsOpen(false)} className="p-2 text-gray-500">
                   <X size={24} />
                 </button>

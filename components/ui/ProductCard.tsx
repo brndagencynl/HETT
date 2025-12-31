@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Heart, Star, Settings, ShoppingCart } from 'lucide-react';
 import { Product, CategorySlug } from '../../types';
 import { useCart } from '../../context/CartContext';
+import QuantitySelector from './QuantitySelector';
 
 interface ProductCardProps {
     product: Product;
@@ -15,6 +16,8 @@ const CONFIG_REQUIRED_CATEGORIES: CategorySlug[] = ['verandas', 'sandwichpanelen
 const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'grid' }) => {
     const navigate = useNavigate();
     const { addToCart, openCart } = useCart();
+
+    const [quantity, setQuantity] = useState(1);
 
     // Determine if this product requires configuration
     const requiresConfiguration = CONFIG_REQUIRED_CATEGORIES.includes(product.category);
@@ -38,7 +41,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'grid' })
         }
         
         // Add accessoire directly to cart
-        addToCart(product, 1, {
+        addToCart(product, quantity, {
             color: product.options?.colors?.[0] || 'Standaard',
             size: product.options?.sizes?.[0] || 'Standaard'
         });
@@ -129,13 +132,16 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'grid' })
                             Stel samen
                         </button>
                     ) : (
-                        <button
-                            onClick={handleAddToCart}
-                            className="w-full rounded-md py-2 sm:py-3 text-[11px] sm:text-sm font-bold flex items-center justify-center gap-1.5 sm:gap-2 shadow-sm transition-colors bg-hett-primary text-white hover:bg-hett-dark"
-                        >
-                            <ShoppingCart size={16} />
-                            In winkelwagen
-                        </button>
+                        <div className="space-y-2">
+                            <QuantitySelector value={quantity} onChange={setQuantity} />
+                            <button
+                                onClick={handleAddToCart}
+                                className="w-full rounded-md py-2 sm:py-3 text-[11px] sm:text-sm font-bold flex items-center justify-center gap-1.5 sm:gap-2 shadow-sm transition-colors bg-hett-primary text-white hover:bg-hett-dark"
+                            >
+                                <ShoppingCart size={16} />
+                                In winkelwagen
+                            </button>
+                        </div>
                     )}
                 </div>
             </div>

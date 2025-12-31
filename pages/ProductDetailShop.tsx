@@ -7,6 +7,7 @@ import PageHeader from '../components/PageHeader';
 import VerandaConfigurator, { VerandaConfiguratorRef } from '../components/VerandaConfigurator';
 import SandwichPanelBuilder from '../components/ui/sandwichpanel/SandwichPanelBuilder';
 import ProductDetailContent from '../components/ui/ProductDetailContent';
+import QuantitySelector from '../components/ui/QuantitySelector';
 import { ProductConfig } from '../types';
 
 const ProductDetailShop: React.FC = () => {
@@ -17,6 +18,7 @@ const ProductDetailShop: React.FC = () => {
     const navigate = useNavigate();
 
     const [activeImage, setActiveImage] = useState(product?.imageUrl || '');
+    const [accessoryQuantity, setAccessoryQuantity] = useState(1);
 
     if (!product) return <div className="pt-40 text-center">Product niet gevonden</div>;
 
@@ -61,7 +63,7 @@ const ProductDetailShop: React.FC = () => {
     const handleAccessoryAdd = () => {
         // Add to cart - cart drawer opens automatically via CartContext
         // No redirect to /cart - user stays on PDP
-        addToCart(product, 1, {
+        addToCart(product, accessoryQuantity, {
             color: product.options?.colors?.[0] || 'Standaard'
         });
     };
@@ -167,6 +169,12 @@ const ProductDetailShop: React.FC = () => {
                                         <span className="text-4xl font-black text-hett-text">€{product.price},-</span>
                                         <span className="text-hett-muted text-xs font-bold uppercase tracking-wider">Incl. BTW</span>
                                     </div>
+
+                                    {product.category === 'accessoires' && (
+                                        <div className="mb-3">
+                                            <QuantitySelector value={accessoryQuantity} onChange={setAccessoryQuantity} />
+                                        </div>
+                                    )}
 
                                     <button
                                         onClick={handleAccessoryAdd}

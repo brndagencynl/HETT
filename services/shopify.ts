@@ -568,13 +568,13 @@ export async function getPageByHandle(handle: string): Promise<ShopifyPage | nul
 // =============================================================================
 
 export const FALLBACK_HERO: HomepageHero = {
-  title: 'Terrasoverkappingen vanaf €839',
-  subtitle: 'HETT Premium',
+  title: 'Veranda\'s vanaf €1350',
+  subtitle: 'HETT Veranda\'s',
   description: 'De beste en voordeligste in de markt voor de doe-het-zelver!',
-  primaryCtaLabel: 'Bekijk assortiment',
+  primaryCtaLabel: 'Stel zelf samen',
   primaryCtaUrl: '/categorie/overkappingen',
-  secondaryCtaLabel: 'Configureer nu',
-  secondaryCtaUrl: '/configurator',
+  secondaryCtaLabel: '',
+  secondaryCtaUrl: '',
   image: { url: '/assets/images/hero_veranda.png' },
 };
 
@@ -622,6 +622,7 @@ export const FALLBACK_FOOTER_COLUMNS: FooterColumn[] = [
       { label: "Veranda's", url: '/categorie/verandas' },
       { label: 'Sandwichpanelen', url: '/categorie/sandwichpanelen' },
       { label: 'Accessoires', url: '/categorie/accessoires' },
+      { label: 'Maatwerk Veranda', url: '/maatwerk-configurator' },
     ],
   },
   {

@@ -4,6 +4,7 @@ import { CartItem, Product, ProductConfig, MaatwerkCartPayload } from '../types'
 import { validateConfig } from '../utils/configValidation';
 import { generateConfigHash } from '../utils/hash';
 import { buildRenderSnapshot, type VerandaVisualizationConfig } from '../src/configurator/visual/verandaAssets';
+import { normalizeQuantity } from '../src/lib/cart/quantity';
 
 // =============================================================================
 // TYPES
@@ -229,6 +230,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // import { ProductConfig } from '../types';
 
   const addToCart = (product: Product, quantity: number, options: any) => {
+    const safeQuantity = normalizeQuantity(quantity);
     // 1. Determine Category
     const category = product.category;
 
@@ -297,8 +299,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         id: cartId, // Override ID for cart uniqueness
         slug: product.id, // Keep original slug/id ref
         type: options?.type,
-        quantity,
-        totalPrice: (options.price || product.price) * quantity,
+        quantity: safeQuantity,
+        totalPrice: (options.price || product.price) * safeQuantity,
         config: configCandidate,
         configHash,
         displayConfigSummary: summary,
@@ -318,7 +320,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setCart(prev => {
         const existing = prev.find(i => i.id === cartId);
         if (existing) {
-          return prev.map(i => i.id === cartId ? { ...i, quantity: i.quantity + quantity, totalPrice: i.totalPrice + (newItem.totalPrice) } : i);
+          return prev.map(i => i.id === cartId ? { ...i, quantity: i.quantity + safeQuantity, totalPrice: i.totalPrice + (newItem.totalPrice) } : i);
         }
         return [...prev, newItem];
       });
@@ -332,15 +334,15 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         ...product,
         id: product.id, // Simple ID
         slug: product.id,
-        quantity,
+        quantity: safeQuantity,
         selectedColor: options.color || 'N/A',
         selectedSize: options.size || 'N/A',
-        totalPrice: (options.price || product.price) * quantity,
+        totalPrice: (options.price || product.price) * safeQuantity,
       };
       setCart(prev => {
         const existing = prev.find(i => i.id === newItem.id);
         if (existing) {
-          return prev.map(i => i.id === newItem.id ? { ...i, quantity: i.quantity + quantity, totalPrice: i.totalPrice + newItem.totalPrice } : i);
+          return prev.map(i => i.id === newItem.id ? { ...i, quantity: i.quantity + safeQuantity, totalPrice: i.totalPrice + newItem.totalPrice } : i);
         }
         return [...prev, newItem];
       });

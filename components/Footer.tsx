@@ -55,13 +55,13 @@ const Footer: React.FC = () => {
                             <div className="flex items-start gap-3">
                                 <MapPin size={18} className="text-white flex-shrink-0 mt-1" />
                                 <div className="text-sm font-medium">
-                                    <strong className="block text-white mb-1 uppercase tracking-tight">HETT B.V.</strong>
-                                    Industrieweg 45, 5600 AA Eindhoven
+                                    <strong className="block text-white mb-1 uppercase tracking-tight">HETT Veranda B.V.</strong>
+                                    Hoppenkuil 17, 5626 DC Eindhoven
                                 </div>
                             </div>
                             <div className="flex flex-col gap-3">
                                 <a href="tel:0401234567" className="flex items-center gap-3 text-sm text-white hover:text-[#FF7300] transition-colors"><Phone size={18} /> 040 123 4567</a>
-                                <a href="mailto:info@hett.nl" className="flex items-center gap-3 text-sm text-white hover:text-[#FF7300] transition-colors"><Mail size={18} /> info@hett.nl</a>
+                                <a href="mailto:info@hettveranda.nl" className="flex items-center gap-3 text-sm text-white hover:text-[#FF7300] transition-colors"><Mail size={18} /> info@hettveranda.nl</a>
                             </div>
                             <div className="flex gap-4 pt-2">
                                 <Facebook size={20} className="text-white cursor-pointer hover:text-[#FF7300] transition-colors" />
@@ -74,15 +74,11 @@ const Footer: React.FC = () => {
 
                 <div className="border-t border-white/20 pt-8 flex flex-col md:flex-row justify-between items-center gap-6">
                     <div className="flex items-center gap-4">
-                        <img src="/logo.png" alt="HETT" className="h-8 brightness-0 invert" />
-                        <p className="text-[10px] text-white">Hoogwaardige panelen voor de professional.</p>
+                        <img src="/assets/images/hett-logo-footer.png" alt="HETT" className="h-8 brightness-0 invert" />
+                        <p className="text-[10px] text-white">Hoogwaardige Veranda's voor iedereen.</p>
                     </div>
-                    <div className="flex gap-4 opacity-70 grayscale brightness-200">
-                        <div className="h-6 w-10 bg-white/20 rounded-sm"></div>
-                        <div className="h-6 w-10 bg-white/20 rounded-sm"></div>
-                        <div className="h-6 w-10 bg-white/20 rounded-sm"></div>
-                    </div>
-                    <p className="text-[10px] text-white font-medium">© 2025 HETT B.V. Alle rechten voorbehouden.</p>
+
+                    <p className="text-[10px] text-white font-medium">© 2025 HETT Veranda B.V. Alle rechten voorbehouden.</p>
                 </div>
             </div>
         </footer>

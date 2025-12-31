@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Check, Star, Wrench, Truck, Package, Award } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { PRODUCTS } from '../constants';
 import { Post } from '../types';
 import { filterVisibleProducts } from '../src/catalog/productVisibility';
@@ -25,7 +26,7 @@ import HomeFeatureBlock from '../components/ui/HomeFeatureBlock';
 import HomeFAQ from '../components/ui/HomeFAQ';
 
 // Icon mapping for USPs
-const iconMap: Record<string, React.ComponentType<{ size?: number; className?: string; strokeWidth?: number }>> = {
+const iconMap: Record<string, LucideIcon> = {
     Wrench,
     Truck,
     Package,
@@ -94,23 +95,18 @@ const Home: React.FC = () => {
                         <div className="absolute inset-0 bg-gradient-to-r from-hett-dark/70 to-transparent"></div>
                         <div className="absolute inset-0 p-8 md:p-12 flex flex-col justify-center max-w-xl">
                             <span className="text-hett-secondary uppercase tracking-widest text-sm font-bold mb-3">
-                                {hero.subtitle}
+                                HETT Veranda’s
                             </span>
                             <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-4 leading-tight">
-                                {hero.title}
+                                Veranda’s vanaf €1350
                             </h2>
                             <p className="text-white/90 text-lg md:text-xl font-medium mb-8">
                                 {hero.description}
                             </p>
                             <div className="flex flex-wrap gap-4">
                                 <Link to={hero.primaryCtaUrl} className="btn-secondary px-10 py-4 text-lg">
-                                    {hero.primaryCtaLabel}
+                                    Stel zelf samen
                                 </Link>
-                                {hero.secondaryCtaLabel && (
-                                    <Link to={hero.secondaryCtaUrl} className="btn-outline-white px-8 py-4 text-lg">
-                                        {hero.secondaryCtaLabel}
-                                    </Link>
-                                )}
                             </div>
                         </div>
                     </div>
@@ -120,16 +116,16 @@ const Home: React.FC = () => {
                             <img src="/assets/images/showroom_advice.png" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-60" alt="Service" />
                             <div className="absolute inset-0 bg-hett-dark/20"></div>
                             <div className="absolute bottom-3 left-3 md:bottom-6 md:left-6">
-                                <span className="bg-hett-primary text-white text-[8px] md:text-[10px] font-bold px-2 md:px-3 py-0.5 md:py-1 rounded-md mb-1 md:mb-2 inline-block uppercase">Service</span>
-                                <h3 className="text-hett-dark font-black text-sm md:text-xl">Advies op maat?</h3>
+                                <span className="bg-hett-primary text-white text-[8px] md:text-[10px] font-bold px-2 md:px-3 py-0.5 md:py-1 rounded-md mb-1 md:mb-2 inline-block uppercase">Sandwichpanelen</span>
+                                <h3 className="text-hett-dark font-black text-sm md:text-xl">Isopar® Plus Lambris</h3>
                             </div>
                         </Link>
-                        <Link to="/showroom" className="card-retail p-0 relative overflow-hidden group flex-1 block min-h-[160px] md:min-h-0">
-                            <img src="/assets/images/showroom_advice.png" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-60" alt="Showroom" />
+                        <Link to="/maatwerk-configurator" className="card-retail p-0 relative overflow-hidden group flex-1 block min-h-[160px] md:min-h-0">
+                            <img src="/assets/images/showroom_advice.png" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-60" alt="Maatwerk" />
                             <div className="absolute inset-0 bg-hett-dark/20"></div>
                             <div className="absolute bottom-3 left-3 md:bottom-6 md:left-6">
-                                <span className="bg-hett-primary text-white text-[8px] md:text-[10px] font-bold px-2 md:px-3 py-0.5 md:py-1 rounded-md mb-1 md:mb-2 inline-block uppercase">Bezoek ons</span>
-                                <h3 className="text-hett-dark font-black text-sm md:text-xl">Bezoek de showroom</h3>
+                                <span className="bg-hett-primary text-white text-[8px] md:text-[10px] font-bold px-2 md:px-3 py-0.5 md:py-1 rounded-md mb-1 md:mb-2 inline-block uppercase">Toch een speciale maat?</span>
+                                <h3 className="text-hett-dark font-black text-sm md:text-xl">Maatwerk veranda's beschikbaar</h3>
                             </div>
                         </Link>
                     </div>
@@ -154,25 +150,8 @@ const Home: React.FC = () => {
                     </div>
                 </div>
             </div>
-
-            {/* Feature Block */}
-            <HomeFeatureBlock />
-
-            {/* Inspiratie Section */}
-            <InspirationStrip items={inspirationItems} />
-
-            {/* Blog & Nieuws Section */}
-            {loading ? (
-                <div className="py-24 text-center bg-white border-b border-gray-100">
-                    <span className="text-hett-muted font-medium animate-pulse">Nieuws laden...</span>
-                </div>
-            ) : error || blogPosts.length === 0 ? (
-                <div className="hidden"></div>
-            ) : (
-                <BlogCarousel items={blogPosts} />
-            )}
-
-            {/* Popular Products - Grid layout */}
+            
+ {/* Popular Products - Grid layout */}
             <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mb-20">
                 <div className="mb-12 border-l-4 border-hett-secondary pl-6">
                     <h2 className="text-3xl md:text-4xl font-black text-hett-dark leading-tight uppercase tracking-tighter">
@@ -215,6 +194,25 @@ const Home: React.FC = () => {
                     ))}
                 </div>
             </div>
+
+            {/* Feature Block */}
+            <HomeFeatureBlock />
+
+            {/* Inspiratie Section */}
+            <InspirationStrip items={inspirationItems} />
+
+            {/* Blog & Nieuws Section */}
+            {loading ? (
+                <div className="py-24 text-center bg-white border-b border-gray-100">
+                    <span className="text-hett-muted font-medium animate-pulse">Nieuws laden...</span>
+                </div>
+            ) : error || blogPosts.length === 0 ? (
+                <div className="hidden"></div>
+            ) : (
+                <BlogCarousel items={blogPosts} />
+            )}
+
+           
 
             {/* FAQ Section */}
             <HomeFAQ items={faqItems} />

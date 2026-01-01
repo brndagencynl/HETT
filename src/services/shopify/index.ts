@@ -14,3 +14,14 @@ export {
   type ShopifyVariant,
   type ProductWithVariants,
 } from './variants';
+
+export {
+  getLatestProjects,
+  getProjectsPage,
+  getProjectByHandle,
+  getProjectPlaceholder,
+  clearProjectsCache,
+  type ShopifyProject,
+  type ProjectImage,
+  type ProjectsPageResult,
+} from './projects';

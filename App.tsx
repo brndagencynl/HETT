@@ -148,7 +148,7 @@ const AnimatedRoutes: React.FC = () => {
         <Route path="/producten/:id" element={<ProductRedirect />} />
         <Route path="/configurator" element={<PageTransition><Configurator /></PageTransition>} />
         <Route path="/projecten" element={<PageTransition><Projects /></PageTransition>} />
-        <Route path="/projecten/:id" element={<PageTransition><ProjectDetailPage /></PageTransition>} />
+        <Route path="/projecten/:handle" element={<PageTransition><ProjectDetailPage /></PageTransition>} />
         <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />
         <Route path="/downloads" element={<PageTransition><Documents /></PageTransition>} />
         <Route path="/over-ons" element={<PageTransition><About /></PageTransition>} />

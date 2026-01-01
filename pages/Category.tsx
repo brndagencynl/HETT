@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Product } from '../types';
 import { Check, Heart, ChevronDown, ChevronUp, SlidersHorizontal, LayoutGrid, List, Star, Loader2 } from 'lucide-react';
@@ -9,7 +9,7 @@ import MobileFilterSheet from '../components/ui/MobileFilterSheet';
 import ActiveFilters from '../components/ui/ActiveFilters';
 import ProductCard from '../components/ui/ProductCard';
 import { parseVerandaDimensions, VERANDA_WIDTH_OPTIONS, VERANDA_DEPTH_OPTIONS } from '../src/utils/verandaDimensions';
-import { formatEUR, toCents } from '../src/utils/money';
+import { toCents } from '../src/utils/money';
 
 import { CATEGORIES } from '../constants';
 import { CategorySlug } from '../types';
@@ -29,10 +29,17 @@ const Category: React.FC = () => {
     const [pendingBrands, setPendingBrands] = useState<string[]>([]);
 
     // Veranda-specific filters
-    const [priceMin, setPriceMin] = useState<string>('');
-    const [priceMax, setPriceMax] = useState<string>('');
-    const [pendingPriceMin, setPendingPriceMin] = useState<string>('');
-    const [pendingPriceMax, setPendingPriceMax] = useState<string>('');
+    // Draft values are bound to inputs; applied values drive actual filtering.
+    const [draftPriceMin, setDraftPriceMin] = useState<string>('');
+    const [draftPriceMax, setDraftPriceMax] = useState<string>('');
+    const [appliedPriceMin, setAppliedPriceMin] = useState<number | null>(null);
+    const [appliedPriceMax, setAppliedPriceMax] = useState<number | null>(null);
+
+    // Mobile sheet uses pending drafts until user taps "Apply"
+    const [pendingDraftPriceMin, setPendingDraftPriceMin] = useState<string>('');
+    const [pendingDraftPriceMax, setPendingDraftPriceMax] = useState<string>('');
+
+    const skipNextPriceDebounceRef = useRef(false);
     const [activeWidths, setActiveWidths] = useState<number[]>([]);
     const [pendingWidths, setPendingWidths] = useState<number[]>([]);
     const [activeDepths, setActiveDepths] = useState<number[]>([]);
@@ -63,12 +70,50 @@ const Category: React.FC = () => {
     useEffect(() => {
         if (mobileFiltersOpen) {
             setPendingBrands([...activeBrands]);
-            setPendingPriceMin(priceMin);
-            setPendingPriceMax(priceMax);
+            setPendingDraftPriceMin(draftPriceMin);
+            setPendingDraftPriceMax(draftPriceMax);
             setPendingWidths([...activeWidths]);
             setPendingDepths([...activeDepths]);
         }
-    }, [mobileFiltersOpen, activeBrands, priceMin, priceMax, activeWidths, activeDepths]);
+    }, [mobileFiltersOpen, activeBrands, draftPriceMin, draftPriceMax, activeWidths, activeDepths]);
+
+    const applyPriceDraft = (nextDraftMin: string = draftPriceMin, nextDraftMax: string = draftPriceMax) => {
+        console.log('[PriceFilter] draft', { draftMin: nextDraftMin, draftMax: nextDraftMax });
+
+        const parseDraft = (value: string): number | null => {
+            const trimmed = value.trim();
+            if (trimmed === '') return null;
+            const numeric = Number(trimmed.replace(',', '.'));
+            return Number.isFinite(numeric) ? numeric : null;
+        };
+
+        let min = parseDraft(nextDraftMin);
+        let max = parseDraft(nextDraftMax);
+
+        if (min !== null && max !== null && min > max) {
+            // Prefer swap to keep intent
+            [min, max] = [max, min];
+        }
+
+        setAppliedPriceMin(min);
+        setAppliedPriceMax(max);
+        console.log('[PriceFilter] applied', { appliedMin: min, appliedMax: max });
+    };
+
+    // Debounced apply while typing (desktop). No UI changes.
+    useEffect(() => {
+        if (skipNextPriceDebounceRef.current) {
+            skipNextPriceDebounceRef.current = false;
+            return;
+        }
+
+        const t = window.setTimeout(() => {
+            applyPriceDraft();
+        }, 600);
+
+        return () => window.clearTimeout(t);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [draftPriceMin, draftPriceMax]);
 
     const getCategoryName = (slug: string | undefined): string => {
         if (!slug) return 'Assortiment';
@@ -94,11 +139,8 @@ const Category: React.FC = () => {
             const productPrice = (p.priceCents ?? toCents(p.price)) / 100;
             
             // Price filter
-            const minPrice = priceMin ? parseFloat(priceMin) : null;
-            const maxPrice = priceMax ? parseFloat(priceMax) : null;
-            
-            if (minPrice !== null && productPrice < minPrice) return false;
-            if (maxPrice !== null && productPrice > maxPrice) return false;
+            if (appliedPriceMin !== null && productPrice < appliedPriceMin) return false;
+            if (appliedPriceMax !== null && productPrice > appliedPriceMax) return false;
             
             // Dimension filters
             const dimensions = parseVerandaDimensions(p.handle || p.title);
@@ -129,8 +171,10 @@ const Category: React.FC = () => {
 
     const handleApplyFilters = () => {
         setActiveBrands([...pendingBrands]);
-        setPriceMin(pendingPriceMin);
-        setPriceMax(pendingPriceMax);
+        setDraftPriceMin(pendingDraftPriceMin);
+        setDraftPriceMax(pendingDraftPriceMax);
+        skipNextPriceDebounceRef.current = true;
+        applyPriceDraft(pendingDraftPriceMin, pendingDraftPriceMax);
         setActiveWidths([...pendingWidths]);
         setActiveDepths([...pendingDepths]);
     };
@@ -175,29 +219,33 @@ const Category: React.FC = () => {
     };
 
     const handleClearPriceFilter = () => {
-        setPriceMin('');
-        setPriceMax('');
+        setDraftPriceMin('');
+        setDraftPriceMax('');
+        setAppliedPriceMin(null);
+        setAppliedPriceMax(null);
     };
 
     const handleClearAll = () => {
         setActiveBrands([]);
-        setPriceMin('');
-        setPriceMax('');
+        setDraftPriceMin('');
+        setDraftPriceMax('');
+        setAppliedPriceMin(null);
+        setAppliedPriceMax(null);
         setActiveWidths([]);
         setActiveDepths([]);
     };
 
     // Count active filters for display
     const activeFilterCount = activeBrands.length + activeWidths.length + activeDepths.length + 
-        (priceMin || priceMax ? 1 : 0);
+        (appliedPriceMin !== null || appliedPriceMax !== null ? 1 : 0);
 
     // Extracted filter content for reuse
     const FilterContent = ({ isPending = false }: { isPending?: boolean }) => {
         const currentBrands = isPending ? pendingBrands : activeBrands;
         const currentWidths = isPending ? pendingWidths : activeWidths;
         const currentDepths = isPending ? pendingDepths : activeDepths;
-        const currentPriceMin = isPending ? pendingPriceMin : priceMin;
-        const currentPriceMax = isPending ? pendingPriceMax : priceMax;
+        const currentPriceMin = isPending ? pendingDraftPriceMin : draftPriceMin;
+        const currentPriceMax = isPending ? pendingDraftPriceMax : draftPriceMax;
         
         // Debug log for filters
         console.log('[Filters] config', { isVerandaCategory, categorySlug });
@@ -221,7 +269,19 @@ const Category: React.FC = () => {
                                         type="number"
                                         placeholder="Min €"
                                         value={currentPriceMin}
-                                        onChange={(e) => isPending ? setPendingPriceMin(e.target.value) : setPriceMin(e.target.value)}
+                                        onChange={(e) => isPending ? setPendingDraftPriceMin(e.target.value) : setDraftPriceMin(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (isPending) return;
+                                            if (e.key === 'Enter') {
+                                                skipNextPriceDebounceRef.current = true;
+                                                applyPriceDraft();
+                                            }
+                                        }}
+                                        onBlur={() => {
+                                            if (isPending) return;
+                                            skipNextPriceDebounceRef.current = true;
+                                            applyPriceDraft();
+                                        }}
                                         className="w-full px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-hett-secondary"
                                     />
                                 </div>
@@ -231,7 +291,19 @@ const Category: React.FC = () => {
                                         type="number"
                                         placeholder="Max €"
                                         value={currentPriceMax}
-                                        onChange={(e) => isPending ? setPendingPriceMax(e.target.value) : setPriceMax(e.target.value)}
+                                        onChange={(e) => isPending ? setPendingDraftPriceMax(e.target.value) : setDraftPriceMax(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (isPending) return;
+                                            if (e.key === 'Enter') {
+                                                skipNextPriceDebounceRef.current = true;
+                                                applyPriceDraft();
+                                            }
+                                        }}
+                                        onBlur={() => {
+                                            if (isPending) return;
+                                            skipNextPriceDebounceRef.current = true;
+                                            applyPriceDraft();
+                                        }}
                                         className="w-full px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-hett-secondary"
                                     />
                                 </div>
@@ -327,8 +399,8 @@ const Category: React.FC = () => {
                             activeBrands={activeBrands}
                             onRemoveBrand={handleRemoveBrand}
                             onClearAll={handleClearAll}
-                            priceMin={priceMin}
-                            priceMax={priceMax}
+                            priceMin={appliedPriceMin}
+                            priceMax={appliedPriceMax}
                             activeWidths={activeWidths}
                             activeDepths={activeDepths}
                             onRemoveWidth={handleRemoveWidth}

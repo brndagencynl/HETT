@@ -7,8 +7,8 @@ interface ActiveFiltersProps {
     onRemoveBrand: (brand: string) => void;
     onClearAll: () => void;
     // Veranda-specific filters
-    priceMin?: string;
-    priceMax?: string;
+    priceMin?: number | null;
+    priceMax?: number | null;
     activeWidths?: number[];
     activeDepths?: number[];
     onRemoveWidth?: (w: number) => void;
@@ -31,7 +31,7 @@ const ActiveFilters: React.FC<ActiveFiltersProps> = ({
     const hasBrands = activeBrands.length > 0;
     const hasWidths = activeWidths.length > 0;
     const hasDepths = activeDepths.length > 0;
-    const hasPrice = (priceMin && priceMin !== '') || (priceMax && priceMax !== '');
+    const hasPrice = priceMin !== null && priceMin !== undefined || priceMax !== null && priceMax !== undefined;
 
     if (!hasBrands && !hasWidths && !hasDepths && !hasPrice) return null;
 
@@ -57,7 +57,7 @@ const ActiveFilters: React.FC<ActiveFiltersProps> = ({
                     {hasPrice && onClearPrice && (
                         <div className="filter-badge">
                             <span className="filter-badge__label">
-                                Prijs: {priceMin ? formatEUR(Number(priceMin) * 100, 'cents') : '...'} - {priceMax ? formatEUR(Number(priceMax) * 100, 'cents') : '...'}
+                                Prijs: {priceMin !== null && priceMin !== undefined ? formatEUR(priceMin * 100, 'cents') : '...'} - {priceMax !== null && priceMax !== undefined ? formatEUR(priceMax * 100, 'cents') : '...'}
                             </span>
                             <button
                                 onClick={onClearPrice}

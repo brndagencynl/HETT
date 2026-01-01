@@ -168,11 +168,15 @@ const Home: React.FC = () => {
             
  {/* Popular Products - Grid layout */}
             <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mb-20">
-                <div className="mb-12 border-l-4 border-hett-secondary pl-6">
-                    <h2 className="text-3xl md:text-4xl font-black text-hett-dark leading-tight uppercase tracking-tighter">
-                        Populaire keuzes
-                    </h2>
-                    <p className="text-hett-muted font-medium mt-2">Geselecteerd door onze klanten.</p>
+                {/* Header - same style as Inspiratie section */}
+                <div className="flex items-center justify-between mb-8">
+                    <h2 className="text-2xl md:text-3xl font-black text-hett-dark">Populaire keuzes</h2>
+                    <Link
+                        to="/categorie/overkappingen"
+                        className="px-4 py-2 border border-gray-300 rounded-full text-sm font-bold text-hett-dark hover:bg-gray-50 transition-colors"
+                    >
+                        Bekijk alle veranda's
+                    </Link>
                 </div>
 
                 {productsLoading ? (

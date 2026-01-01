@@ -8,6 +8,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import MobileFilterSheet from '../components/ui/MobileFilterSheet';
 import ActiveFilters from '../components/ui/ActiveFilters';
 import ProductCard from '../components/ui/ProductCard';
+import { parseVerandaDimensions, VERANDA_WIDTH_OPTIONS, VERANDA_DEPTH_OPTIONS } from '../src/utils/verandaDimensions';
+import { formatEUR, toCents } from '../src/utils/money';
 
 import { CATEGORIES } from '../constants';
 import { CategorySlug } from '../types';
@@ -25,6 +27,19 @@ const Category: React.FC = () => {
     // Filter State
     const [activeBrands, setActiveBrands] = useState<string[]>([]);
     const [pendingBrands, setPendingBrands] = useState<string[]>([]);
+
+    // Veranda-specific filters
+    const [priceMin, setPriceMin] = useState<string>('');
+    const [priceMax, setPriceMax] = useState<string>('');
+    const [pendingPriceMin, setPendingPriceMin] = useState<string>('');
+    const [pendingPriceMax, setPendingPriceMax] = useState<string>('');
+    const [activeWidths, setActiveWidths] = useState<number[]>([]);
+    const [pendingWidths, setPendingWidths] = useState<number[]>([]);
+    const [activeDepths, setActiveDepths] = useState<number[]>([]);
+    const [pendingDepths, setPendingDepths] = useState<number[]>([]);
+
+    // Check if this is the veranda category
+    const isVerandaCategory = categorySlug === 'verandas' || categorySlug === 'overkappingen';
 
     // Fetch products from Shopify
     useEffect(() => {
@@ -48,8 +63,12 @@ const Category: React.FC = () => {
     useEffect(() => {
         if (mobileFiltersOpen) {
             setPendingBrands([...activeBrands]);
+            setPendingPriceMin(priceMin);
+            setPendingPriceMax(priceMax);
+            setPendingWidths([...activeWidths]);
+            setPendingDepths([...activeDepths]);
         }
-    }, [mobileFiltersOpen, activeBrands]);
+    }, [mobileFiltersOpen, activeBrands, priceMin, priceMax, activeWidths, activeDepths]);
 
     const getCategoryName = (slug: string | undefined): string => {
         if (!slug) return 'Assortiment';
@@ -66,12 +85,54 @@ const Category: React.FC = () => {
 
     // Filter to only show public products first, then apply category/brand filters
     const filteredProducts = products.filter(p => {
+        // Brand filter (for non-veranda categories)
         const matchesBrand = activeBrands.length === 0 || activeBrands.includes(p.badges?.[0] || 'Onbekend');
+        
+        // Veranda-specific filters
+        if (isVerandaCategory) {
+            // Get product price (priceCents is in cents)
+            const productPrice = (p.priceCents ?? toCents(p.price)) / 100;
+            
+            // Price filter
+            const minPrice = priceMin ? parseFloat(priceMin) : null;
+            const maxPrice = priceMax ? parseFloat(priceMax) : null;
+            
+            if (minPrice !== null && productPrice < minPrice) return false;
+            if (maxPrice !== null && productPrice > maxPrice) return false;
+            
+            // Dimension filters
+            const dimensions = parseVerandaDimensions(p.handle || p.title);
+            
+            console.log('[Veranda Filters] product', p.handle, 'dimensions:', dimensions, 'price:', productPrice);
+            
+            // Width filter
+            if (activeWidths.length > 0) {
+                if (!dimensions.width) {
+                    console.warn('[Veranda Filters] dimensions missing width', p.handle, p.title);
+                    return false;
+                }
+                if (!activeWidths.includes(dimensions.width)) return false;
+            }
+            
+            // Depth filter
+            if (activeDepths.length > 0) {
+                if (!dimensions.depth) {
+                    console.warn('[Veranda Filters] dimensions missing depth', p.handle, p.title);
+                    return false;
+                }
+                if (!activeDepths.includes(dimensions.depth)) return false;
+            }
+        }
+        
         return matchesBrand;
     });
 
     const handleApplyFilters = () => {
         setActiveBrands([...pendingBrands]);
+        setPriceMin(pendingPriceMin);
+        setPriceMax(pendingPriceMax);
+        setActiveWidths([...pendingWidths]);
+        setActiveDepths([...pendingDepths]);
     };
 
     const handleToggleBrand = (brand: string, isPending: boolean) => {
@@ -83,17 +144,65 @@ const Category: React.FC = () => {
         );
     };
 
+    const handleToggleWidth = (width: number, isPending: boolean) => {
+        const setter = isPending ? setPendingWidths : setActiveWidths;
+        setter(prev =>
+            prev.includes(width)
+                ? prev.filter(w => w !== width)
+                : [...prev, width]
+        );
+    };
+
+    const handleToggleDepth = (depth: number, isPending: boolean) => {
+        const setter = isPending ? setPendingDepths : setActiveDepths;
+        setter(prev =>
+            prev.includes(depth)
+                ? prev.filter(d => d !== depth)
+                : [...prev, depth]
+        );
+    };
+
     const handleRemoveBrand = (brand: string) => {
         setActiveBrands(prev => prev.filter(b => b !== brand));
     };
 
+    const handleRemoveWidth = (width: number) => {
+        setActiveWidths(prev => prev.filter(w => w !== width));
+    };
+
+    const handleRemoveDepth = (depth: number) => {
+        setActiveDepths(prev => prev.filter(d => d !== depth));
+    };
+
+    const handleClearPriceFilter = () => {
+        setPriceMin('');
+        setPriceMax('');
+    };
+
     const handleClearAll = () => {
         setActiveBrands([]);
+        setPriceMin('');
+        setPriceMax('');
+        setActiveWidths([]);
+        setActiveDepths([]);
     };
+
+    // Count active filters for display
+    const activeFilterCount = activeBrands.length + activeWidths.length + activeDepths.length + 
+        (priceMin || priceMax ? 1 : 0);
 
     // Extracted filter content for reuse
     const FilterContent = ({ isPending = false }: { isPending?: boolean }) => {
         const currentBrands = isPending ? pendingBrands : activeBrands;
+        const currentWidths = isPending ? pendingWidths : activeWidths;
+        const currentDepths = isPending ? pendingDepths : activeDepths;
+        const currentPriceMin = isPending ? pendingPriceMin : priceMin;
+        const currentPriceMax = isPending ? pendingPriceMax : priceMax;
+        
+        // Debug log for filters
+        console.log('[Filters] config', { isVerandaCategory, categorySlug });
+        console.log('[Filters] selected', { currentWidths, currentDepths, currentPriceMin, currentPriceMax, currentBrands });
+        
         return (
             <div className="border border-gray-200 rounded-lg overflow-hidden divide-y divide-gray-200">
                 <FilterAccordion title="Laat resultaten zien in" defaultOpen>
@@ -101,20 +210,77 @@ const Category: React.FC = () => {
                         {categoryName} ({filteredProducts.length})
                     </div>
                 </FilterAccordion>
-                <FilterAccordion title="Merk" defaultOpen>
-                    <FilterCheckbox
-                        label="HETT Premium"
-                        count={42}
-                        checked={currentBrands.includes("HETT Premium")}
-                        onChange={() => handleToggleBrand("HETT Premium", isPending)}
-                    />
-                    <FilterCheckbox
-                        label="Deponti"
-                        count={15}
-                        checked={currentBrands.includes("Deponti")}
-                        onChange={() => handleToggleBrand("Deponti", isPending)}
-                    />
-                </FilterAccordion>
+                
+                {isVerandaCategory ? (
+                    <>
+                        {/* Price Filter */}
+                        <FilterAccordion title="Prijs" defaultOpen>
+                            <div className="flex items-center gap-2">
+                                <div className="flex-1">
+                                    <input
+                                        type="number"
+                                        placeholder="Min €"
+                                        value={currentPriceMin}
+                                        onChange={(e) => isPending ? setPendingPriceMin(e.target.value) : setPriceMin(e.target.value)}
+                                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-hett-secondary"
+                                    />
+                                </div>
+                                <span className="text-gray-400">-</span>
+                                <div className="flex-1">
+                                    <input
+                                        type="number"
+                                        placeholder="Max €"
+                                        value={currentPriceMax}
+                                        onChange={(e) => isPending ? setPendingPriceMax(e.target.value) : setPriceMax(e.target.value)}
+                                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-hett-secondary"
+                                    />
+                                </div>
+                            </div>
+                        </FilterAccordion>
+                        
+                        {/* Width Filter */}
+                        <FilterAccordion title="Breedte (cm)" defaultOpen>
+                            {VERANDA_WIDTH_OPTIONS.map((width) => (
+                                <FilterCheckbox
+                                    key={width}
+                                    label={`${width} cm`}
+                                    count={products.filter(p => parseVerandaDimensions(p.handle || p.title).width === width).length}
+                                    checked={currentWidths.includes(width)}
+                                    onChange={() => handleToggleWidth(width, isPending)}
+                                />
+                            ))}
+                        </FilterAccordion>
+                        
+                        {/* Depth Filter */}
+                        <FilterAccordion title="Diepte (cm)" defaultOpen>
+                            {VERANDA_DEPTH_OPTIONS.map((depth) => (
+                                <FilterCheckbox
+                                    key={depth}
+                                    label={`${depth} cm`}
+                                    count={products.filter(p => parseVerandaDimensions(p.handle || p.title).depth === depth).length}
+                                    checked={currentDepths.includes(depth)}
+                                    onChange={() => handleToggleDepth(depth, isPending)}
+                                />
+                            ))}
+                        </FilterAccordion>
+                    </>
+                ) : (
+                    /* Default brand filter for non-veranda categories */
+                    <FilterAccordion title="Merk" defaultOpen>
+                        <FilterCheckbox
+                            label="HETT Premium"
+                            count={42}
+                            checked={currentBrands.includes("HETT Premium")}
+                            onChange={() => handleToggleBrand("HETT Premium", isPending)}
+                        />
+                        <FilterCheckbox
+                            label="Deponti"
+                            count={15}
+                            checked={currentBrands.includes("Deponti")}
+                            onChange={() => handleToggleBrand("Deponti", isPending)}
+                        />
+                    </FilterAccordion>
+                )}
             </div>
         );
     };
@@ -161,6 +327,13 @@ const Category: React.FC = () => {
                             activeBrands={activeBrands}
                             onRemoveBrand={handleRemoveBrand}
                             onClearAll={handleClearAll}
+                            priceMin={priceMin}
+                            priceMax={priceMax}
+                            activeWidths={activeWidths}
+                            activeDepths={activeDepths}
+                            onRemoveWidth={handleRemoveWidth}
+                            onRemoveDepth={handleRemoveDepth}
+                            onClearPrice={handleClearPriceFilter}
                         />
 
                         <div className="flex flex-wrap items-center justify-between gap-4 mb-8 bg-gray-50 p-3 rounded-lg border border-gray-100">

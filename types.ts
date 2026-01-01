@@ -10,6 +10,11 @@ export type ProductVisibility = 'public' | 'hidden_anchor';
 
 export interface Product {
   id: string;
+  /**
+   * Shopify product handle (URL slug)
+   * e.g., "veranda-706-x-400"
+   */
+  handle?: string;
   title: string;
   category: CategorySlug;
   /** Canonical money value (always cents, integer). */

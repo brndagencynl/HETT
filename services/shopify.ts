@@ -1,7 +1,30 @@
 /**
  * Shopify Storefront API Service
  * Single source of truth for commerce + content via Metaobjects and Blog
+ * 
+ * =============================================================================
+ * SHOPIFY STOREFRONT API SCOPES REQUIRED:
+ * =============================================================================
+ * 
+ * For PRODUCTS (always needed):
+ *   - unauthenticated_read_product_listings
+ *   - unauthenticated_read_product_inventory
+ * 
+ * For METAOBJECTS (content blocks - optional):
+ *   - unauthenticated_read_metaobjects
+ * 
+ * For PAGES & BLOG:
+ *   - unauthenticated_read_content
+ * 
+ * For CART/CHECKOUT:
+ *   - unauthenticated_write_checkouts
+ *   - unauthenticated_read_checkouts
+ * 
+ * See config/contentMode.ts for instructions on enabling metaobjects.
+ * =============================================================================
  */
+
+import { CONTENT_MODE, useMetaobjects } from '../config/contentMode';
 
 // =============================================================================
 // TYPES
@@ -91,13 +114,55 @@ const STOREFRONT_API_URL = SHOPIFY_DOMAIN
   ? `https://${SHOPIFY_DOMAIN}/api/${API_VERSION}/graphql.json`
   : '';
 
-// Debug logging bij module load
-console.log('[Shopify services/shopify.ts Config]', {
-  domain: SHOPIFY_DOMAIN || '(niet ingesteld)',
-  tokenPresent: STOREFRONT_TOKEN ? `✓ (${STOREFRONT_TOKEN.length} chars)` : '✗ ontbreekt',
-  apiVersion: API_VERSION,
-  apiUrl: STOREFRONT_API_URL || '(niet beschikbaar)',
-});
+// Debug logging bij module load (DEV only)
+if (import.meta.env.DEV) {
+  console.log('[Shopify services/shopify.ts Config]', {
+    domain: SHOPIFY_DOMAIN || '(niet ingesteld)',
+    tokenPresent: STOREFRONT_TOKEN ? `✓ (${STOREFRONT_TOKEN.length} chars)` : '✗ ontbreekt',
+    apiVersion: API_VERSION,
+    apiUrl: STOREFRONT_API_URL || '(niet beschikbaar)',
+    contentMode: CONTENT_MODE,
+  });
+}
+
+// =============================================================================
+// SIMPLE IN-MEMORY CACHE
+// =============================================================================
+
+interface CacheEntry<T> {
+  data: T;
+  timestamp: number;
+}
+
+const cache = new Map<string, CacheEntry<unknown>>();
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+function getCached<T>(key: string): T | null {
+  const entry = cache.get(key);
+  if (!entry) return null;
+  
+  const isExpired = Date.now() - entry.timestamp > CACHE_TTL_MS;
+  if (isExpired) {
+    cache.delete(key);
+    return null;
+  }
+  
+  return entry.data as T;
+}
+
+function setCache<T>(key: string, data: T): void {
+  cache.set(key, { data, timestamp: Date.now() });
+}
+
+/**
+ * Clear cache (useful for development)
+ */
+export function clearShopifyCache(): void {
+  cache.clear();
+  if (import.meta.env.DEV) {
+    console.log('[Shopify] Cache cleared');
+  }
+}
 
 // =============================================================================
 // GRAPHQL CLIENT
@@ -285,70 +350,308 @@ const PAGE_BY_HANDLE_QUERY = `
 `;
 
 // =============================================================================
-// FETCH FUNCTIONS
+// FETCH FUNCTIONS - CONTENT BLOCKS (with CONTENT_MODE support)
 // =============================================================================
 
 /**
- * Fetch homepage hero content
- * NOTE: Metaobject queries disabled - Storefront token lacks unauthenticated_read_metaobjects scope
- * Returns fallback data directly
+ * Safely fetch metaobject data with fallback
+ * Returns fallback if:
+ * - CONTENT_MODE is 'static'
+ * - Fetch fails (access denied, missing data, network error)
  */
-export async function getHomepageHero(): Promise<HomepageHero | null> {
-  // Metaobjects disabled - return fallback immediately
-  if (import.meta.env.DEV) {
-    console.log('[Shopify] getHomepageHero: Using fallback (metaobjects disabled)');
+async function safeMetaobjectFetch<T>(
+  cacheKey: string,
+  fetcher: () => Promise<T | null>,
+  fallback: T,
+  label: string
+): Promise<T> {
+  // If static mode, skip fetch entirely
+  if (!useMetaobjects()) {
+    if (import.meta.env.DEV) {
+      console.log(`[Shopify Metaobjects] ${label}: Using static content (CONTENT_MODE=static)`);
+    }
+    return fallback;
   }
-  return FALLBACK_HERO;
+
+  // Check cache first
+  const cached = getCached<T>(cacheKey);
+  if (cached !== null) {
+    if (import.meta.env.DEV) {
+      console.log(`[Shopify Metaobjects] ${label}: Returning cached data`);
+    }
+    return cached;
+  }
+
+  // Try fetching from Shopify
+  try {
+    const data = await fetcher();
+    
+    if (data === null) {
+      if (import.meta.env.DEV) {
+        console.log(`[Shopify Metaobjects] ${label}: No data returned -> fallback to static`);
+      }
+      return fallback;
+    }
+
+    // Cache successful result
+    setCache(cacheKey, data);
+    
+    if (import.meta.env.DEV) {
+      console.log(`[Shopify Metaobjects] ${label}: Loaded from Shopify`);
+    }
+    return data;
+  } catch (error) {
+    // Check for access denied error
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    const isAccessDenied = errorMsg.toLowerCase().includes('access denied') || 
+                           errorMsg.toLowerCase().includes('unauthenticated_read_metaobjects');
+    
+    if (import.meta.env.DEV) {
+      if (isAccessDenied) {
+        console.warn(`[Shopify Metaobjects] ${label}: Access denied (scope missing) -> fallback to static`);
+        console.warn('  → Enable unauthenticated_read_metaobjects scope in Shopify Admin');
+        console.warn('  → See config/contentMode.ts for instructions');
+      } else {
+        console.warn(`[Shopify Metaobjects] ${label}: Fetch failed -> fallback to static`, error);
+      }
+    }
+    return fallback;
+  }
+}
+
+/**
+ * Internal fetcher for homepage hero from metaobjects
+ */
+async function fetchHeroFromMetaobjects(): Promise<HomepageHero | null> {
+  interface HeroResponse {
+    metaobject: {
+      fields: Array<{
+        key: string;
+        value: string;
+        reference?: {
+          image?: ShopifyImage;
+        };
+      }>;
+    } | null;
+  }
+  
+  const data = await shopifyFetch<HeroResponse>(HOMEPAGE_HERO_QUERY);
+  
+  if (!data.metaobject) return null;
+
+  const fields = data.metaobject.fields;
+  const getField = (key: string) => fields.find(f => f?.key === key);
+
+  return {
+    title: getField('title')?.value || '',
+    subtitle: getField('subtitle')?.value || '',
+    description: getField('description')?.value || '',
+    primaryCtaLabel: getField('primary_cta_label')?.value || '',
+    primaryCtaUrl: getField('primary_cta_url')?.value || '',
+    secondaryCtaLabel: getField('secondary_cta_label')?.value || '',
+    secondaryCtaUrl: getField('secondary_cta_url')?.value || '',
+    image: getField('image')?.reference?.image || { url: '' },
+  };
+}
+
+/**
+ * Fetch homepage hero content
+ * Uses CONTENT_MODE to determine source
+ */
+export async function getHomepageHero(): Promise<HomepageHero> {
+  return safeMetaobjectFetch(
+    'metaobject:homepage_hero',
+    fetchHeroFromMetaobjects,
+    FALLBACK_HERO,
+    'getHomepageHero'
+  );
+}
+
+/**
+ * Internal fetcher for USPs from metaobjects
+ */
+async function fetchUspsFromMetaobjects(): Promise<HomepageUsp[] | null> {
+  interface UspsResponse {
+    metaobjects: {
+      nodes: Array<{
+        fields: Array<{ key: string; value: string }>;
+      }>;
+    };
+  }
+
+  const data = await shopifyFetch<UspsResponse>(HOMEPAGE_USPS_QUERY);
+  
+  if (!data.metaobjects?.nodes?.length) return null;
+
+  return data.metaobjects.nodes.map(node => {
+    const getField = (key: string) => node.fields?.find(f => f?.key === key)?.value || '';
+    return {
+      iconName: getField('icon_name'),
+      title: getField('title'),
+      text: getField('text'),
+    };
+  });
 }
 
 /**
  * Fetch homepage USPs
- * NOTE: Metaobject queries disabled - Storefront token lacks unauthenticated_read_metaobjects scope
+ * Uses CONTENT_MODE to determine source
  */
 export async function getHomepageUsps(): Promise<HomepageUsp[]> {
-  if (import.meta.env.DEV) {
-    console.log('[Shopify] getHomepageUsps: Using fallback (metaobjects disabled)');
+  return safeMetaobjectFetch(
+    'metaobject:homepage_usps',
+    fetchUspsFromMetaobjects,
+    FALLBACK_USPS,
+    'getHomepageUsps'
+  );
+}
+
+/**
+ * Internal fetcher for FAQ from metaobjects
+ */
+async function fetchFaqFromMetaobjects(): Promise<FaqItem[] | null> {
+  interface FaqResponse {
+    metaobjects: {
+      nodes: Array<{
+        fields: Array<{ key: string; value: string }>;
+      }>;
+    };
   }
-  return FALLBACK_USPS;
+
+  const data = await shopifyFetch<FaqResponse>(HOMEPAGE_FAQ_QUERY);
+  
+  if (!data.metaobjects?.nodes?.length) return null;
+
+  return data.metaobjects.nodes.map(node => {
+    const getField = (key: string) => node.fields?.find(f => f?.key === key)?.value || '';
+    return {
+      question: getField('question'),
+      answer: getField('answer'),
+    };
+  });
 }
 
 /**
  * Fetch homepage FAQ items
- * NOTE: Metaobject queries disabled - Storefront token lacks unauthenticated_read_metaobjects scope
+ * Uses CONTENT_MODE to determine source
  */
 export async function getHomepageFaq(): Promise<FaqItem[]> {
-  if (import.meta.env.DEV) {
-    console.log('[Shopify] getHomepageFaq: Using fallback (metaobjects disabled)');
+  return safeMetaobjectFetch(
+    'metaobject:homepage_faq',
+    fetchFaqFromMetaobjects,
+    FALLBACK_FAQ,
+    'getHomepageFaq'
+  );
+}
+
+/**
+ * Internal fetcher for inspiration cards from metaobjects
+ */
+async function fetchInspirationFromMetaobjects(): Promise<InspirationCard[] | null> {
+  interface InspirationResponse {
+    metaobjects: {
+      nodes: Array<{
+        fields: Array<{
+          key: string;
+          value: string;
+          reference?: { image?: ShopifyImage };
+        }>;
+      }>;
+    };
   }
-  return FALLBACK_FAQ;
+
+  const data = await shopifyFetch<InspirationResponse>(HOMEPAGE_INSPIRATION_QUERY);
+  
+  if (!data.metaobjects?.nodes?.length) return null;
+
+  return data.metaobjects.nodes.map(node => {
+    const getField = (key: string) => node.fields?.find(f => f?.key === key);
+    return {
+      image: getField('image')?.reference?.image || { url: '' },
+      title: getField('title')?.value || '',
+      subtitle: getField('subtitle')?.value || '',
+      url: getField('url')?.value || '',
+    };
+  });
 }
 
 /**
  * Fetch homepage inspiration cards
- * NOTE: Metaobject queries disabled - Storefront token lacks unauthenticated_read_metaobjects scope
+ * Uses CONTENT_MODE to determine source
  */
 export async function getHomepageInspiration(): Promise<InspirationCard[]> {
-  if (import.meta.env.DEV) {
-    console.log('[Shopify] getHomepageInspiration: Using fallback (metaobjects disabled)');
+  return safeMetaobjectFetch(
+    'metaobject:homepage_inspiration',
+    fetchInspirationFromMetaobjects,
+    FALLBACK_INSPIRATION,
+    'getHomepageInspiration'
+  );
+}
+
+/**
+ * Internal fetcher for footer columns from metaobjects
+ */
+async function fetchFooterFromMetaobjects(): Promise<FooterColumn[] | null> {
+  interface FooterResponse {
+    metaobjects: {
+      nodes: Array<{
+        fields: Array<{ key: string; value: string }>;
+      }>;
+    };
   }
-  return FALLBACK_INSPIRATION;
+
+  const data = await shopifyFetch<FooterResponse>(FOOTER_COLUMNS_QUERY);
+  
+  if (!data.metaobjects?.nodes?.length) return null;
+
+  return data.metaobjects.nodes.map(node => {
+    const getField = (key: string) => node.fields?.find(f => f?.key === key)?.value || '';
+    const linksJson = getField('links');
+    
+    let links: ShopifyLink[] = [];
+    try {
+      links = JSON.parse(linksJson) as ShopifyLink[];
+    } catch {
+      // If not JSON, try line-separated format: "Label|URL"
+      links = linksJson.split('\n').filter(Boolean).map(line => {
+        const [label, url] = line.split('|');
+        return { label: label?.trim() || '', url: url?.trim() || '' };
+      });
+    }
+
+    return {
+      title: getField('title'),
+      links,
+    };
+  });
 }
 
 /**
  * Fetch footer columns
- * NOTE: Metaobject queries disabled - Storefront token lacks unauthenticated_read_metaobjects scope
+ * Uses CONTENT_MODE to determine source
  */
 export async function getFooterColumns(): Promise<FooterColumn[]> {
-  if (import.meta.env.DEV) {
-    console.log('[Shopify] getFooterColumns: Using fallback (metaobjects disabled)');
-  }
-  return FALLBACK_FOOTER_COLUMNS;
+  return safeMetaobjectFetch(
+    'metaobject:footer_columns',
+    fetchFooterFromMetaobjects,
+    FALLBACK_FOOTER_COLUMNS,
+    'getFooterColumns'
+  );
 }
+
+// =============================================================================
+// FETCH FUNCTIONS - BLOG (always tries Shopify, falls back gracefully)
+// =============================================================================
 
 /**
  * Fetch blog articles
  */
 export async function getBlogArticles(first = 6): Promise<BlogArticle[]> {
+  // Check cache
+  const cacheKey = `blog:articles:${first}`;
+  const cached = getCached<BlogArticle[]>(cacheKey);
+  if (cached) return cached;
+
   try {
     interface BlogResponse {
       blog: {
@@ -369,9 +672,9 @@ export async function getBlogArticles(first = 6): Promise<BlogArticle[]> {
 
     const data = await shopifyFetch<BlogResponse>(BLOG_ARTICLES_QUERY, { first });
 
-    if (!data.blog) return [];
+    if (!data.blog?.articles?.nodes) return [];
 
-    return data.blog.articles.nodes.map(article => ({
+    const articles = data.blog.articles.nodes.map(article => ({
       id: article.id,
       handle: article.handle,
       title: article.title,
@@ -381,6 +684,9 @@ export async function getBlogArticles(first = 6): Promise<BlogArticle[]> {
       image: article.image || null,
       author: article.authorV2?.name,
     }));
+
+    setCache(cacheKey, articles);
+    return articles;
   } catch (error) {
     console.error('Failed to fetch blog articles:', error);
     return [];

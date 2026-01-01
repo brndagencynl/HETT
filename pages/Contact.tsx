@@ -70,7 +70,7 @@ const Contact: React.FC = () => {
                   </div>
                   <div>
                     <strong className="block text-hett-dark text-lg mb-1">Bezoekadres</strong>
-                    <span className="text-gray-600 leading-relaxed">Industrieweg 45<br />5600 AA Eindhoven</span>
+                    <span className="text-gray-600 leading-relaxed">Hoppenkuil 17<br />5626 DD Eindhoven</span>
                   </div>
                 </li>
                 <li className="flex items-start gap-6">
@@ -89,7 +89,7 @@ const Contact: React.FC = () => {
                   </div>
                   <div>
                     <strong className="block text-hett-dark text-lg mb-1">E-mail</strong>
-                    <a href="mailto:info@hett.nl" className="text-gray-600 hover:text-hett-brown transition-colors">info@hett.nl</a>
+                    <a href="mailto:info@hettveranda.nl" className="text-gray-600 hover:text-hett-brown transition-colors">info@hettveranda.nl</a>
                   </div>
                 </li>
                 <li className="flex items-start gap-6">

@@ -40,19 +40,22 @@ const COLLECTION_HANDLES: Record<CategorySlug, string> = {
  * Transform a Shopify product to our internal Product type
  */
 export function transformShopifyProduct(shopifyProduct: ShopifyProduct): Product {
-  const firstVariant = shopifyProduct.variants.nodes[0];
+  const firstVariant = shopifyProduct.variants?.nodes?.[0];
   const price = firstVariant
     ? parseFloat(firstVariant.price.amount)
-    : parseFloat(shopifyProduct.priceRange.minVariantPrice.amount);
+    : parseFloat(shopifyProduct.priceRange?.minVariantPrice?.amount || '0');
 
-  // Parse metafields
+  // Parse metafields safely (handle null/undefined)
   const metafields = shopifyProduct.metafields || [];
-  const getMetafield = (key: string) =>
-    metafields.find(m => m.key === key)?.value;
+  const getMetafield = (key: string) => {
+    const field = metafields.find(m => m && m.key === key);
+    return field?.value;
+  };
 
   // Determine category from metafield or product type
+  const productType = shopifyProduct.productType || '';
   const categorySlug = getMetafield('category_slug') || 
-    shopifyProduct.productType.toLowerCase().replace(/\s+/g, '') as CategorySlug;
+    productType.toLowerCase().replace(/\s+/g, '') as CategorySlug;
   
   // Determine if configuration is required
   const requiresConfiguration = 
@@ -76,19 +79,24 @@ export function transformShopifyProduct(shopifyProduct: ShopifyProduct): Product
     ? 'hidden_anchor' 
     : 'public';
 
+  // Safe tag access
+  const tags = shopifyProduct.tags || [];
+  const description = shopifyProduct.description || '';
+  const descriptionHtml = shopifyProduct.descriptionHtml || description;
+
   return {
     id: shopifyProduct.handle, // Use handle as ID for URL friendliness
-    title: shopifyProduct.title,
+    title: shopifyProduct.title || 'Product',
     category: categorySlug as CategorySlug,
     price: Math.round(price), // Round to whole euros
     priceExVat: Math.round(price / 1.21), // Calculate ex VAT
-    shortDescription: shopifyProduct.description.substring(0, 160),
-    description: shopifyProduct.descriptionHtml || shopifyProduct.description,
+    shortDescription: description.substring(0, 160),
+    description: descriptionHtml,
     imageUrl: shopifyProduct.featuredImage?.url || '/assets/images/placeholder.jpg',
     specs,
-    isNew: shopifyProduct.tags.includes('nieuw'),
-    isBestseller: shopifyProduct.tags.includes('bestseller'),
-    badges: shopifyProduct.tags.filter(t => 
+    isNew: tags.includes('nieuw'),
+    isBestseller: tags.includes('bestseller'),
+    badges: tags.filter(t => 
       ['nieuw', 'bestseller', 'actie', 'populair'].includes(t.toLowerCase())
     ),
     stockStatus: shopifyProduct.availableForSale ? 'Op voorraad' : 'Niet beschikbaar',
@@ -108,11 +116,13 @@ export function transformShopifyProduct(shopifyProduct: ShopifyProduct): Product
  */
 function extractColorOptions(product: ShopifyProduct): string[] {
   const colors = new Set<string>();
-  product.variants.nodes.forEach(variant => {
+  const variants = product.variants?.nodes || [];
+  variants.forEach(variant => {
+    if (!variant?.selectedOptions) return;
     const colorOption = variant.selectedOptions.find(
-      opt => opt.name.toLowerCase() === 'kleur' || opt.name.toLowerCase() === 'color'
+      opt => opt && (opt.name?.toLowerCase() === 'kleur' || opt.name?.toLowerCase() === 'color')
     );
-    if (colorOption) {
+    if (colorOption?.value) {
       colors.add(colorOption.value);
     }
   });
@@ -124,13 +134,17 @@ function extractColorOptions(product: ShopifyProduct): string[] {
  */
 function extractSizeOptions(product: ShopifyProduct): string[] {
   const sizes = new Set<string>();
-  product.variants.nodes.forEach(variant => {
+  const variants = product.variants?.nodes || [];
+  variants.forEach(variant => {
+    if (!variant?.selectedOptions) return;
     const sizeOption = variant.selectedOptions.find(
-      opt => opt.name.toLowerCase() === 'maat' || 
-             opt.name.toLowerCase() === 'size' ||
-             opt.name.toLowerCase() === 'afmeting'
+      opt => opt && (
+        opt.name?.toLowerCase() === 'maat' || 
+        opt.name?.toLowerCase() === 'size' ||
+        opt.name?.toLowerCase() === 'afmeting'
+      )
     );
-    if (sizeOption) {
+    if (sizeOption?.value) {
       sizes.add(sizeOption.value);
     }
   });

@@ -141,18 +141,46 @@ const ProductDetailShop: React.FC<ProductDetailShopProps> = ({ productHandle }) 
 
     // Callback from Sandwich Builder - no persistence, just pass to cart
     const handleSandwichAddToCart = (payload: any) => {
-        // Add to cart - cart drawer opens automatically via CartContext
-        // No redirect to /cart - user stays on PDP
+        console.log('[ProductDetailShop] Sandwich add to cart:', payload);
         addToCart(product, payload.quantity, payload);
     };
 
-    // Accessories Add
+    // Accessories Add with validation
+    const [accessoryError, setAccessoryError] = useState<string | null>(null);
+    const [isAddingAccessory, setIsAddingAccessory] = useState(false);
+
     const handleAccessoryAdd = () => {
-        // Add to cart - cart drawer opens automatically via CartContext
-        // No redirect to /cart - user stays on PDP
-        addToCart(product, accessoryQuantity, {
-            color: product.options?.colors?.[0] || 'Standaard'
+        console.log('[ProductDetailShop] handleAccessoryAdd clicked', {
+            productId: product.id,
+            title: product.title,
+            shopifyVariantId: product.shopifyVariantId,
+            quantity: accessoryQuantity,
         });
+
+        // Validate variant ID
+        if (!product.shopifyVariantId) {
+            const errorMsg = 'Dit product heeft geen beschikbare variant in Shopify.';
+            console.error('[ProductDetailShop] No variant ID:', product.id);
+            setAccessoryError(errorMsg);
+            setTimeout(() => setAccessoryError(null), 4000);
+            return;
+        }
+
+        setIsAddingAccessory(true);
+        setAccessoryError(null);
+
+        try {
+            addToCart(product, accessoryQuantity, {
+                color: product.options?.colors?.[0] || 'Standaard'
+            });
+            console.log('[ProductDetailShop] addToCart called successfully');
+        } catch (err) {
+            console.error('[ProductDetailShop] addToCart error:', err);
+            setAccessoryError('Kon niet toevoegen aan winkelwagen');
+            setTimeout(() => setAccessoryError(null), 4000);
+        } finally {
+            setIsAddingAccessory(false);
+        }
     };
 
     // Navigate gallery
@@ -272,6 +300,13 @@ const ProductDetailShop: React.FC<ProductDetailShopProps> = ({ productHandle }) 
                                         <span className="text-hett-muted text-xs font-bold uppercase tracking-wider">Incl. BTW</span>
                                     </div>
 
+                                    {/* Error message */}
+                                    {accessoryError && (
+                                        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600 font-medium">
+                                            {accessoryError}
+                                        </div>
+                                    )}
+
                                     {product.category === 'accessoires' && (
                                         <div className="mb-3">
                                             <QuantitySelector value={accessoryQuantity} onChange={setAccessoryQuantity} />
@@ -280,9 +315,15 @@ const ProductDetailShop: React.FC<ProductDetailShopProps> = ({ productHandle }) 
 
                                     <button
                                         onClick={handleAccessoryAdd}
-                                        className="btn-primary w-full py-4 text-lg flex items-center justify-center gap-3"
+                                        disabled={isAddingAccessory}
+                                        className={`w-full py-4 text-lg flex items-center justify-center gap-3 rounded-lg font-bold transition-colors ${
+                                            isAddingAccessory
+                                                ? 'bg-gray-400 cursor-not-allowed text-white'
+                                                : 'btn-primary'
+                                        }`}
                                     >
-                                        <ShoppingCart size={20} /> In winkelwagen
+                                        <ShoppingCart size={20} /> 
+                                        {isAddingAccessory ? 'Toevoegen...' : 'In winkelwagen'}
                                     </button>
                                 </>
                             )}

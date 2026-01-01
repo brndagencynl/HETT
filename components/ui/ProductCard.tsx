@@ -15,43 +15,76 @@ const CONFIG_REQUIRED_CATEGORIES: CategorySlug[] = ['verandas', 'sandwichpanelen
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'grid' }) => {
     const navigate = useNavigate();
-    const { addToCart, openCart } = useCart();
+    const { addToCart } = useCart();
 
     const [quantity, setQuantity] = useState(1);
+    const [isAdding, setIsAdding] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     // Determine if this product requires configuration
     const requiresConfiguration = CONFIG_REQUIRED_CATEGORIES.includes(product.category);
 
     const handleWishlistClick = (e: React.MouseEvent) => {
         e.stopPropagation();
-        // Placeholder for wishlist logic
-        console.log('Toggle wishlist', product.id);
+        e.preventDefault();
+        console.log('[ProductCard] Toggle wishlist', product.id);
     };
 
     // Direct add to cart for accessoires only
     const handleAddToCart = (e: React.MouseEvent) => {
+        // CRITICAL: Stop event propagation to prevent Link navigation
         e.stopPropagation();
         e.preventDefault();
         
-        // Only allow direct add for accessoires
+        console.log('[ProductCard] handleAddToCart clicked', {
+            productId: product.id,
+            title: product.title,
+            category: product.category,
+            requiresConfiguration,
+            shopifyVariantId: product.shopifyVariantId,
+            quantity,
+        });
+
+        // Safety check: redirect to PDP if config required
         if (requiresConfiguration) {
-            // Navigate to product detail for configuration
+            console.log('[ProductCard] Redirecting to PDP for configuration');
             navigate(`/products/${product.id}`);
             return;
         }
+
+        // Check for variant ID before attempting add
+        if (!product.shopifyVariantId) {
+            const errorMsg = 'Dit product heeft geen beschikbare variant in Shopify.';
+            console.error('[ProductCard] No variant ID:', product.id);
+            setError(errorMsg);
+            setTimeout(() => setError(null), 3000);
+            return;
+        }
         
-        // Add accessoire directly to cart
-        addToCart(product, quantity, {
-            color: product.options?.colors?.[0] || 'Standaard',
-            size: product.options?.sizes?.[0] || 'Standaard'
-        });
-        // Cart drawer opens automatically via CartContext
+        setIsAdding(true);
+        setError(null);
+        
+        try {
+            // Add accessoire directly to cart
+            addToCart(product, quantity, {
+                color: product.options?.colors?.[0] || 'Standaard',
+                size: product.options?.sizes?.[0] || 'Standaard'
+            });
+            console.log('[ProductCard] addToCart called successfully');
+        } catch (err) {
+            console.error('[ProductCard] addToCart error:', err);
+            setError('Kon niet toevoegen aan winkelwagen');
+            setTimeout(() => setError(null), 3000);
+        } finally {
+            setIsAdding(false);
+        }
     };
 
     // Navigate to product detail page for configuration
     const handleConfigureClick = (e: React.MouseEvent) => {
         e.stopPropagation();
         e.preventDefault();
+        console.log('[ProductCard] Configure click, navigating to:', `/products/${product.id}`);
         navigate(`/products/${product.id}`);
     };
 
@@ -123,6 +156,13 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'grid' })
                 </div>
 
                 <div className="mt-auto">
+                    {/* Error message */}
+                    {error && (
+                        <div className="mb-2 p-2 bg-red-50 border border-red-200 rounded text-xs text-red-600 font-medium">
+                            {error}
+                        </div>
+                    )}
+                    
                     {requiresConfiguration ? (
                         <button
                             onClick={handleConfigureClick}
@@ -136,10 +176,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'grid' })
                             <QuantitySelector value={quantity} onChange={setQuantity} />
                             <button
                                 onClick={handleAddToCart}
-                                className="w-full rounded-md py-2 sm:py-3 text-[11px] sm:text-sm font-bold flex items-center justify-center gap-1.5 sm:gap-2 shadow-sm transition-colors bg-hett-primary text-white hover:bg-hett-dark"
+                                disabled={isAdding}
+                                className={`w-full rounded-md py-2 sm:py-3 text-[11px] sm:text-sm font-bold flex items-center justify-center gap-1.5 sm:gap-2 shadow-sm transition-colors ${
+                                    isAdding 
+                                        ? 'bg-gray-400 cursor-not-allowed' 
+                                        : 'bg-hett-primary text-white hover:bg-hett-dark'
+                                }`}
                             >
                                 <ShoppingCart size={16} />
-                                In winkelwagen
+                                {isAdding ? 'Toevoegen...' : 'In winkelwagen'}
                             </button>
                         </div>
                     )}

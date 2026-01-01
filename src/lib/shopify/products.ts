@@ -40,10 +40,21 @@ const COLLECTION_HANDLES: Record<CategorySlug, string> = {
  * Transform a Shopify product to our internal Product type
  */
 export function transformShopifyProduct(shopifyProduct: ShopifyProduct): Product {
-  const firstVariant = shopifyProduct.variants?.nodes?.[0];
+  const variants = shopifyProduct.variants?.nodes || [];
+  // Get first available variant, or first variant, or null
+  const availableVariant = variants.find(v => v?.availableForSale) || variants[0] || null;
+  const firstVariant = availableVariant;
+  
   const price = firstVariant
     ? parseFloat(firstVariant.price.amount)
     : parseFloat(shopifyProduct.priceRange?.minVariantPrice?.amount || '0');
+
+  // Log variant info for debugging
+  console.log('[transformShopifyProduct] Product:', shopifyProduct.handle, {
+    variantCount: variants.length,
+    selectedVariantId: firstVariant?.id || 'NONE',
+    availableForSale: firstVariant?.availableForSale,
+  });
 
   // Parse metafields safely (handle null/undefined)
   const metafields = shopifyProduct.metafields || [];
@@ -54,8 +65,18 @@ export function transformShopifyProduct(shopifyProduct: ShopifyProduct): Product
 
   // Determine category from metafield or product type
   const productType = shopifyProduct.productType || '';
-  const categorySlug = getMetafield('category_slug') || 
-    productType.toLowerCase().replace(/\s+/g, '') as CategorySlug;
+  const rawCategorySlug = getMetafield('category_slug') || 
+    productType.toLowerCase().replace(/\s+/g, '');
+  
+  // Normalize category to valid CategorySlug
+  let categorySlug: CategorySlug = 'accessoires'; // default
+  if (rawCategorySlug === 'verandas' || rawCategorySlug === 'veranda') {
+    categorySlug = 'verandas';
+  } else if (rawCategorySlug === 'sandwichpanelen' || rawCategorySlug === 'sandwichpaneel') {
+    categorySlug = 'sandwichpanelen';
+  } else if (rawCategorySlug === 'accessoires' || rawCategorySlug === 'accessoire') {
+    categorySlug = 'accessoires';
+  }
   
   // Determine if configuration is required
   const requiresConfiguration = 
@@ -87,7 +108,7 @@ export function transformShopifyProduct(shopifyProduct: ShopifyProduct): Product
   return {
     id: shopifyProduct.handle, // Use handle as ID for URL friendliness
     title: shopifyProduct.title || 'Product',
-    category: categorySlug as CategorySlug,
+    category: categorySlug,
     price: Math.round(price), // Round to whole euros
     priceExVat: Math.round(price / 1.21), // Calculate ex VAT
     shortDescription: description.substring(0, 160),
@@ -108,6 +129,9 @@ export function transformShopifyProduct(shopifyProduct: ShopifyProduct): Product
     requiresConfiguration,
     visibility,
     sizeKey: getMetafield('size_key') || undefined,
+    // Shopify variant info for add-to-cart
+    shopifyVariantId: firstVariant?.id || undefined,
+    availableForSale: firstVariant?.availableForSale ?? shopifyProduct.availableForSale ?? false,
   };
 }
 

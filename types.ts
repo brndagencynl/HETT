@@ -43,6 +43,15 @@ export interface Product {
    * Used for price lookup in custom configurator
    */
   sizeKey?: string;
+  /**
+   * Shopify variant ID (GID) for add-to-cart operations
+   * e.g., "gid://shopify/ProductVariant/123456789"
+   */
+  shopifyVariantId?: string;
+  /**
+   * Whether the variant is available for sale
+   */
+  availableForSale?: boolean;
 }
 
 // Product Configuration Types

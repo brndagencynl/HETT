@@ -222,49 +222,46 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Shipping lock/unlock
   const lockShipping = () => setShipping(prev => ({ ...prev, isLocked: true }));
-  const unlockShipping = () => setShipping(prev => ({ ...prev, isLocked: false }));
+  const unlockShipping = () => setShipping(prev => ({ ...prev, isLocked: true }));
 
-  // New imports needed at top:
-  // import { validateConfig } from '../utils/configValidation';
-  // import { generateConfigHash } from '../utils/hash';
-  // import { ProductConfig } from '../types';
+  // =========================================================================
+  // ADD TO CART - Main entry point
+  // =========================================================================
 
   const addToCart = (product: Product, quantity: number, options: any) => {
     const safeQuantity = normalizeQuantity(quantity);
-    // 1. Determine Category
     const category = product.category;
 
-    // 2. Strict Guard for Configurable Categories
-    if (category === 'verandas' || category === 'sandwichpanelen') {
-      // "options" here is expected to be the ProductConfig object or contain it. 
-      // Adapting to existing usage: usually "options" passed was a mix. 
-      // We now expect the caller to pass the full `ProductConfig` wrapper or we construct it?
-      // The prompt says: "Cart line items must include... config object".
-      // Let's assume the `options` argument CONTAINS the `config` property if coming from new flow,
-      // OR we try to construct it from legacy args if possible (but we want strict).
+    // Logging for debugging
+    console.log('[CartContext] addToCart called', {
+      handle: product.id,
+      title: product.title,
+      category: category,
+      quantity: safeQuantity,
+      shopifyVariantId: product.shopifyVariantId,
+      options: options,
+    });
 
-      // Let's expect `options.config` to be the `ProductConfig` type.
+    // =========================================================================
+    // CONFIGURABLE PRODUCTS (verandas, sandwichpanelen)
+    // =========================================================================
+    if (category === 'verandas' || category === 'sandwichpanelen') {
       const configCandidate = options?.config as ProductConfig | undefined;
 
       if (!configCandidate) {
-        console.warn(`Blocked add-to-cart: ${product.title} requires configuration.`);
-        alert('Kies eerst je opties in de configurator before adding to cart.');
+        console.warn(`[CartContext] Blocked: ${product.title} requires configuration.`);
+        alert('Kies eerst je opties in de configurator voordat je toevoegt aan winkelwagen.');
         return;
       }
 
       const validation = validateConfig(category, configCandidate);
       if (!validation.ok) {
-        console.warn(`Blocked add-to-cart: Invalid config`, validation.errors);
+        console.warn(`[CartContext] Blocked: Invalid config`, validation.errors);
         alert(`Configuratie incompleet: ${validation.errors.join(', ')}`);
         return;
       }
 
-      // 3. Compute Hash
       const configHash = generateConfigHash(configCandidate.data);
-
-      // 4. Create summary string
-      // Logic to create a readable string from config data
-      // For now simple JSON dump or specific field map
       const summary =
         typeof options?.displayConfigSummary === 'string'
           ? options.displayConfigSummary
@@ -272,14 +269,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
             ? `Dak: ${configCandidate.data.daktype}, Goot: ${configCandidate.data.goot?.charAt(0).toUpperCase() + configCandidate.data.goot?.slice(1) || '-'}, Voorzijde: ${configCandidate.data.voorzijde || 'Geen'}`
             : `Sandwichpaneel`;
 
-      // 5. Add/Update Item
-      // Check if item with same ID AND same Hash exists?
-      // Actually, simple cart usually just adds. Duplicate ID might merge quantity.
-      // With hash, we treat them as unique variants. 
-      // Let's generate a unique cart ID: product.id + hash
       const cartId = `${product.id}-${configHash}`;
 
-      // 6. Compute render snapshot for verandas (visual preview in cart/checkout)
       let renderSnapshot: CartItem['render'] | undefined;
       if (configCandidate.category === 'verandas') {
         const visualConfig: VerandaVisualizationConfig = {
@@ -296,27 +287,22 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       const newItem: CartItem = {
         ...product,
-        id: cartId, // Override ID for cart uniqueness
-        slug: product.id, // Keep original slug/id ref
+        id: cartId,
+        slug: product.id,
         type: options?.type,
         quantity: safeQuantity,
         totalPrice: (options.price || product.price) * safeQuantity,
         config: configCandidate,
         configHash,
         displayConfigSummary: summary,
-        // Store detailed breakdown for config popup
         priceBreakdown: options.priceBreakdown,
         pricing: options.pricing,
         details: options.details,
-        // Store render snapshot for visual preview
         render: renderSnapshot,
-        // Legacy mapping for UI safety until updated
         selectedColor: 'Configured',
         selectedSize: 'Custom'
       };
 
-      // If exists, update quantity? Or just append?
-      // Simple append for now or merge
       setCart(prev => {
         const existing = prev.find(i => i.id === cartId);
         if (existing) {
@@ -324,30 +310,52 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
         return [...prev, newItem];
       });
+      
+      console.log('[CartContext] Configured item added to cart:', cartId);
       setIsCartOpen(true);
       return;
     }
 
-    // 3. Accessoires (Pass-through)
-    if (category === 'accessoires') {
-      const newItem: CartItem = {
-        ...product,
-        id: product.id, // Simple ID
-        slug: product.id,
-        quantity: safeQuantity,
-        selectedColor: options.color || 'N/A',
-        selectedSize: options.size || 'N/A',
-        totalPrice: (options.price || product.price) * safeQuantity,
-      };
-      setCart(prev => {
-        const existing = prev.find(i => i.id === newItem.id);
-        if (existing) {
-          return prev.map(i => i.id === newItem.id ? { ...i, quantity: i.quantity + safeQuantity, totalPrice: i.totalPrice + newItem.totalPrice } : i);
-        }
-        return [...prev, newItem];
-      });
-      setIsCartOpen(true);
+    // =========================================================================
+    // ACCESSOIRES (and any other simple products)
+    // =========================================================================
+    // Check for Shopify variant ID - required for Shopify checkout
+    if (!product.shopifyVariantId) {
+      console.error('[CartContext] ERROR: No shopifyVariantId for accessory:', product.id);
+      alert('Dit product heeft geen beschikbare variant in Shopify. Neem contact op met support.');
+      return;
     }
+
+    console.log('[CartContext] Adding accessory to cart:', {
+      productId: product.id,
+      variantId: product.shopifyVariantId,
+      quantity: safeQuantity,
+      unitPrice: product.price,
+    });
+
+    const newItem: CartItem = {
+      ...product,
+      id: product.id,
+      slug: product.id,
+      type: 'product',
+      quantity: safeQuantity,
+      selectedColor: options?.color || 'Standaard',
+      selectedSize: options?.size || 'Standaard',
+      totalPrice: (options?.price || product.price) * safeQuantity,
+    };
+
+    setCart(prev => {
+      const existing = prev.find(i => i.id === newItem.id);
+      if (existing) {
+        console.log('[CartContext] Updating existing item quantity');
+        return prev.map(i => i.id === newItem.id ? { ...i, quantity: i.quantity + safeQuantity, totalPrice: i.totalPrice + newItem.totalPrice } : i);
+      }
+      console.log('[CartContext] Adding new item to cart');
+      return [...prev, newItem];
+    });
+    
+    console.log('[CartContext] Accessory added, opening cart drawer');
+    setIsCartOpen(true);
   };
 
   /**

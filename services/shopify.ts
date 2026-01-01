@@ -632,7 +632,7 @@ export const FALLBACK_FOOTER_COLUMNS: FooterColumn[] = [
     title: 'Producten',
     links: [
       { label: "Veranda's", url: '/categorie/verandas' },
-      { label: 'Sandwichpanelen', url: '/sandwichpanelen/isopar-plus-lambris' },
+      { label: 'Sandwichpanelen', url: '/products/sandwichpaneel' },
       { label: 'Accessoires', url: '/categorie/accessoires' },
       { label: 'Maatwerk Veranda', url: '/maatwerk-configurator' },
     ],

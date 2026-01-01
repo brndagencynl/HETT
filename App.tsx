@@ -45,7 +45,7 @@ import CartDrawer from './components/ui/CartDrawer';
 
 import { PRODUCTS } from './constants';
 
-const SANDWICHPANELEN_CANONICAL_URL = '/sandwichpanelen/isopar-plus-lambris';
+const SANDWICHPANELEN_CANONICAL_URL = '/products/sandwichpaneel';
 const SANDWICHPANELEN_PRODUCT_ID = PRODUCTS.find((p) => p.category === 'sandwichpanelen')?.id;
 
 // Shopify Blog & Page Routes
@@ -76,9 +76,10 @@ const AnimatedRoutes: React.FC = () => {
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<PageTransition><Home /></PageTransition>} />
 
-        {/* Sandwichpanelen (single product) */}
+        {/* Sandwichpanelen (single product) - canonical URL: /products/sandwichpaneel */}
         <Route path="/sandwichpanelen" element={<Navigate to={SANDWICHPANELEN_CANONICAL_URL} replace />} />
         <Route path="/categorie/sandwichpanelen" element={<Navigate to={SANDWICHPANELEN_CANONICAL_URL} replace />} />
+        <Route path="/sandwichpanelen/isopar-plus-lambris" element={<Navigate to={SANDWICHPANELEN_CANONICAL_URL} replace />} />
         <Route
           path={SANDWICHPANELEN_CANONICAL_URL}
           element={

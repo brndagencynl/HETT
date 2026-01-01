@@ -20,19 +20,38 @@ export const CONFIGURABLE_CATEGORIES: CategorySlug[] = ['verandas', 'sandwichpan
 export const SIMPLE_CATEGORIES: CategorySlug[] = ['accessoires'];
 
 /**
+ * Product handles that are always configurable (hardcoded fallback)
+ */
+export const CONFIGURABLE_HANDLES: string[] = ['sandwichpaneel'];
+
+/**
  * Determine if a product requires configuration
  * 
  * Priority order:
  * 1. Shopify tag "configurable" → requires config
- * 2. Shopify metafield custom.product_kind → "configurable" or "simple"
- * 3. Product.requiresConfiguration field
- * 4. Category-based fallback:
+ * 2. Shopify tag "simple" → simple add-to-cart
+ * 3. Product handle is in CONFIGURABLE_HANDLES → configurable
+ * 4. Product.requiresConfiguration field
+ * 5. Category-based fallback:
  *    - verandas, sandwichpanelen → configurable
  *    - accessoires → simple
- * 5. Default: simple (safe fallback)
+ * 6. Default: simple (safe fallback)
  */
 export function getProductKind(product: Product): ProductKind {
-  // 1. Check explicit requiresConfiguration field
+  // 1. Check badges/tags for "configurable" or "simple"
+  if (product.badges?.some(b => b.toLowerCase() === 'configurable')) {
+    return 'configurable';
+  }
+  if (product.badges?.some(b => b.toLowerCase() === 'simple')) {
+    return 'simple';
+  }
+
+  // 2. Check if product handle is in configurable handles list
+  if (product.id && CONFIGURABLE_HANDLES.includes(product.id.toLowerCase())) {
+    return 'configurable';
+  }
+
+  // 3. Check explicit requiresConfiguration field
   if (product.requiresConfiguration === true) {
     return 'configurable';
   }
@@ -40,12 +59,7 @@ export function getProductKind(product: Product): ProductKind {
     return 'simple';
   }
 
-  // 2. Check badges/tags for "configurable"
-  if (product.badges?.some(b => b.toLowerCase() === 'configurable')) {
-    return 'configurable';
-  }
-
-  // 3. Category-based fallback
+  // 4. Category-based fallback
   if (CONFIGURABLE_CATEGORIES.includes(product.category)) {
     return 'configurable';
   }
@@ -54,7 +68,7 @@ export function getProductKind(product: Product): ProductKind {
     return 'simple';
   }
 
-  // 4. Default to simple (safe fallback - no configuration UI needed)
+  // 5. Default to simple (safe fallback - no configuration UI needed)
   return 'simple';
 }
 

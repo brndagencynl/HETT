@@ -6,7 +6,7 @@ import { getFooterColumns, FooterColumn, FALLBACK_FOOTER_COLUMNS } from '../serv
 const Footer: React.FC = () => {
     const [columns, setColumns] = useState<FooterColumn[]>(FALLBACK_FOOTER_COLUMNS);
 
-    const sandwichpanelenUrl = '/sandwichpanelen/isopar-plus-lambris';
+    const sandwichpanelenUrl = '/products/sandwichpaneel';
 
     useEffect(() => {
         const fetchFooter = async () => {

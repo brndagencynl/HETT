@@ -41,7 +41,7 @@ const HomeFeatureBlock: React.FC<HomeFeatureBlockProps> = ({
                         </div>
 
                         <div className="flex flex-wrap gap-4 pt-2">
-                            <Link to="/sandwichpanelen/isopar-plus-lambris" className="btn-primary px-8 py-3.5 text-base shadow-sm hover:shadow-md transition-all group">
+                            <Link to="/products/sandwichpaneel" className="btn-primary px-8 py-3.5 text-base shadow-sm hover:shadow-md transition-all group">
                                 Lees meer
                                 <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                             </Link>

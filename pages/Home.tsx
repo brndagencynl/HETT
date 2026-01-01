@@ -112,7 +112,7 @@ const Home: React.FC = () => {
                     </div>
 
                     <div className="grid grid-cols-2 lg:grid-cols-1 gap-3 md:gap-6">
-                        <Link to="/contact" className="card-retail p-0 relative overflow-hidden group flex-1 block min-h-[160px] md:min-h-0">
+                        <Link to="/products/sandwichpaneel" className="card-retail p-0 relative overflow-hidden group flex-1 block min-h-[160px] md:min-h-0">
                             <img src="/assets/images/showroom_advice.png" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-60" alt="Service" />
                             <div className="absolute inset-0 bg-hett-dark/20"></div>
                             <div className="absolute bottom-3 left-3 md:bottom-6 md:left-6">

@@ -54,8 +54,9 @@ export const CONTENT_MODE: ContentMode =
 
 /**
  * Check if metaobject content should be fetched
+ * (Not a React hook - just a config check)
  */
-export function useMetaobjects(): boolean {
+export function isMetaobjectsEnabled(): boolean {
   return CONTENT_MODE === 'shopify_metaobjects';
 }
 

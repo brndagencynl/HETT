@@ -24,7 +24,7 @@
  * =============================================================================
  */
 
-import { CONTENT_MODE, useMetaobjects } from '../config/contentMode';
+import { CONTENT_MODE, isMetaobjectsEnabled } from '../config/contentMode';
 
 // =============================================================================
 // TYPES
@@ -366,7 +366,7 @@ async function safeMetaobjectFetch<T>(
   label: string
 ): Promise<T> {
   // If static mode, skip fetch entirely
-  if (!useMetaobjects()) {
+  if (!isMetaobjectsEnabled()) {
     if (import.meta.env.DEV) {
       console.log(`[Shopify Metaobjects] ${label}: Using static content (CONTENT_MODE=static)`);
     }

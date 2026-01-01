@@ -32,6 +32,10 @@ const ProductDetailShop: React.FC<ProductDetailShopProps> = ({ productHandle }) 
     const [activeImage, setActiveImage] = useState('');
     const [accessoryQuantity, setAccessoryQuantity] = useState(1);
 
+    // Accessories Add with validation (hooks must be called before any conditional returns!)
+    const [accessoryError, setAccessoryError] = useState<string | null>(null);
+    const [isAddingAccessory, setIsAddingAccessory] = useState(false);
+
     // Fetch product from Shopify on mount / handle change
     useEffect(() => {
         async function fetchProduct() {
@@ -146,9 +150,6 @@ const ProductDetailShop: React.FC<ProductDetailShopProps> = ({ productHandle }) 
     };
 
     // Accessories Add with validation
-    const [accessoryError, setAccessoryError] = useState<string | null>(null);
-    const [isAddingAccessory, setIsAddingAccessory] = useState(false);
-
     const handleAccessoryAdd = () => {
         console.log('[ProductDetailShop] handleAccessoryAdd clicked', {
             productId: product.id,

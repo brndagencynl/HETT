@@ -147,7 +147,7 @@ const ProductDetailShop: React.FC<ProductDetailShopProps> = ({ productId }) => {
                                     <div className="space-y-3">
                                         <button onClick={handleOpenConfigurator} className="btn-primary w-full py-5 text-lg flex items-center justify-center gap-3">
                                             <PenTool size={20} />
-                                            Configureer nu
+                                            Stel samen
                                         </button>
                                         <button onClick={() => navigate('/offerte')} className="btn-outline w-full py-4 text-sm font-bold">
                                             Direct offerte aanvragen

@@ -73,7 +73,7 @@ const Search: React.FC = () => {
                                 to={`/product/${product.id}`}
                                 className="bg-[#293133] text-white text-xs font-medium px-5 py-2.5 rounded-full hover:bg-[#1a1a1a] transition-colors"
                             >
-                                Configureer nu
+                                Stel samen
                             </Link>
                         </div>
                     </div>

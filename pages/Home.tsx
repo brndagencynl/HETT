@@ -187,7 +187,7 @@ const Home: React.FC = () => {
                                 </div>
                                 <div className="text-hett-dark font-black text-2xl mb-6">€{product.price},-</div>
                                 <Link to={`/product/${product.id}`} className="btn-primary w-full py-3.5 text-sm uppercase tracking-wider">
-                                    Configureer nu
+                                    Stel samen
                                 </Link>
                             </div>
                         </div>

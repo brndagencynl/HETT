@@ -104,7 +104,7 @@ export const nl = {
   common: {
     cta: {
       addToCart: 'In winkelwagen',
-      configureNow: 'Configureer nu',
+      configureNow: 'Stel samen',
       changeConfiguration: 'Configuratie wijzigen',
       requestQuote: 'Direct offerte aanvragen',
       goBack: 'Terug',

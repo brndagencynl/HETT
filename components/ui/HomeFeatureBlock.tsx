@@ -11,9 +11,9 @@ interface HomeFeatureBlockProps {
 }
 
 const HomeFeatureBlock: React.FC<HomeFeatureBlockProps> = ({
-    title = "Meer licht. Meer ruimte. Meer buitenleven.",
-    imageSrc = "/assets/images/glass_sliding_walls.png",
-    imageAlt = "Glazen schuifwanden",
+    title = "Isopar® Plus Lambris: strak geïsoleerde wanden.",
+    imageSrc = "/assets/images/productafb.jpg",
+    imageAlt = "Isopar® Plus Lambris",
     reverse = false,
 }) => {
     return (
@@ -24,7 +24,7 @@ const HomeFeatureBlock: React.FC<HomeFeatureBlockProps> = ({
                     <div className="flex-1 space-y-6">
                         <div>
                             <span className="text-hett-secondary text-sm font-bold tracking-widest uppercase mb-2 block">
-                                GLAZEN SCHUIFWANDEN
+                                SANDWICHPANELEN
                             </span>
                             <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-hett-dark leading-tight">
                                 {title}
@@ -33,15 +33,15 @@ const HomeFeatureBlock: React.FC<HomeFeatureBlockProps> = ({
 
                         <div className="space-y-4 text-hett-muted text-lg leading-relaxed">
                             <p>
-                                Ontdek onze glazen schuifwanden voor veranda’s en overkappingen. Strak design, soepel schuiven en maximale transparantie.
+                                Isopar® Plus Lambris is een geïsoleerd sandwichpaneel met een strakke lambris-afwerking. Het helpt warmteverlies en tocht te beperken en geeft je wand direct een nette, rustige uitstraling.
                             </p>
                             <p>
-                                Configureer eenvoudig de juiste maat en opties, of vraag direct een offerte aan. Wij leveren snel en denken mee met montage en afwerking.
+                                Dankzij het slimme profiel monteer je snel en nauwkeurig — prettig voor doe-het-zelvers en efficiënt voor professionals. Geschikt voor wanden van veranda’s en overkappingen, met snelle levering en flexibiliteit in maat en uitvoering.
                             </p>
                         </div>
 
                         <div className="flex flex-wrap gap-4 pt-2">
-                            <Link to="/schuifwanden" className="btn-primary px-8 py-3.5 text-base shadow-sm hover:shadow-md transition-all group">
+                            <Link to="/sandwichpanelen/isopar-plus-lambris" className="btn-primary px-8 py-3.5 text-base shadow-sm hover:shadow-md transition-all group">
                                 Lees meer
                                 <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                             </Link>

@@ -225,6 +225,10 @@ export async function getAllCollectionProducts(
  * Fetch a single product by handle
  */
 export async function getProductByHandle(handle: string): Promise<Product | null> {
+  if (import.meta.env.DEV) {
+    console.log('[Shopify] Fetching product by handle:', handle);
+  }
+
   if (!isShopifyConfigured()) {
     console.warn('[Products] Shopify not configured');
     return null;
@@ -236,10 +240,19 @@ export async function getProductByHandle(handle: string): Promise<Product | null
     });
 
     if (!data.product) {
+      if (import.meta.env.DEV) {
+        console.log('[Shopify] Product not found:', handle);
+      }
       return null;
     }
 
-    return transformShopifyProduct(data.product);
+    const product = transformShopifyProduct(data.product);
+    
+    if (import.meta.env.DEV) {
+      console.log('[Shopify] Product loaded:', product.title);
+    }
+
+    return product;
   } catch (error) {
     console.error(`[Products] Failed to fetch product ${handle}:`, error);
     return null;
@@ -316,9 +329,21 @@ export async function searchProducts(
  * Get all visible products across all categories
  */
 export async function getAllProducts(): Promise<Product[]> {
+  if (import.meta.env.DEV) {
+    console.log('[Shopify] Fetching all products...');
+    console.log('[Shopify] Domain:', import.meta.env.VITE_SHOPIFY_DOMAIN);
+  }
+
   const categories: CategorySlug[] = ['verandas', 'sandwichpanelen', 'accessoires'];
   const results = await Promise.all(
     categories.map(cat => getAllCollectionProducts(cat, { includeHiddenAnchor: false }))
   );
-  return results.flat();
+  const allProducts = results.flat();
+
+  if (import.meta.env.DEV) {
+    console.log('[Shopify] Products loaded:', allProducts.length);
+    console.log('[Shopify] Handles:', allProducts.map(p => p.id));
+  }
+
+  return allProducts;
 }

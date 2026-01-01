@@ -43,8 +43,6 @@ import Quote from './pages/Quote';
 import Wishlist from './pages/Wishlist';
 import CartDrawer from './components/ui/CartDrawer';
 
-import { PRODUCTS } from './constants';
-
 const SANDWICHPANELEN_CANONICAL_URL = '/products/sandwichpaneel';
 const SANDWICHPANELEN_HANDLE = 'sandwichpaneel'; // Shopify product handle
 

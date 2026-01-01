@@ -1,8 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Product } from '../types';
-import { PRODUCTS } from '../constants';
-import { filterVisibleProducts } from '../src/catalog/productVisibility';
 
 interface WishlistContextType {
   wishlist: Product[];
@@ -14,9 +12,6 @@ interface WishlistContextType {
 }
 
 const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
-
-// Get only visible products for initial wishlist
-const visibleProducts = filterVisibleProducts(PRODUCTS);
 
 export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [wishlist, setWishlist] = useState<Product[]>([]);
@@ -32,10 +27,8 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       } catch (e) {
         console.error('Failed to parse wishlist', e);
       }
-    } else {
-        // Initialize with valid visible products for demo purposes
-        setWishlist(visibleProducts.slice(0, 2));
     }
+    // No default wishlist - starts empty
   }, []);
 
   // Save to local storage on change

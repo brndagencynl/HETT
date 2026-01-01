@@ -1,23 +1,40 @@
 
-import React, { useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { PRODUCTS } from '../constants';
 import PageHeader from '../components/PageHeader';
-import { Search as SearchIcon, Check } from 'lucide-react';
-import { filterVisibleProducts } from '../src/catalog/productVisibility';
+import { Search as SearchIcon, Check, Loader2 } from 'lucide-react';
+import { searchProducts } from '../src/lib/shopify';
+import { Product } from '../types';
 
 const Search: React.FC = () => {
   const [searchParams] = useSearchParams();
   const query = searchParams.get('q') || '';
 
-  // Filter to only show public products first
-  const visibleProducts = useMemo(() => filterVisibleProducts(PRODUCTS), []);
+  // Shopify search state
+  const [results, setResults] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const results = visibleProducts.filter(product => 
-    product.title.toLowerCase().includes(query.toLowerCase()) ||
-    product.description.toLowerCase().includes(query.toLowerCase()) ||
-    product.category.toLowerCase().includes(query.toLowerCase())
-  );
+  // Search products from Shopify
+  useEffect(() => {
+    const performSearch = async () => {
+      if (!query) {
+        setResults([]);
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const searchResult = await searchProducts(query);
+        setResults(searchResult.products);
+      } catch (err) {
+        console.error('Search failed:', err);
+        setResults([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    performSearch();
+  }, [query]);
 
   return (
     <div className="min-h-screen bg-[#f6f8fa] font-sans">
@@ -29,7 +46,12 @@ const Search: React.FC = () => {
       />
 
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {results.length > 0 ? (
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="w-8 h-8 animate-spin text-hett-secondary" />
+            <span className="ml-3 text-hett-muted font-medium">Zoeken...</span>
+          </div>
+        ) : results.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {results.map((product) => (
                <div key={product.id} className="bg-white rounded-lg overflow-hidden flex flex-col h-full group hover:shadow-lg transition-shadow duration-300 border border-transparent hover:border-gray-200">

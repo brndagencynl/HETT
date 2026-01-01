@@ -1,16 +1,11 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { PROJECTS, PRODUCTS } from '../constants';
+import { PROJECTS } from '../constants';
 import { ArrowLeft, MapPin, Calendar, ArrowRight } from 'lucide-react';
 
 const ProjectDetail: React.FC = () => {
     const { id } = useParams();
     const project = PROJECTS.find(p => p.id === id) || PROJECTS[0];
-
-    // Find related products
-    const usedProducts = project.usedProductIds
-        ? PRODUCTS.filter(p => project.usedProductIds?.includes(p.id))
-        : [];
 
     return (
         <div className="bg-white min-h-screen pt-24 pb-20">
@@ -75,21 +70,7 @@ const ProjectDetail: React.FC = () => {
                             <h3 className="text-xl font-bold text-hett-dark mb-6">Gebruikte Materialen</h3>
 
                             <div className="space-y-4 mb-8">
-                                {usedProducts.map(product => (
-                                    <Link
-                                        key={product.id}
-                                        to={`/producten/${product.id}`}
-                                        className="flex items-start gap-4 p-3 bg-white rounded border border-gray-200 hover:border-hett-dark transition-colors group"
-                                    >
-                                        <img src={product.imageUrl} alt={product.title} className="w-16 h-16 object-cover rounded bg-gray-100" />
-                                        <div>
-                                            <span className="text-xs font-bold text-hett-accent uppercase">{product.category}</span>
-                                            <h4 className="font-bold text-hett-dark text-sm group-hover:underline">{product.title}</h4>
-                                            <span className="text-xs text-gray-500">Meer info</span>
-                                        </div>
-                                    </Link>
-                                ))}
-                                {usedProducts.length === 0 && <p className="text-gray-500 text-sm">Geen specifieke producten gekoppeld.</p>}
+                                <p className="text-gray-500 text-sm">Bekijk onze shop voor vergelijkbare producten.</p>
                             </div>
 
                             <div className="space-y-4">

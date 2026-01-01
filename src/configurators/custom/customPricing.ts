@@ -28,9 +28,6 @@ import {
   MAATWERK_CUSTOM_FEE,
 } from '../../catalog/matrixCatalog';
 
-import { PRODUCTS } from '../../../constants';
-import { getVerandaBySizeKey } from '../../catalog/productVisibility';
-
 // =============================================================================
 // PRICING TYPES
 // =============================================================================
@@ -89,6 +86,10 @@ function getFallbackPrice(width: number, depth: number): number {
 /**
  * Get the anchor product for a given custom size
  * Returns the product info including price
+ * 
+ * Note: Since we removed local PRODUCTS mock data, we now use
+ * the fallback pricing formula for anchor prices. In the future,
+ * this could be enhanced to fetch prices from Shopify.
  */
 export function getAnchorProductForSize(size: MaatwerkSize): {
   anchorWidth: number;
@@ -100,14 +101,8 @@ export function getAnchorProductForSize(size: MaatwerkSize): {
   const anchorDepth = mapToAnchorDepth(size.depth);
   const anchorSizeKey = mapToAnchorSize(size.width, size.depth);
   
-  // Look up anchor product price from the product catalog
-  const anchorProduct = getVerandaBySizeKey(PRODUCTS, anchorSizeKey);
-  const anchorPrice = anchorProduct?.price ?? getFallbackPrice(anchorWidth, anchorDepth);
-  
-  // Log in dev mode if anchor not found
-  if (import.meta.env.DEV && !anchorProduct) {
-    console.warn(`[MaatwerkPricing] Anchor product not found for ${anchorSizeKey}, using fallback price`);
-  }
+  // Use fallback pricing formula (no longer dependent on mock PRODUCTS)
+  const anchorPrice = getFallbackPrice(anchorWidth, anchorDepth);
   
   return { anchorWidth, anchorDepth, anchorSizeKey, anchorPrice };
 }

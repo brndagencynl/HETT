@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
-import { PRODUCTS, PROJECTS, NEWS_ITEMS } from '../constants';
+import { PROJECTS, NEWS_ITEMS } from '../constants';
 
 interface Breadcrumb {
   label: string;
@@ -35,16 +35,9 @@ const PageHeader: React.FC<any> = () => {
           crumbs.push({ label: 'Categorieën', path: '/shop' });
           label = segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ');
       } else if (pathname.includes('/products/') && isLast) {
-          // For product pages, use product title from constants if available, otherwise use handle (prettified)
-          const product = PRODUCTS.find(p => p.id === segment);
-          if (product) {
-              crumbs.push({ label: product.category, path: `/categorie/${product.category.toLowerCase()}` });
-              label = product.title;
-          } else {
-              // Fallback: prettify the handle for breadcrumb display
-              // e.g., "sandwichpaneel" -> "Sandwichpaneel"
-              label = segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ');
-          }
+          // For product pages, prettify the handle for breadcrumb display
+          // e.g., "sandwichpaneel" -> "Sandwichpaneel"
+          label = segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ');
       } else if (pathname.includes('/projecten/') && isLast) {
           crumbs.push({ label: 'Projecten', path: '/projecten' });
           const project = PROJECTS.find(p => p.id === segment);

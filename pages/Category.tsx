@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { PRODUCTS } from '../constants';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { Product } from '../types';
-import { Check, Heart, ChevronDown, ChevronUp, SlidersHorizontal, LayoutGrid, List, Star } from 'lucide-react';
-import { filterVisibleProducts } from '../src/catalog/productVisibility';
+import { Check, Heart, ChevronDown, ChevronUp, SlidersHorizontal, LayoutGrid, List, Star, Loader2 } from 'lucide-react';
+import { getCollectionProducts } from '../src/lib/shopify';
 import PageHeader from '../components/PageHeader';
 import { motion, AnimatePresence } from 'framer-motion';
 import MobileFilterSheet from '../components/ui/MobileFilterSheet';
@@ -19,9 +18,31 @@ const Category: React.FC = () => {
     const [showMoreDesc, setShowMoreDesc] = useState(false);
     const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
+    // Shopify products state
+    const [products, setProducts] = useState<Product[]>([]);
+    const [loading, setLoading] = useState(true);
+
     // Filter State
     const [activeBrands, setActiveBrands] = useState<string[]>([]);
     const [pendingBrands, setPendingBrands] = useState<string[]>([]);
+
+    // Fetch products from Shopify
+    useEffect(() => {
+        const fetchProducts = async () => {
+            if (!categorySlug) return;
+            
+            setLoading(true);
+            try {
+                const result = await getCollectionProducts(categorySlug as CategorySlug);
+                setProducts(result.products);
+            } catch (err) {
+                console.error('Failed to fetch category products:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchProducts();
+    }, [categorySlug]);
 
     // Reset pending state when sheet opens
     useEffect(() => {
@@ -44,15 +65,9 @@ const Category: React.FC = () => {
             : `Bij HETT.nl vind je een ruime selectie aan hoogwaardige ${categoryName.toLowerCase()} van topmerken. Onze systemen zijn verkrijgbaar in verschillende maten en materialen, waaronder aluminium en gepoedercoat staal, zodat je altijd de juiste oplossing hebt voor jouw tuinproject.`;
 
     // Filter to only show public products first, then apply category/brand filters
-    const visibleProducts = useMemo(() => filterVisibleProducts(PRODUCTS), []);
-    
-    // Filtering Logic
-    const products = visibleProducts.filter(p => {
-        const matchesCategory = !categorySlug || p.category === categorySlug;
-        const matchesBrand = activeBrands.length === 0 || activeBrands.includes(p.badges?.[0] || 'Onbekend'); // Workaround since brand field missing in interface
-        // Note: PRODUCTS constant usually has a brand field, if not we fall back to logic.
-        // For this demo, we'll assume the brand labels match product properties.
-        return matchesCategory && matchesBrand;
+    const filteredProducts = products.filter(p => {
+        const matchesBrand = activeBrands.length === 0 || activeBrands.includes(p.badges?.[0] || 'Onbekend');
+        return matchesBrand;
     });
 
     const handleApplyFilters = () => {
@@ -83,7 +98,7 @@ const Category: React.FC = () => {
             <div className="border border-gray-200 rounded-lg overflow-hidden divide-y divide-gray-200">
                 <FilterAccordion title="Laat resultaten zien in" defaultOpen>
                     <div className="text-blue-700 text-sm font-bold pl-2 cursor-pointer hover:underline">
-                        {categoryName} ({products.length})
+                        {categoryName} ({filteredProducts.length})
                     </div>
                 </FilterAccordion>
                 <FilterAccordion title="Merk" defaultOpen>
@@ -150,7 +165,7 @@ const Category: React.FC = () => {
 
                         <div className="flex flex-wrap items-center justify-between gap-4 mb-8 bg-gray-50 p-3 rounded-lg border border-gray-100">
                             <div className="text-xs sm:text-sm font-medium text-gray-500">
-                                <span className="font-bold text-hett-dark">{products.length}</span> resultaten
+                                <span className="font-bold text-hett-dark">{loading ? '...' : filteredProducts.length}</span> resultaten
                             </div>
 
                             <div className="flex items-center gap-4">
@@ -167,11 +182,22 @@ const Category: React.FC = () => {
                             </div>
                         </div>
 
-                        <div className={`grid gap-3 sm:gap-6 ${viewMode === 'grid' ? 'grid-cols-2 sm:grid-cols-2 xl:grid-cols-3' : 'grid-cols-1'}`}>
-                            {products.map((product) => (
-                                <ProductCard key={product.id} product={product} viewMode={viewMode} />
-                            ))}
-                        </div>
+                        {loading ? (
+                            <div className="flex items-center justify-center py-20">
+                                <Loader2 className="w-8 h-8 animate-spin text-hett-secondary" />
+                                <span className="ml-3 text-hett-muted font-medium">Producten laden...</span>
+                            </div>
+                        ) : filteredProducts.length === 0 ? (
+                            <div className="text-center py-20 bg-white rounded-xl">
+                                <p className="text-hett-muted font-medium">Geen producten gevonden</p>
+                            </div>
+                        ) : (
+                            <div className={`grid gap-3 sm:gap-6 ${viewMode === 'grid' ? 'grid-cols-2 sm:grid-cols-2 xl:grid-cols-3' : 'grid-cols-1'}`}>
+                                {filteredProducts.map((product) => (
+                                    <ProductCard key={product.id} product={product} viewMode={viewMode} />
+                                ))}
+                            </div>
+                        )}
                     </main>
                 </div>
             </div>

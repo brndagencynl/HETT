@@ -1,12 +1,29 @@
-import React, { useMemo } from 'react';
-import { PRODUCTS } from '../constants';
+import React, { useState, useEffect } from 'react';
 import PageHeader from '../components/PageHeader';
 import ProductCard from '../components/ui/ProductCard';
-import { filterVisibleProducts } from '../src/catalog/productVisibility';
+import { getAllProducts } from '../src/lib/shopify';
+import { Product } from '../types';
+import { Loader2 } from 'lucide-react';
 
 const Products: React.FC = () => {
-  // Filter to only show public products (excludes hidden anchor products)
-  const visibleProducts = useMemo(() => filterVisibleProducts(PRODUCTS), []);
+  // Shopify products state
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch products from Shopify
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const shopifyProducts = await getAllProducts();
+        setProducts(shopifyProducts);
+      } catch (err) {
+        console.error('Failed to fetch products:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#f6f8fa] font-sans">
@@ -22,16 +39,20 @@ const Products: React.FC = () => {
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-20">
 
         {/* Product Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-          {visibleProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-
-        {/* No Results */}
-        {visibleProducts.length === 0 && (
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="w-8 h-8 animate-spin text-hett-secondary" />
+            <span className="ml-3 text-hett-muted font-medium">Producten laden...</span>
+          </div>
+        ) : products.length === 0 ? (
           <div className="text-center py-20">
             <p className="text-gray-500 text-lg">Geen producten gevonden.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+            {products.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
           </div>
         )}
       </div>

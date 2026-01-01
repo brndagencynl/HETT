@@ -1,20 +1,80 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { PRODUCTS } from '../constants';
-import { CheckCircle, FileText, Download, ArrowLeft, Box, Image as ImageIcon, ShieldCheck, Truck } from 'lucide-react';
+import { CheckCircle, FileText, Download, ArrowLeft, Box, Image as ImageIcon, ShieldCheck, Truck, Loader2 } from 'lucide-react';
 import Panel3D from '../components/Panel3D';
-
+import { getProductByHandle } from '../src/lib/shopify';
+import { Product } from '../types';
 import ProductDetailContent from '../components/ui/ProductDetailContent';
 
 const ProductDetail: React.FC = () => {
-    // In a real app, use the ID to fetch specific data. 
-    // For this demo, we'll just show the first product or find by ID if passed, fallback to first.
-    const { id } = useParams();
-    const product = PRODUCTS.find(p => p.id === id) || PRODUCTS[0];
+    const { handle } = useParams<{ handle: string }>();
+    
+    // Shopify product state
+    const [product, setProduct] = useState<Product | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     const [viewMode, setViewMode] = useState<'image' | '3d'>('image');
 
-    if (!product) return <div>Product niet gevonden</div>;
+    // Fetch product from Shopify
+    useEffect(() => {
+        const fetchProduct = async () => {
+            if (!handle) {
+                setError('Geen product handle opgegeven');
+                setLoading(false);
+                return;
+            }
+
+            setLoading(true);
+            setError(null);
+
+            try {
+                const shopifyProduct = await getProductByHandle(handle);
+                
+                if (!shopifyProduct) {
+                    setError('Product niet gevonden');
+                    setLoading(false);
+                    return;
+                }
+
+                setProduct(shopifyProduct);
+            } catch (err) {
+                console.error('Failed to fetch product:', err);
+                setError('Fout bij het laden van het product');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchProduct();
+    }, [handle]);
+
+    // Loading state
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-white flex items-center justify-center">
+                <div className="text-center">
+                    <Loader2 className="w-12 h-12 animate-spin text-hett-secondary mx-auto mb-4" />
+                    <p className="text-hett-muted font-bold">Product laden...</p>
+                </div>
+            </div>
+        );
+    }
+
+    // Error state
+    if (error || !product) {
+        return (
+            <div className="min-h-screen bg-white flex items-center justify-center">
+                <div className="text-center max-w-md">
+                    <h2 className="text-2xl font-black text-hett-dark mb-4">Product niet gevonden</h2>
+                    <p className="text-hett-muted mb-8">{error || 'Het opgevraagde product bestaat niet of is niet meer beschikbaar.'}</p>
+                    <Link to="/shop" className="btn-primary inline-flex items-center gap-2">
+                        <ArrowLeft size={16} /> Terug naar shop
+                    </Link>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="bg-white min-h-screen pt-24 pb-20">

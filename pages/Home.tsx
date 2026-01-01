@@ -1,10 +1,9 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Check, Star, Wrench, Truck, Package, Award } from 'lucide-react';
+import { ArrowRight, Check, Star, Wrench, Truck, Package, Award, Loader2 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { PRODUCTS } from '../constants';
-import { Post } from '../types';
-import { filterVisibleProducts } from '../src/catalog/productVisibility';
+import { Post, Product } from '../types';
+import { getAllProducts } from '../src/lib/shopify';
 import { content } from '../services/content';
 import {
     getHomepageHero,
@@ -35,8 +34,9 @@ const iconMap: Record<string, LucideIcon> = {
 };
 
 const Home: React.FC = () => {
-    // Filter to only show public products
-    const visibleProducts = useMemo(() => filterVisibleProducts(PRODUCTS), []);
+    // Shopify products state
+    const [products, setProducts] = useState<Product[]>([]);
+    const [productsLoading, setProductsLoading] = useState(true);
 
     // Shopify content state
     const [hero, setHero] = useState<HomepageHero>(FALLBACK_HERO);
@@ -48,6 +48,21 @@ const Home: React.FC = () => {
     const [blogPosts, setBlogPosts] = useState<Post[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
+
+    // Fetch Shopify products
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                const shopifyProducts = await getAllProducts();
+                setProducts(shopifyProducts);
+            } catch (err) {
+                console.error('Failed to fetch products:', err);
+            } finally {
+                setProductsLoading(false);
+            }
+        };
+        fetchProducts();
+    }, []);
 
     // Fetch all Shopify content
     useEffect(() => {
@@ -160,39 +175,50 @@ const Home: React.FC = () => {
                     <p className="text-hett-muted font-medium mt-2">Geselecteerd door onze klanten.</p>
                 </div>
 
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-                    {visibleProducts.slice(0, 4).map((product) => (
-                        <div key={product.id} className="card-retail p-0 flex flex-col group overflow-hidden bg-white">
-                            <Link to={`/products/${product.id}`} className="relative block aspect-[1/1] bg-hett-light overflow-hidden">
-                                <img src={product.imageUrl} alt={product.title} className="w-full h-full object-cover mix-blend-multiply group-hover:scale-110 transition-transform duration-700" />
-                                {product.isBestseller && (
-                                    <div className="absolute top-4 left-4 bg-hett-secondary text-white text-[10px] font-black px-3 py-1 rounded uppercase tracking-widest shadow-retail">
-                                        Bestseller
+                {productsLoading ? (
+                    <div className="flex items-center justify-center py-20">
+                        <Loader2 className="w-8 h-8 animate-spin text-hett-secondary" />
+                        <span className="ml-3 text-hett-muted font-medium">Producten laden...</span>
+                    </div>
+                ) : products.length === 0 ? (
+                    <div className="text-center py-20 bg-white rounded-xl">
+                        <p className="text-hett-muted font-medium">Geen producten gevonden</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                        {products.slice(0, 4).map((product) => (
+                            <div key={product.id} className="card-retail p-0 flex flex-col group overflow-hidden bg-white">
+                                <Link to={`/products/${product.id}`} className="relative block aspect-[1/1] bg-hett-light overflow-hidden">
+                                    <img src={product.imageUrl} alt={product.title} className="w-full h-full object-cover mix-blend-multiply group-hover:scale-110 transition-transform duration-700" />
+                                    {product.isBestseller && (
+                                        <div className="absolute top-4 left-4 bg-hett-secondary text-white text-[10px] font-black px-3 py-1 rounded uppercase tracking-widest shadow-retail">
+                                            Bestseller
+                                        </div>
+                                    )}
+                                </Link>
+                                <div className="p-6 flex flex-col flex-grow">
+                                    <Link to={`/products/${product.id}`} className="block mb-3">
+                                        <h3 className="text-hett-dark text-base font-bold leading-tight line-clamp-2 min-h-[2.5em] group-hover:text-hett-primary transition-colors">
+                                            {product.title}
+                                        </h3>
+                                    </Link>
+                                    <div className="flex items-center gap-1 text-yellow-400 mb-4">
+                                        <Star size={14} fill="currentColor" />
+                                        <Star size={14} fill="currentColor" />
+                                        <Star size={14} fill="currentColor" />
+                                        <Star size={14} fill="currentColor" />
+                                        <Star size={14} fill="currentColor" />
+                                        <span className="text-xs text-hett-muted font-bold ml-1">(42)</span>
                                     </div>
-                                )}
-                            </Link>
-                            <div className="p-6 flex flex-col flex-grow">
-                                <Link to={`/products/${product.id}`} className="block mb-3">
-                                    <h3 className="text-hett-dark text-base font-bold leading-tight line-clamp-2 min-h-[2.5em] group-hover:text-hett-primary transition-colors">
-                                        {product.title}
-                                    </h3>
-                                </Link>
-                                <div className="flex items-center gap-1 text-yellow-400 mb-4">
-                                    <Star size={14} fill="currentColor" />
-                                    <Star size={14} fill="currentColor" />
-                                    <Star size={14} fill="currentColor" />
-                                    <Star size={14} fill="currentColor" />
-                                    <Star size={14} fill="currentColor" />
-                                    <span className="text-xs text-hett-muted font-bold ml-1">(42)</span>
+                                    <div className="text-hett-dark font-black text-2xl mb-6">€{product.price},-</div>
+                                    <Link to={`/products/${product.id}`} className="btn-primary w-full py-3.5 text-sm uppercase tracking-wider">
+                                        Stel samen
+                                    </Link>
                                 </div>
-                                <div className="text-hett-dark font-black text-2xl mb-6">€{product.price},-</div>
-                                <Link to={`/products/${product.id}`} className="btn-primary w-full py-3.5 text-sm uppercase tracking-wider">
-                                    Stel samen
-                                </Link>
                             </div>
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                )}
             </div>
 
             {/* Feature Block */}

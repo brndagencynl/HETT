@@ -20,6 +20,7 @@ import { getLatestProjectCards, ProjectCard } from '../src/services/shopify';
 import InspirationStrip from '../components/ui/InspirationStrip';
 import BlogCarousel from '../components/ui/BlogCarousel';
 import HomeFeatureBlock from '../components/ui/HomeFeatureBlock';
+import HomeShowroomSection from '../components/ui/HomeShowroomSection';
 import HomeFAQ from '../components/ui/HomeFAQ';
 import { formatEUR, toCents } from '../src/utils/money';
 
@@ -112,7 +113,7 @@ const Home: React.FC = () => {
                                 HETT Veranda’s
                             </span>
                             <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-4 leading-tight">
-                                Veranda’s vanaf € 1.350,00
+                                Al een Veranda vanaf € 699
                             </h2>
                             <p className="text-white/90 text-lg md:text-xl font-medium mb-8">
                                 {hero.description}
@@ -220,8 +221,11 @@ const Home: React.FC = () => {
                 )}
             </div>
 
-            {/* Feature Block */}
+            {/* Feature Block - Sandwichpanelen */}
             <HomeFeatureBlock />
+
+            {/* Showroom Section */}
+            <HomeShowroomSection />
 
             {/* Inspiratie Section - Uses Shopify Projects */}
             <InspirationStrip projectCards={projectCards} />

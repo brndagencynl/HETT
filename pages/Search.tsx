@@ -34,7 +34,7 @@ const Search: React.FC = () => {
             {results.map((product) => (
                <div key={product.id} className="bg-white rounded-lg overflow-hidden flex flex-col h-full group hover:shadow-lg transition-shadow duration-300 border border-transparent hover:border-gray-200">
                     {/* Image */}
-                    <Link to={`/product/${product.id}`} className="block relative h-56 overflow-hidden">
+                    <Link to={`/products/${product.id}`} className="block relative h-56 overflow-hidden">
                         <img src={product.imageUrl} alt={product.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                         {product.isBestseller && (
                             <div className="absolute top-4 left-4 bg-[#a05a2c] text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">
@@ -50,7 +50,7 @@ const Search: React.FC = () => {
                     
                     {/* Content */}
                     <div className="p-6 flex flex-col flex-grow">
-                        <Link to={`/product/${product.id}`} className="block mb-4">
+                        <Link to={`/products/${product.id}`} className="block mb-4">
                             <h3 className="text-[#1a1a1a] text-sm font-normal leading-snug hover:underline line-clamp-2">
                                 {product.title} – {product.shortDescription}
                             </h3>
@@ -70,7 +70,7 @@ const Search: React.FC = () => {
                                 <span className="text-gray-500 text-[10px] mt-1">incl. BTW</span>
                             </div>
                             <Link 
-                                to={`/product/${product.id}`}
+                                to={`/products/${product.id}`}
                                 className="bg-[#293133] text-white text-xs font-medium px-5 py-2.5 rounded-full hover:bg-[#1a1a1a] transition-colors"
                             >
                                 Stel samen

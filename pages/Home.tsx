@@ -163,7 +163,7 @@ const Home: React.FC = () => {
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
                     {visibleProducts.slice(0, 4).map((product) => (
                         <div key={product.id} className="card-retail p-0 flex flex-col group overflow-hidden bg-white">
-                            <Link to={`/product/${product.id}`} className="relative block aspect-[1/1] bg-hett-light overflow-hidden">
+                            <Link to={`/products/${product.id}`} className="relative block aspect-[1/1] bg-hett-light overflow-hidden">
                                 <img src={product.imageUrl} alt={product.title} className="w-full h-full object-cover mix-blend-multiply group-hover:scale-110 transition-transform duration-700" />
                                 {product.isBestseller && (
                                     <div className="absolute top-4 left-4 bg-hett-secondary text-white text-[10px] font-black px-3 py-1 rounded uppercase tracking-widest shadow-retail">
@@ -172,7 +172,7 @@ const Home: React.FC = () => {
                                 )}
                             </Link>
                             <div className="p-6 flex flex-col flex-grow">
-                                <Link to={`/product/${product.id}`} className="block mb-3">
+                                <Link to={`/products/${product.id}`} className="block mb-3">
                                     <h3 className="text-hett-dark text-base font-bold leading-tight line-clamp-2 min-h-[2.5em] group-hover:text-hett-primary transition-colors">
                                         {product.title}
                                     </h3>
@@ -186,7 +186,7 @@ const Home: React.FC = () => {
                                     <span className="text-xs text-hett-muted font-bold ml-1">(42)</span>
                                 </div>
                                 <div className="text-hett-dark font-black text-2xl mb-6">€{product.price},-</div>
-                                <Link to={`/product/${product.id}`} className="btn-primary w-full py-3.5 text-sm uppercase tracking-wider">
+                                <Link to={`/products/${product.id}`} className="btn-primary w-full py-3.5 text-sm uppercase tracking-wider">
                                     Stel samen
                                 </Link>
                             </div>

@@ -29,15 +29,21 @@ const PageHeader: React.FC<any> = () => {
 
       // Logic to map path segments to readable labels
       if (segment === 'categorie') return; // Skip "categorie" segment as we want Categorieën > [Name]
+      if (segment === 'products') return; // Skip "products" segment
       
       if (pathname.includes('/categorie/') && index === segments.length - 1) {
           crumbs.push({ label: 'Categorieën', path: '/shop' });
           label = segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ');
-      } else if (pathname.includes('/product/') && isLast) {
+      } else if (pathname.includes('/products/') && isLast) {
+          // For product pages, use product title from constants if available, otherwise use handle (prettified)
           const product = PRODUCTS.find(p => p.id === segment);
           if (product) {
               crumbs.push({ label: product.category, path: `/categorie/${product.category.toLowerCase()}` });
               label = product.title;
+          } else {
+              // Fallback: prettify the handle for breadcrumb display
+              // e.g., "sandwichpaneel" -> "Sandwichpaneel"
+              label = segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ');
           }
       } else if (pathname.includes('/projecten/') && isLast) {
           crumbs.push({ label: 'Projecten', path: '/projecten' });

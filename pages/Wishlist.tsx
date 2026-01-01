@@ -48,7 +48,7 @@ const Wishlist: React.FC = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {wishlist.map(product => (
                             <div key={product.id} className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 group flex flex-col hover:shadow-md transition-shadow">
-                                <Link to={`/product/${product.id}`} className="relative h-64 overflow-hidden block bg-gray-100">
+                                <Link to={`/products/${product.id}`} className="relative h-64 overflow-hidden block bg-gray-100">
                                     <img src={product.imageUrl} alt={product.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                                     <button
                                         onClick={(e) => { e.preventDefault(); removeFromWishlist(product.id); }}
@@ -59,7 +59,7 @@ const Wishlist: React.FC = () => {
                                     </button>
                                 </Link>
                                 <div className="p-6 flex flex-col flex-grow">
-                                    <Link to={`/product/${product.id}`} className="block mb-2">
+                                    <Link to={`/products/${product.id}`} className="block mb-2">
                                         <span className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 block">{product.category}</span>
                                         <h3 className="font-bold text-hett-dark text-lg leading-tight hover:underline line-clamp-2">{product.title}</h3>
                                     </Link>
@@ -75,7 +75,7 @@ const Wishlist: React.FC = () => {
                                         </div>
                                         {isConfigOnly(product) ? (
                                             <Link
-                                                to={`/product/${product.id}`}
+                                                to={`/products/${product.id}`}
                                                 className="bg-hett-dark text-white p-3 rounded-lg hover:bg-hett-brown transition-colors flex items-center gap-2 text-sm font-bold flex-grow justify-center"
                                             >
                                                 <PenTool size={18} /> Stel samen

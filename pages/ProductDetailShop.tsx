@@ -1,31 +1,113 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { PRODUCTS } from '../constants';
 import { useCart } from '../context/CartContext';
-import { Truck, ShieldCheck, PenTool, ArrowLeft, ChevronLeft, ChevronRight, ShoppingCart } from 'lucide-react';
+import { Truck, ShieldCheck, PenTool, ArrowLeft, ChevronLeft, ChevronRight, ShoppingCart, Loader2 } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import VerandaConfigurator, { VerandaConfiguratorRef } from '../components/VerandaConfigurator';
 import SandwichPanelBuilder from '../components/ui/sandwichpanel/SandwichPanelBuilder';
 import ProductDetailContent from '../components/ui/ProductDetailContent';
 import QuantitySelector from '../components/ui/QuantitySelector';
-import { ProductConfig } from '../types';
+import { ProductConfig, Product } from '../types';
+import { getProductByHandle } from '../src/lib/shopify';
 
 type ProductDetailShopProps = {
-    productId?: string;
+    /** Pass a handle directly (for sandwichpanelen canonical route) */
+    productHandle?: string;
 };
 
-const ProductDetailShop: React.FC<ProductDetailShopProps> = ({ productId }) => {
-    const { id } = useParams();
-    const resolvedId = productId ?? id;
-    const product = PRODUCTS.find(p => p.id === resolvedId);
+const ProductDetailShop: React.FC<ProductDetailShopProps> = ({ productHandle }) => {
+    const { handle } = useParams<{ handle: string }>();
+    const resolvedHandle = productHandle ?? handle;
     const configuratorRef = useRef<VerandaConfiguratorRef>(null);
     const { addToCart } = useCart();
     const navigate = useNavigate();
 
-    const [activeImage, setActiveImage] = useState(product?.imageUrl || '');
+    // Shopify product state
+    const [product, setProduct] = useState<Product | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    // Gallery images from Shopify
+    const [galleryImages, setGalleryImages] = useState<string[]>([]);
+    const [activeImage, setActiveImage] = useState('');
     const [accessoryQuantity, setAccessoryQuantity] = useState(1);
 
-    if (!product) return <div className="pt-40 text-center">Product niet gevonden</div>;
+    // Fetch product from Shopify on mount / handle change
+    useEffect(() => {
+        async function fetchProduct() {
+            if (!resolvedHandle) {
+                setError('Geen product handle opgegeven');
+                setLoading(false);
+                return;
+            }
+
+            setLoading(true);
+            setError(null);
+
+            if (import.meta.env.DEV) {
+                console.log('[ProductDetailShop] Fetching product:', resolvedHandle);
+            }
+
+            try {
+                const shopifyProduct = await getProductByHandle(resolvedHandle);
+                
+                if (!shopifyProduct) {
+                    setError('Product niet gevonden');
+                    setLoading(false);
+                    return;
+                }
+
+                if (import.meta.env.DEV) {
+                    console.log('[ProductDetailShop] Product loaded:', shopifyProduct);
+                }
+
+                setProduct(shopifyProduct);
+                
+                // Set gallery images - use Shopify images array if available
+                // The transformed product only has imageUrl (featured), so we use it as primary
+                // In the future, we can extend transformShopifyProduct to include all images
+                const images = shopifyProduct.imageUrl 
+                    ? [shopifyProduct.imageUrl]
+                    : ['/assets/images/placeholder.jpg'];
+                setGalleryImages(images);
+                setActiveImage(images[0]);
+            } catch (err) {
+                console.error('[ProductDetailShop] Error fetching product:', err);
+                setError('Fout bij het laden van het product');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        fetchProduct();
+    }, [resolvedHandle]);
+
+    // Loading state
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-white flex items-center justify-center">
+                <div className="text-center">
+                    <Loader2 className="w-12 h-12 animate-spin text-hett-secondary mx-auto mb-4" />
+                    <p className="text-hett-muted font-bold">Product laden...</p>
+                </div>
+            </div>
+        );
+    }
+
+    // Error state
+    if (error || !product) {
+        return (
+            <div className="min-h-screen bg-white flex items-center justify-center">
+                <div className="text-center max-w-md">
+                    <h2 className="text-2xl font-black text-hett-text mb-4">Product niet gevonden</h2>
+                    <p className="text-hett-muted mb-8">{error || 'Het opgevraagde product bestaat niet of is niet meer beschikbaar.'}</p>
+                    <Link to="/shop" className="btn-primary inline-flex items-center gap-2">
+                        <ArrowLeft size={16} /> Terug naar shop
+                    </Link>
+                </div>
+            </div>
+        );
+    }
 
     const handleOpenConfigurator = () => {
         // Always start fresh with defaults - no persisted config
@@ -73,7 +155,20 @@ const ProductDetailShop: React.FC<ProductDetailShopProps> = ({ productId }) => {
         });
     };
 
-    const galleryImages = [product.imageUrl, "https://picsum.photos/1200/900?random=10", "https://picsum.photos/1200/900?random=11"];
+    // Navigate gallery
+    const handlePrevImage = () => {
+        if (galleryImages.length <= 1) return;
+        const currentIndex = galleryImages.indexOf(activeImage);
+        const prevIndex = currentIndex === 0 ? galleryImages.length - 1 : currentIndex - 1;
+        setActiveImage(galleryImages[prevIndex]);
+    };
+
+    const handleNextImage = () => {
+        if (galleryImages.length <= 1) return;
+        const currentIndex = galleryImages.indexOf(activeImage);
+        const nextIndex = currentIndex === galleryImages.length - 1 ? 0 : currentIndex + 1;
+        setActiveImage(galleryImages[nextIndex]);
+    };
 
     return (
         <div className="min-h-screen bg-white">
@@ -99,10 +194,12 @@ const ProductDetailShop: React.FC<ProductDetailShopProps> = ({ productId }) => {
                         <div className="relative aspect-[4/3] bg-hett-light rounded-lg overflow-hidden shadow-soft">
                             <img src={activeImage} alt={product.title} className="w-full h-full object-cover" />
 
-                            <div className="absolute inset-x-4 top-1/2 -translate-y-1/2 flex justify-between pointer-events-none">
-                                <button className="btn-icon pointer-events-auto shadow-lg"><ChevronLeft size={24} /></button>
-                                <button className="btn-icon pointer-events-auto shadow-lg"><ChevronRight size={24} /></button>
-                            </div>
+                            {galleryImages.length > 1 && (
+                                <div className="absolute inset-x-4 top-1/2 -translate-y-1/2 flex justify-between pointer-events-none">
+                                    <button onClick={handlePrevImage} className="btn-icon pointer-events-auto shadow-lg"><ChevronLeft size={24} /></button>
+                                    <button onClick={handleNextImage} className="btn-icon pointer-events-auto shadow-lg"><ChevronRight size={24} /></button>
+                                </div>
+                            )}
                         </div>
 
                         <div className="grid grid-cols-4 gap-4">

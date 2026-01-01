@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { HashRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, useLocation, Navigate, useParams } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -46,7 +46,7 @@ import CartDrawer from './components/ui/CartDrawer';
 import { PRODUCTS } from './constants';
 
 const SANDWICHPANELEN_CANONICAL_URL = '/products/sandwichpaneel';
-const SANDWICHPANELEN_PRODUCT_ID = PRODUCTS.find((p) => p.category === 'sandwichpanelen')?.id;
+const SANDWICHPANELEN_HANDLE = 'sandwichpaneel'; // Shopify product handle
 
 // Shopify Blog & Page Routes
 import Blog from './pages/Blog';
@@ -68,6 +68,12 @@ const ScrollToTop = () => {
   return null;
 };
 
+// Legacy product route redirect helper
+const ProductRedirect = () => {
+  const { id } = useParams();
+  return <Navigate to={`/products/${id}`} replace />;
+};
+
 const AnimatedRoutes: React.FC = () => {
   const location = useLocation();
 
@@ -84,11 +90,7 @@ const AnimatedRoutes: React.FC = () => {
           path={SANDWICHPANELEN_CANONICAL_URL}
           element={
             <PageTransition>
-              {SANDWICHPANELEN_PRODUCT_ID ? (
-                <ProductDetailShop productId={SANDWICHPANELEN_PRODUCT_ID} />
-              ) : (
-                <Navigate to="/shop" replace />
-              )}
+              <ProductDetailShop productHandle={SANDWICHPANELEN_HANDLE} />
             </PageTransition>
           }
         />
@@ -96,7 +98,9 @@ const AnimatedRoutes: React.FC = () => {
         {/* Shop Routes */}
         <Route path="/shop" element={<PageTransition><Shop /></PageTransition>} />
         <Route path="/categorie/:categorySlug" element={<PageTransition><Category /></PageTransition>} />
-        <Route path="/product/:id" element={<PageTransition><ProductDetailShop /></PageTransition>} />
+        <Route path="/products/:handle" element={<PageTransition><ProductDetailShop /></PageTransition>} />
+        {/* Legacy route redirect */}
+        <Route path="/product/:id" element={<ProductRedirect />} />
         <Route path="/cart" element={<PageTransition><Cart /></PageTransition>} />
         <Route path="/afrekenen" element={<PageTransition><Checkout /></PageTransition>} />
         <Route path="/my-account" element={<PageTransition><MyAccount /></PageTransition>} />
@@ -137,7 +141,7 @@ const AnimatedRoutes: React.FC = () => {
         {/* Legacy/Other Routes */}
         {/* Redirect Legacy Routes */}
         <Route path="/producten" element={<Navigate to="/shop" replace />} />
-        <Route path="/producten/:id" element={<Navigate to="/product/:id" replace />} />
+        <Route path="/producten/:id" element={<ProductRedirect />} />
         <Route path="/configurator" element={<PageTransition><Configurator /></PageTransition>} />
         <Route path="/projecten" element={<PageTransition><Projects /></PageTransition>} />
         <Route path="/projecten/:id" element={<PageTransition><ProjectDetailPage /></PageTransition>} />

@@ -36,7 +36,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'grid' })
         // Only allow direct add for accessoires
         if (requiresConfiguration) {
             // Navigate to product detail for configuration
-            navigate(`/product/${product.id}`);
+            navigate(`/products/${product.id}`);
             return;
         }
         
@@ -52,12 +52,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'grid' })
     const handleConfigureClick = (e: React.MouseEvent) => {
         e.stopPropagation();
         e.preventDefault();
-        navigate(`/product/${product.id}`);
+        navigate(`/products/${product.id}`);
     };
 
     return (
         <Link
-            to={`/product/${product.id}`}
+            to={`/products/${product.id}`}
             className={`bg-white border border-gray-200 rounded-lg shadow-soft hover:shadow-md transition-all flex flex-col group overflow-hidden cursor-pointer ${viewMode === 'list' ? 'md:flex-row' : ''}`}
         >
             {/* Action Bar (Wishlist) */}

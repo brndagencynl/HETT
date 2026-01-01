@@ -222,7 +222,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Shipping lock/unlock
   const lockShipping = () => setShipping(prev => ({ ...prev, isLocked: true }));
-  const unlockShipping = () => setShipping(prev => ({ ...prev, isLocked: true }));
+  const unlockShipping = () => setShipping(prev => ({ ...prev, isLocked: false }));
 
   // =========================================================================
   // ADD TO CART - Main entry point

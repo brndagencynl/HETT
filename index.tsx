@@ -1,6 +1,10 @@
 import "./styles/ui.css";
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+
+// Global error handlers to surface crashes
+window.addEventListener('error', (e) => console.error('[GlobalError]', e.error || e.message));
+window.addEventListener('unhandledrejection', (e) => console.error('[UnhandledRejection]', e.reason));
 import App from './App';
 import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';

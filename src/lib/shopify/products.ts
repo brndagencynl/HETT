@@ -142,7 +142,17 @@ function extractSizeOptions(product: ShopifyProduct): string[] {
 // =============================================================================
 
 /**
+ * Map category slugs to product types for fallback queries
+ */
+const CATEGORY_TO_PRODUCT_TYPE: Record<CategorySlug, string> = {
+  verandas: 'Veranda',
+  sandwichpanelen: 'Sandwichpaneel',
+  accessoires: 'Accessoires',
+};
+
+/**
  * Fetch products from a collection by category
+ * Falls back to products query with productType filter if collection not found
  */
 export async function getCollectionProducts(
   category: CategorySlug,
@@ -172,8 +182,9 @@ export async function getCollectionProducts(
     });
 
     if (!data.collection) {
-      console.warn(`[Products] Collection not found: ${handle}`);
-      return { products: [], hasNextPage: false, endCursor: null };
+      console.warn(`[Products] Collection not found: ${handle}, trying productType fallback`);
+      // Fallback: query products by productType
+      return await getProductsByType(category, options);
     }
 
     let products = data.collection.products.edges
@@ -184,6 +195,10 @@ export async function getCollectionProducts(
       products = products.filter(p => p.visibility !== 'hidden_anchor');
     }
 
+    if (import.meta.env.DEV) {
+      console.log(`[Products] Collection ${handle}: ${products.length} products loaded`);
+    }
+
     return {
       products,
       hasNextPage: data.collection.products.pageInfo.hasNextPage,
@@ -191,8 +206,64 @@ export async function getCollectionProducts(
     };
   } catch (error) {
     console.error(`[Products] Failed to fetch collection ${category}:`, error);
-    return { products: [], hasNextPage: false, endCursor: null };
+    // Try fallback on error as well
+    try {
+      console.warn(`[Products] Attempting productType fallback for ${category}`);
+      return await getProductsByType(category, options);
+    } catch (fallbackError) {
+      console.error(`[Products] Fallback also failed:`, fallbackError);
+      return { products: [], hasNextPage: false, endCursor: null };
+    }
   }
+}
+
+/**
+ * Fallback: Fetch products by productType when collection is not available
+ */
+async function getProductsByType(
+  category: CategorySlug,
+  options: {
+    first?: number;
+    after?: string;
+    includeHiddenAnchor?: boolean;
+  } = {}
+): Promise<{
+  products: Product[];
+  hasNextPage: boolean;
+  endCursor: string | null;
+}> {
+  const productType = CATEGORY_TO_PRODUCT_TYPE[category];
+  const { first = 50, after } = options;
+
+  // Use Shopify search query syntax to filter by product_type
+  const query = `product_type:${productType}`;
+
+  if (import.meta.env.DEV) {
+    console.log(`[Products] Fallback query: ${query}`);
+  }
+
+  const data = await shopifyFetch<ProductsResponse>(GET_PRODUCTS, {
+    first,
+    after,
+    query,
+  });
+
+  let products = data.products.edges.map(edge => transformShopifyProduct(edge.node));
+
+  // Filter out hidden_anchor products unless explicitly requested
+  if (!options.includeHiddenAnchor) {
+    products = products.filter(p => p.visibility !== 'hidden_anchor');
+  }
+
+  if (import.meta.env.DEV) {
+    console.log(`[Products] Fallback loaded ${products.length} products for ${category}`);
+  }
+
+  return {
+    products,
+    hasNextPage: data.products.pageInfo.hasNextPage,
+    endCursor: data.products.pageInfo.endCursor,
+  };
 }
 
 /**

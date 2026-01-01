@@ -289,175 +289,60 @@ const PAGE_BY_HANDLE_QUERY = `
 // =============================================================================
 
 /**
- * Fetch homepage hero content from metaobject
+ * Fetch homepage hero content
+ * NOTE: Metaobject queries disabled - Storefront token lacks unauthenticated_read_metaobjects scope
+ * Returns fallback data directly
  */
 export async function getHomepageHero(): Promise<HomepageHero | null> {
-  try {
-    interface HeroResponse {
-      metaobject: {
-        fields: Array<{
-          key: string;
-          value: string;
-          reference?: {
-            image?: ShopifyImage;
-          };
-        }>;
-      } | null;
-    }
-    
-    const data = await shopifyFetch<HeroResponse>(HOMEPAGE_HERO_QUERY);
-    
-    if (!data.metaobject) return null;
-
-    const fields = data.metaobject.fields;
-    const getField = (key: string) => fields.find(f => f.key === key);
-
-    return {
-      title: getField('title')?.value || '',
-      subtitle: getField('subtitle')?.value || '',
-      description: getField('description')?.value || '',
-      primaryCtaLabel: getField('primary_cta_label')?.value || '',
-      primaryCtaUrl: getField('primary_cta_url')?.value || '',
-      secondaryCtaLabel: getField('secondary_cta_label')?.value || '',
-      secondaryCtaUrl: getField('secondary_cta_url')?.value || '',
-      image: getField('image')?.reference?.image || { url: '' },
-    };
-  } catch (error) {
-    console.error('Failed to fetch homepage hero:', error);
-    return null;
+  // Metaobjects disabled - return fallback immediately
+  if (import.meta.env.DEV) {
+    console.log('[Shopify] getHomepageHero: Using fallback (metaobjects disabled)');
   }
+  return FALLBACK_HERO;
 }
 
 /**
- * Fetch homepage USPs from metaobjects (exactly 4)
+ * Fetch homepage USPs
+ * NOTE: Metaobject queries disabled - Storefront token lacks unauthenticated_read_metaobjects scope
  */
 export async function getHomepageUsps(): Promise<HomepageUsp[]> {
-  try {
-    interface UspsResponse {
-      metaobjects: {
-        nodes: Array<{
-          fields: Array<{ key: string; value: string }>;
-        }>;
-      };
-    }
-
-    const data = await shopifyFetch<UspsResponse>(HOMEPAGE_USPS_QUERY);
-
-    return data.metaobjects.nodes.map(node => {
-      const getField = (key: string) => node.fields.find(f => f.key === key)?.value || '';
-      return {
-        iconName: getField('icon_name'),
-        title: getField('title'),
-        text: getField('text'),
-      };
-    });
-  } catch (error) {
-    console.error('Failed to fetch homepage USPs:', error);
-    return [];
+  if (import.meta.env.DEV) {
+    console.log('[Shopify] getHomepageUsps: Using fallback (metaobjects disabled)');
   }
+  return FALLBACK_USPS;
 }
 
 /**
- * Fetch homepage FAQ items from metaobjects
+ * Fetch homepage FAQ items
+ * NOTE: Metaobject queries disabled - Storefront token lacks unauthenticated_read_metaobjects scope
  */
 export async function getHomepageFaq(): Promise<FaqItem[]> {
-  try {
-    interface FaqResponse {
-      metaobjects: {
-        nodes: Array<{
-          fields: Array<{ key: string; value: string }>;
-        }>;
-      };
-    }
-
-    const data = await shopifyFetch<FaqResponse>(HOMEPAGE_FAQ_QUERY);
-
-    return data.metaobjects.nodes.map(node => {
-      const getField = (key: string) => node.fields.find(f => f.key === key)?.value || '';
-      return {
-        question: getField('question'),
-        answer: getField('answer'),
-      };
-    });
-  } catch (error) {
-    console.error('Failed to fetch homepage FAQ:', error);
-    return [];
+  if (import.meta.env.DEV) {
+    console.log('[Shopify] getHomepageFaq: Using fallback (metaobjects disabled)');
   }
+  return FALLBACK_FAQ;
 }
 
 /**
- * Fetch homepage inspiration cards from metaobjects
+ * Fetch homepage inspiration cards
+ * NOTE: Metaobject queries disabled - Storefront token lacks unauthenticated_read_metaobjects scope
  */
 export async function getHomepageInspiration(): Promise<InspirationCard[]> {
-  try {
-    interface InspirationResponse {
-      metaobjects: {
-        nodes: Array<{
-          fields: Array<{
-            key: string;
-            value: string;
-            reference?: { image?: ShopifyImage };
-          }>;
-        }>;
-      };
-    }
-
-    const data = await shopifyFetch<InspirationResponse>(HOMEPAGE_INSPIRATION_QUERY);
-
-    return data.metaobjects.nodes.map(node => {
-      const getField = (key: string) => node.fields.find(f => f.key === key);
-      return {
-        image: getField('image')?.reference?.image || { url: '' },
-        title: getField('title')?.value || '',
-        subtitle: getField('subtitle')?.value || '',
-        url: getField('url')?.value || '',
-      };
-    });
-  } catch (error) {
-    console.error('Failed to fetch homepage inspiration:', error);
-    return [];
+  if (import.meta.env.DEV) {
+    console.log('[Shopify] getHomepageInspiration: Using fallback (metaobjects disabled)');
   }
+  return FALLBACK_INSPIRATION;
 }
 
 /**
- * Fetch footer columns from metaobjects
+ * Fetch footer columns
+ * NOTE: Metaobject queries disabled - Storefront token lacks unauthenticated_read_metaobjects scope
  */
 export async function getFooterColumns(): Promise<FooterColumn[]> {
-  try {
-    interface FooterResponse {
-      metaobjects: {
-        nodes: Array<{
-          fields: Array<{ key: string; value: string }>;
-        }>;
-      };
-    }
-
-    const data = await shopifyFetch<FooterResponse>(FOOTER_COLUMNS_QUERY);
-
-    return data.metaobjects.nodes.map(node => {
-      const getField = (key: string) => node.fields.find(f => f.key === key)?.value || '';
-      const linksJson = getField('links');
-      
-      let links: ShopifyLink[] = [];
-      try {
-        links = JSON.parse(linksJson) as ShopifyLink[];
-      } catch {
-        // If not JSON, try line-separated format: "Label|URL"
-        links = linksJson.split('\n').filter(Boolean).map(line => {
-          const [label, url] = line.split('|');
-          return { label: label?.trim() || '', url: url?.trim() || '' };
-        });
-      }
-
-      return {
-        title: getField('title'),
-        links,
-      };
-    });
-  } catch (error) {
-    console.error('Failed to fetch footer columns:', error);
-    return [];
+  if (import.meta.env.DEV) {
+    console.log('[Shopify] getFooterColumns: Using fallback (metaobjects disabled)');
   }
+  return FALLBACK_FOOTER_COLUMNS;
 }
 
 /**

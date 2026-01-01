@@ -17,7 +17,7 @@ interface ShopifyConfig {
 
 /**
  * Get and validate Shopify configuration from environment variables
- * Logs debug info to help diagnose configuration issues
+ * Logs debug info to help diagnose configuration issues (DEV only)
  */
 export function getShopifyConfig(): ShopifyConfig {
   const domain = import.meta.env.VITE_SHOPIFY_DOMAIN || '';
@@ -27,14 +27,16 @@ export function getShopifyConfig(): ShopifyConfig {
   const isValid = Boolean(domain && token);
   const apiUrl = domain ? `https://${domain}/api/${apiVersion}/graphql.json` : '';
 
-  // Debug logging (verwijder in productie indien gewenst)
-  console.log('[Shopify Config]', {
-    domain: domain || '(niet ingesteld)',
-    tokenPresent: token ? `✓ (${token.length} chars)` : '✗ ontbreekt',
-    apiVersion,
-    apiUrl: apiUrl || '(niet beschikbaar)',
-    isValid,
-  });
+  // Debug logging (DEV only)
+  if (import.meta.env.DEV) {
+    console.log('[Shopify Config]', {
+      domain: domain || '(niet ingesteld)',
+      tokenPresent: token ? `✓ (${token.length} chars)` : '✗ ontbreekt',
+      apiVersion,
+      apiUrl: apiUrl || '(niet beschikbaar)',
+      isValid,
+    });
+  }
 
   if (!isValid) {
     if (!domain) {

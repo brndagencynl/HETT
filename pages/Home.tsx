@@ -9,16 +9,14 @@ import {
     getHomepageHero,
     getHomepageUsps,
     getHomepageFaq,
-    getHomepageInspiration,
     HomepageHero,
     HomepageUsp,
     FaqItem,
-    InspirationCard,
     FALLBACK_HERO,
     FALLBACK_USPS,
     FALLBACK_FAQ,
-    FALLBACK_INSPIRATION,
 } from '../services/shopify';
+import { getLatestProjectCards, ProjectCard } from '../src/services/shopify';
 import InspirationStrip from '../components/ui/InspirationStrip';
 import BlogCarousel from '../components/ui/BlogCarousel';
 import HomeFeatureBlock from '../components/ui/HomeFeatureBlock';
@@ -43,7 +41,7 @@ const Home: React.FC = () => {
     const [hero, setHero] = useState<HomepageHero>(FALLBACK_HERO);
     const [usps, setUsps] = useState<HomepageUsp[]>(FALLBACK_USPS);
     const [faqItems, setFaqItems] = useState<FaqItem[]>(FALLBACK_FAQ);
-    const [inspirationItems, setInspirationItems] = useState<InspirationCard[]>(FALLBACK_INSPIRATION);
+    const [projectCards, setProjectCards] = useState<ProjectCard[]>([]);
 
     // Blog posts
     const [blogPosts, setBlogPosts] = useState<Post[]>([]);
@@ -70,11 +68,11 @@ const Home: React.FC = () => {
         const fetchContent = async () => {
             try {
                 // Fetch all content in parallel
-                const [heroData, uspsData, faqData, inspirationData, postsData] = await Promise.all([
+                const [heroData, uspsData, faqData, projectCardsData, postsData] = await Promise.all([
                     getHomepageHero(),
                     getHomepageUsps(),
                     getHomepageFaq(),
-                    getHomepageInspiration(),
+                    getLatestProjectCards(6),
                     content.getPosts(6),
                 ]);
 
@@ -82,7 +80,7 @@ const Home: React.FC = () => {
                 if (heroData) setHero(heroData);
                 if (uspsData.length > 0) setUsps(uspsData);
                 if (faqData.length > 0) setFaqItems(faqData);
-                if (inspirationData.length > 0) setInspirationItems(inspirationData);
+                if (projectCardsData.length > 0) setProjectCards(projectCardsData);
 
                 setBlogPosts(postsData);
                 setLoading(false);
@@ -225,8 +223,8 @@ const Home: React.FC = () => {
             {/* Feature Block */}
             <HomeFeatureBlock />
 
-            {/* Inspiratie Section */}
-            <InspirationStrip items={inspirationItems} />
+            {/* Inspiratie Section - Uses Shopify Projects */}
+            <InspirationStrip projectCards={projectCards} />
 
             {/* Blog & Nieuws Section */}
             {loading ? (

@@ -35,6 +35,17 @@ export interface ProjectsPageResult {
   };
 }
 
+/**
+ * Simplified project card for Home inspiration section
+ */
+export interface ProjectCard {
+  id: string;
+  handle: string;
+  title: string;
+  imageUrl: string;
+  alt?: string;
+}
+
 // =============================================================================
 // CONFIG
 // =============================================================================
@@ -49,6 +60,14 @@ const STOREFRONT_API_URL = SHOPIFY_DOMAIN
 
 const BLOG_HANDLE = 'projecten';
 const PLACEHOLDER_IMAGE = '/assets/images/project-placeholder.jpg';
+
+/**
+ * Extract first image URL from HTML content
+ */
+function extractFirstImageFromHtml(html: string): string | null {
+  const match = html.match(/<img[^>]+src=["']([^"']+)["']/i);
+  return match ? match[1] : null;
+}
 
 // =============================================================================
 // GRAPHQL QUERIES
@@ -204,6 +223,11 @@ interface RawArticle {
 }
 
 function transformArticle(article: RawArticle): ShopifyProject {
+  // Debug log for image fields
+  if (import.meta.env.DEV) {
+    console.log('[Projects][Home] article', article.handle, 'image', article.image);
+  }
+
   return {
     id: article.id,
     handle: article.handle,
@@ -214,6 +238,46 @@ function transformArticle(article: RawArticle): ShopifyProject {
     tags: article.tags || [],
     image: article.image || null,
   };
+}
+
+/**
+ * Transform ShopifyProject to simplified ProjectCard for Home section
+ * Uses image priority: image.url > contentHtml img > placeholder
+ */
+export function projectToCard(project: ShopifyProject): ProjectCard {
+  let imageUrl = PLACEHOLDER_IMAGE;
+
+  // Priority 1: article.image
+  if (project.image?.url) {
+    imageUrl = project.image.url;
+  }
+  // Priority 2: first image from contentHtml
+  else if (project.contentHtml) {
+    const htmlImage = extractFirstImageFromHtml(project.contentHtml);
+    if (htmlImage) {
+      imageUrl = htmlImage;
+    }
+  }
+
+  if (import.meta.env.DEV) {
+    console.log('[Projects][Card] project', project.handle, 'resolved imageUrl:', imageUrl);
+  }
+
+  return {
+    id: project.id,
+    handle: project.handle,
+    title: project.title,
+    imageUrl,
+    alt: project.image?.altText || project.title,
+  };
+}
+
+/**
+ * Get latest projects as simplified cards for Home inspiration section
+ */
+export async function getLatestProjectCards(limit = 6): Promise<ProjectCard[]> {
+  const projects = await getLatestProjects(limit);
+  return projects.map(projectToCard);
 }
 
 // =============================================================================

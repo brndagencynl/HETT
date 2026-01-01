@@ -17,11 +17,14 @@ export {
 
 export {
   getLatestProjects,
+  getLatestProjectCards,
   getProjectsPage,
   getProjectByHandle,
   getProjectPlaceholder,
   clearProjectsCache,
+  projectToCard,
   type ShopifyProject,
   type ProjectImage,
   type ProjectsPageResult,
+  type ProjectCard,
 } from './projects';

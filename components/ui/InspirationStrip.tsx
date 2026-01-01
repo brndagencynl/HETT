@@ -2,6 +2,9 @@ import React, { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronRight, ArrowRight } from 'lucide-react';
 import { InspirationCard, FALLBACK_INSPIRATION } from '../../services/shopify';
+import type { ProjectCard } from '../../src/services/shopify';
+
+const PLACEHOLDER_IMAGE = '/assets/images/project-placeholder.jpg';
 
 interface InspirationItem {
     id: string;
@@ -52,17 +55,25 @@ const staticItems: InspirationItem[] = [
 
 interface InspirationStripProps {
     items?: InspirationCard[];
+    projectCards?: ProjectCard[];
 }
 
-const InspirationStrip: React.FC<InspirationStripProps> = ({ items }) => {
+const InspirationStrip: React.FC<InspirationStripProps> = ({ items, projectCards }) => {
     const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-    // Convert Shopify items to local format or use static fallback
-    const inspirationItems: InspirationItem[] = items && items.length > 0
+    // Priority: projectCards > items > static fallback
+    const inspirationItems: InspirationItem[] = projectCards && projectCards.length > 0
+        ? projectCards.map((card) => ({
+            id: card.id,
+            title: card.title,
+            image: card.imageUrl,
+            path: `/projecten/${card.handle}`,
+        }))
+        : items && items.length > 0
         ? items.map((item, index) => ({
             id: String(index + 1),
             title: item.title,
-            image: item.image?.url || '',
+            image: item.image?.url || PLACEHOLDER_IMAGE,
             path: item.url,
         }))
         : staticItems;
@@ -106,9 +117,10 @@ const InspirationStrip: React.FC<InspirationStripProps> = ({ items }) => {
                                 {/* Image Container */}
                                 <div className="aspect-[4/5] rounded-xl overflow-hidden bg-gray-100 mb-4 border border-gray-100">
                                     <img
-                                        src={item.image}
+                                        src={item.image || PLACEHOLDER_IMAGE}
                                         alt={item.title}
                                         className="w-full h-full object-cover transition-transform duration-700 group-hover/card:scale-105"
+                                        onError={(e) => { e.currentTarget.src = PLACEHOLDER_IMAGE; }}
                                     />
                                 </div>
                                 {/* Info */}

@@ -233,6 +233,10 @@ export async function getCollectionProducts(
       products = products.filter(p => p.visibility !== 'hidden_anchor');
     }
 
+    // Logging as requested
+    console.log('[Shopify] fetched products count', products.length);
+    console.log('[Shopify] first handles', products.slice(0, 10).map(p => p.id));
+
     if (import.meta.env.DEV) {
       console.log(`[Products] Collection ${handle}: ${products.length} products loaded`);
     }
@@ -356,6 +360,9 @@ export async function getProductByHandle(handle: string): Promise<Product | null
     }
 
     const product = transformShopifyProduct(data.product);
+    
+    // Logging as requested
+    console.log('[PDP] product handle from Shopify', product.id);
     
     if (import.meta.env.DEV) {
       console.log('[Shopify] Product loaded:', product.title);

@@ -39,6 +39,9 @@ const ProductDetailShop: React.FC<ProductDetailShopProps> = ({ productHandle }) 
     // Fetch product from Shopify on mount / handle change
     useEffect(() => {
         async function fetchProduct() {
+            // Logging as requested
+            console.log('[PDP] handle param', resolvedHandle);
+            
             if (!resolvedHandle) {
                 setError('Geen product handle opgegeven');
                 setLoading(false);
@@ -274,9 +277,6 @@ const ProductDetailShop: React.FC<ProductDetailShopProps> = ({ productHandle }) 
                                         <button onClick={handleOpenConfigurator} className="btn-primary w-full py-5 text-lg flex items-center justify-center gap-3">
                                             <PenTool size={20} />
                                             Stel samen
-                                        </button>
-                                        <button onClick={() => navigate('/offerte')} className="btn-outline w-full py-4 text-sm font-bold">
-                                            Direct offerte aanvragen
                                         </button>
                                     </div>
 

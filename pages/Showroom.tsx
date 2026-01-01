@@ -201,7 +201,7 @@ const Showroom: React.FC = () => {
                                     5600 AA Eindhoven
                                 </p>
                                 <p>
-                                    <span className="block">KVK: 92626963</span>
+                                    <span className="block">KVK: 832023291</span>
                                     <span className="block">BTW: NL866121171B01</span>
                                 </p>
                                 <p>
@@ -214,23 +214,23 @@ const Showroom: React.FC = () => {
                             <div className="space-y-2 text-sm text-gray-600">
                                 <div className="flex justify-between border-b border-gray-200/50 pb-2">
                                     <span>Maandag</span>
-                                    <span className="font-medium">08:30 - 16:30</span>
+                                    <span className="font-medium">08:30 - 17:00</span>
                                 </div>
                                 <div className="flex justify-between border-b border-gray-200/50 pb-2">
                                     <span>Dinsdag</span>
-                                    <span className="font-medium">08:30 - 16:30</span>
+                                    <span className="font-medium">08:30 - 17:00</span>
                                 </div>
                                 <div className="flex justify-between border-b border-gray-200/50 pb-2">
                                     <span>Woensdag</span>
-                                    <span className="font-medium">08:30 - 16:30</span>
+                                    <span className="font-medium">08:30 - 17:00</span>
                                 </div>
                                 <div className="flex justify-between border-b border-gray-200/50 pb-2">
                                     <span>Donderdag</span>
-                                    <span className="font-medium">08:30 - 16:30</span>
+                                    <span className="font-medium">08:30 - 17:00</span>
                                 </div>
                                 <div className="flex justify-between border-b border-gray-200/50 pb-2">
                                     <span>Vrijdag</span>
-                                    <span className="font-medium">08:30 - 16:00</span>
+                                    <span className="font-medium">08:30 - 17:00</span>
                                 </div>
                                 <div className="flex justify-between border-b border-gray-200/50 pb-2">
                                     <span>Zaterdag</span>
@@ -270,7 +270,7 @@ const Showroom: React.FC = () => {
                             />
                             <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/20 transition-colors">
                                 <a
-                                    href="https://maps.google.com/?q=Industrieweg+45+Eindhoven"
+                                    href="https://maps.app.goo.gl/xaV7aijwoswQ7tuk8"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="bg-white text-hett-dark px-6 py-3 rounded-full font-bold shadow-lg flex items-center gap-2 hover:scale-105 transition-transform"

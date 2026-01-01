@@ -4,6 +4,7 @@ import PageHeader from '../components/PageHeader';
 import { FileText, Download, Youtube, Wrench, PlayCircle } from 'lucide-react';
 
 const Mounting: React.FC = () => {
+    
   return (
     <div className="min-h-screen bg-[#f6f8fa] font-sans">
       <PageHeader 

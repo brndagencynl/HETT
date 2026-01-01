@@ -25,11 +25,11 @@ const infoCategories: FAQCategory[] = [
     items: [
       {
         question: 'Wat is de levertijd?',
-        answer: 'Omdat wij leveren uit eigen voorraad, kunnen we vaak binnen 1 tot 2 weken leveren in heel Nederland en België. U ontvangt een bericht zodra de exacte leverdatum bekend is.'
+        answer: 'Levertijd 2 tot 4 weken in Nederland, België en Duitsland. Omdat wij leveren uit eigen voorraad, kunnen we vaak binnen 1 tot 2 weken leveren in heel Nederland en België. U ontvangt een bericht zodra de exacte leverdatum bekend is.'
       },
       {
         question: 'Wat zijn de bezorgkosten?',
-        answer: 'Bij bestellingen boven de €2.500,- leveren wij gratis in Nederland en België. Daaronder rekenen wij een vast tarief voor transport (€75,- NL / €95,- BE) vanwege de lengte en het gewicht van de pakketten.'
+        answer: 'Binnen Nederland is gratis, en Belgie en Duitsland rekenen wij bezorgkosten. Bij bestellingen boven de €2.500,- leveren wij gratis in Nederland en België. Daaronder rekenen wij een vast tarief voor transport (€75,- NL / €95,- BE) vanwege de lengte en het gewicht van de pakketten.'
       }
     ]
   },

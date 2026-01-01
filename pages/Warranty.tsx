@@ -26,7 +26,7 @@ const Warranty: React.FC = () => {
             </div>
 
             <p className="text-gray-600 text-lg mb-8">
-                Bij HETT koopt u kwaliteit. Mocht er onverhoopt toch iets mis zijn, dan kunt u rekenen op onze uitgebreide garantieregeling.
+                Bij HETT Veranda koopt u kwaliteit. Mocht er onverhoopt toch iets mis zijn, dan kunt u rekenen op onze uitgebreide garantieregeling.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">

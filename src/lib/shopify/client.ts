@@ -7,13 +7,61 @@
 // CONFIG
 // =============================================================================
 
-const SHOPIFY_DOMAIN = import.meta.env.VITE_SHOPIFY_DOMAIN;
-const STOREFRONT_TOKEN = import.meta.env.VITE_SHOPIFY_STOREFRONT_TOKEN;
-const API_VERSION = import.meta.env.VITE_SHOPIFY_API_VERSION || '2024-10';
+interface ShopifyConfig {
+  domain: string;
+  token: string;
+  apiVersion: string;
+  apiUrl: string;
+  isValid: boolean;
+}
 
-const STOREFRONT_API_URL = SHOPIFY_DOMAIN
-  ? `https://${SHOPIFY_DOMAIN}/api/${API_VERSION}/graphql.json`
-  : '';
+/**
+ * Get and validate Shopify configuration from environment variables
+ * Logs debug info to help diagnose configuration issues
+ */
+export function getShopifyConfig(): ShopifyConfig {
+  const domain = import.meta.env.VITE_SHOPIFY_DOMAIN || '';
+  const token = import.meta.env.VITE_SHOPIFY_STOREFRONT_TOKEN || '';
+  const apiVersion = import.meta.env.VITE_SHOPIFY_API_VERSION || '2024-10';
+
+  const isValid = Boolean(domain && token);
+  const apiUrl = domain ? `https://${domain}/api/${apiVersion}/graphql.json` : '';
+
+  // Debug logging (verwijder in productie indien gewenst)
+  console.log('[Shopify Config]', {
+    domain: domain || '(niet ingesteld)',
+    tokenPresent: token ? `✓ (${token.length} chars)` : '✗ ontbreekt',
+    apiVersion,
+    apiUrl: apiUrl || '(niet beschikbaar)',
+    isValid,
+  });
+
+  if (!isValid) {
+    if (!domain) {
+      console.error('[Shopify] ❌ VITE_SHOPIFY_DOMAIN ontbreekt in environment variables');
+    }
+    if (!token) {
+      console.error('[Shopify] ❌ VITE_SHOPIFY_STOREFRONT_TOKEN ontbreekt in environment variables');
+    }
+    console.error('[Shopify] Zorg dat .env bestand bestaat met:', 
+      '\n  VITE_SHOPIFY_DOMAIN=hett-veranda.myshopify.com',
+      '\n  VITE_SHOPIFY_STOREFRONT_TOKEN=xxx',
+      '\n  VITE_SHOPIFY_API_VERSION=2024-10',
+      '\n\nHerstart Vite dev server na aanpassen van .env'
+    );
+  }
+
+  return { domain, token, apiVersion, apiUrl, isValid };
+}
+
+// Initialize config on module load
+const CONFIG = getShopifyConfig();
+
+// Legacy exports for backward compatibility
+const SHOPIFY_DOMAIN = CONFIG.domain;
+const STOREFRONT_TOKEN = CONFIG.token;
+const API_VERSION = CONFIG.apiVersion;
+const STOREFRONT_API_URL = CONFIG.apiUrl;
 
 // =============================================================================
 // ERROR TYPES
@@ -96,14 +144,15 @@ export async function shopifyFetch<T>(
 
 /**
  * Check if Shopify is configured
+ * Returns true only if domain AND token are present
  */
 export function isShopifyConfigured(): boolean {
-  return Boolean(STOREFRONT_API_URL && STOREFRONT_TOKEN);
+  return CONFIG.isValid;
 }
 
 /**
  * Get the Shopify domain
  */
 export function getShopifyDomain(): string {
-  return SHOPIFY_DOMAIN;
+  return CONFIG.domain;
 }

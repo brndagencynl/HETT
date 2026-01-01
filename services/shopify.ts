@@ -85,10 +85,19 @@ export interface ShopifyPage {
 
 const SHOPIFY_DOMAIN = import.meta.env.VITE_SHOPIFY_DOMAIN || '';
 const STOREFRONT_TOKEN = import.meta.env.VITE_SHOPIFY_STOREFRONT_TOKEN || '';
+const API_VERSION = import.meta.env.VITE_SHOPIFY_API_VERSION || '2024-10';
 
 const STOREFRONT_API_URL = SHOPIFY_DOMAIN
-  ? `https://${SHOPIFY_DOMAIN}/api/2024-01/graphql.json`
+  ? `https://${SHOPIFY_DOMAIN}/api/${API_VERSION}/graphql.json`
   : '';
+
+// Debug logging bij module load
+console.log('[Shopify services/shopify.ts Config]', {
+  domain: SHOPIFY_DOMAIN || '(niet ingesteld)',
+  tokenPresent: STOREFRONT_TOKEN ? `✓ (${STOREFRONT_TOKEN.length} chars)` : '✗ ontbreekt',
+  apiVersion: API_VERSION,
+  apiUrl: STOREFRONT_API_URL || '(niet beschikbaar)',
+});
 
 // =============================================================================
 // GRAPHQL CLIENT
@@ -96,7 +105,10 @@ const STOREFRONT_API_URL = SHOPIFY_DOMAIN
 
 async function shopifyFetch<T>(query: string, variables: Record<string, unknown> = {}): Promise<T> {
   if (!STOREFRONT_API_URL || !STOREFRONT_TOKEN) {
-    console.warn('Shopify not configured. Set VITE_SHOPIFY_DOMAIN and VITE_SHOPIFY_STOREFRONT_TOKEN.');
+    console.error('[Shopify] Niet geconfigureerd. Controleer .env bestand met:',
+      '\n  VITE_SHOPIFY_DOMAIN=hett-veranda.myshopify.com',
+      '\n  VITE_SHOPIFY_STOREFRONT_TOKEN=xxx'
+    );
     throw new Error('Shopify not configured');
   }
 

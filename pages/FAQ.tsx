@@ -29,7 +29,7 @@ const infoCategories: FAQCategory[] = [
       },
       {
         question: 'Wat zijn de bezorgkosten?',
-        answer: 'Binnen Nederland is gratis, en Belgie en Duitsland rekenen wij bezorgkosten. Bij bestellingen boven de €2.500,- leveren wij gratis in Nederland en België. Daaronder rekenen wij een vast tarief voor transport (€75,- NL / €95,- BE) vanwege de lengte en het gewicht van de pakketten.'
+        answer: 'Binnen Nederland is gratis, en Belgie en Duitsland rekenen wij bezorgkosten. Bij bestellingen boven de € 2.500,00 leveren wij gratis in Nederland en België. Daaronder rekenen wij een vast tarief voor transport (€ 75,00 NL / € 95,00 BE) vanwege de lengte en het gewicht van de pakketten.'
       }
     ]
   },

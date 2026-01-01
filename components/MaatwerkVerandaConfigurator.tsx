@@ -414,7 +414,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
             <div className="text-xs text-gray-500">Basisprijs</div>
             <div className="font-black text-[#003878] text-base leading-tight">{formatMaatwerkPrice(priceBreakdown.basePrice)}</div>
             {priceBreakdown.anchor && (
-              <div className="text-[11px] text-gray-500">incl. €{priceBreakdown.anchor.customFee},- maatwerk toeslag</div>
+              <div className="text-[11px] text-gray-500">incl. {formatMaatwerkPrice(priceBreakdown.anchor.customFee)} maatwerk toeslag</div>
             )}
           </div>
         </Card>
@@ -422,7 +422,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
         <Card padding="tight" className="bg-amber-50 border border-amber-200 flex items-start gap-2.5">
           <Info size={16} className="text-amber-600 mt-0.5 flex-shrink-0" />
           <div className="text-sm text-amber-800 leading-snug">
-            <strong>Maatwerk:</strong> Kies elke maat tot op de centimeter. De prijs wordt automatisch berekend op basis van de gekozen afmetingen, plus €750 maatwerk toeslag.
+            <strong>Maatwerk:</strong> Kies elke maat tot op de centimeter. De prijs wordt automatisch berekend op basis van de gekozen afmetingen, plus € 750,00 maatwerk toeslag.
           </div>
         </Card>
       </div>
@@ -512,7 +512,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
                 <span className="text-sm text-gray-600">{choice.description}</span>
                 {price > 0 && (
                   <span className="inline-block mt-2 bg-[#FF7300]/10 text-[#FF7300] text-sm font-bold px-3 py-1 rounded-full">
-                    + €{price},-
+                    + {formatMaatwerkPrice(price)}
                   </span>
                 )}
               </div>
@@ -560,7 +560,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
                 </span>
                 <span className="text-sm text-gray-600">{choice.description}</span>
                 {price > 0 && (
-                  <span className="block text-sm text-[#FF7300] font-semibold mt-1">+ €{price},-</span>
+                  <span className="block text-sm text-[#FF7300] font-semibold mt-1">+ {formatMaatwerkPrice(price)}</span>
                 )}
               </div>
               {choice.description && (
@@ -607,7 +607,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
               <span className="font-bold text-gray-900 text-lg block">{choice.label}</span>
               <span className="text-sm text-gray-600">{choice.description}</span>
               {price > 0 && (
-                <span className="block text-sm text-[#FF7300] font-semibold mt-1">+ €{price},-</span>
+                <span className="block text-sm text-[#FF7300] font-semibold mt-1">+ {formatMaatwerkPrice(price)}</span>
               )}
             </div>
           </div>
@@ -687,7 +687,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
             {priceBreakdown.selections.filter(s => s.price > 0).map((selection, idx) => (
               <div key={idx} className="flex justify-between">
                 <span className="text-gray-600">{selection.choiceLabel}</span>
-                <span className="font-semibold text-gray-900">+ €{selection.price.toLocaleString('nl-NL')},-</span>
+                <span className="font-semibold text-gray-900">+ {formatMaatwerkPrice(selection.price)}</span>
               </div>
             ))}
             <div className="border-t-2 border-gray-300 pt-3 mt-3 flex justify-between items-center">

@@ -17,6 +17,8 @@
  * - Delivery DE: €199
  */
 
+import { formatEUR, toCents } from './money';
+
 // =============================================================================
 // TYPES
 // =============================================================================
@@ -67,8 +69,8 @@ const COUNTRY_LABELS: Record<CountryCode, string> = {
 /** Shipping result messages */
 const SHIPPING_MESSAGES: Record<CountryCode, string> = {
   NL: 'Nederland – Gratis levering',
-  BE: 'België – €99 bezorgkosten',
-  DE: 'Duitsland – €199 bezorgkosten',
+  BE: 'België – € 99,00 bezorgkosten',
+  DE: 'Duitsland – € 199,00 bezorgkosten',
 };
 
 // =============================================================================
@@ -148,7 +150,7 @@ export function getShippingCost(method: ShippingMethod, country: CountryCode | n
  * @returns Formatted string (e.g., "Gratis" or "€99")
  */
 export function formatShippingCost(cost: number): string {
-  return cost === 0 ? 'Gratis' : `€${cost}`;
+  return cost === 0 ? 'Gratis' : formatEUR(toCents(cost), 'cents');
 }
 
 // =============================================================================

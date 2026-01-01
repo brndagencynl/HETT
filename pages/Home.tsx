@@ -23,6 +23,7 @@ import InspirationStrip from '../components/ui/InspirationStrip';
 import BlogCarousel from '../components/ui/BlogCarousel';
 import HomeFeatureBlock from '../components/ui/HomeFeatureBlock';
 import HomeFAQ from '../components/ui/HomeFAQ';
+import { formatEUR, toCents } from '../src/utils/money';
 
 // Icon mapping for USPs
 const iconMap: Record<string, LucideIcon> = {
@@ -113,7 +114,7 @@ const Home: React.FC = () => {
                                 HETT Veranda’s
                             </span>
                             <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-4 leading-tight">
-                                Veranda’s vanaf €1350
+                                Veranda’s vanaf € 1.350,00
                             </h2>
                             <p className="text-white/90 text-lg md:text-xl font-medium mb-8">
                                 {hero.description}
@@ -210,7 +211,7 @@ const Home: React.FC = () => {
                                         <Star size={14} fill="currentColor" />
                                         <span className="text-xs text-hett-muted font-bold ml-1">(42)</span>
                                     </div>
-                                    <div className="text-hett-dark font-black text-2xl mb-6">€{product.price},-</div>
+                                    <div className="text-hett-dark font-black text-2xl mb-6">{formatEUR(product.priceCents ?? toCents(product.price), 'cents')}</div>
                                     <Link to={`/products/${product.id}`} className="btn-primary w-full py-3.5 text-sm uppercase tracking-wider">
                                         Stel samen
                                     </Link>

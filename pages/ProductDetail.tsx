@@ -5,6 +5,7 @@ import Panel3D from '../components/Panel3D';
 import { getProductByHandle } from '../src/lib/shopify';
 import { Product } from '../types';
 import ProductDetailContent from '../components/ui/ProductDetailContent';
+import { formatEUR, toCents } from '../src/utils/money';
 
 const ProductDetail: React.FC = () => {
     const { handle } = useParams<{ handle: string }>();
@@ -157,7 +158,7 @@ const ProductDetail: React.FC = () => {
                         </p>
                         <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
                             <div className="flex items-baseline gap-2 mb-6">
-                                <span className="text-4xl font-black text-hett-dark">€{product.price},-</span>
+                                <span className="text-4xl font-black text-hett-dark">{formatEUR(product.priceCents ?? toCents(product.price), 'cents')}</span>
                                 <span className="text-sm text-gray-500 font-bold uppercase">Incl. BTW</span>
                             </div>
                             <Link to="/contact" className="block w-full text-center bg-hett-dark text-white font-bold py-4 rounded-xl hover:opacity-90 transition-all shadow-lg shadow-blue-900/10">

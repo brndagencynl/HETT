@@ -26,7 +26,7 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({ items = [] }) => {
                 <div className="flex items-center justify-between mb-8">
                     <h2 className="text-2xl md:text-3xl font-black text-hett-dark">Nieuws & inspiratie</h2>
                     <Link
-                        to="/nieuws"
+                        to="/blog"
                         className="px-4 py-2 border border-gray-300 rounded-full text-sm font-bold text-hett-dark hover:bg-gray-50 transition-colors flex items-center gap-2"
                     >
                         Bekijk alle artikelen
@@ -43,7 +43,7 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({ items = [] }) => {
                         {items.map((item) => (
                             <Link
                                 key={item.id}
-                                to={`/nieuws/${item.id}`} // Using existing NewsDetail route
+                                to={`/blog/${item.slug || item.id}`}
                                 className="flex-none w-[300px] md:w-[350px] snap-start group/card flex flex-col h-full bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100"
                             >
                                 {/* Image Container */}

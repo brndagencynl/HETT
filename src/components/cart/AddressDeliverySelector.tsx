@@ -293,7 +293,7 @@ export const AddressDeliverySelector: React.FC<AddressDeliverySelectorProps> = (
           />
           <div className="flex-1">
             <div className="font-bold text-gray-900">Bezorgen</div>
-            <div className="text-xs text-gray-500">NL gratis, BE €99, DE €199</div>
+            <div className="text-xs text-gray-500">NL gratis, BE € 99,00, DE € 199,00</div>
           </div>
           {method === 'delivery' && validationStatus === 'valid' && (
             <span className={`font-bold ${shippingCost === 0 ? 'text-green-600' : 'text-gray-900'}`}>

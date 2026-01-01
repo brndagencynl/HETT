@@ -9,6 +9,7 @@ import ProductDetailContent from '../components/ui/ProductDetailContent';
 import QuantitySelector from '../components/ui/QuantitySelector';
 import { ProductConfig, Product } from '../types';
 import { getProductByHandle } from '../src/lib/shopify';
+import { formatEUR } from '../src/utils/money';
 
 type ProductDetailShopProps = {
     /** Pass a handle directly (for sandwichpanelen canonical route) */
@@ -269,7 +270,7 @@ const ProductDetailShop: React.FC<ProductDetailShopProps> = ({ productHandle }) 
                                     </p>
 
                                     <div className="flex items-baseline gap-2 mb-8">
-                                        <span className="text-4xl font-black text-hett-text">€{product.price},-</span>
+                                        <span className="text-4xl font-black text-hett-text">{formatEUR(product.priceCents, 'cents')}</span>
                                         <span className="text-hett-muted text-xs font-bold uppercase tracking-wider">Vanaf prijs</span>
                                     </div>
 
@@ -297,7 +298,7 @@ const ProductDetailShop: React.FC<ProductDetailShopProps> = ({ productHandle }) 
                                     </p>
 
                                     <div className="flex items-baseline gap-2 mb-8">
-                                        <span className="text-4xl font-black text-hett-text">€{product.price},-</span>
+                                        <span className="text-4xl font-black text-hett-text">{formatEUR(product.priceCents, 'cents')}</span>
                                         <span className="text-hett-muted text-xs font-bold uppercase tracking-wider">Incl. BTW</span>
                                     </div>
 

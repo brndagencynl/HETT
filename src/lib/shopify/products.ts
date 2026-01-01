@@ -17,6 +17,7 @@ import type {
   ProductsResponse,
 } from './types';
 import type { Product, CategorySlug } from '../../../types';
+import { toCents, fromCents } from '../../utils/money';
 
 // =============================================================================
 // COLLECTION HANDLES MAPPING
@@ -45,9 +46,11 @@ export function transformShopifyProduct(shopifyProduct: ShopifyProduct): Product
   const availableVariant = variants.find(v => v?.availableForSale) || variants[0] || null;
   const firstVariant = availableVariant;
   
-  const price = firstVariant
-    ? parseFloat(firstVariant.price.amount)
-    : parseFloat(shopifyProduct.priceRange?.minVariantPrice?.amount || '0');
+  const priceAmountStr = firstVariant
+    ? firstVariant.price.amount
+    : (shopifyProduct.priceRange?.minVariantPrice?.amount || '0');
+  const priceCents = toCents(priceAmountStr);
+  const price = fromCents(priceCents);
 
   // Log variant info for debugging
   console.log('[transformShopifyProduct] Product:', shopifyProduct.handle, {
@@ -109,8 +112,10 @@ export function transformShopifyProduct(shopifyProduct: ShopifyProduct): Product
     id: shopifyProduct.handle, // Use handle as ID for URL friendliness
     title: shopifyProduct.title || 'Product',
     category: categorySlug,
-    price: Math.round(price), // Round to whole euros
-    priceExVat: Math.round(price / 1.21), // Calculate ex VAT
+    priceCents,
+    price,
+    priceExVatCents: Math.round(priceCents / 1.21),
+    priceExVat: fromCents(Math.round(priceCents / 1.21)),
     shortDescription: description.substring(0, 160),
     description: descriptionHtml,
     imageUrl: shopifyProduct.featuredImage?.url || '/assets/images/placeholder.jpg',

@@ -12,6 +12,8 @@
  *   - DE: €199
  */
 
+import { formatEUR, toCents } from '../utils/money';
+
 // =============================================================================
 // TYPES
 // =============================================================================
@@ -72,7 +74,7 @@ export function getShippingFee(method: ShippingMethod, country: CountryCode): nu
 export function getShippingLabel(method: ShippingMethod, country: CountryCode): string {
   const methodLabel = METHOD_LABELS[method];
   const fee = getShippingFee(method, country);
-  const feeLabel = fee === 0 ? 'Gratis' : `€${fee}`;
+  const feeLabel = formatShippingFee(fee);
   
   if (method === 'pickup') {
     return `${methodLabel} (${feeLabel})`;
@@ -103,5 +105,6 @@ export function formatShippingFee(fee: number): string {
   if (fee === 0) {
     return 'Gratis';
   }
-  return `€${fee},-`;
+  // Fee is expressed in EUR.
+  return formatEUR(toCents(fee), 'cents');
 }

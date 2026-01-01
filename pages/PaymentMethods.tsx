@@ -40,7 +40,7 @@ const PaymentMethods: React.FC = () => {
                 <PaymentCard 
                     title="Klarna Achteraf Betalen" 
                     desc="Eerst zien, dan betalen. U betaalt de factuur binnen 30 dagen na levering aan Klarna."
-                    badge="+ €2,95"
+                    badge="+ € 2,95"
                 />
                 <PaymentCard 
                     title="Bankoverschrijving" 

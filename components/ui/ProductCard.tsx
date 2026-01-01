@@ -4,6 +4,7 @@ import { Heart, Star, Settings, ShoppingCart } from 'lucide-react';
 import { Product, CategorySlug } from '../../types';
 import { useCart } from '../../context/CartContext';
 import QuantitySelector from './QuantitySelector';
+import { formatEUR, mulCents, toCents } from '../../src/utils/money';
 
 interface ProductCardProps {
     product: Product;
@@ -148,9 +149,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'grid' })
                 <div className="mb-3 sm:mb-4">
                     <div className="text-base sm:text-2xl font-black text-hett-dark leading-none">
                         {requiresConfiguration ? (
-                            <>€ {product.price},- <span className="text-xs font-medium text-gray-500">vanaf</span></>
+                            <>{formatEUR(product.priceCents, 'cents')} <span className="text-xs font-medium text-gray-500">vanaf</span></>
                         ) : (
-                            <>€ {product.price},-</>
+                            <>{formatEUR(product.priceCents, 'cents')}</>
                         )}
                     </div>
                 </div>

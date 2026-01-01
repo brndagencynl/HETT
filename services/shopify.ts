@@ -771,7 +771,7 @@ export async function getPageByHandle(handle: string): Promise<ShopifyPage | nul
 // =============================================================================
 
 export const FALLBACK_HERO: HomepageHero = {
-  title: 'Veranda\'s vanaf €1350',
+  title: 'Veranda\'s vanaf € 1.350,00',
   subtitle: 'HETT Veranda\'s',
   description: 'De beste en voordeligste in de markt voor de doe-het-zelver!',
   primaryCtaLabel: 'Stel zelf samen',

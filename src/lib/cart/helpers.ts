@@ -21,6 +21,8 @@ import {
   type VerandaPricingConfig,
 } from '../../configurator/pricing/verandapricing';
 
+import { formatEUR, toCents } from '../../utils/money';
+
 import type {
   CartItemPayload,
   CartItemAttribute,
@@ -272,11 +274,8 @@ export function calculateCartTotals(items: CartItemPayload[]): {
  * Format price for display (Dutch format)
  */
 export function formatPrice(amount: number): string {
-  const formatted = amount.toLocaleString('nl-NL', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  });
-  return `€ ${formatted},-`;
+  // Amount is expressed in EUR.
+  return formatEUR(toCents(amount), 'cents');
 }
 
 /**

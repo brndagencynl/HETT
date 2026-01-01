@@ -38,7 +38,7 @@ const OrderReceived: React.FC = () => {
                 </div>
                 <div className="bg-gray-50 p-6 rounded-2xl">
                     <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">Totaal</span>
-                    <span className="font-bold text-lg text-hett-dark">€2.244,-</span>
+                    <span className="font-bold text-lg text-hett-dark">€ 2.244,00</span>
                 </div>
             </div>
 

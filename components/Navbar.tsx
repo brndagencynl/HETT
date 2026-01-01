@@ -86,13 +86,13 @@ const Navbar: React.FC = () => {
         <div className={`hidden md:block bg-hett-primary text-white text-[11px] font-bold py-1.5 transition-all ${isScrolled ? 'h-0 py-0 overflow-hidden opacity-0' : 'h-auto opacity-100'}`}>
           <div className="max-w-[1400px] mx-auto px-6 flex justify-between items-center">
             <div className="flex gap-6 uppercase tracking-wider">
-              <span className="flex items-center gap-1.5"><Check size={12} className="text-hett-brown" strokeWidth={4} /> Sinds 2011</span>
+              <span className="flex items-center gap-1.5"><Check size={12} className="text-hett-brown" strokeWidth={4} /> Sinds 2016</span>
               <span className="flex items-center gap-1.5"><Check size={12} className="text-hett-brown" strokeWidth={4} /> Persoonlijk advies</span>
               <span className="flex items-center gap-1.5"><Check size={12} className="text-hett-brown" strokeWidth={4} /> Snelle levering</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="flex text-yellow-400"><Star size={10} fill="currentColor" /><Star size={10} fill="currentColor" /><Star size={10} fill="currentColor" /><Star size={10} fill="currentColor" /><Star size={10} fill="currentColor" /></div>
-              <span>SCORE: 9.2</span>
+              <span>Gebasseerd op 43 reviews</span>
             </div>
           </div>
         </div>

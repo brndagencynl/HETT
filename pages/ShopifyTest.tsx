@@ -1,3 +1,4 @@
+import { formatEUR, toCents } from '../src/utils/money';
 import React, { useEffect, useMemo, useState } from "react";
 import { beginCheckout, isShopifyConfigured, shopifyFetch } from "../src/lib/shopify";
 import { GET_PRODUCTS, PRODUCT_FRAGMENT } from "../src/lib/shopify/queries";
@@ -295,9 +296,9 @@ export default function ShopifyTest() {
           <tbody>
             {products.map(product => {
               const firstVariant = product.variants.nodes[0];
-              const price = firstVariant 
-                ? `€${parseFloat(firstVariant.price.amount).toFixed(2)} ${firstVariant.price.currencyCode}`
-                : "—";
+                  const price = firstVariant 
+                    ? `${formatEUR(toCents(firstVariant.price.amount), 'cents')} ${firstVariant.price.currencyCode}`
+                    : "—";
               const variantId = firstVariant?.id || "—";
 
               return (

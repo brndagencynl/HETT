@@ -12,11 +12,12 @@ import { isVerandaCategory, isMaatwerkVerandaItem } from './ConfigBreakdownPopup
 import { CartItemPreview } from './ConfigPreviewImage';
 import ConfigBreakdownPopup from './ConfigBreakdownPopup';
 import { beginCheckout, isShopifyConfigured } from '../../src/lib/shopify';
+import { formatEUR } from '../../src/utils/money';
 
 const MotionDiv = motion.div as any;
 
 const CartDrawer: React.FC = () => {
-    const { isCartOpen, closeCart, cart, removeFromCart, total } = useCart();
+    const { isCartOpen, closeCart, cart, removeFromCart, totalCents } = useCart();
     const { openEditConfigurator } = useVerandaEdit();
     const { openMaatwerkEdit } = useMaatwerkEdit();
     const { openSandwichpanelenEdit } = useSandwichpanelenEdit();
@@ -257,7 +258,7 @@ const CartDrawer: React.FC = () => {
                                                 <div className="flex items-center gap-2 text-xs font-bold text-gray-500 bg-gray-50 px-2 py-1 rounded">
                                                     <span>Aantal: {item.quantity}</span>
                                                 </div>
-                                                <span className="font-black text-hett-dark">€ {item.totalPrice.toLocaleString()},-</span>
+                                                <span className="font-black text-hett-dark">{formatEUR(item.lineTotalCents || 0, 'cents')}</span>
                                             </div>
                                         </div>
                                         {/* Breakdown popup for maatwerk items */}
@@ -279,7 +280,7 @@ const CartDrawer: React.FC = () => {
                             <div className="p-6 bg-white border-t border-gray-100 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
                                 <div className="flex justify-between items-end mb-6">
                                     <span className="text-gray-500 font-bold text-sm">Subtotaal (incl. BTW)</span>
-                                    <span className="text-3xl font-black text-hett-dark">€ {total.toLocaleString()},-</span>
+                                    <span className="text-3xl font-black text-hett-dark">{formatEUR(totalCents, 'cents')}</span>
                                 </div>
                                 {checkoutError && (
                                     <div className="flex items-start gap-2 p-3 mb-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">

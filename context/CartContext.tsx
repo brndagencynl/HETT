@@ -5,6 +5,7 @@ import { validateConfig } from '../utils/configValidation';
 import { generateConfigHash } from '../utils/hash';
 import { buildRenderSnapshot, type VerandaVisualizationConfig } from '../src/configurator/visual/verandaAssets';
 import { normalizeQuantity } from '../src/lib/cart/quantity';
+import { addCents, fromCents, mulCents, toCents } from '../src/utils/money';
 
 // =============================================================================
 // TYPES
@@ -32,7 +33,7 @@ export interface DeliveryAddress {
 interface ShippingState {
   method: ShippingMethod;
   address: DeliveryAddress;
-  cost: number;
+  costCents: number;
   isValid: boolean;
   isLocked: boolean;
 }
@@ -47,6 +48,7 @@ interface CartContextType {
   updateCartItem: (lineItemIdOrIndex: number | string, updates: Partial<CartItem>) => void;
   clearCart: () => void;
   total: number;
+  totalCents: number;
   itemCount: number;
   isCartOpen: boolean;
   openCart: () => void;
@@ -55,18 +57,21 @@ interface CartContextType {
   shippingMethod: ShippingMethod;
   shippingAddress: DeliveryAddress;
   shippingCost: number;
+  shippingCostCents: number;
   shippingIsValid: boolean;
   isShippingLocked: boolean;
   setShippingMethod: (method: ShippingMethod) => void;
   setShippingAddress: (address: DeliveryAddress) => void;
-  updateShippingCost: (cost: number, isValid: boolean) => void;
+  updateShippingCost: (costCents: number, isValid: boolean) => void;
   lockShipping: () => void;
   unlockShipping: () => void;
   /** Total including shipping */
   grandTotal: number;
+  grandTotalCents: number;
   // Legacy aliases (for backward compatibility)
   shippingCountry: CountryCode | null;
   shippingFee: number;
+  shippingFeeCents: number;
   shippingPostcode: string;
 }
 
@@ -90,7 +95,7 @@ const DEFAULT_ADDRESS: DeliveryAddress = {
 const DEFAULT_SHIPPING_STATE: ShippingState = {
   method: 'delivery',
   address: DEFAULT_ADDRESS,
-  cost: 0,
+  costCents: 0,
   isValid: false,
   isLocked: false,
 };
@@ -114,7 +119,7 @@ function loadShippingFromStorage(): ShippingState {
           isValidated: parsed.address?.isValidated || false,
           normalizedAddress: parsed.address?.normalizedAddress || null,
         },
-        cost: parsed.cost || 0,
+        costCents: parsed.costCents ?? toCents(parsed.cost ?? 0),
         isValid: parsed.isValid || false,
         isLocked: parsed.isLocked || false,
       };
@@ -180,12 +185,40 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   }, [cart]);
 
-  // Calculate totals
-  const total = normalizedCart.reduce((sum, item) => sum + item.totalPrice, 0);
+  // Ensure cents fields exist (defensive: older items in memory may not have them)
+  const cartWithCents = useMemo(() => {
+    return normalizedCart.map((item) => {
+      const qty = item.quantity || 1;
+
+      const unitPriceCents =
+        typeof item.unitPriceCents === 'number'
+          ? item.unitPriceCents
+          : (typeof item.priceCents === 'number' ? item.priceCents : toCents(item.price));
+
+      const lineTotalCents =
+        typeof item.lineTotalCents === 'number'
+          ? item.lineTotalCents
+          : mulCents(unitPriceCents, qty);
+
+      return {
+        ...item,
+        unitPriceCents,
+        lineTotalCents,
+        // Keep legacy euro fields derived from cents
+        price: fromCents(unitPriceCents),
+        totalPrice: fromCents(lineTotalCents),
+      };
+    });
+  }, [normalizedCart]);
+
+  // Calculate totals in cents (canonical)
+  const totalCents = cartWithCents.reduce((sum, item) => sum + (item.lineTotalCents || 0), 0);
+  const total = fromCents(totalCents);
   const itemCount = normalizedCart.reduce((sum, item) => sum + item.quantity, 0);
   
   // Grand total including shipping (only if shipping is valid)
-  const grandTotal = total + (shipping.isValid ? shipping.cost : 0);
+  const grandTotalCents = addCents(totalCents, shipping.isValid ? shipping.costCents : 0);
+  const grandTotal = fromCents(grandTotalCents);
 
   // Shipping setters (guarded by lock)
   const setShippingMethod = (method: ShippingMethod) => {
@@ -196,7 +229,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setShipping(prev => ({
         ...prev,
         method,
-        cost: 0,
+        costCents: 0,
         isValid: true,
       }));
     } else {
@@ -205,7 +238,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         ...prev,
         method,
         isValid: prev.address.isValidated,
-        cost: prev.address.isValidated ? prev.cost : 0,
+        costCents: prev.address.isValidated ? prev.costCents : 0,
       }));
     }
   };
@@ -215,9 +248,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setShipping(prev => ({ ...prev, address }));
   };
 
-  const updateShippingCost = (cost: number, isValid: boolean) => {
+  const updateShippingCost = (costCents: number, isValid: boolean) => {
     if (shipping.isLocked) return;
-    setShipping(prev => ({ ...prev, cost, isValid }));
+    setShipping(prev => ({ ...prev, costCents, isValid }));
   };
 
   // Shipping lock/unlock
@@ -271,6 +304,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       const cartId = `${product.id}-${configHash}`;
 
+      const unitPriceCents = toCents(options.price ?? fromCents(product.priceCents));
+      const lineTotalCents = mulCents(unitPriceCents, safeQuantity);
+
       let renderSnapshot: CartItem['render'] | undefined;
       if (configCandidate.category === 'verandas') {
         const visualConfig: VerandaVisualizationConfig = {
@@ -291,7 +327,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         slug: product.id,
         type: options?.type,
         quantity: safeQuantity,
-        totalPrice: (options.price || product.price) * safeQuantity,
+        unitPriceCents,
+        lineTotalCents,
+        price: fromCents(unitPriceCents),
+        totalPrice: fromCents(lineTotalCents),
         config: configCandidate,
         configHash,
         displayConfigSummary: summary,
@@ -306,7 +345,20 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setCart(prev => {
         const existing = prev.find(i => i.id === cartId);
         if (existing) {
-          return prev.map(i => i.id === cartId ? { ...i, quantity: i.quantity + safeQuantity, totalPrice: i.totalPrice + (newItem.totalPrice) } : i);
+          const nextQty = existing.quantity + safeQuantity;
+          const nextLineTotalCents = (existing.lineTotalCents || 0) + lineTotalCents;
+          return prev.map(i =>
+            i.id === cartId
+              ? {
+                  ...i,
+                  quantity: nextQty,
+                  unitPriceCents: i.unitPriceCents ?? unitPriceCents,
+                  lineTotalCents: nextLineTotalCents,
+                  price: fromCents(i.unitPriceCents ?? unitPriceCents),
+                  totalPrice: fromCents(nextLineTotalCents),
+                }
+              : i
+          );
         }
         return [...prev, newItem];
       });
@@ -341,14 +393,30 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       quantity: safeQuantity,
       selectedColor: options?.color || 'Standaard',
       selectedSize: options?.size || 'Standaard',
-      totalPrice: (options?.price || product.price) * safeQuantity,
+      unitPriceCents: toCents(options?.price ?? fromCents(product.priceCents)),
+      lineTotalCents: mulCents(toCents(options?.price ?? fromCents(product.priceCents)), safeQuantity),
+      price: fromCents(toCents(options?.price ?? fromCents(product.priceCents))),
+      totalPrice: fromCents(mulCents(toCents(options?.price ?? fromCents(product.priceCents)), safeQuantity)),
     };
 
     setCart(prev => {
       const existing = prev.find(i => i.id === newItem.id);
       if (existing) {
         console.log('[CartContext] Updating existing item quantity');
-        return prev.map(i => i.id === newItem.id ? { ...i, quantity: i.quantity + safeQuantity, totalPrice: i.totalPrice + newItem.totalPrice } : i);
+        const nextQty = existing.quantity + safeQuantity;
+        const nextLineTotalCents = (existing.lineTotalCents || 0) + (newItem.lineTotalCents || 0);
+        return prev.map(i =>
+          i.id === newItem.id
+            ? {
+                ...i,
+                quantity: nextQty,
+                unitPriceCents: i.unitPriceCents ?? newItem.unitPriceCents,
+                lineTotalCents: nextLineTotalCents,
+                price: fromCents(i.unitPriceCents ?? (newItem.unitPriceCents || 0)),
+                totalPrice: fromCents(nextLineTotalCents),
+              }
+            : i
+        );
       }
       console.log('[CartContext] Adding new item to cart');
       return [...prev, newItem];
@@ -363,6 +431,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
    * Maatwerk items are custom-configured verandas not tied to product pages.
    */
   const addMaatwerkToCart = (payload: MaatwerkCartPayload) => {
+      const unitPriceCents = toCents(payload.totalPrice);
+      const lineTotalCents = mulCents(unitPriceCents, payload.quantity);
     // Generate unique cart ID based on configuration
     const configString = JSON.stringify({
       size: payload.size,
@@ -387,7 +457,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       slug: 'maatwerk-veranda',
       title: payload.title,
       category: 'verandas', // Use verandas category for cart display logic
-      price: payload.totalPrice,
+      priceCents: unitPriceCents,
+      price: fromCents(unitPriceCents),
       shortDescription: `Maatwerk veranda ${sizeSummary}`,
       description: 'Op maat geconfigureerde aluminium veranda',
       imageUrl: `/renders/veranda/${String(payload.selections.find(s => s.groupId === 'color')?.choiceId || 'ral7016')}/base.png`, // Default preview
@@ -396,7 +467,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       // Cart item fields
       quantity: payload.quantity,
-      totalPrice: payload.totalPrice,
+      unitPriceCents,
+      lineTotalCents,
+      totalPrice: fromCents(lineTotalCents),
 
       // Config props
       config: {
@@ -435,7 +508,14 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (existing) {
         return prev.map(i => 
           i.id === cartId 
-            ? { ...i, quantity: i.quantity + 1, totalPrice: i.totalPrice + payload.totalPrice } 
+            ? {
+                ...i,
+                quantity: i.quantity + 1,
+                unitPriceCents: i.unitPriceCents ?? unitPriceCents,
+                lineTotalCents: (i.lineTotalCents || 0) + unitPriceCents,
+                price: fromCents(i.unitPriceCents ?? unitPriceCents),
+                totalPrice: fromCents((i.lineTotalCents || 0) + unitPriceCents),
+              }
             : i
         );
       }
@@ -458,12 +538,15 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       prev.map((item, i) => {
         if (i !== index) return item;
 
-        const currentQty = item.quantity || 1;
-        const unitPrice = currentQty > 0 ? item.totalPrice / currentQty : item.totalPrice;
+        const unitPriceCents = item.unitPriceCents ?? toCents(item.price);
+        const nextLineTotalCents = mulCents(unitPriceCents, quantity);
         return {
           ...item,
           quantity,
-          totalPrice: unitPrice * quantity,
+          unitPriceCents,
+          lineTotalCents: nextLineTotalCents,
+          price: fromCents(unitPriceCents),
+          totalPrice: fromCents(nextLineTotalCents),
         };
       })
     );
@@ -495,7 +578,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   return (
     <CartContext.Provider value={{ 
-      cart: normalizedCart, 
+      cart: cartWithCents,
       addToCart,
       addMaatwerkToCart,
       removeFromCart, 
@@ -503,6 +586,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       updateCartItem, 
       clearCart, 
       total, 
+      totalCents,
       itemCount, 
       isCartOpen, 
       openCart, 
@@ -510,7 +594,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Shipping - address-based system with Google validation
       shippingMethod: shipping.method,
       shippingAddress: shipping.address,
-      shippingCost: shipping.cost,
+      shippingCostCents: shipping.costCents,
+      shippingCost: fromCents(shipping.costCents),
       shippingIsValid: shipping.isValid,
       isShippingLocked: shipping.isLocked,
       setShippingMethod,
@@ -519,9 +604,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       lockShipping,
       unlockShipping,
       grandTotal,
+      grandTotalCents,
       // Legacy aliases (for backward compatibility)
       shippingCountry: shipping.address.isValidated ? shipping.address.country : null,
-      shippingFee: shipping.cost,
+      shippingFeeCents: shipping.costCents,
+      shippingFee: fromCents(shipping.costCents),
       shippingPostcode: shipping.address.postalCode,
     }}>
       {children}

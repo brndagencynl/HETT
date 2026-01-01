@@ -18,6 +18,8 @@ import {
   type PriceCalculationResult,
 } from '../configurator/pricing/verandapricing';
 
+import { formatEUR, toCents } from '../utils/money';
+
 // =============================================================================
 // TYPES
 // =============================================================================
@@ -67,24 +69,21 @@ export type VerandaSelection = Omit<VerandaPricingConfig, 'productSize'>;
 
 /**
  * Format money amount in Dutch style
- * Uses € symbol, no cents, thousand separator is dot
+ * Uses € symbol, always 2 decimals, thousand separator is dot
  * 
- * @example formatMoney(1650) → "€ 1.650,-"
- * @example formatMoney(0) → "€ 0,-"
+ * @example formatMoney(1650) → "€ 1.650,00"
+ * @example formatMoney(0) → "€ 0,00"
  */
 export function formatMoney(amount: number): string {
-  const formatted = amount.toLocaleString('nl-NL', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  });
-  return `€ ${formatted},-`;
+  // In this module, amounts are expressed in EUR.
+  return formatEUR(toCents(amount), 'cents');
 }
 
 /**
  * Format money for display with "+" prefix for positive amounts
  * 
- * @example formatMoneyDelta(125) → "+ € 125,-"
- * @example formatMoneyDelta(0) → "€ 0,-"
+ * @example formatMoneyDelta(125) → "+ € 125,00"
+ * @example formatMoneyDelta(0) → "€ 0,00"
  */
 export function formatMoneyDelta(amount: number): string {
   if (amount > 0) {

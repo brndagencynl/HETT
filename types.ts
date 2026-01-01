@@ -12,7 +12,11 @@ export interface Product {
   id: string;
   title: string;
   category: CategorySlug;
+  /** Canonical money value (always cents, integer). */
+  priceCents: number;
   price: number;
+  /** Canonical ex-VAT money value (always cents, integer). */
+  priceExVatCents?: number;
   priceExVat?: number;
   shortDescription: string;
   description: string;
@@ -162,6 +166,10 @@ export interface CartItem extends Product {
 
   // Standard props
   quantity: number;
+  /** Canonical unit price (always cents, integer). */
+  unitPriceCents?: number;
+  /** Canonical line total (always cents, integer). */
+  lineTotalCents?: number;
   totalPrice: number;
 
   /** Line item type (used for edit detection and payload contracts) */

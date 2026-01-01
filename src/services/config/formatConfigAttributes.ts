@@ -6,6 +6,7 @@
  */
 
 import type { CartItem, VerandaConfig, SandwichConfig } from '../../../types';
+import { formatEUR, toCents } from '../../utils/money';
 
 // =============================================================================
 // TYPES
@@ -203,7 +204,7 @@ function formatMaatwerkSummary(item: CartItem): string {
   
   // Maatwerk indicator with fee
   const maatwerkFee = payload.priceBreakdown?.anchor?.customFee || 750;
-  parts.push(`Maatwerk: Ja (+€${maatwerkFee})`);
+  parts.push(`Maatwerk: Ja (+${formatEUR(toCents(maatwerkFee), 'cents')})`);
   
   // Dimensions
   parts.push(`Breedte: ${payload.size.width}cm`);

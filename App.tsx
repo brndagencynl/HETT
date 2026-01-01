@@ -72,6 +72,12 @@ const ProductRedirect = () => {
   return <Navigate to={`/products/${id}`} replace />;
 };
 
+// Legacy nieuws route redirect helper (preserves article handle)
+const NieuwsRedirect = () => {
+  const { id } = useParams();
+  return <Navigate to={`/blog/${id}`} replace />;
+};
+
 const AnimatedRoutes: React.FC = () => {
   const location = useLocation();
 
@@ -134,7 +140,7 @@ const AnimatedRoutes: React.FC = () => {
         {/* Legacy Blog Redirects (WordPress → Shopify) */}
         <Route path="/blogs" element={<Navigate to="/blog" replace />} />
         <Route path="/nieuws" element={<Navigate to="/blog" replace />} />
-        <Route path="/nieuws/:id" element={<Navigate to="/blog" replace />} />
+        <Route path="/nieuws/:id" element={<NieuwsRedirect />} />
 
         {/* Legacy/Other Routes */}
         {/* Redirect Legacy Routes */}

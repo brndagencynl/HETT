@@ -6,6 +6,7 @@ import { useCart } from '../context/CartContext';
 import PageHeader from '../components/PageHeader';
 import { Trash2, ShoppingCart, Heart, ArrowRight, Check, PenTool } from 'lucide-react';
 import { isConfigOnly } from '../utils/productRules';
+import { formatEUR, toCents } from '../src/utils/money';
 
 const Wishlist: React.FC = () => {
     const { wishlist, removeFromWishlist } = useWishlist();
@@ -70,7 +71,7 @@ const Wishlist: React.FC = () => {
 
                                     <div className="mt-auto pt-4 border-t border-gray-50 flex items-center justify-between gap-4">
                                         <div className="flex flex-col">
-                                            <span className="font-black text-xl text-hett-dark">€{product.price}</span>
+                                            <span className="font-black text-xl text-hett-dark">{formatEUR(product.priceCents ?? toCents(product.price), 'cents')}</span>
                                             <span className="text-[10px] text-gray-400 font-medium">incl. BTW</span>
                                         </div>
                                         {isConfigOnly(product) ? (

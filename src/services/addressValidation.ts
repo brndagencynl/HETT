@@ -6,6 +6,8 @@
  * This service communicates with /api/validate-address which calls Google Address Validation API.
  */
 
+import { formatEUR, toCents } from '../utils/money';
+
 // =============================================================================
 // TYPES
 // =============================================================================
@@ -133,7 +135,7 @@ export function getShippingCost(country: CountryCode | null): number {
  * @returns Formatted string (e.g., "Gratis" or "€99")
  */
 export function formatShippingCost(cost: number): string {
-  return cost === 0 ? 'Gratis' : `€${cost}`;
+  return cost === 0 ? 'Gratis' : formatEUR(toCents(cost), 'cents');
 }
 
 /**

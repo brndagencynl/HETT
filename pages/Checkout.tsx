@@ -11,6 +11,7 @@ import Button from '../components/ui/button';
 import { Card } from '../components/ui/card';
 import Input from '../components/ui/input';
 import { formatMoney } from '../src/pricing/pricingHelpers';
+import { fromCents } from '../src/utils/money';
 import ConfigBreakdownPopup, { getCartItemPriceBreakdown, isConfigurableCategory, isVerandaCategory, isMaatwerkVerandaItem } from '../components/ui/ConfigBreakdownPopup';
 import { CartItemPreview } from '../components/ui/ConfigPreviewImage';
 import { formatShippingCost, getAddressSummary, COUNTRY_LABELS } from '../src/services/addressValidation';
@@ -31,12 +32,14 @@ const Checkout: React.FC = () => {
   const { 
     cart, 
     total, 
+    totalCents,
     clearCart, 
     shippingMethod, 
     shippingAddress,
     shippingCost, 
     shippingIsValid,
     grandTotal, 
+    grandTotalCents,
     lockShipping 
   } = useCart();
   const { openEditConfigurator } = useVerandaEdit();
@@ -127,9 +130,12 @@ const Checkout: React.FC = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const VAT_RATE = 0.21;
-    const totalInclVat = grandTotal; // Now includes shipping
-    const subtotalExVat = Math.round(total / (1 + VAT_RATE)); // Items only
-    const vatAmount = Math.round(total - subtotalExVat);
+    const totalInclVat = fromCents(grandTotalCents); // Now includes shipping
+    // Items-only VAT calculations in cents (21% VAT => total = ex * 121/100)
+    const subtotalExVatCents = Math.round((totalCents * 100) / 121);
+    const vatAmountCents = totalCents - subtotalExVatCents;
+    const subtotalExVat = fromCents(subtotalExVatCents);
+    const vatAmount = fromCents(vatAmountCents);
 
     const isEmailValid = (email: string) => /\S+@\S+\.\S+/.test(email);
 
@@ -161,7 +167,13 @@ const Checkout: React.FC = () => {
 
     const orderItems = useMemo(() => {
         return cart.map((item) => {
-            const unitPrice = item.quantity > 0 ? item.totalPrice / item.quantity : item.totalPrice;
+        const unitPriceCents =
+          typeof item.unitPriceCents === 'number'
+            ? item.unitPriceCents
+            : item.quantity > 0
+              ? Math.round(((item.lineTotalCents || 0) / item.quantity))
+              : (item.lineTotalCents || 0);
+        const unitPrice = fromCents(unitPriceCents);
             return { item, unitPrice };
         });
     }, [cart]);

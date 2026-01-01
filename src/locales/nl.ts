@@ -135,7 +135,7 @@ export const nl = {
       colorLabel: 'Kleur Profielen',
       roofLabel: 'Dakbedekking',
       quantityLabel: 'Aantal',
-      meta: 'Levertijd 1-2 weken • Gratis verzending vanaf €2500',
+      meta: 'Levertijd 1-2 weken • Gratis verzending vanaf € 2.500,00',
     },
     sandwich: {
       heading: 'Stel samen',

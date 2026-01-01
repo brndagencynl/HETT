@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Product } from '../types';
 import { useCart } from '../context/CartContext';
 import { ShoppingBag, Check, Minus, Plus } from 'lucide-react';
+import { formatEUR, mulCents, toCents } from '../src/utils/money';
 
 interface ProductConfiguratorProps {
   product: Product;
@@ -33,7 +34,9 @@ const ProductConfigurator: React.FC<ProductConfiguratorProps> = ({ product }) =>
 
         {/* Price Display */}
         <div className="flex items-end gap-2 mb-8 pb-8 border-b border-gray-100">
-            <span className="text-4xl font-black text-hett-dark">€{product.price * quantity},-</span>
+                        <span className="text-4xl font-black text-hett-dark">
+                            {formatEUR(mulCents(product.priceCents ?? toCents(product.price), quantity), 'cents')}
+                        </span>
             <span className="text-gray-400 font-medium mb-2">Excl. montage</span>
         </div>
 
@@ -136,7 +139,7 @@ const ProductConfigurator: React.FC<ProductConfiguratorProps> = ({ product }) =>
         
         <div className="mt-6 text-center">
             <p className="text-xs text-gray-400">
-                Levertijd 1-2 weken • Gratis verzending vanaf €2500
+                Levertijd 1-2 weken • Gratis verzending vanaf € 2.500,00
             </p>
         </div>
     </div>

@@ -131,14 +131,14 @@ const MyAccount: React.FC = () => {
                                         <td className="p-4 font-bold text-hett-dark">#12345</td>
                                         <td className="p-4 text-gray-500">10 Mei 2024</td>
                                         <td className="p-4"><span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold">Voltooid</span></td>
-                                        <td className="p-4 font-bold">€1.895,-</td>
+                                        <td className="p-4 font-bold">€ 1.895,00</td>
                                         <td className="p-4"><button className="text-hett-brown font-bold hover:underline">Bekijken</button></td>
                                     </tr>
                                     <tr>
                                         <td className="p-4 font-bold text-hett-dark">#12346</td>
                                         <td className="p-4 text-gray-500">22 Mei 2024</td>
                                         <td className="p-4"><span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">In behandeling</span></td>
-                                        <td className="p-4 font-bold">€349,-</td>
+                                        <td className="p-4 font-bold">€ 349,00</td>
                                         <td className="p-4"><button className="text-hett-brown font-bold hover:underline">Bekijken</button></td>
                                     </tr>
                                 </tbody>

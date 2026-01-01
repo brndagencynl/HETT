@@ -5,6 +5,7 @@ import { VERANDA_OPTIONS_UI, DEFAULT_VERANDA_CONFIG, VerandaConfig, COLOR_OPTION
 import { calcVerandaPrice } from '../src/configurator/pricing/veranda';
 import { buildVisualizationLayers, type VisualizationLayer, FALLBACK_IMAGE, type VerandaColorId, getPreloadPaths, preloadImages } from '../src/configurator/visual/verandaAssets';
 import { t } from '../src/utils/i18n';
+import { formatEUR, toCents } from '../src/utils/money';
 
 const MotionDiv = motion.div as any;
 
@@ -412,7 +413,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                                 <span className="text-sm text-gray-600">{choice.description}</span>
                                 {choice.price > 0 && (
                                     <span className="inline-block mt-2 bg-[#FF7300]/10 text-[#FF7300] text-sm font-bold px-3 py-1 rounded-full">
-                                        + €{choice.price},-
+                                        + {formatEUR(toCents(choice.price), 'cents')}
                                     </span>
                                 )}
                             </div>
@@ -445,7 +446,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                                 <span className="font-bold text-gray-900 text-lg block">{choice.label}</span>
                                 <span className="text-sm text-gray-600">{choice.description}</span>
                                 {choice.price > 0 && (
-                                    <span className="block text-sm text-[#FF7300] font-semibold mt-1">+ €{choice.price},-</span>
+                                    <span className="block text-sm text-[#FF7300] font-semibold mt-1">+ {formatEUR(toCents(choice.price), 'cents')}</span>
                                 )}
                             </div>
                         </div>
@@ -496,7 +497,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                             </span>
                             <span className="text-sm text-gray-600">{choice.description}</span>
                             {choice.price > 0 && (
-                                <span className="block text-sm text-[#FF7300] font-semibold mt-1">+ €{choice.price},-</span>
+                                <span className="block text-sm text-[#FF7300] font-semibold mt-1">+ {formatEUR(toCents(choice.price), 'cents')}</span>
                             )}
                         </div>
                         <button
@@ -573,17 +574,17 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                     <div className="space-y-2 text-sm">
                         <div className="flex justify-between">
                             <span className="text-gray-600">{t('configurator.overview.basePrice')}</span>
-                            <span className="font-semibold text-gray-900">€ {calcBasePrice.toLocaleString()},-</span>
+                            <span className="font-semibold text-gray-900">{formatEUR(toCents(calcBasePrice), 'cents')}</span>
                         </div>
                         {priceItems.map((item, idx) => (
                             <div key={idx} className="flex justify-between">
                                 <span className="text-gray-600">{item.label}</span>
-                                <span className="font-semibold text-gray-900">+ € {item.amount.toLocaleString()},-</span>
+                                <span className="font-semibold text-gray-900">+ {formatEUR(toCents(item.amount), 'cents')}</span>
                             </div>
                         ))}
                         <div className="border-t-2 border-gray-300 pt-3 mt-3 flex justify-between items-center">
                             <span className="font-bold text-gray-900 text-base">{t('configurator.overview.totalInclVat')}</span>
-                            <span className="font-black text-2xl text-[#003878]">€ {currentPrice.toLocaleString()},-</span>
+                            <span className="font-black text-2xl text-[#003878]">{formatEUR(toCents(currentPrice), 'cents')}</span>
                         </div>
                     </div>
                 </div>
@@ -1011,7 +1012,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                                     {/* Price */}
                                     <div className="mb-4">
                                         <span className="text-[10px] text-gray-500 uppercase tracking-wide font-medium">{t('configurator.footer.totalPriceInclVat')}</span>
-                                        <span className="block text-2xl font-black text-[#003878]">€ {currentPrice.toLocaleString()},-</span>
+                                        <span className="block text-2xl font-black text-[#003878]">{formatEUR(toCents(currentPrice), 'cents')}</span>
                                     </div>
 
                                     {/* Navigation Buttons */}
@@ -1120,7 +1121,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                                     {/* Price */}
                                     <div>
                                         <span className="text-[10px] text-gray-500 uppercase tracking-wide font-medium">{t('configurator.footer.totalPriceInclVat')}</span>
-                                        <span className="block text-2xl font-black text-[#003878]">€ {currentPrice.toLocaleString()},-</span>
+                                        <span className="block text-2xl font-black text-[#003878]">{formatEUR(toCents(currentPrice), 'cents')}</span>
                                     </div>
 
                                     {/* Navigation Buttons */}

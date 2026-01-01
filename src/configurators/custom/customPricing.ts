@@ -28,6 +28,8 @@ import {
   MAATWERK_CUSTOM_FEE,
 } from '../../catalog/matrixCatalog';
 
+import { addCents, formatEUR, fromCents, mulCents, toCents } from '../../utils/money';
+
 // =============================================================================
 // PRICING TYPES
 // =============================================================================
@@ -74,13 +76,16 @@ const FALLBACK_PRICING = {
  */
 function getFallbackPrice(width: number, depth: number): number {
   const area = width * depth;
-  const calculatedPrice = 
-    FALLBACK_PRICING.baseFlat +
-    (width * FALLBACK_PRICING.widthRate) +
-    (depth * FALLBACK_PRICING.depthRate) +
-    (area * FALLBACK_PRICING.areaRate);
-  
-  return Math.round(Math.max(FALLBACK_PRICING.minimumPrice, calculatedPrice));
+
+  // Compute in cents (integers) to avoid float drift and whole-euro rounding.
+  const baseCents = toCents(FALLBACK_PRICING.baseFlat);
+  const widthCents = Math.round(width * FALLBACK_PRICING.widthRate * 100);
+  const depthCents = Math.round(depth * FALLBACK_PRICING.depthRate * 100);
+  const areaCents = Math.round(area * FALLBACK_PRICING.areaRate * 100);
+  const calculatedCents = baseCents + widthCents + depthCents + areaCents;
+  const minimumCents = toCents(FALLBACK_PRICING.minimumPrice);
+
+  return fromCents(Math.max(minimumCents, calculatedCents));
 }
 
 /**
@@ -119,7 +124,7 @@ export function getMaatwerkBasePrice(size: MaatwerkSize): number {
   const { anchorPrice } = getAnchorProductForSize(size);
   
   // Add custom fee to anchor price
-  return anchorPrice + MAATWERK_CUSTOM_FEE;
+  return fromCents(addCents(toCents(anchorPrice), toCents(MAATWERK_CUSTOM_FEE)));
 }
 
 /**
@@ -136,7 +141,7 @@ export function getMaatwerkBasePriceBreakdown(size: MaatwerkSize): {
   return {
     anchorPrice,
     customFee: MAATWERK_CUSTOM_FEE,
-    total: anchorPrice + MAATWERK_CUSTOM_FEE,
+    total: fromCents(addCents(toCents(anchorPrice), toCents(MAATWERK_CUSTOM_FEE))),
     anchorSizeKey,
   };
 }
@@ -324,16 +329,16 @@ export function getMaatwerkOptionPrice(
     
     case 'byWidth':
       // Linear pricing: basePrice + (width * pricePerCm)
-      return Math.round(pricing.basePrice + (size.width * pricing.pricePerCm));
+      return fromCents(addCents(toCents(pricing.basePrice), mulCents(toCents(pricing.pricePerCm), size.width)));
     
     case 'byDepth':
       // Linear pricing: basePrice + (depth * pricePerCm)
-      return Math.round(pricing.basePrice + (size.depth * pricing.pricePerCm));
+      return fromCents(addCents(toCents(pricing.basePrice), mulCents(toCents(pricing.pricePerCm), size.depth)));
     
     case 'byArea':
       // Calculate area in m² and multiply by rate
       const areaM2 = (size.width / 100) * (size.depth / 100);
-      return Math.round(areaM2 * pricing.pricePerM2);
+      return fromCents(Math.round(areaM2 * pricing.pricePerM2 * 100));
     
     default:
       return 0;
@@ -380,7 +385,8 @@ export function calculateMaatwerkPrice(config: PartialMaatwerkConfig): MaatwerkP
   
   // Get anchor-based pricing
   const anchorInfo = getAnchorProductForSize(size);
-  const basePrice = anchorInfo.anchorPrice + MAATWERK_CUSTOM_FEE;
+  const basePriceCents = addCents(toCents(anchorInfo.anchorPrice), toCents(MAATWERK_CUSTOM_FEE));
+  const basePrice = fromCents(basePriceCents);
   
   const selections: MaatwerkSelection[] = [];
 
@@ -423,8 +429,9 @@ export function calculateMaatwerkPrice(config: PartialMaatwerkConfig): MaatwerkP
     }
   }
 
-  const optionsTotal = selections.reduce((sum, s) => sum + s.price, 0);
-  const grandTotal = basePrice + optionsTotal;
+  const optionsTotalCents = selections.reduce((sum, s) => sum + toCents(s.price), 0);
+  const optionsTotal = fromCents(optionsTotalCents);
+  const grandTotal = fromCents(addCents(basePriceCents, optionsTotalCents));
 
   return {
     basePrice,
@@ -443,5 +450,7 @@ export function calculateMaatwerkPrice(config: PartialMaatwerkConfig): MaatwerkP
  * Format price for display
  */
 export function formatMaatwerkPrice(price: number): string {
-  return `€ ${price.toLocaleString('nl-NL')},-`;
+  // Prices in this module are currently expressed in EUR (not cents).
+  // Always format with 2 decimals in nl-NL style.
+  return formatEUR(toCents(price), 'cents');
 }

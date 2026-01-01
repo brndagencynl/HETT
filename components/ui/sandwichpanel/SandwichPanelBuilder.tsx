@@ -8,6 +8,7 @@ import {
     SANDWICH_WORKING_WIDTH_MM,
     calculateSandwichpanelenPricing,
 } from '../../../src/pricing/sandwichpanelen';
+import { formatEUR, toCents } from '../../../src/utils/money';
 
 interface Props {
     product: Product;
@@ -225,7 +226,7 @@ const SandwichPanelBuilder: React.FC<Props> = ({ product, basePrice, onAddToCart
                         </div>
                         <div className="text-right pl-3">
                             <div className="text-sm font-bold text-hett-dark">
-                                {config.extras.uProfiles.enabled ? `+€${pricing.extrasTotal.toFixed(2)}` : '—'}
+                                {config.extras.uProfiles.enabled ? `+ ${formatEUR(toCents(pricing.extrasTotal), 'cents')}` : '—'}
                             </div>
                             <div className={`w-5 h-5 rounded-full border flex items-center justify-center mt-1 ml-auto transition-colors ${config.extras.uProfiles.enabled ? 'bg-hett-primary border-hett-primary text-white' : 'border-gray-300'}`}>
                                 {config.extras.uProfiles.enabled && <Check size={12} />}
@@ -301,15 +302,15 @@ const SandwichPanelBuilder: React.FC<Props> = ({ product, basePrice, onAddToCart
                 <div className="space-y-2 mb-6 text-sm">
                     <div className="flex justify-between text-gray-500">
                         <span>Product totaal</span>
-                        <span>€ {pricing.basePrice.toLocaleString()},-</span>
+                        <span>{formatEUR(toCents(pricing.basePrice), 'cents')}</span>
                     </div>
                     <div className="flex justify-between text-gray-500">
                         <span>Opties totaal</span>
-                        <span>€ {pricing.extrasTotal.toLocaleString()},-</span>
+                        <span>{formatEUR(toCents(pricing.extrasTotal), 'cents')}</span>
                     </div>
                     <div className="flex justify-between text-lg font-black text-hett-dark pt-2 border-t border-gray-200">
                         <span>Totaal</span>
-                        <span>€ {pricing.total.toLocaleString()},-</span>
+                        <span>{formatEUR(toCents(pricing.total), 'cents')}</span>
                     </div>
                 </div>
 

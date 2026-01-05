@@ -168,9 +168,9 @@ export interface MaatwerkSelection {
 export interface MaatwerkAnchorInfo {
   /** The anchor size key (e.g., "606x350") */
   anchorSizeKey: string;
-  /** The anchor product's base price */
+  /** The anchor product's base price (from Shopify variant) */
   anchorPrice: number;
-  /** Custom fee added for maatwerk */
+  /** Custom fee added for maatwerk (€750) */
   customFee: number;
 }
 
@@ -178,7 +178,12 @@ export interface MaatwerkAnchorInfo {
  * Price breakdown for maatwerk items
  */
 export interface MaatwerkPriceBreakdown {
+  /** Base price = shopifyVariantPrice + maatwerkSurcharge */
   basePrice: number;
+  /** Base price from Shopify variant (before surcharge) */
+  shopifyVariantPrice?: number;
+  /** Maatwerk surcharge (€750) */
+  maatwerkSurcharge?: number;
   selections: MaatwerkSelection[];
   optionsTotal: number;
   grandTotal: number;
@@ -193,7 +198,12 @@ export interface MaatwerkCartPayload {
   type: 'maatwerk_veranda';
   title: string;
   quantity: number;
+  /** Base price = shopifyVariantPrice + maatwerkSurcharge */
   basePrice: number;
+  /** Base price from Shopify variant (before surcharge) */
+  shopifyVariantPrice?: number;
+  /** Maatwerk surcharge (€750) */
+  maatwerkSurcharge?: number;
   optionsTotal: number;
   totalPrice: number;
   /** User's requested custom dimensions */

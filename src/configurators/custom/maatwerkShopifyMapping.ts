@@ -2,6 +2,7 @@ import { GET_PRODUCT_BY_HANDLE } from '../../lib/shopify/queries';
 import { shopifyFetch } from '../../lib/shopify/client';
 import type { ShopifyProduct, ShopifyProductVariant } from '../../lib/shopify/types';
 import { MATRIX_DEPTHS, MATRIX_WIDTHS, type MatrixDepth, type MatrixWidth } from '../../catalog/matrixCatalog';
+import { MAATWERK_SURCHARGE } from '../../pricing/surcharges';
 
 export const MAATWERK_WIDTH_BUCKETS = [...MATRIX_WIDTHS] as const;
 export const MAATWERK_DEPTH_BUCKETS = [...MATRIX_DEPTHS] as const;
@@ -11,8 +12,11 @@ export type MaatwerkDepthBucket = MatrixDepth;
 
 export type MaatwerkKey = `${MaatwerkWidthBucket}x${MaatwerkDepthBucket}`;
 
-// Matches existing custom configurator pricing fee
-export const MAATWERK_CUSTOM_FEE = 750;
+// Re-export the surcharge constant for convenience
+export { MAATWERK_SURCHARGE };
+
+// Legacy alias (for backward compatibility)
+export const MAATWERK_CUSTOM_FEE = MAATWERK_SURCHARGE;
 
 // Keep this as a simple constant object as requested.
 // Prices here are only used for optional display/fallback logic.
@@ -122,6 +126,32 @@ export async function resolveMaatwerkVariantId(
   bucketW: number,
   bucketD: number
 ): Promise<string | null> {
+  const result = await resolveMaatwerkVariant(bucketW, bucketD);
+  return result?.id ?? null;
+}
+
+/**
+ * Result from resolving a maatwerk variant
+ */
+export interface MaatwerkVariantResult {
+  id: string;
+  priceAmount: number; // Base price in EUR from Shopify
+  bucketW: number;
+  bucketD: number;
+}
+
+/**
+ * Resolve the full Shopify variant for a maatwerk configuration.
+ * Returns the variant ID and its price.
+ * 
+ * @param bucketW - Bucket width in cm
+ * @param bucketD - Bucket depth in cm
+ * @returns Variant info including price, or null if not found
+ */
+export async function resolveMaatwerkVariant(
+  bucketW: number,
+  bucketD: number
+): Promise<MaatwerkVariantResult | null> {
   const variants = await getCachedMaatwerkVariants();
 
   const wStr = String(bucketW);
@@ -135,12 +165,19 @@ export async function resolveMaatwerkVariantId(
   });
 
   if (byName) {
+    const priceAmount = parseFloat(byName.price?.amount || '0');
     console.log('[maatwerk] Resolved variant by option names', {
       bucketW,
       bucketD,
       variantId: byName.id,
+      priceAmount,
     });
-    return byName.id;
+    return {
+      id: byName.id,
+      priceAmount,
+      bucketW,
+      bucketD,
+    };
   }
 
   // 2) Fallback: match by values present anywhere in selectedOptions
@@ -150,12 +187,19 @@ export async function resolveMaatwerkVariantId(
   });
 
   if (byValue) {
+    const priceAmount = parseFloat(byValue.price?.amount || '0');
     console.log('[maatwerk] Resolved variant by option values', {
       bucketW,
       bucketD,
       variantId: byValue.id,
+      priceAmount,
     });
-    return byValue.id;
+    return {
+      id: byValue.id,
+      priceAmount,
+      bucketW,
+      bucketD,
+    };
   }
 
   console.error('[maatwerk] Variant not found for buckets', { bucketW, bucketD });

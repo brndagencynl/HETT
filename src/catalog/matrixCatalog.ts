@@ -221,14 +221,17 @@ export function getHiddenAnchorSizes(): Array<{ width: MatrixWidth; depth: Matri
 }
 
 // =============================================================================
-// CUSTOM FEE
+// CUSTOM FEE (re-exported from central location)
 // =============================================================================
+
+import { MAATWERK_SURCHARGE } from '../pricing/surcharges';
 
 /**
  * Custom/maatwerk fee added to anchor product price
  * This covers the additional work for non-standard dimensions
+ * @deprecated Use MAATWERK_SURCHARGE from '../pricing/surcharges' instead
  */
-export const MAATWERK_CUSTOM_FEE = 750;
+export const MAATWERK_CUSTOM_FEE = MAATWERK_SURCHARGE;
 
 // =============================================================================
 // DEV MODE VALIDATION

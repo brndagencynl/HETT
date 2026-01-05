@@ -350,6 +350,7 @@ function buildVerandaAttributes(item: CartItem): ShopifyLineAttribute[] {
 
 /**
  * Build individual Shopify line attributes for maatwerk veranda
+ * Includes readable pricing breakdown with maatwerk_toeslag
  */
 function buildMaatwerkAttributes(item: CartItem): ShopifyLineAttribute[] {
   const payload = item.maatwerkPayload;
@@ -357,12 +358,22 @@ function buildMaatwerkAttributes(item: CartItem): ShopifyLineAttribute[] {
   
   if (!payload) return attributes;
   
-  // Maatwerk indicator
-  attributes.push({ key: 'Type', value: 'Maatwerk' });
+  // Config type indicator
+  attributes.push({ key: 'config_type', value: 'maatwerk' });
   
-  // Dimensions
-  attributes.push({ key: 'Breedte', value: `${payload.size.width} cm` });
-  attributes.push({ key: 'Diepte', value: `${payload.size.depth} cm` });
+  // Dimensions (actual slider value, not bucket)
+  attributes.push({ key: 'maat', value: `${payload.size.width} x ${payload.size.depth} cm` });
+  
+  // Pricing breakdown - always show with 2 decimals
+  const shopifyVariantPrice = payload.shopifyVariantPrice ?? payload.priceBreakdown?.shopifyVariantPrice ?? payload.priceBreakdown?.anchor?.anchorPrice ?? 0;
+  const maatwerkSurcharge = payload.maatwerkSurcharge ?? payload.priceBreakdown?.maatwerkSurcharge ?? 750;
+  const optionsTotal = payload.optionsTotal ?? payload.priceBreakdown?.optionsTotal ?? 0;
+  const grandTotal = payload.totalPrice ?? payload.priceBreakdown?.grandTotal ?? 0;
+  
+  attributes.push({ key: 'prijs_basis', value: formatEUR(toCents(shopifyVariantPrice), 'cents') });
+  attributes.push({ key: 'maatwerk_toeslag', value: formatEUR(toCents(maatwerkSurcharge), 'cents') });
+  attributes.push({ key: 'opties_totaal', value: formatEUR(toCents(optionsTotal), 'cents') });
+  attributes.push({ key: 'totaal', value: formatEUR(toCents(grandTotal), 'cents') });
   
   // Helper to get selection value
   const getSelection = (groupId: string): string | undefined => {
@@ -373,41 +384,41 @@ function buildMaatwerkAttributes(item: CartItem): ShopifyLineAttribute[] {
   // Color
   const color = getSelection('kleur') || getSelection('color');
   if (color) {
-    attributes.push({ key: 'Kleur', value: color });
+    attributes.push({ key: 'kleur', value: color });
   }
   
   // Daktype
   const daktype = getSelection('daktype') || getSelection('dak');
   if (daktype) {
-    attributes.push({ key: 'Daktype', value: daktype });
+    attributes.push({ key: 'daktype', value: daktype });
   }
   
   // Goot
   const goot = getSelection('goot');
   if (goot) {
-    attributes.push({ key: 'Goot', value: goot });
+    attributes.push({ key: 'goot', value: goot });
   }
   
   // Zijwanden
   attributes.push({ 
-    key: 'Zijwand links', 
+    key: 'zijwand_links', 
     value: getSelection('zijwand_links') || getSelection('zijwandLinks') || 'Geen' 
   });
   attributes.push({ 
-    key: 'Zijwand rechts', 
+    key: 'zijwand_rechts', 
     value: getSelection('zijwand_rechts') || getSelection('zijwandRechts') || 'Geen' 
   });
   
   // Voorzijde
   attributes.push({ 
-    key: 'Voorzijde', 
+    key: 'voorzijde', 
     value: getSelection('voorzijde') || 'Geen' 
   });
   
   // Verlichting
   const verlichting = getSelection('verlichting');
   if (verlichting) {
-    attributes.push({ key: 'Verlichting', value: verlichting });
+    attributes.push({ key: 'verlichting', value: verlichting });
   }
   
   return attributes;
@@ -475,7 +486,7 @@ export function toShopifyLineAttributes(item: CartItem): ShopifyLineAttribute[] 
   
   const attributes: ShopifyLineAttribute[] = [];
 
-  // Extra machine-readable attributes for maatwerk mapping/troubleshooting
+  // Extra machine-readable attributes for maatwerk mapping/troubleshooting (underscore prefix = internal)
   if (configType === 'maatwerk') {
     const originalWidthCm = item.maatwerkPayload?.size?.width ?? (item as any)?.config?.data?.widthCm;
     const originalDepthCm = item.maatwerkPayload?.size?.depth ?? (item as any)?.config?.data?.depthCm;
@@ -489,25 +500,14 @@ export function toShopifyLineAttributes(item: CartItem): ShopifyLineAttribute[] 
       (item as any)?.config?.data?.bucketDepthCm ??
       (typeof originalDepthCm === 'number' ? mapToBucket(originalDepthCm, MAATWERK_DEPTH_BUCKETS) : undefined);
 
-    if (typeof originalWidthCm === 'number') {
-      attributes.push({ key: '_breedte_cm', value: String(originalWidthCm) });
-    }
-    if (typeof originalDepthCm === 'number') {
-      attributes.push({ key: '_diepte_cm', value: String(originalDepthCm) });
-    }
+    // Internal bucket info (for order processing, not display)
     if (typeof bucketW === 'number') {
       attributes.push({ key: '_bucket_breedte', value: String(bucketW) });
     }
     if (typeof bucketD === 'number') {
       attributes.push({ key: '_bucket_diepte', value: String(bucketD) });
     }
-
-    try {
-      const configJson = JSON.stringify(item.config?.data ?? item.maatwerkPayload ?? {});
-      attributes.push({ key: '_config_json', value: configJson });
-    } catch {
-      // ignore
-    }
+    // NOTE: JSON blob removed - all config is now in readable attributes above
   }
   
   // Build individual attributes based on config type

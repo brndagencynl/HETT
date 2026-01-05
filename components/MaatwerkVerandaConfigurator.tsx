@@ -66,8 +66,9 @@ import {
 import {
   MAATWERK_DEPTH_BUCKETS,
   MAATWERK_WIDTH_BUCKETS,
+  MAATWERK_SURCHARGE,
   mapToBucket,
-  resolveMaatwerkVariantId,
+  resolveMaatwerkVariant,
 } from '../src/configurators/custom/maatwerkShopifyMapping';
 
 // Reuse visual layer system for preview (but from existing assets)
@@ -249,18 +250,55 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
         bucketD,
       });
 
-      const variantId = await resolveMaatwerkVariantId(bucketW, bucketD);
-      if (!variantId) {
-        const message = `Prijsvariant niet gevonden in Shopify voor ${bucketW}x${bucketD}`;
+      const variantResult = await resolveMaatwerkVariant(bucketW, bucketD);
+      if (!variantResult) {
+        const message = `Geen geldige Shopify-variant gevonden voor deze maat (${bucketW}x${bucketD} cm).`;
         console.error('[MaatwerkConfigurator]', message);
         setShopifyVariantError(message);
         return;
       }
 
+      // Get prices from Shopify variant
+      const shopifyVariantPrice = variantResult.priceAmount;
+      const maatwerkSurcharge = MAATWERK_SURCHARGE;
+      const basePrice = shopifyVariantPrice + maatwerkSurcharge;
+      const optionsTotal = priceBreakdown.optionsTotal;
+      const grandTotal = basePrice + optionsTotal;
+
+      console.log('[Maatwerk Price]', {
+        variantId: variantResult.id,
+        shopifyVariantPrice,
+        maatwerkSurcharge,
+        base: basePrice,
+        optionsTotal,
+        grandTotal,
+      });
+
+      // Build payload with Shopify-based pricing
       const payload = buildMaatwerkCartPayload(config);
       payload.bucketWidthCm = bucketW;
       payload.bucketDepthCm = bucketD;
-      payload.shopifyVariantId = variantId;
+      payload.shopifyVariantId = variantResult.id;
+      payload.shopifyVariantPrice = shopifyVariantPrice;
+      payload.maatwerkSurcharge = maatwerkSurcharge;
+      payload.basePrice = basePrice;
+      payload.optionsTotal = optionsTotal;
+      payload.totalPrice = grandTotal;
+      
+      // Update priceBreakdown with Shopify prices
+      payload.priceBreakdown = {
+        ...payload.priceBreakdown,
+        shopifyVariantPrice,
+        maatwerkSurcharge,
+        basePrice,
+        optionsTotal,
+        grandTotal,
+        anchor: {
+          anchorSizeKey: `${bucketW}x${bucketD}`,
+          anchorPrice: shopifyVariantPrice,
+          customFee: maatwerkSurcharge,
+        },
+      };
 
       if (!onAddToCart) {
         console.warn('[MaatwerkConfigurator] Missing onAddToCart in create mode');

@@ -46,25 +46,23 @@ const MANUAL_VARIANT_MAP: Partial<Record<string, string>> = {
  */
 export function resolveMerchandiseForCartItem(item: CartItem): MerchandiseResolution {
   const isMaatwerk = item.slug === 'maatwerk-veranda' || item.type === 'custom_veranda' || Boolean(item.maatwerkPayload);
-  
-  // 1. Maatwerk always uses manual mapping
-  if (isMaatwerk) {
-    const gid = MANUAL_VARIANT_MAP['maatwerk-veranda'];
-    if (!gid) {
-      throw new Error('Maatwerk veranda variant GID niet geconfigureerd');
-    }
-    assertVariantGid(gid, 'maatwerk-veranda');
-    return { mappingKey: 'maatwerk-veranda', merchandiseId: gid };
+
+  // 1. If we already have a resolved Shopify variant id, always prefer it (also for maatwerk)
+  if (item.shopifyVariantId) {
+    console.log('[resolveMerchandise] Using shopifyVariantId from item:', item.shopifyVariantId);
+    assertVariantGid(item.shopifyVariantId, item.id || item.slug || item.title);
+    return {
+      mappingKey: item.id || item.slug || 'product',
+      merchandiseId: item.shopifyVariantId,
+    };
   }
   
-  // 2. Use shopifyVariantId from product (set during Shopify fetch)
-  if (item.shopifyVariantId) {
-    console.log('[resolveMerchandise] Using shopifyVariantId from product:', item.shopifyVariantId);
-    assertVariantGid(item.shopifyVariantId, item.id || item.slug || item.title);
-    return { 
-      mappingKey: item.id || item.slug || 'product', 
-      merchandiseId: item.shopifyVariantId 
-    };
+  // 2. Maatwerk requires a resolved bucket variant
+  if (isMaatwerk) {
+    const bucketW = (item as any)?.maatwerkPayload?.bucketWidthCm;
+    const bucketD = (item as any)?.maatwerkPayload?.bucketDepthCm;
+    const hint = bucketW && bucketD ? ` voor ${bucketW}x${bucketD}` : '';
+    throw new Error(`Prijsvariant niet gevonden in Shopify${hint}`);
   }
   
   // 3. Fall back to manual mapping by slug (legacy support)

@@ -7,6 +7,7 @@
 
 import type { CartItem, VerandaConfig, SandwichConfig } from '../../../types';
 import { formatEUR, toCents } from '../../utils/money';
+import { MAATWERK_DEPTH_BUCKETS, MAATWERK_WIDTH_BUCKETS, mapToBucket } from '../../configurators/custom/maatwerkShopifyMapping';
 
 // =============================================================================
 // TYPES
@@ -315,6 +316,41 @@ export function toShopifyLineAttributes(item: CartItem): ShopifyLineAttribute[] 
   }
   
   const attributes: ShopifyLineAttribute[] = [];
+
+  // Extra machine-readable attributes for maatwerk mapping/troubleshooting
+  if (configType === 'maatwerk') {
+    const originalWidthCm = item.maatwerkPayload?.size?.width ?? (item as any)?.config?.data?.widthCm;
+    const originalDepthCm = item.maatwerkPayload?.size?.depth ?? (item as any)?.config?.data?.depthCm;
+
+    const bucketW =
+      item.maatwerkPayload?.bucketWidthCm ??
+      (item as any)?.config?.data?.bucketWidthCm ??
+      (typeof originalWidthCm === 'number' ? mapToBucket(originalWidthCm, MAATWERK_WIDTH_BUCKETS) : undefined);
+    const bucketD =
+      item.maatwerkPayload?.bucketDepthCm ??
+      (item as any)?.config?.data?.bucketDepthCm ??
+      (typeof originalDepthCm === 'number' ? mapToBucket(originalDepthCm, MAATWERK_DEPTH_BUCKETS) : undefined);
+
+    if (typeof originalWidthCm === 'number') {
+      attributes.push({ key: 'originalWidthCm', value: String(originalWidthCm) });
+    }
+    if (typeof originalDepthCm === 'number') {
+      attributes.push({ key: 'originalDepthCm', value: String(originalDepthCm) });
+    }
+    if (typeof bucketW === 'number') {
+      attributes.push({ key: 'bucketW', value: String(bucketW) });
+    }
+    if (typeof bucketD === 'number') {
+      attributes.push({ key: 'bucketD', value: String(bucketD) });
+    }
+
+    try {
+      const configJson = JSON.stringify(item.config?.data ?? item.maatwerkPayload ?? {});
+      attributes.push({ key: 'config_json', value: configJson });
+    } catch {
+      // ignore
+    }
+  }
   
   // 1. Configuration summary
   let summary: string;
@@ -338,6 +374,8 @@ export function toShopifyLineAttributes(item: CartItem): ShopifyLineAttribute[] 
   const previewUrl = getPreviewUrl(item);
   if (previewUrl) {
     attributes.push({ key: 'Preview', value: previewUrl });
+    // Also add the explicit key expected by ShopifyCartContext and integrations
+    attributes.push({ key: 'preview_image_url', value: previewUrl });
   }
   
   // 3. Config ID for support reference

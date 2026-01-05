@@ -198,8 +198,14 @@ export interface MaatwerkCartPayload {
   totalPrice: number;
   /** User's requested custom dimensions */
   size: MaatwerkSize;
+  /** Resolved bucketed width used for Shopify variant mapping */
+  bucketWidthCm?: number;
+  /** Resolved bucketed depth used for Shopify variant mapping */
+  bucketDepthCm?: number;
   /** Anchor size used for pricing (may differ from size) */
   anchorSizeKey: string;
+  /** Resolved Shopify variant ID (GID) for bucketed size */
+  shopifyVariantId?: string;
   selections: MaatwerkSelection[];
   renderPreview?: string;
   priceBreakdown: MaatwerkPriceBreakdown;

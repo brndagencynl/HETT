@@ -457,6 +457,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       slug: 'maatwerk-veranda',
       title: payload.title,
       category: 'verandas', // Use verandas category for cart display logic
+      shopifyVariantId: payload.shopifyVariantId,
       priceCents: unitPriceCents,
       price: fromCents(unitPriceCents),
       shortDescription: `Maatwerk veranda ${sizeSummary}`,
@@ -479,6 +480,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           size: payload.size,
           widthCm: payload.size.width,
           depthCm: payload.size.depth,
+          bucketWidthCm: payload.bucketWidthCm,
+          bucketDepthCm: payload.bucketDepthCm,
           color: payload.selections.find(s => s.groupId === 'color')?.choiceId || 'ral7016',
           daktype: payload.selections.find(s => s.groupId === 'daktype')?.choiceId || '',
           goot: payload.selections.find(s => s.groupId === 'goot')?.choiceId || '',

@@ -63,6 +63,13 @@ import {
   getMaatwerkValidationErrors,
 } from '../src/configurators/custom/customHelpers';
 
+import {
+  MAATWERK_DEPTH_BUCKETS,
+  MAATWERK_WIDTH_BUCKETS,
+  mapToBucket,
+  resolveMaatwerkVariantId,
+} from '../src/configurators/custom/maatwerkShopifyMapping';
+
 // Reuse visual layer system for preview (but from existing assets)
 import { buildVisualizationLayers, type VisualizationLayer, FALLBACK_IMAGE, type VerandaColorId } from '../src/configurator/visual/verandaAssets';
 
@@ -149,6 +156,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
   const [isSelectionOpen, setSelectionOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isMobilePreviewOpen, setIsMobilePreviewOpen] = useState(true);
+  const [shopifyVariantError, setShopifyVariantError] = useState<string | null>(null);
 
   useEffect(() => {
     if (mode !== 'edit') return;
@@ -225,9 +233,35 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
     }
 
     setIsSubmitting(true);
+    setShopifyVariantError(null);
 
     try {
+      const widthCm = config.size?.width ?? 0;
+      const depthCm = config.size?.depth ?? 0;
+
+      const bucketW = mapToBucket(widthCm, MAATWERK_WIDTH_BUCKETS);
+      const bucketD = mapToBucket(depthCm, MAATWERK_DEPTH_BUCKETS);
+
+      console.log('[MaatwerkConfigurator] Resolving Shopify variant for buckets', {
+        originalWidthCm: widthCm,
+        originalDepthCm: depthCm,
+        bucketW,
+        bucketD,
+      });
+
+      const variantId = await resolveMaatwerkVariantId(bucketW, bucketD);
+      if (!variantId) {
+        const message = `Prijsvariant niet gevonden in Shopify voor ${bucketW}x${bucketD}`;
+        console.error('[MaatwerkConfigurator]', message);
+        setShopifyVariantError(message);
+        return;
+      }
+
       const payload = buildMaatwerkCartPayload(config);
+      payload.bucketWidthCm = bucketW;
+      payload.bucketDepthCm = bucketD;
+      payload.shopifyVariantId = variantId;
+
       if (!onAddToCart) {
         console.warn('[MaatwerkConfigurator] Missing onAddToCart in create mode');
         return;
@@ -1014,27 +1048,34 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
                         <ChevronRight size={18} />
                       </button>
                     ) : (
-                      <button
-                        onClick={mode === 'edit' ? handleSaveEdit : handleAddToCart}
-                        disabled={!agreed || isSubmitting}
-                        className={`px-6 py-3 font-bold rounded-xl text-sm flex items-center gap-2 transition-all ${
-                          agreed && !isSubmitting
-                            ? 'bg-[#FF7300] text-white hover:bg-[#E66600]'
-                            : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                        }`}
-                      >
-                        {isSubmitting ? (
-                          <>
-                            <Loader2 size={18} className="animate-spin" />
-                            {mode === 'edit' ? 'Opslaan...' : 'Toevoegen...'}
-                          </>
-                        ) : (
-                          <>
-                            {mode === 'edit' ? 'Opslaan' : 'Toevoegen aan winkelwagen'}
-                            <ArrowRight size={18} />
-                          </>
-                        )}
-                      </button>
+                      <div className="flex flex-col items-end gap-2">
+                        {shopifyVariantError && mode !== 'edit' ? (
+                          <div className="max-w-md w-full p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 font-bold">
+                            {shopifyVariantError}
+                          </div>
+                        ) : null}
+                        <button
+                          onClick={mode === 'edit' ? handleSaveEdit : handleAddToCart}
+                          disabled={!agreed || isSubmitting}
+                          className={`px-6 py-3 font-bold rounded-xl text-sm flex items-center gap-2 transition-all ${
+                            agreed && !isSubmitting
+                              ? 'bg-[#FF7300] text-white hover:bg-[#E66600]'
+                              : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                          }`}
+                        >
+                          {isSubmitting ? (
+                            <>
+                              <Loader2 size={18} className="animate-spin" />
+                              {mode === 'edit' ? 'Opslaan...' : 'Toevoegen...'}
+                            </>
+                          ) : (
+                            <>
+                              {mode === 'edit' ? 'Opslaan' : 'Toevoegen aan winkelwagen'}
+                              <ArrowRight size={18} />
+                            </>
+                          )}
+                        </button>
+                      </div>
                     )}
                   </div>
 

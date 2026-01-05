@@ -225,10 +225,6 @@ const ProductDetailShop: React.FC<ProductDetailShopProps> = ({ productHandle }) 
 
             <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
 
-                <Link to={`/categorie/${product.category.toLowerCase()}`} className="inline-flex items-center text-hett-muted hover:text-hett-primary mb-8 text-sm font-bold">
-                    <ArrowLeft size={16} className="mr-2" /> Terug naar {product.category}
-                </Link>
-
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 xl:gap-20 mb-20">
 
                     {/* Gallery Section */}

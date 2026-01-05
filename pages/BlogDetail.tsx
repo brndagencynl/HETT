@@ -50,7 +50,7 @@ const BlogDetail: React.FC = () => {
 
     if (loading) {
         return (
-            <div className="pt-[185px] md:pt-[200px] pb-20 bg-hett-bg">
+            <div className="pb-20 bg-hett-bg">
                 <div className="max-w-[800px] mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="py-24 text-center">
                         <span className="text-hett-muted font-medium animate-pulse">Artikel laden...</span>
@@ -62,7 +62,7 @@ const BlogDetail: React.FC = () => {
 
     if (error || !article) {
         return (
-            <div className="pt-[185px] md:pt-[200px] pb-20 bg-hett-bg">
+            <div className="pb-20 bg-hett-bg">
                 <div className="max-w-[800px] mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="py-24 text-center">
                         <h1 className="text-2xl font-bold text-hett-dark mb-4">Artikel niet gevonden</h1>
@@ -77,7 +77,7 @@ const BlogDetail: React.FC = () => {
     }
 
     return (
-        <div className="pt-[185px] md:pt-[200px] pb-20 bg-hett-bg">
+        <div className="pb-20 bg-hett-bg">
             {/* Hero Image */}
             {article.image && (
                 <div className="w-full h-[300px] md:h-[400px] lg:h-[500px] relative overflow-hidden bg-gray-100 mb-12">

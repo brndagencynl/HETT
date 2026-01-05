@@ -96,7 +96,7 @@ const Home: React.FC = () => {
     }, []);
 
     return (
-        <div className="pt-[185px] md:pt-[200px] pb-20 bg-hett-bg">
+        <div className="pb-20 bg-hett-bg">
 
             {/* Hero Section */}
             <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mb-8">

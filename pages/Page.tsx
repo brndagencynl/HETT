@@ -34,7 +34,7 @@ const Page: React.FC = () => {
 
     if (loading) {
         return (
-            <div className="pt-[185px] md:pt-[200px] pb-20 bg-hett-bg">
+            <div className="pb-20 bg-hett-bg">
                 <div className="max-w-[800px] mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="py-24 text-center">
                         <span className="text-hett-muted font-medium animate-pulse">Pagina laden...</span>
@@ -46,7 +46,7 @@ const Page: React.FC = () => {
 
     if (error || !page) {
         return (
-            <div className="pt-[185px] md:pt-[200px] pb-20 bg-hett-bg">
+            <div className="pb-20 bg-hett-bg">
                 <div className="max-w-[800px] mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="py-24 text-center">
                         <h1 className="text-2xl font-bold text-hett-dark mb-4">Pagina niet gevonden</h1>
@@ -61,7 +61,7 @@ const Page: React.FC = () => {
     }
 
     return (
-        <div className="pt-[185px] md:pt-[200px] pb-20 bg-hett-bg">
+        <div className="pb-20 bg-hett-bg">
             <PageHeader
                 title={page.title}
                 subtitle={page.bodySummary || undefined}

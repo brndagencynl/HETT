@@ -1,9 +1,18 @@
 
 import React from 'react';
 import PageHeader from '../components/PageHeader';
-import { FileText, Download, Youtube, Wrench, PlayCircle } from 'lucide-react';
+import { FileText, Download, Youtube, Wrench, PlayCircle, Truck, ShieldCheck, CreditCard, Pen } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
 
 const Mounting: React.FC = () => {
+    const location = useLocation();
+
+    const navItems = [
+        { id: 'bezorgen', title: 'Bezorgen & Afhalen', icon: Truck, path: '/bezorging' },
+        { id: 'garantie', title: 'Garantie & Service', icon: ShieldCheck, path: '/garantie-en-klachten' },
+        { id: 'betalen', title: 'Bestellen & Betalen', icon: CreditCard, path: '/betaalmethoden' },
+        { id: 'montage', title: 'Product & Montage', icon: Pen, path: '/montage-handleiding' },
+    ];
     
   return (
     <div className="min-h-screen bg-[#f6f8fa] font-sans">
@@ -14,12 +23,36 @@ const Mounting: React.FC = () => {
         image="https://picsum.photos/1200/600?random=mounting"
       />
 
-      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
-            {/* Main Content */}
-            <div className="lg:col-span-2 space-y-12">
+            <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+                    {/* Sidebar (Categorieën) */}
+                    <aside className="lg:col-span-3">
+                        <div className="sticky top-48">
+                            <h3 className="sidebar-nav-title uppercase tracking-tight">Categorieën</h3>
+                            <nav className="flex flex-col gap-1">
+                                {navItems.map((item) => {
+                                    const Icon = item.icon;
+                                    const isActive = location.pathname === item.path;
+                                    return (
+                                        <Link
+                                            key={item.id}
+                                            to={item.path}
+                                            className={`sidebar-nav-item ${isActive ? 'active' : ''}`}
+                                        >
+                                            <Icon size={22} className="sidebar-nav-icon" />
+                                            <span>{item.title}</span>
+                                        </Link>
+                                    );
+                                })}
+                            </nav>
+                        </div>
+                    </aside>
+
+                    {/* Main Content */}
+                    <div className="lg:col-span-9">
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                            {/* Content */}
+                            <div className="lg:col-span-2 space-y-12">
                 
                 {/* Intro */}
                 <div>
@@ -74,10 +107,10 @@ const Mounting: React.FC = () => {
                     </div>
                 </div>
 
-            </div>
+              </div>
 
-            {/* Sidebar */}
-            <div>
+              {/* Gereedschap Sidebar */}
+              <div>
                 <div className="bg-white p-6 rounded-[24px] shadow-sm border border-gray-100 sticky top-32">
                     <h3 className="font-bold text-hett-dark text-lg mb-4 flex items-center gap-2">
                         <Wrench size={20} /> Benodigd Gereedschap
@@ -101,9 +134,10 @@ const Mounting: React.FC = () => {
                         </a>
                     </div>
                 </div>
-            </div>
-
-        </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
       </div>
     </div>
   );

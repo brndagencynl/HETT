@@ -78,7 +78,7 @@ const ProductDetail: React.FC = () => {
     }
 
     return (
-        <div className="bg-white min-h-screen pt-24 pb-20">
+        <div className="bg-white min-h-screen pb-20">
 
             {/* Breadcrumb */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">

@@ -43,7 +43,7 @@ const Blog: React.FC = () => {
     };
 
     return (
-        <div className="pt-[185px] md:pt-[200px] pb-20 bg-hett-bg">
+        <div className="pb-20 bg-hett-bg">
             <PageHeader
                 title="Blog & Nieuws"
                 subtitle="Blijf op de hoogte van het laatste nieuws, tips en inspiratie rondom terrasoverkappingen en buitenleven."

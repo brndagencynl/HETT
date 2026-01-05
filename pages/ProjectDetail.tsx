@@ -57,7 +57,7 @@ const ProjectDetail: React.FC = () => {
 
     if (loading) {
         return (
-            <div className="bg-white min-h-screen pt-24 pb-20">
+            <div className="bg-white min-h-screen pb-20">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="py-24 text-center">
                         <Loader2 className="w-8 h-8 animate-spin text-hett-secondary mx-auto mb-4" />
@@ -70,7 +70,7 @@ const ProjectDetail: React.FC = () => {
 
     if (error || !project) {
         return (
-            <div className="bg-white min-h-screen pt-24 pb-20">
+            <div className="bg-white min-h-screen pb-20">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="py-24 text-center">
                         <h1 className="text-2xl font-bold text-hett-dark mb-4">Project niet gevonden</h1>
@@ -88,7 +88,7 @@ const ProjectDetail: React.FC = () => {
     const categoryTags = getCategoryTags(project.tags);
 
     return (
-        <div className="bg-white min-h-screen pt-24 pb-20">
+        <div className="bg-white min-h-screen pb-20">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
                 <Link to="/projecten" className="text-gray-500 hover:text-hett-dark flex items-center gap-1 text-sm mb-6">
                     <ArrowLeft size={16} /> Terug naar projecten

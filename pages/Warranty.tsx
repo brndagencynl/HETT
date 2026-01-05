@@ -1,10 +1,19 @@
 
 import React from 'react';
 import PageHeader from '../components/PageHeader';
-import { ShieldCheck, AlertTriangle, FileText, Mail } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { ShieldCheck, AlertTriangle, Truck, CreditCard, Pen } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
 
 const Warranty: React.FC = () => {
+    const location = useLocation();
+
+    const navItems = [
+        { id: 'bezorgen', title: 'Bezorgen & Afhalen', icon: Truck, path: '/bezorging' },
+        { id: 'garantie', title: 'Garantie & Service', icon: ShieldCheck, path: '/garantie-en-klachten' },
+        { id: 'betalen', title: 'Bestellen & Betalen', icon: CreditCard, path: '/betaalmethoden' },
+        { id: 'montage', title: 'Product & Montage', icon: Pen, path: '/montage-handleiding' },
+    ];
+
   return (
     <div className="min-h-screen bg-[#f6f8fa] font-sans">
       <PageHeader 
@@ -14,7 +23,34 @@ const Warranty: React.FC = () => {
         image="https://picsum.photos/1200/600?random=warranty"
       />
 
-      <div className="max-w-[1000px] mx-auto px-4 sm:px-6 lg:px-8 py-20">
+            <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+                    {/* Sidebar (Categorieën) */}
+                    <aside className="lg:col-span-3">
+                        <div className="sticky top-48">
+                            <h3 className="sidebar-nav-title uppercase tracking-tight">Categorieën</h3>
+                            <nav className="flex flex-col gap-1">
+                                {navItems.map((item) => {
+                                    const Icon = item.icon;
+                                    const isActive = location.pathname === item.path;
+                                    return (
+                                        <Link
+                                            key={item.id}
+                                            to={item.path}
+                                            className={`sidebar-nav-item ${isActive ? 'active' : ''}`}
+                                        >
+                                            <Icon size={22} className="sidebar-nav-icon" />
+                                            <span>{item.title}</span>
+                                        </Link>
+                                    );
+                                })}
+                            </nav>
+                        </div>
+                    </aside>
+
+                    {/* Content */}
+                    <div className="lg:col-span-9">
+                        <div className="max-w-[1000px]">
         
         {/* Warranty Section */}
         <div className="bg-white p-8 md:p-12 rounded-[32px] shadow-sm border border-gray-100 mb-12">
@@ -103,6 +139,9 @@ const Warranty: React.FC = () => {
         </div>
 
       </div>
+                        </div>
+                    </div>
+                </div>
     </div>
   );
 };

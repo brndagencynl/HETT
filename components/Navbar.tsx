@@ -50,7 +50,7 @@ const Navbar: React.FC = () => {
 
   return (
     <>
-      <div className="fixed top-0 w-full z-50 font-sans bg-white shadow-sm">
+      <div className="sticky top-0 w-full z-50 font-sans bg-white shadow-sm">
         {/* MOBILE HEADER */}
         <div className="md:hidden border-b border-gray-200 bg-white">
           <div className="flex items-center justify-between px-4 py-3">

@@ -106,6 +106,7 @@ export default function ShopifyTest() {
       title: payload.title,
       category: "verandas",
       price: payload.totalPrice,
+      priceCents: toCents(payload.totalPrice),
       shortDescription: "Test maatwerk item",
       description: "Test maatwerk item",
       imageUrl: "/renders/veranda/ral7016/base.png",

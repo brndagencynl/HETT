@@ -292,6 +292,164 @@ function formatSandwichpanelenSummary(item: CartItem): string {
 }
 
 // =============================================================================
+// INDIVIDUAL ATTRIBUTE BUILDERS
+// =============================================================================
+
+/**
+ * Build individual Shopify line attributes for standard veranda
+ * Each config option gets its own attribute with human-readable key/value
+ */
+function buildVerandaAttributes(item: CartItem): ShopifyLineAttribute[] {
+  const config = item.config?.data as VerandaConfig | undefined;
+  const attributes: ShopifyLineAttribute[] = [];
+  
+  if (!config) return attributes;
+  
+  // Color (Kleur)
+  const color = config.color || config.kleur;
+  if (color) {
+    attributes.push({ key: 'Kleur', value: getLabel(color, COLOR_LABELS) });
+  }
+  
+  // Daktype (Dak)
+  if (config.daktype) {
+    attributes.push({ key: 'Daktype', value: getLabel(config.daktype, DAKTYPE_LABELS) });
+  }
+  
+  // Goot
+  if (config.goot) {
+    attributes.push({ key: 'Goot', value: getLabel(config.goot, GOOT_LABELS) });
+  }
+  
+  // Zijwand links
+  attributes.push({ 
+    key: 'Zijwand links', 
+    value: getLabel(config.zijwand_links || 'geen', ZIJWAND_LABELS) 
+  });
+  
+  // Zijwand rechts
+  attributes.push({ 
+    key: 'Zijwand rechts', 
+    value: getLabel(config.zijwand_rechts || 'geen', ZIJWAND_LABELS) 
+  });
+  
+  // Voorzijde
+  attributes.push({ 
+    key: 'Voorzijde', 
+    value: getLabel(config.voorzijde || 'geen', VOORZIJDE_LABELS) 
+  });
+  
+  // Verlichting
+  attributes.push({ 
+    key: 'Verlichting', 
+    value: formatBoolean(config.verlichting) 
+  });
+  
+  return attributes;
+}
+
+/**
+ * Build individual Shopify line attributes for maatwerk veranda
+ */
+function buildMaatwerkAttributes(item: CartItem): ShopifyLineAttribute[] {
+  const payload = item.maatwerkPayload;
+  const attributes: ShopifyLineAttribute[] = [];
+  
+  if (!payload) return attributes;
+  
+  // Maatwerk indicator
+  attributes.push({ key: 'Type', value: 'Maatwerk' });
+  
+  // Dimensions
+  attributes.push({ key: 'Breedte', value: `${payload.size.width} cm` });
+  attributes.push({ key: 'Diepte', value: `${payload.size.depth} cm` });
+  
+  // Helper to get selection value
+  const getSelection = (groupId: string): string | undefined => {
+    const sel = payload.selections.find(s => s.groupId === groupId);
+    return sel?.choiceLabel;
+  };
+  
+  // Color
+  const color = getSelection('kleur') || getSelection('color');
+  if (color) {
+    attributes.push({ key: 'Kleur', value: color });
+  }
+  
+  // Daktype
+  const daktype = getSelection('daktype') || getSelection('dak');
+  if (daktype) {
+    attributes.push({ key: 'Daktype', value: daktype });
+  }
+  
+  // Goot
+  const goot = getSelection('goot');
+  if (goot) {
+    attributes.push({ key: 'Goot', value: goot });
+  }
+  
+  // Zijwanden
+  attributes.push({ 
+    key: 'Zijwand links', 
+    value: getSelection('zijwand_links') || getSelection('zijwandLinks') || 'Geen' 
+  });
+  attributes.push({ 
+    key: 'Zijwand rechts', 
+    value: getSelection('zijwand_rechts') || getSelection('zijwandRechts') || 'Geen' 
+  });
+  
+  // Voorzijde
+  attributes.push({ 
+    key: 'Voorzijde', 
+    value: getSelection('voorzijde') || 'Geen' 
+  });
+  
+  // Verlichting
+  const verlichting = getSelection('verlichting');
+  if (verlichting) {
+    attributes.push({ key: 'Verlichting', value: verlichting });
+  }
+  
+  return attributes;
+}
+
+/**
+ * Build individual Shopify line attributes for sandwichpanelen
+ */
+function buildSandwichpanelenAttributes(item: CartItem): ShopifyLineAttribute[] {
+  const config = item.config?.data as SandwichConfig | undefined;
+  const attributes: ShopifyLineAttribute[] = [];
+  
+  if (!config) return attributes;
+  
+  // Working width
+  if (config.workingWidthMm) {
+    attributes.push({ key: 'Werkende breedte', value: `${config.workingWidthMm} mm` });
+  }
+  
+  // Length
+  const length = config.lengthMm || config.length;
+  if (length) {
+    attributes.push({ key: 'Lengte', value: `${length} mm` });
+  }
+  
+  // Color
+  const color = config.color || config.kleur;
+  if (color) {
+    attributes.push({ key: 'Kleur', value: getLabel(color, COLOR_LABELS) });
+  }
+  
+  // U-profiles
+  if (config.extras?.uProfiles?.enabled) {
+    attributes.push({ key: 'U-profielen', value: `${config.extras.uProfiles.meters} m` });
+  } else if (config.extra_u_profielen_m) {
+    attributes.push({ key: 'U-profielen', value: `${config.extra_u_profielen_m} m` });
+  }
+  
+  return attributes;
+}
+
+// =============================================================================
 // MAIN EXPORT
 // =============================================================================
 
@@ -299,7 +457,7 @@ function formatSandwichpanelenSummary(item: CartItem): string {
  * Convert a cart item to clean Shopify line attributes
  * 
  * Output attributes:
- * - "Configuratie": Human-readable summary of all config options
+ * - Individual config options as separate keys (Kleur, Daktype, Goot, etc.)
  * - "Preview": Absolute URL to preview image (if available)
  * - "Config-ID": Short reference ID for support
  * 
@@ -332,55 +490,54 @@ export function toShopifyLineAttributes(item: CartItem): ShopifyLineAttribute[] 
       (typeof originalDepthCm === 'number' ? mapToBucket(originalDepthCm, MAATWERK_DEPTH_BUCKETS) : undefined);
 
     if (typeof originalWidthCm === 'number') {
-      attributes.push({ key: 'originalWidthCm', value: String(originalWidthCm) });
+      attributes.push({ key: '_breedte_cm', value: String(originalWidthCm) });
     }
     if (typeof originalDepthCm === 'number') {
-      attributes.push({ key: 'originalDepthCm', value: String(originalDepthCm) });
+      attributes.push({ key: '_diepte_cm', value: String(originalDepthCm) });
     }
     if (typeof bucketW === 'number') {
-      attributes.push({ key: 'bucketW', value: String(bucketW) });
+      attributes.push({ key: '_bucket_breedte', value: String(bucketW) });
     }
     if (typeof bucketD === 'number') {
-      attributes.push({ key: 'bucketD', value: String(bucketD) });
+      attributes.push({ key: '_bucket_diepte', value: String(bucketD) });
     }
 
     try {
       const configJson = JSON.stringify(item.config?.data ?? item.maatwerkPayload ?? {});
-      attributes.push({ key: 'config_json', value: configJson });
+      attributes.push({ key: '_config_json', value: configJson });
     } catch {
       // ignore
     }
   }
   
-  // 1. Configuration summary
-  let summary: string;
+  // Build individual attributes based on config type
+  let configAttributes: ShopifyLineAttribute[] = [];
   switch (configType) {
     case 'veranda':
-      summary = formatVerandaSummary(item);
+      configAttributes = buildVerandaAttributes(item);
       break;
     case 'maatwerk':
-      summary = formatMaatwerkSummary(item);
+      configAttributes = buildMaatwerkAttributes(item);
       break;
     case 'sandwichpaneel':
-      summary = formatSandwichpanelenSummary(item);
+      configAttributes = buildSandwichpanelenAttributes(item);
       break;
-    default:
-      summary = 'Configuratie: Niet beschikbaar';
   }
   
-  attributes.push({ key: 'Configuratie', value: summary });
+  // Add config attributes
+  attributes.push(...configAttributes);
   
-  // 2. Preview image (if available)
+  // Preview image (if available)
   const previewUrl = getPreviewUrl(item);
   if (previewUrl) {
     attributes.push({ key: 'Preview', value: previewUrl });
     // Also add the explicit key expected by ShopifyCartContext and integrations
-    attributes.push({ key: 'preview_image_url', value: previewUrl });
+    attributes.push({ key: '_preview_url', value: previewUrl });
   }
   
-  // 3. Config ID for support reference
+  // Config ID for support reference
   const configId = generateConfigId(item);
-  attributes.push({ key: 'Config-ID', value: configId });
+  attributes.push({ key: 'Referentie', value: configId });
   
   // Log for debugging
   console.log('[Checkout Attributes]', {

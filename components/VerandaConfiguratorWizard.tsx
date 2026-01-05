@@ -173,8 +173,17 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
     const [isSubmitting, setIsSubmitting] = useState(false); // Loading state for add-to-cart
     const [didSubmit, setDidSubmit] = useState(false); // Track if form was submitted successfully
 
-    // Price calculation
+    // Price calculation - basePrice comes from Shopify product.price
     const { total: currentPrice, items: priceItems, basePrice: calcBasePrice } = calcVerandaPrice(basePrice, config as VerandaConfig);
+    
+    // Log pricing source for debugging
+    console.log('[VerandaConfigurator] Pricing:', {
+        basePriceProp: basePrice,
+        calculatedBasePrice: calcBasePrice,
+        optionsTotal: priceItems.reduce((sum, item) => sum + item.amount, 0),
+        grandTotal: currentPrice,
+        source: 'Shopify via product.price prop',
+    });
 
     // Visual layers for rendering - uses color to determine base image and overlay variants
     const visualLayers = useMemo((): VisualizationLayer[] => {

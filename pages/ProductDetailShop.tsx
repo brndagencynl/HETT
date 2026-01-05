@@ -65,6 +65,15 @@ const ProductDetailShop: React.FC<ProductDetailShopProps> = ({ productHandle }) 
                     return;
                 }
 
+                // Always log price info for debugging
+                console.log('[ProductDetailShop] Product pricing:', {
+                    handle: shopifyProduct.handle,
+                    price: shopifyProduct.price,
+                    priceCents: shopifyProduct.priceCents,
+                    shopifyVariantId: shopifyProduct.shopifyVariantId,
+                    source: 'Shopify variant',
+                });
+
                 if (import.meta.env.DEV) {
                     console.log('[ProductDetailShop] Product loaded:', shopifyProduct);
                 }

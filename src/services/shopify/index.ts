@@ -35,3 +35,12 @@ export {
   getShopifyRegisterUrl,
   getShopifyOrdersUrl,
 } from './account';
+
+export {
+  toNumber,
+  getFirstAvailableVariant as getFirstAvailablePriceVariant,
+  getVariantPrice as getPriceFromVariant,
+  getProductBasePrice,
+  hasValidShopifyPrice,
+  type ShopifyVariant as ShopifyPriceVariant,
+} from './pricing';

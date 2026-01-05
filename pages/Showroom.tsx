@@ -74,7 +74,7 @@ const Showroom: React.FC = () => {
 
                         {/* Module Header */}
                         <div className="p-8 md:p-10 border-b border-gray-100 text-center">
-                            <img src="/logo.png" alt="HETT" className="h-12 mx-auto mb-6 object-contain" />
+                            <img src="/assets/images/hett-logo-navbar.png" alt="HETT" className="h-12 mx-auto mb-6 object-contain" />
                             <span className="text-gray-500 font-bold text-sm uppercase tracking-wider mb-2 block">Showroom HETT Eindhoven</span>
                             <h2 className="text-2xl md:text-3xl font-black text-hett-dark mb-4">
                                 Plan hier je afspraak met onze adviseur(s)

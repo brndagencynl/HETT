@@ -314,24 +314,26 @@ const ProductDetailShop: React.FC<ProductDetailShopProps> = ({ productHandle }) 
                                         </div>
                                     )}
 
-                                    {product.category === 'accessoires' && (
-                                        <div className="mb-3">
-                                            <QuantitySelector value={accessoryQuantity} onChange={setAccessoryQuantity} />
-                                        </div>
-                                    )}
+                                    <div className="flex flex-row items-stretch gap-3">
+                                        {product.category === 'accessoires' && (
+                                            <div className="w-32 flex-shrink-0">
+                                                <QuantitySelector value={accessoryQuantity} onChange={setAccessoryQuantity} className="w-full h-full rounded-lg border border-gray-200 bg-gray-50 overflow-hidden flex items-stretch" />
+                                            </div>
+                                        )}
 
-                                    <button
-                                        onClick={handleAccessoryAdd}
-                                        disabled={isAddingAccessory}
-                                        className={`w-full py-4 text-lg flex items-center justify-center gap-3 rounded-lg font-bold transition-colors ${
-                                            isAddingAccessory
-                                                ? 'bg-gray-400 cursor-not-allowed text-white'
-                                                : 'btn-primary'
-                                        }`}
-                                    >
-                                        <ShoppingCart size={20} /> 
-                                        {isAddingAccessory ? 'Toevoegen...' : 'In winkelwagen'}
-                                    </button>
+                                        <button
+                                            onClick={handleAccessoryAdd}
+                                            disabled={isAddingAccessory}
+                                            className={`flex-1 py-4 text-lg flex items-center justify-center gap-3 rounded-lg font-bold transition-colors ${
+                                                isAddingAccessory
+                                                    ? 'bg-gray-400 cursor-not-allowed text-white'
+                                                    : 'btn-primary'
+                                            }`}
+                                        >
+                                            <ShoppingCart size={20} /> 
+                                            {isAddingAccessory ? 'Toevoegen...' : 'In winkelwagen'}
+                                        </button>
+                                    </div>
                                 </>
                             )}
                         </div>

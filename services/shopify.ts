@@ -790,16 +790,24 @@ export const FALLBACK_USPS: HomepageUsp[] = [
 
 export const FALLBACK_FAQ: FaqItem[] = [
   {
-    question: 'Hoe lang duurt de levering?',
-    answer: 'Standaard leveren wij binnen 10 werkdagen na bestelling. Voor maatwerk kan dit iets langer duren.',
+    question: 'Kan ik een veranda volledig op maat samenstellen?',
+    answer: 'Ja. Met onze configurator stelt u eenvoudig uw veranda samen op basis van afmetingen, kleuren, daktype en opties zoals zijwanden en verlichting. Afwijkende maten zijn mogelijk via maatwerk.',
   },
   {
-    question: 'Kan ik de veranda zelf monteren?',
-    answer: 'Ja! Al onze veranda\'s zijn ontworpen voor doe-het-zelvers. We leveren een complete montagehandleiding mee.',
+    question: 'Wat is de levertijd van een veranda of sandwichpaneel?',
+    answer: 'De gemiddelde levertijd bedraagt 5–10 werkdagen. Bij maatwerk of specifieke uitvoeringen kan de levertijd iets afwijken. U ziet dit altijd duidelijk bij het product.',
   },
   {
-    question: 'Wat is de garantie?',
-    answer: 'Wij bieden 10 jaar garantie op constructie en 5 jaar op dakbedekking.',
+    question: 'Leveren jullie ook in België en Duitsland?',
+    answer: 'Ja. Wij leveren in Nederland, België en Duitsland. Levering binnen Nederland is gratis. Voor België en Duitsland worden de bezorgkosten berekend op basis van afstand.',
+  },
+  {
+    question: 'Kan ik de producten zelf monteren?',
+    answer: 'Ja. Onze producten zijn ontworpen voor eenvoudige montage door doe-het-zelvers. U ontvangt een duidelijke montagehandleiding. Montage door ons team is optioneel op aanvraag.',
+  },
+  {
+    question: 'Kan ik de producten ook bekijken in een showroom?',
+    answer: 'Ja. In onze showroom kunt u verschillende veranda\'s, sandwichpanelen en afwerkingen bekijken. Zo krijgt u een goed beeld van materialen, kleuren en mogelijkheden.',
   },
 ];
 

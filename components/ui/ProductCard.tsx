@@ -197,7 +197,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'grid' })
                         </button>
                     ) : (
                         <div
-                            className="flex items-stretch gap-2"
+                            className="flex flex-row items-stretch gap-2"
                             onMouseDown={(e) => {
                                 // Don't let the parent Link start navigation.
                                 e.stopPropagation();
@@ -208,7 +208,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'grid' })
                                 e.stopPropagation();
                             }}
                         >
-                            <div className="w-1/3">
+                            <div className="w-28 flex-shrink-0">
                                 <QuantitySelector value={quantity} onChange={setQuantity} />
                             </div>
                             <button

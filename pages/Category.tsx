@@ -77,18 +77,41 @@ const Category: React.FC = () => {
         }
     }, [mobileFiltersOpen, activeBrands, draftPriceMin, draftPriceMax, activeWidths, activeDepths]);
 
-    const applyPriceDraft = (nextDraftMin: string = draftPriceMin, nextDraftMax: string = draftPriceMax) => {
-        console.log('[PriceFilter] draft', { draftMin: nextDraftMin, draftMax: nextDraftMax });
+    const applyPriceDraft = (
+        nextDraftMin: string = draftPriceMin,
+        nextDraftMax: string = draftPriceMax,
+        commit: boolean = true
+    ) => {
+        console.log('[PriceFilter] draft', { draftMin: nextDraftMin, draftMax: nextDraftMax, commit });
 
-        const parseDraft = (value: string): number | null => {
+        const parseDraft = (value: string): { value: number | null; pending: boolean } => {
             const trimmed = value.trim();
-            if (trimmed === '') return null;
-            const numeric = Number(trimmed.replace(',', '.'));
-            return Number.isFinite(numeric) ? numeric : null;
+            if (trimmed === '') return { value: null, pending: false };
+
+            // Allow comma as decimal separator.
+            const normalized = trimmed.replace(',', '.');
+
+            // While typing (debounced apply), don't apply if it's clearly a partial number
+            // like "12." or "12,", because that would temporarily clear the filter.
+            if (!commit) {
+                const looksNumeric = /^\d+(?:\.\d*)?$/.test(normalized);
+                const isTrailingDot = normalized.endsWith('.');
+                if (looksNumeric && isTrailingDot) return { value: null, pending: true };
+            }
+
+            const cleaned = commit ? normalized.replace(/\.$/, '') : normalized;
+            const numeric = Number(cleaned);
+            return Number.isFinite(numeric) ? { value: numeric, pending: false } : { value: null, pending: true };
         };
 
-        let min = parseDraft(nextDraftMin);
-        let max = parseDraft(nextDraftMax);
+        const parsedMin = parseDraft(nextDraftMin);
+        const parsedMax = parseDraft(nextDraftMax);
+
+        // If either field is mid-typing (partial/invalid), keep current applied values.
+        if (!commit && (parsedMin.pending || parsedMax.pending)) return;
+
+        let min = parsedMin.value;
+        let max = parsedMax.value;
 
         if (min !== null && max !== null && min > max) {
             // Prefer swap to keep intent
@@ -108,7 +131,7 @@ const Category: React.FC = () => {
         }
 
         const t = window.setTimeout(() => {
-            applyPriceDraft();
+            applyPriceDraft(draftPriceMin, draftPriceMax, false);
         }, 600);
 
         return () => window.clearTimeout(t);
@@ -174,7 +197,7 @@ const Category: React.FC = () => {
         setDraftPriceMin(pendingDraftPriceMin);
         setDraftPriceMax(pendingDraftPriceMax);
         skipNextPriceDebounceRef.current = true;
-        applyPriceDraft(pendingDraftPriceMin, pendingDraftPriceMax);
+        applyPriceDraft(pendingDraftPriceMin, pendingDraftPriceMax, true);
         setActiveWidths([...pendingWidths]);
         setActiveDepths([...pendingDepths]);
     };
@@ -239,18 +262,20 @@ const Category: React.FC = () => {
     const activeFilterCount = activeBrands.length + activeWidths.length + activeDepths.length + 
         (appliedPriceMin !== null || appliedPriceMax !== null ? 1 : 0);
 
-    // Extracted filter content for reuse
-    const FilterContent = ({ isPending = false }: { isPending?: boolean }) => {
+    // Render filter content for reuse.
+    // NOTE: Keep this as a plain function (not an inline component) to avoid remounting
+    // the whole filter tree on every render, which can reset focus/caret while typing.
+    const renderFilterContent = (isPending: boolean = false) => {
         const currentBrands = isPending ? pendingBrands : activeBrands;
         const currentWidths = isPending ? pendingWidths : activeWidths;
         const currentDepths = isPending ? pendingDepths : activeDepths;
         const currentPriceMin = isPending ? pendingDraftPriceMin : draftPriceMin;
         const currentPriceMax = isPending ? pendingDraftPriceMax : draftPriceMax;
-        
+
         // Debug log for filters
         console.log('[Filters] config', { isVerandaCategory, categorySlug });
         console.log('[Filters] selected', { currentWidths, currentDepths, currentPriceMin, currentPriceMax, currentBrands });
-        
+
         return (
             <div className="border border-gray-200 rounded-lg overflow-hidden divide-y divide-gray-200">
                 <FilterAccordion title="Laat resultaten zien in" defaultOpen>
@@ -266,7 +291,9 @@ const Category: React.FC = () => {
                             <div className="flex items-center gap-2">
                                 <div className="flex-1">
                                     <input
-                                        type="number"
+                                        type="text"
+                                        inputMode="decimal"
+                                        pattern="[0-9]*[.,]?[0-9]*"
                                         placeholder="Min €"
                                         value={currentPriceMin}
                                         onChange={(e) => isPending ? setPendingDraftPriceMin(e.target.value) : setDraftPriceMin(e.target.value)}
@@ -274,13 +301,13 @@ const Category: React.FC = () => {
                                             if (isPending) return;
                                             if (e.key === 'Enter') {
                                                 skipNextPriceDebounceRef.current = true;
-                                                applyPriceDraft();
+                                                applyPriceDraft((e.currentTarget as HTMLInputElement).value, currentPriceMax, true);
                                             }
                                         }}
                                         onBlur={() => {
                                             if (isPending) return;
                                             skipNextPriceDebounceRef.current = true;
-                                            applyPriceDraft();
+                                            applyPriceDraft(currentPriceMin, currentPriceMax, true);
                                         }}
                                         className="w-full px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-hett-secondary"
                                     />
@@ -288,7 +315,9 @@ const Category: React.FC = () => {
                                 <span className="text-gray-400">-</span>
                                 <div className="flex-1">
                                     <input
-                                        type="number"
+                                        type="text"
+                                        inputMode="decimal"
+                                        pattern="[0-9]*[.,]?[0-9]*"
                                         placeholder="Max €"
                                         value={currentPriceMax}
                                         onChange={(e) => isPending ? setPendingDraftPriceMax(e.target.value) : setDraftPriceMax(e.target.value)}
@@ -296,13 +325,13 @@ const Category: React.FC = () => {
                                             if (isPending) return;
                                             if (e.key === 'Enter') {
                                                 skipNextPriceDebounceRef.current = true;
-                                                applyPriceDraft();
+                                                applyPriceDraft(currentPriceMin, (e.currentTarget as HTMLInputElement).value, true);
                                             }
                                         }}
                                         onBlur={() => {
                                             if (isPending) return;
                                             skipNextPriceDebounceRef.current = true;
-                                            applyPriceDraft();
+                                            applyPriceDraft(currentPriceMin, currentPriceMax, true);
                                         }}
                                         className="w-full px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-hett-secondary"
                                     />
@@ -381,7 +410,7 @@ const Category: React.FC = () => {
                         <div className="flex items-center gap-2 mb-6 text-xl font-bold text-hett-dark">
                             <SlidersHorizontal size={24} /> Filters
                         </div>
-                        <FilterContent />
+                            {renderFilterContent()}
                     </aside>
 
                     <main className="flex-grow">
@@ -453,7 +482,7 @@ const Category: React.FC = () => {
                 onClose={() => setMobileFiltersOpen(false)}
                 onApply={handleApplyFilters}
             >
-                <FilterContent isPending />
+                {renderFilterContent(true)}
             </MobileFilterSheet>
         </div>
     );

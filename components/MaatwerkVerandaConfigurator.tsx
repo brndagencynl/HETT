@@ -347,6 +347,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
     
     // Handle slider change
     const handleWidthChange = (value: number) => {
+      console.log('[Maatwerk Slider] width slider =>', value);
       const clampedValue = clampMaatwerkWidth(value);
       setConfig((prev) => {
         const prevSize = prev.size || { width: 600, depth: 300 };
@@ -358,6 +359,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
     };
 
     const handleDepthChange = (value: number) => {
+      console.log('[Maatwerk Slider] depth slider =>', value);
       const clampedValue = clampMaatwerkDepth(value);
       setConfig((prev) => {
         const prevSize = prev.size || { width: 600, depth: 300 };
@@ -368,21 +370,6 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
       });
     };
 
-    // Handle numeric input
-    const handleWidthInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = parseInt(e.target.value, 10);
-      if (!isNaN(value)) {
-        handleWidthChange(value);
-      }
-    };
-
-    const handleDepthInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = parseInt(e.target.value, 10);
-      if (!isNaN(value)) {
-        handleDepthChange(value);
-      }
-    };
-
     // Calculate area in m²
     const areaM2 = (currentSize.width / 100) * (currentSize.depth / 100);
     
@@ -391,18 +378,84 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
       value,
       min,
       max,
-      onInput,
       onSlider,
+      configKey,
     }: {
       label: string;
       value: number;
       min: number;
       max: number;
-      onInput: (e: React.ChangeEvent<HTMLInputElement>) => void;
       onSlider: (value: number) => void;
+      configKey: 'width' | 'depth';
     }) => {
-      const ratio = (value - min) / (max - min);
+      // Local string state for typing - allows empty/intermediate values
+      const [inputValue, setInputValue] = React.useState(String(value));
+      // Track if user is actively dragging
+      const [isDragging, setIsDragging] = React.useState(false);
+      // Local slider value during drag to prevent React re-render interference
+      const [localSliderValue, setLocalSliderValue] = React.useState(value);
+      
+      // Sync local state when value prop changes (but not during drag)
+      React.useEffect(() => {
+        if (!isDragging) {
+          setInputValue(String(value));
+          setLocalSliderValue(value);
+        }
+      }, [value, isDragging]);
+
+      const ratio = ((isDragging ? localSliderValue : value) - min) / (max - min);
       const percent = Math.max(0, Math.min(1, ratio)) * 100;
+
+      // Clamp and commit value
+      const commitValue = (raw: string) => {
+        const parsed = parseInt(raw, 10);
+        if (isNaN(parsed)) {
+          setInputValue(String(value));
+          return;
+        }
+        const clamped = Math.max(min, Math.min(max, Math.round(parsed)));
+        console.log(`[Maatwerk Input] ${configKey} commit =>`, clamped);
+        onSlider(clamped);
+        setInputValue(String(clamped));
+      };
+
+      const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setInputValue(e.target.value);
+      };
+
+      const handleBlur = () => {
+        commitValue(inputValue);
+      };
+
+      const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+          commitValue(inputValue);
+          (e.target as HTMLInputElement).blur();
+        }
+      };
+
+      // Slider handlers
+      const handleSliderInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const val = parseInt(e.target.value, 10);
+        if (!isNaN(val)) {
+          setLocalSliderValue(val);
+          console.log(`[Maatwerk Slider] ${configKey} drag =>`, val);
+        }
+      };
+
+      const handleSliderMouseDown = () => {
+        setIsDragging(true);
+      };
+
+      const handleSliderMouseUp = (e: React.MouseEvent<HTMLInputElement> | React.TouchEvent<HTMLInputElement>) => {
+        setIsDragging(false);
+        const target = e.target as HTMLInputElement;
+        const val = parseInt(target.value, 10);
+        if (!isNaN(val)) {
+          console.log(`[Maatwerk Slider] ${configKey} commit =>`, val);
+          onSlider(val);
+        }
+      };
 
       return (
         <Card padding="tight" className="space-y-2">
@@ -412,34 +465,52 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
           </div>
 
           <div className="flex items-center gap-3">
-            <input
-              type="range"
-              min={min}
-              max={max}
-              step={1}
-              value={value}
-              onChange={(e) => onSlider(parseInt(e.target.value, 10))}
-              className="flex-1 h-2.5 bg-gray-200 rounded-full appearance-none cursor-pointer accent-[#003878] 
-                [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 
-                [&::-webkit-slider-thumb]:bg-[#003878] [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer
-                [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white
-                [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:bg-[#003878] 
-                [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white"
-              style={{
-                background: `linear-gradient(to right, #003878 ${percent}%, #e5e7eb ${percent}%)`,
-              }}
-            />
+            <div className="flex-1 relative h-6 flex items-center">
+              {/* Track background */}
+              <div className="absolute inset-x-0 h-2.5 bg-gray-200 rounded-full" />
+              {/* Track fill */}
+              <div 
+                className="absolute left-0 h-2.5 bg-[#003878] rounded-full transition-all duration-75"
+                style={{ width: `${percent}%` }}
+              />
+              {/* Actual range input */}
+              <input
+                type="range"
+                min={min}
+                max={max}
+                step={1}
+                value={isDragging ? localSliderValue : value}
+                onInput={handleSliderInput}
+                onChange={handleSliderInput}
+                onMouseDown={handleSliderMouseDown}
+                onTouchStart={handleSliderMouseDown}
+                onMouseUp={handleSliderMouseUp}
+                onTouchEnd={handleSliderMouseUp}
+                className="absolute inset-0 w-full h-full cursor-pointer appearance-none bg-transparent
+                  [&::-webkit-slider-runnable-track]:h-2.5 [&::-webkit-slider-runnable-track]:bg-transparent
+                  [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 
+                  [&::-webkit-slider-thumb]:bg-[#003878] [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-grab
+                  [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white
+                  [&::-webkit-slider-thumb]:relative [&::-webkit-slider-thumb]:z-10
+                  [&::-moz-range-track]:h-2.5 [&::-moz-range-track]:bg-transparent
+                  [&::-moz-range-thumb]:w-6 [&::-moz-range-thumb]:h-6 [&::-moz-range-thumb]:bg-[#003878] 
+                  [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:cursor-grab [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white
+                  [&::-moz-range-thumb]:border-0"
+              />
+            </div>
 
             <div className="relative w-[128px] flex-shrink-0">
               <input
-                type="number"
-                min={min}
-                max={max}
-                value={value}
-                onChange={onInput}
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={isDragging ? String(localSliderValue) : inputValue}
+                onChange={handleInputChange}
+                onBlur={handleBlur}
+                onKeyDown={handleKeyDown}
                 className="w-full py-2.5 px-3 pr-10 rounded-md font-semibold text-base text-center border border-gray-200 focus:border-[#003878] focus:ring-2 focus:ring-[#003878]/20 outline-none transition-all"
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-medium">cm</span>
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-medium pointer-events-none">cm</span>
             </div>
           </div>
 
@@ -458,8 +529,8 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
           value={currentSize.width}
           min={MAATWERK_WIDTH_MIN}
           max={MAATWERK_WIDTH_MAX}
-          onInput={handleWidthInput}
           onSlider={handleWidthChange}
+          configKey="width"
         />
 
         <DimensionCard
@@ -467,8 +538,8 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
           value={currentSize.depth}
           min={MAATWERK_DEPTH_MIN}
           max={MAATWERK_DEPTH_MAX}
-          onInput={handleDepthInput}
           onSlider={handleDepthChange}
+          configKey="depth"
         />
 
         <Card padding="tight" className="flex items-start gap-3">
@@ -1031,9 +1102,9 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
                 <AnimatePresence mode="wait">
                   <MotionDiv
                     key={currentStepIndex}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
+                    initial={{ opacity: 0, y: 10, pointerEvents: 'none' as const }}
+                    animate={{ opacity: 1, y: 0, pointerEvents: 'auto' as const }}
+                    exit={{ opacity: 0, y: -10, pointerEvents: 'none' as const }}
                     transition={{ duration: 0.2 }}
                   >
                     {renderOptionSelector()}

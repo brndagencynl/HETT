@@ -269,9 +269,9 @@ const ProductDetailShop: React.FC<ProductDetailShopProps> = ({ productHandle }) 
                                 />
                             ) : product.requiresConfiguration ? (
                                 <>
-                                    <h3 className="text-2xl font-black text-hett-text mb-4">Product configuratie</h3>
+                                    <h3 className="text-2xl font-black text-hett-text mb-4">{product.title}</h3>
                                     <p className="text-hett-muted text-sm leading-relaxed mb-8">
-                                        Stel uw overkapping volledig op maat samen in onze 3D configurator. Kies uw afmetingen, kleuren en accessoires.
+                                        {product.shortDescription || product.description || 'Stel uw product volledig op maat samen in onze configurator.'}
                                     </p>
 
                                     <div className="flex items-baseline gap-2 mb-8">

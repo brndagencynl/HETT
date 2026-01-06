@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Heart, Settings, ShoppingCart } from 'lucide-react';
+import { Heart, Settings, ShoppingCart, Truck } from 'lucide-react';
 import { Product, CategorySlug } from '../../types';
 import { useCart } from '../../context/CartContext';
 import QuantitySelector from './QuantitySelector';
@@ -173,9 +173,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'grid' })
                             <>{formatEUR(product.priceCents, 'cents')}</>
                         )}
                     </div>
-                    <div className="mt-1 text-[10px] sm:text-xs text-gray-500 font-medium leading-tight">
-                        <span>Levertijd</span>{' '}
-                        <span className="text-hett-dark font-bold">{deliveryTime}</span>
+                    <div className="mt-1 flex items-center gap-1 text-[10px] sm:text-xs text-green-600 font-medium leading-tight">
+                        <Truck size={14} className="flex-shrink-0" />
+                        <span>{deliveryTime}</span>
                     </div>
                 </div>
 

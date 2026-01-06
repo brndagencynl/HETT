@@ -1,10 +1,25 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Heart, Star, Settings, ShoppingCart } from 'lucide-react';
+import { Heart, Settings, ShoppingCart } from 'lucide-react';
 import { Product, CategorySlug } from '../../types';
 import { useCart } from '../../context/CartContext';
 import QuantitySelector from './QuantitySelector';
 import { formatEUR, mulCents, toCents } from '../../src/utils/money';
+
+function getDeliveryTimeLabel(product: Product): string {
+    const specs = product.specs || {};
+    const keys = Object.keys(specs);
+    const matchKey = keys.find((k) => k.toLowerCase().includes('levertijd') || k.toLowerCase().includes('delivery') || k.toLowerCase().includes('lead'));
+    if (matchKey) {
+        const value = specs[matchKey];
+        const text = Array.isArray(value) ? value.join(', ') : String(value);
+        const trimmed = text.trim();
+        if (trimmed) return trimmed;
+    }
+
+    // Fallback used elsewhere in the site.
+    return '1-2 weken';
+}
 
 interface ProductCardProps {
     product: Product;
@@ -24,6 +39,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'grid' })
 
     // Determine if this product requires configuration
     const requiresConfiguration = CONFIG_REQUIRED_CATEGORIES.includes(product.category);
+
+    const mainTitle = product.title;
+    const subtitleText = (product.shortDescription || '').trim();
+    const deliveryTime = getDeliveryTimeLabel(product);
 
     const handleWishlistClick = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -135,15 +154,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'grid' })
 
                 <div className="block mb-1 sm:mb-2">
                     <h3 className="text-hett-dark font-bold text-[13px] sm:text-base leading-tight group-hover:underline line-clamp-2 min-h-[2.4rem] sm:min-h-[3rem]">
-                        {product.title}
+                        {mainTitle}
                     </h3>
-                </div>
-
-                <div className="flex items-center gap-1 mb-2 sm:mb-4">
-                    <div className="flex text-yellow-400">
-                        <Star size={10} fill="currentColor" />
+                    <div className="mt-0.5 sm:mt-1 space-y-0.5">
+                        {subtitleText && (
+                            <div className="text-[10px] sm:text-xs text-gray-500 font-medium leading-tight line-clamp-2">
+                                {subtitleText}
+                            </div>
+                        )}
                     </div>
-                    <span className="text-[9px] sm:text-xs text-gray-400 font-bold">({product.reviewCount || 0})</span>
                 </div>
 
                 <div className="mb-3 sm:mb-4">
@@ -153,6 +172,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'grid' })
                         ) : (
                             <>{formatEUR(product.priceCents, 'cents')}</>
                         )}
+                    </div>
+                    <div className="mt-1 text-[10px] sm:text-xs text-gray-500 font-medium leading-tight">
+                        <span>Levertijd</span>{' '}
+                        <span className="text-hett-dark font-bold">{deliveryTime}</span>
                     </div>
                 </div>
 
@@ -173,12 +196,25 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'grid' })
                             Stel samen
                         </button>
                     ) : (
-                        <div className="space-y-2">
-                            <QuantitySelector value={quantity} onChange={setQuantity} />
+                        <div
+                            className="flex items-stretch gap-2"
+                            onMouseDown={(e) => {
+                                // Don't let the parent Link start navigation.
+                                e.stopPropagation();
+                            }}
+                            onClick={(e) => {
+                                // Prevent Link navigation when interacting with the CTA row.
+                                e.preventDefault();
+                                e.stopPropagation();
+                            }}
+                        >
+                            <div className="w-1/3">
+                                <QuantitySelector value={quantity} onChange={setQuantity} />
+                            </div>
                             <button
                                 onClick={handleAddToCart}
                                 disabled={isAdding}
-                                className={`w-full rounded-md py-2 sm:py-3 text-[11px] sm:text-sm font-bold flex items-center justify-center gap-1.5 sm:gap-2 shadow-sm transition-colors ${
+                                className={`flex-1 rounded-md py-2 sm:py-3 text-[11px] sm:text-sm font-bold flex items-center justify-center gap-1.5 sm:gap-2 shadow-sm transition-colors ${
                                     isAdding 
                                         ? 'bg-gray-400 cursor-not-allowed' 
                                         : 'bg-hett-primary text-white hover:bg-hett-dark'

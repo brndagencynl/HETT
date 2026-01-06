@@ -105,8 +105,17 @@ export function transformShopifyProduct(shopifyProduct: ShopifyProduct): Product
 
   // Safe tag access
   const tags = shopifyProduct.tags || [];
-  const description = shopifyProduct.description || '';
-  const descriptionHtml = shopifyProduct.descriptionHtml || description;
+  const description = (shopifyProduct.description || '').trim();
+
+  const toExcerpt = (text: string, maxLen: number) => {
+    const normalized = text.replace(/\s+/g, ' ').trim();
+    if (!normalized) return '';
+    if (normalized.length <= maxLen) return normalized;
+    const cut = normalized.slice(0, maxLen);
+    // Prefer cutting at a word boundary when possible.
+    const lastSpace = cut.lastIndexOf(' ');
+    return (lastSpace > Math.floor(maxLen * 0.6) ? cut.slice(0, lastSpace) : cut).trim();
+  };
 
   return {
     id: shopifyProduct.handle, // Use handle as ID for URL friendliness
@@ -116,8 +125,9 @@ export function transformShopifyProduct(shopifyProduct: ShopifyProduct): Product
     price,
     priceExVatCents: Math.round(priceCents / 1.21),
     priceExVat: fromCents(Math.round(priceCents / 1.21)),
-    shortDescription: description.substring(0, 160),
-    description: descriptionHtml,
+    shortDescription: toExcerpt(description, 180),
+    // Keep description as Shopify plain-text description to avoid rendering raw HTML tags in the UI.
+    description,
     imageUrl: shopifyProduct.featuredImage?.url || '/assets/images/placeholder.jpg',
     specs,
     isNew: tags.includes('nieuw'),

@@ -297,9 +297,9 @@ const ProductDetailShop: React.FC<ProductDetailShopProps> = ({ productHandle }) 
                                 </>
                             ) : (
                                 <>
-                                    <h3 className="text-2xl font-black text-hett-text mb-4">Bestellen</h3>
+                                    <h3 className="text-2xl font-black text-hett-text mb-4">{product.title}</h3>
                                     <p className="text-hett-muted text-sm leading-relaxed mb-8">
-                                        Bestel dit product direct uit onze voorraad. Snelle levering gegarandeerd.
+                                        {product.shortDescription}
                                     </p>
 
                                     <div className="flex items-baseline gap-2 mb-8">

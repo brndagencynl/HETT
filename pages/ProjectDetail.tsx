@@ -90,7 +90,7 @@ const ProjectDetail: React.FC = () => {
     return (
         <div className="bg-white min-h-screen pb-20">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
-                <Link to="/projecten" className="text-gray-500 hover:text-hett-dark flex items-center gap-1 text-sm mb-6">
+                <Link to="/projecten" className="text-gray-500 hover:text-hett-dark flex items-center gap-1 text-sm mb-3">
                     <ArrowLeft size={16} /> Terug naar projecten
                 </Link>
 

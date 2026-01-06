@@ -117,6 +117,10 @@ export interface MaatwerkVerandaConfig {
   /** Convenience duplicates for consumers expecting width/depth fields */
   widthCm?: number;
   depthCm?: number;
+  /** Resolved bucketed width used for Shopify variant mapping */
+  bucketWidthCm?: number;
+  /** Resolved bucketed depth used for Shopify variant mapping */
+  bucketDepthCm?: number;
   color: string;
   daktype: string;
   goot: string;
@@ -131,12 +135,23 @@ export interface MaatwerkCartPayload {
   type: 'maatwerk_veranda';
   title: string;
   quantity: number;
+  /** Base price = shopifyVariantPrice + maatwerkSurcharge */
   basePrice: number;
+  /** Base price from Shopify variant (before surcharge) */
+  shopifyVariantPrice?: number;
+  /** Maatwerk surcharge (e.g. €750) */
+  maatwerkSurcharge?: number;
   optionsTotal: number;
   totalPrice: number;
   size: { width: number; depth: number };
+  /** Resolved bucketed width used for Shopify variant mapping */
+  bucketWidthCm?: number;
+  /** Resolved bucketed depth used for Shopify variant mapping */
+  bucketDepthCm?: number;
   /** Anchor size key used for pricing reference (may differ from size) */
   anchorSizeKey?: string;
+  /** Resolved Shopify variant ID (GID) for bucketed size */
+  shopifyVariantId?: string;
   selections: Array<{
     groupId: string;
     groupLabel: string;
@@ -147,6 +162,8 @@ export interface MaatwerkCartPayload {
   renderPreview?: string;
   priceBreakdown: {
     basePrice: number;
+    shopifyVariantPrice?: number;
+    maatwerkSurcharge?: number;
     selections: Array<{
       groupId: string;
       groupLabel: string;

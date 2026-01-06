@@ -1023,7 +1023,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
         )}
       </AnimatePresence>
 
-      <div className={isModalLayout ? 'py-4 sm:py-6' : 'pt-[185px] md:pt-[200px] pb-14'}>
+      <div className={isModalLayout ? 'py-4 sm:py-6' : 'pt-24 md:pt-28 pb-14'}>
         <div className={isModalLayout ? 'px-3 sm:px-6' : 'container'}>
           {!isModalLayout && (
             <div className="flex items-start justify-between gap-6 mb-6">

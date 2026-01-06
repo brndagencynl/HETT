@@ -172,7 +172,7 @@ const Home: React.FC = () => {
                 <div className="flex items-center justify-between mb-8">
                     <h2 className="text-2xl md:text-3xl font-black text-hett-dark">Populaire keuzes</h2>
                     <Link
-                        to="/categorie/overkappingen"
+                        to="/categorie/verandas"
                         className="px-4 py-2 border border-gray-300 rounded-full text-sm font-bold text-hett-dark hover:bg-gray-50 transition-colors"
                     >
                         Bekijk alle veranda's

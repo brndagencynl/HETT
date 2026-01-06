@@ -59,7 +59,7 @@ export type MaatwerkColorId = 'ral7016' | 'ral9005' | 'ral9001';
 export type MaatwerkDaktypeValue = 'poly_helder' | 'poly_opaal';
 
 /** Front side options */
-export type MaatwerkVoorzijdeValue = 'geen' | 'glas_schuifwand';
+export type MaatwerkVoorzijdeValue = 'geen' | 'glas_schuifwand' | 'glas_schuifwand_helder' | 'glas_schuifwand_getint';
 
 /** Side wall options (same for left and right) */
 export type MaatwerkZijwandValue = 'geen' | 'poly_spie' | 'sandwich_polyspie' | 'sandwich_vol';

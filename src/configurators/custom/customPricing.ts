@@ -247,13 +247,23 @@ export const MAATWERK_FRONT_OPTIONS: MaatwerkOptionChoice[] = [
     pricing: { type: 'fixed', price: 0 },
   },
   {
-    id: 'glas_schuifwand',
-    label: 'Glazen schuifwanden',
-    description: 'Glazen panelen over de gehele breedte.',
+    id: 'glas_schuifwand_helder',
+    label: 'Glazen schuifwand helder',
+    description: 'Heldere glazen panelen over de gehele breedte.',
     pricing: {
       type: 'byWidth',
       basePrice: 300,   // Base at minimum width
       pricePerCm: 1.50, // ~€1.50 per cm width
+    },
+  },
+  {
+    id: 'glas_schuifwand_getint',
+    label: 'Glazen schuifwand getint',
+    description: 'Getinte glazen panelen over de gehele breedte voor extra privacy.',
+    pricing: {
+      type: 'byWidth',
+      basePrice: 300,   // Base at minimum width
+      pricePerCm: 1.50, // ~€1.50 per cm width (adjust as needed)
     },
   },
 ];

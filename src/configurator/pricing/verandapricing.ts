@@ -170,10 +170,24 @@ export const FRONT_SIDE_OPTIONS: OptionChoice[] = [
     pricing: { type: 'fixed', price: 0 },
   },
   {
-    id: 'glas_schuifwand',
-    label: 'Glass sliding wall',
-    labelNL: 'Glazen schuifwanden',
-    description: 'Glazen panelen over de gehele breedte.',
+    id: 'glas_schuifwand_helder',
+    label: 'Glass sliding wall clear',
+    labelNL: 'Glazen schuifwand helder',
+    description: 'Heldere glazen panelen over de gehele breedte.',
+    pricing: {
+      type: 'byWidth',
+      prices: {
+        500: 999,
+        600: 1150,
+        700: 1450,
+      },
+    },
+  },
+  {
+    id: 'glas_schuifwand_getint',
+    label: 'Glass sliding wall tinted',
+    labelNL: 'Glazen schuifwand getint',
+    description: 'Getinte glazen panelen over de gehele breedte voor extra privacy.',
     pricing: {
       type: 'byWidth',
       prices: {

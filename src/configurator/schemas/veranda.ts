@@ -56,7 +56,7 @@ export type ColorValue = VerandaColorId;
 export type DaktypeValue = 'poly_helder' | 'poly_opaal';
 
 /** Front side options */
-export type VoorzijdeValue = 'geen' | 'glas_schuifwand';
+export type VoorzijdeValue = 'geen' | 'glas_schuifwand' | 'glas_schuifwand_helder' | 'glas_schuifwand_getint';
 
 /** Side wall options (same for left and right) */
 export type ZijwandValue = 'geen' | 'poly_spie' | 'sandwich_polyspie' | 'sandwich_vol';

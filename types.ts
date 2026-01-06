@@ -72,7 +72,7 @@ export type VerandaConfig = {
   goot?: 'deluxe' | 'cube' | 'classic'; // Required
   zijwand_links?: 'geen' | 'poly_spie' | 'sandwich_poly_spie' | 'sandwich_volledig' | 'sandwich_polyspie' | 'sandwich_vol';
   zijwand_rechts?: 'geen' | 'poly_spie' | 'sandwich_poly_spie' | 'sandwich_volledig' | 'sandwich_polyspie' | 'sandwich_vol';
-  voorzijde?: 'geen' | 'glazen_schuifwand' | 'glas_schuifwand';
+  voorzijde?: 'geen' | 'glazen_schuifwand' | 'glas_schuifwand' | 'glas_schuifwand_helder' | 'glas_schuifwand_getint';
   verlichting?: boolean;
   extra_verlichting?: boolean;
   // Common visual options

@@ -65,6 +65,28 @@ export const FALLBACK_IMAGE = '/renders/veranda/fallback.png';
 /** Choice IDs that should not have overlays */
 const NO_OVERLAY_CHOICES = ['geen', 'none', 'false', ''];
 
+/**
+ * Asset filename mapping for choices
+ * Maps new choice IDs to actual asset filenames
+ * This allows backwards compatibility and supports multiple IDs pointing to same asset
+ */
+const ASSET_FILENAME_MAP: Record<string, string> = {
+  // Voorzijde: both helder and getint variants
+  // Legacy key maps to helder
+  'glas_schuifwand': 'glas_schuifwand_helder',
+  // New keys use dedicated assets (or fallback to helder if getint doesn't exist yet)
+  'glas_schuifwand_helder': 'glas_schuifwand_helder',
+  'glas_schuifwand_getint': 'glas_schuifwand_getint',
+};
+
+/**
+ * Get the actual asset filename for a choice ID
+ * Applies mapping for backwards compatibility
+ */
+function getAssetFilename(choiceId: string): string {
+  return ASSET_FILENAME_MAP[choiceId] || choiceId;
+}
+
 /** Groups that do NOT render overlays (option-only, no images) */
 const NO_OVERLAY_GROUPS: string[] = ['verlichting', 'color'];
 
@@ -127,7 +149,7 @@ export function getBaseImagePath(color: VerandaColorId = DEFAULT_COLOR): string 
  * Get the overlay image path for an option selection
  * 
  * @param groupId - The option group (e.g., 'daktype', 'voorzijde')
- * @param choiceId - The selected choice ID (e.g., 'poly_helder', 'glas_schuifwand')
+ * @param choiceId - The selected choice ID (e.g., 'poly_helder', 'glas_schuifwand_helder')
  * @param color - The selected color
  * @returns Path to overlay image, or null if no overlay should be rendered
  */
@@ -145,8 +167,11 @@ export function getOverlayPath(
   // Convert boolean to null (booleans are for option-only toggles)
   if (typeof choiceId === 'boolean') return null;
   
+  // Apply asset filename mapping for backwards compatibility
+  const filename = getAssetFilename(choiceId);
+  
   // Color-dependent path
-  return `${RENDER_BASE_PATH}/${color}/${groupId}/${choiceId}.png`;
+  return `${RENDER_BASE_PATH}/${color}/${groupId}/${filename}.png`;
 }
 
 /**
@@ -168,8 +193,10 @@ export function getThumbnailPath(
     return `${RENDER_BASE_PATH}/shared/thumbnails/${groupId}/${choiceId}.png`;
   }
   
+  // Apply asset filename mapping
+  const filename = getAssetFilename(choiceId);
   // Color-dependent thumbnail
-  return `${RENDER_BASE_PATH}/${color}/thumbnails/${groupId}/${choiceId}.png`;
+  return `${RENDER_BASE_PATH}/${color}/thumbnails/${groupId}/${filename}.png`;
 }
 
 /**

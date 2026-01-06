@@ -51,8 +51,12 @@ const ZIJWAND_LABELS: Record<string, string> = {
 
 const VOORZIJDE_LABELS: Record<string, string> = {
   geen: 'Geen',
-  glazen_schuifwand: 'Glazen schuifwand',
-  glas_schuifwand: 'Glazen schuifwand',
+  // Legacy keys (map to helder for backwards compatibility)
+  glazen_schuifwand: 'Glazen schuifwand helder',
+  glas_schuifwand: 'Glazen schuifwand helder',
+  // New keys
+  glas_schuifwand_helder: 'Glazen schuifwand helder',
+  glas_schuifwand_getint: 'Glazen schuifwand getint',
 };
 
 // =============================================================================

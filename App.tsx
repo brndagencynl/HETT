@@ -5,6 +5,7 @@ import { AnimatePresence } from 'framer-motion';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
+import TawkTo from './src/components/TawkTo';
 
 import Configurator from './pages/Configurator';
 import Projects from './pages/Projects';
@@ -164,6 +165,7 @@ const AnimatedRoutes: React.FC = () => {
 const App: React.FC = () => {
   return (
     <HashRouter>
+      <TawkTo />
       <div className="flex flex-col min-h-screen bg-[#f6f8fa] font-sans text-hett-primary relative">
         <ScrollToTop />
         <Navbar />

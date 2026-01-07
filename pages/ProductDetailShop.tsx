@@ -7,6 +7,7 @@ import VerandaConfigurator, { VerandaConfiguratorRef } from '../components/Veran
 import SandwichPanelBuilder from '../components/ui/sandwichpanel/SandwichPanelBuilder';
 import ProductDetailContent from '../components/ui/ProductDetailContent';
 import QuantitySelector from '../components/ui/QuantitySelector';
+import ProductUSPs from '../src/components/ui/ProductUSPs';
 import { ProductConfig, Product } from '../types';
 import { getProductByHandle } from '../src/lib/shopify';
 import { formatEUR } from '../src/utils/money';
@@ -280,6 +281,8 @@ const ProductDetailShop: React.FC<ProductDetailShopProps> = ({ productHandle }) 
                                         <span className="text-hett-muted text-xs font-bold uppercase tracking-wider">Vanaf prijs</span>
                                     </div>
 
+                                    <ProductUSPs items={product.usps ?? []} />
+
                                     <div className="space-y-3">
                                         <button onClick={handleOpenConfigurator} className="btn-primary w-full py-5 text-lg flex items-center justify-center gap-3">
                                             <PenTool size={20} />
@@ -307,6 +310,8 @@ const ProductDetailShop: React.FC<ProductDetailShopProps> = ({ productHandle }) 
                                         <span className="text-4xl font-black text-hett-text">{formatEUR(product.priceCents, 'cents')}</span>
                                         <span className="text-hett-muted text-xs font-bold uppercase tracking-wider">Incl. BTW</span>
                                     </div>
+
+                                    <ProductUSPs items={product.usps ?? []} />
 
                                     {/* Error message */}
                                     {accessoryError && (

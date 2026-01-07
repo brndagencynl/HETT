@@ -68,6 +68,7 @@ export interface ShopifyProduct {
     key: string;
     value: string;
     namespace: string;
+    type?: string;
   }> | null;
 }
 

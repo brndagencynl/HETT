@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Heart, Settings, ShoppingCart, Truck } from 'lucide-react';
+import { CheckCircle, Heart, Settings, ShoppingCart, Truck } from 'lucide-react';
 import { Product, CategorySlug } from '../../types';
 import { useCart } from '../../context/CartContext';
 import QuantitySelector from './QuantitySelector';
@@ -43,6 +43,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'grid' })
     const mainTitle = product.title;
     const subtitleText = (product.shortDescription || '').trim();
     const deliveryTime = getDeliveryTimeLabel(product);
+    const firstUSP = (product.usps ?? []).map((x) => (typeof x === 'string' ? x.trim() : '')).find(Boolean) || '';
 
     const handleWishlistClick = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -173,6 +174,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'grid' })
                             <>{formatEUR(product.priceCents, 'cents')}</>
                         )}
                     </div>
+                    {firstUSP && (
+                        <div className="mt-1 flex items-center gap-1 text-[10px] sm:text-xs text-gray-500 font-medium leading-tight">
+                            <CheckCircle size={14} className="text-green-600 flex-shrink-0" />
+                            <span className="line-clamp-1">{firstUSP}</span>
+                        </div>
+                    )}
                     <div className="mt-1 flex items-center gap-1 text-[10px] sm:text-xs text-green-600 font-medium leading-tight">
                         <Truck size={14} className="flex-shrink-0" />
                         <span>{deliveryTime}</span>

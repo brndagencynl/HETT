@@ -71,6 +71,12 @@ export interface Product {
    * Format: one spec per line, "Label: Value"
    */
   specificationsRaw?: string;
+
+  /**
+   * Unique Selling Points from Shopify metafield (custom.usps)
+   * Definition: list.single_line_text_field
+   */
+  usps?: string[];
 }
 
 // Product Configuration Types

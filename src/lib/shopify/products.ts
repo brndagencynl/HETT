@@ -19,6 +19,30 @@ import type {
 import type { Product, CategorySlug } from '../../../types';
 import { toCents, fromCents } from '../../utils/money';
 
+export function parseShopifyUSPMetafield(
+  metafield: { type?: string | null; value?: string | null } | null | undefined
+): string[] {
+  const rawValue = (metafield?.value ?? '').trim();
+  if (!rawValue) return [];
+
+  const rawType = (metafield?.type ?? '').trim();
+
+  try {
+    if (rawType.startsWith('list.')) {
+      const parsed = JSON.parse(rawValue);
+      if (!Array.isArray(parsed)) return [];
+      return parsed
+        .map((x) => (typeof x === 'string' ? x.trim() : ''))
+        .filter(Boolean);
+    }
+
+    return [rawValue].map((x) => x.trim()).filter(Boolean);
+  } catch (error) {
+    console.warn('[USP] Failed to parse custom.usps metafield value');
+    return [];
+  }
+}
+
 // =============================================================================
 // COLLECTION HANDLES MAPPING
 // =============================================================================
@@ -64,6 +88,10 @@ export function transformShopifyProduct(shopifyProduct: ShopifyProduct): Product
   const getMetafield = (key: string) => {
     const field = metafields.find(m => m && m.key === key);
     return field?.value;
+  };
+
+  const getMetafieldObject = (namespace: string, key: string) => {
+    return metafields.find((m) => m && m.namespace === namespace && m.key === key) || null;
   };
 
   // Determine category from metafield or product type
@@ -119,6 +147,7 @@ export function transformShopifyProduct(shopifyProduct: ShopifyProduct): Product
 
   return {
     id: shopifyProduct.handle, // Use handle as ID for URL friendliness
+    handle: shopifyProduct.handle,
     title: shopifyProduct.title || 'Product',
     category: categorySlug,
     priceCents,
@@ -150,6 +179,7 @@ export function transformShopifyProduct(shopifyProduct: ShopifyProduct): Product
     // Custom metafields for product detail page
     extraDescription: getMetafield('extra_description') || undefined,
     specificationsRaw: getMetafield('specifications') || undefined,
+    usps: parseShopifyUSPMetafield(getMetafieldObject('custom', 'usps')),
   };
 }
 
@@ -377,7 +407,14 @@ export async function getProductByHandle(handle: string): Promise<Product | null
       return null;
     }
 
+    if (import.meta.env.DEV && data.product.metafields === null) {
+      console.warn('[USP] metafield custom.usps not accessible - check Storefront API permissions');
+    }
+
     const product = transformShopifyProduct(data.product);
+
+    // Log once per product fetch
+    console.log('[USP] handle', product.handle ?? product.id, product.usps ?? []);
     
     // Logging as requested
     console.log('[PDP] product handle from Shopify', product.id);

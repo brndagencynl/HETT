@@ -85,12 +85,14 @@ export const PRODUCT_FRAGMENT = `
       { namespace: "custom", key: "size_key" },
       { namespace: "custom", key: "visibility" },
       { namespace: "custom", key: "specs" },
+      { namespace: "custom", key: "usps" },
       { namespace: "custom", key: "extra_description" },
       { namespace: "custom", key: "specifications" }
     ]) {
       key
       value
       namespace
+      type
     }
   }
 `;

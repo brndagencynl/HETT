@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Check, ShoppingCart, Minus, Plus, ShieldCheck } from 'lucide-react';
 import { DEFAULT_SANDWICHPANEL_CONFIG, type SandwichpanelenConfig } from './SandwichPanelConfig';
 import { Product } from '../../../types';
+import ProductUSPs from '../../../src/components/ui/ProductUSPs';
 import {
     SANDWICH_COLOR_OPTIONS,
     SANDWICH_LENGTH_MM_OPTIONS,
@@ -313,6 +314,8 @@ const SandwichPanelBuilder: React.FC<Props> = ({ product, basePrice, onAddToCart
                         <span>{formatEUR(toCents(pricing.total), 'cents')}</span>
                     </div>
                 </div>
+
+                <ProductUSPs items={product.usps ?? []} />
 
                 <div className="flex gap-3">
                     <div className="flex items-center bg-white border border-gray-300 rounded-lg px-2 w-24">

@@ -6,6 +6,7 @@ import { getProductByHandle } from '../src/lib/shopify';
 import { Product } from '../types';
 import ProductDetailContent from '../components/ui/ProductDetailContent';
 import { formatEUR, toCents } from '../src/utils/money';
+import ProductUSPs from '../src/components/ui/ProductUSPs';
 
 const ProductDetail: React.FC = () => {
     const { handle } = useParams<{ handle: string }>();
@@ -161,6 +162,7 @@ const ProductDetail: React.FC = () => {
                                 <span className="text-4xl font-black text-hett-dark">{formatEUR(product.priceCents ?? toCents(product.price), 'cents')}</span>
                                 <span className="text-sm text-gray-500 font-bold uppercase">Incl. BTW</span>
                             </div>
+                            <ProductUSPs items={product.usps ?? []} />
                             <Link to="/contact" className="block w-full text-center bg-hett-dark text-white font-bold py-4 rounded-xl hover:opacity-90 transition-all shadow-lg shadow-blue-900/10">
                                 Offerte Aanvragen
                             </Link>
@@ -189,11 +191,7 @@ const ProductDetail: React.FC = () => {
                     }}
                     description={{
                         title: "Beschrijving",
-                        intro: product.description || product.shortDescription,
-                        paragraphs: [
-                            "Dit product is ontworpen met oog voor detail en kwaliteit. Het duurzame materiaalgebruik garandeert een lange levensduur en minimale onderhoudskosten.",
-                            "Dankzij de modulaire opbouw is het systeem eenvoudig aan te passen aan uw specifieke situatie."
-                        ]
+                        intro: product.description || product.shortDescription
                     }}
                     specs={Object.entries(product.specs).map(([label, value]) => ({
                         label: label,

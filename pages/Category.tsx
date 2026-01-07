@@ -47,6 +47,9 @@ const Category: React.FC = () => {
 
     // Check if this is the veranda category
     const isVerandaCategory = categorySlug === 'verandas' || categorySlug === 'overkappingen';
+    
+    // Check if this is the accessoires category
+    const isAccessoiresCategory = categorySlug === 'accessoires';
 
     // Fetch products from Shopify
     useEffect(() => {
@@ -123,8 +126,12 @@ const Category: React.FC = () => {
         console.log('[PriceFilter] applied', { appliedMin: min, appliedMax: max });
     };
 
-    // Debounced apply while typing (desktop). No UI changes.
+    // Debounced apply while typing (desktop). Only for veranda, not for accessoires.
+    // Accessoires uses explicit apply (button, Enter, or blur).
     useEffect(() => {
+        // Skip debounce for accessoires - they use explicit apply
+        if (categorySlug === 'accessoires') return;
+        
         if (skipNextPriceDebounceRef.current) {
             skipNextPriceDebounceRef.current = false;
             return;
@@ -136,7 +143,7 @@ const Category: React.FC = () => {
 
         return () => window.clearTimeout(t);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [draftPriceMin, draftPriceMax]);
+    }, [draftPriceMin, draftPriceMax, categorySlug]);
 
     const getCategoryName = (slug: string | undefined): string => {
         if (!slug) return 'Assortiment';
@@ -153,8 +160,20 @@ const Category: React.FC = () => {
 
     // Filter to only show public products first, then apply category/brand filters
     const filteredProducts = products.filter(p => {
-        // Brand filter (for non-veranda categories)
+        // Brand filter (for non-veranda and non-accessoires categories)
         const matchesBrand = activeBrands.length === 0 || activeBrands.includes(p.badges?.[0] || 'Onbekend');
+        
+        // Accessoires-specific filters (only price)
+        if (isAccessoiresCategory) {
+            // Get product price (priceCents is in cents)
+            const productPrice = (p.priceCents ?? toCents(p.price)) / 100;
+            
+            // Price filter
+            if (appliedPriceMin !== null && productPrice < appliedPriceMin) return false;
+            if (appliedPriceMax !== null && productPrice > appliedPriceMax) return false;
+            
+            return true; // No brand filter for accessoires
+        }
         
         // Veranda-specific filters
         if (isVerandaCategory) {
@@ -273,7 +292,7 @@ const Category: React.FC = () => {
         const currentPriceMax = isPending ? pendingDraftPriceMax : draftPriceMax;
 
         // Debug log for filters
-        console.log('[Filters] config', { isVerandaCategory, categorySlug });
+        console.log('[Filters] config', { isVerandaCategory, isAccessoiresCategory, categorySlug });
         console.log('[Filters] selected', { currentWidths, currentDepths, currentPriceMin, currentPriceMax, currentBrands });
 
         return (
@@ -284,7 +303,71 @@ const Category: React.FC = () => {
                     </div>
                 </FilterAccordion>
                 
-                {isVerandaCategory ? (
+                {isAccessoiresCategory ? (
+                    /* Accessoires: Only show Price filter */
+                    <FilterAccordion title="Prijs" defaultOpen>
+                        <div className="flex items-center gap-2">
+                            <div className="flex-1">
+                                <input
+                                    type="text"
+                                    inputMode="decimal"
+                                    pattern="[0-9]*[.,]?[0-9]*"
+                                    placeholder="Min €"
+                                    value={currentPriceMin}
+                                    onChange={(e) => isPending ? setPendingDraftPriceMin(e.target.value) : setDraftPriceMin(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (isPending) return;
+                                        if (e.key === 'Enter') {
+                                            skipNextPriceDebounceRef.current = true;
+                                            applyPriceDraft((e.currentTarget as HTMLInputElement).value, currentPriceMax, true);
+                                        }
+                                    }}
+                                    onBlur={() => {
+                                        if (isPending) return;
+                                        skipNextPriceDebounceRef.current = true;
+                                        applyPriceDraft(currentPriceMin, currentPriceMax, true);
+                                    }}
+                                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-hett-secondary"
+                                />
+                            </div>
+                            <span className="text-gray-400">-</span>
+                            <div className="flex-1">
+                                <input
+                                    type="text"
+                                    inputMode="decimal"
+                                    pattern="[0-9]*[.,]?[0-9]*"
+                                    placeholder="Max €"
+                                    value={currentPriceMax}
+                                    onChange={(e) => isPending ? setPendingDraftPriceMax(e.target.value) : setDraftPriceMax(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (isPending) return;
+                                        if (e.key === 'Enter') {
+                                            skipNextPriceDebounceRef.current = true;
+                                            applyPriceDraft(currentPriceMin, (e.currentTarget as HTMLInputElement).value, true);
+                                        }
+                                    }}
+                                    onBlur={() => {
+                                        if (isPending) return;
+                                        skipNextPriceDebounceRef.current = true;
+                                        applyPriceDraft(currentPriceMin, currentPriceMax, true);
+                                    }}
+                                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-hett-secondary"
+                                />
+                            </div>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                if (isPending) return;
+                                skipNextPriceDebounceRef.current = true;
+                                applyPriceDraft(currentPriceMin, currentPriceMax, true);
+                            }}
+                            className="mt-3 w-full py-2 bg-hett-primary text-white text-sm font-bold rounded-md hover:bg-hett-dark transition-colors"
+                        >
+                            Toepassen
+                        </button>
+                    </FilterAccordion>
+                ) : isVerandaCategory ? (
                     <>
                         {/* Price Filter */}
                         <FilterAccordion title="Prijs" defaultOpen>

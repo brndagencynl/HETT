@@ -10,7 +10,7 @@
  * - Full address form for delivery (street, postal code, city, country)
  * - Google Address Validation via serverless API
  * - Real-time validation status feedback
- * - Shipping cost calculation based on validated country
+ * - Distance-based shipping cost calculation (€1/km for BE/DE, free for NL)
  */
 
 import React, { useState, useCallback, useEffect } from 'react';
@@ -24,11 +24,14 @@ import {
   SUPPORTED_COUNTRIES,
   COUNTRY_LABELS,
   validateAddress,
-  getShippingCost,
   formatShippingCost,
   isAddressComplete,
   isDeliveryAvailable,
 } from '../../services/addressValidation';
+import {
+  calculateShipping,
+  type ShippingResult,
+} from '../../services/shipping';
 
 // =============================================================================
 // TYPES
@@ -78,6 +81,10 @@ export const AddressDeliverySelector: React.FC<AddressDeliverySelectorProps> = (
   );
   const [validationMessages, setValidationMessages] = useState<string[]>([]);
   const [hasInteracted, setHasInteracted] = useState(false);
+  
+  // Distance-based shipping state
+  const [distanceKm, setDistanceKm] = useState<number | null>(null);
+  const [isCalculatingShipping, setIsCalculatingShipping] = useState(false);
 
   // Initialize from props if address was previously validated
   useEffect(() => {
@@ -95,11 +102,12 @@ export const AddressDeliverySelector: React.FC<AddressDeliverySelectorProps> = (
     // If switching to pickup, mark as valid with 0 cost
     if (newMethod === 'pickup') {
       onShippingCostChange(0, true);
+      setDistanceKm(null);
     } else {
       // If switching to delivery, use current validation state
       const isValid = validationStatus === 'valid';
-      const cost = isValid ? getShippingCost(address.country) : 0;
-      onShippingCostChange(cost, isValid);
+      // Keep existing shipping cost if valid, otherwise 0
+      onShippingCostChange(isValid ? shippingCost : 0, isValid);
     }
   };
 
@@ -115,6 +123,7 @@ export const AddressDeliverySelector: React.FC<AddressDeliverySelectorProps> = (
     // Reset validation when address changes
     setValidationStatus('idle');
     setValidationMessages([]);
+    setDistanceKm(null);
     
     // Update parent with non-validated address
     onAddressChange({
@@ -126,6 +135,24 @@ export const AddressDeliverySelector: React.FC<AddressDeliverySelectorProps> = (
     // Mark shipping as invalid until re-validated
     onShippingCostChange(0, false);
   };
+
+  // Calculate shipping cost using distance API
+  const calculateDistanceBasedShipping = useCallback(async (
+    addressData: AddressInput
+  ): Promise<ShippingResult> => {
+    setIsCalculatingShipping(true);
+    try {
+      const result = await calculateShipping({
+        country: addressData.country,
+        postalCode: addressData.postalCode,
+        street: addressData.street,
+        city: addressData.city,
+      });
+      return result;
+    } finally {
+      setIsCalculatingShipping(false);
+    }
+  }, []);
 
   // Validate address
   const handleValidateAddress = useCallback(async () => {
@@ -140,14 +167,12 @@ export const AddressDeliverySelector: React.FC<AddressDeliverySelectorProps> = (
 
     setValidationStatus('validating');
     setValidationMessages([]);
+    setDistanceKm(null);
 
     try {
       const result = await validateAddress(localAddress);
       
       if (result.isValid && result.normalizedAddress) {
-        setValidationStatus('valid');
-        setValidationMessages(result.messages);
-        
         // Check if delivery is available for this country
         const countryCode = result.countryCode as CountryCode;
         if (!isDeliveryAvailable(countryCode)) {
@@ -160,27 +185,62 @@ export const AddressDeliverySelector: React.FC<AddressDeliverySelectorProps> = (
           return;
         }
         
-        // Calculate shipping cost
-        const cost = getShippingCost(countryCode);
-        
-        // Update parent with validated address
-        onAddressChange({
+        // Address is valid, now calculate distance-based shipping
+        const shippingResult = await calculateDistanceBasedShipping({
           ...localAddress,
           country: countryCode,
-          isValidated: true,
-          normalizedAddress: result.normalizedAddress,
         });
         
-        onShippingCostChange(cost, true);
-        
-        // Update local state with normalized values if available
-        if (result.normalizedAddress) {
-          setLocalAddress({
-            street: result.normalizedAddress.street || localAddress.street,
-            postalCode: result.normalizedAddress.postalCode || localAddress.postalCode,
-            city: result.normalizedAddress.city || localAddress.city,
-            country: (result.normalizedAddress.country as CountryCode) || localAddress.country,
+        if (shippingResult.success) {
+          setValidationStatus('valid');
+          setDistanceKm(shippingResult.distanceKm);
+          
+          // Build success messages
+          const messages: string[] = ['Adres is geldig.'];
+          if (shippingResult.distanceKm > 0) {
+            messages.push(`Afstand: ${shippingResult.distanceKm} km vanaf Eindhoven`);
+          }
+          setValidationMessages(messages);
+          
+          // Convert euros to cents for consistency with cart context
+          const costInEuros = shippingResult.costEuros;
+          
+          // Update parent with validated address
+          onAddressChange({
+            ...localAddress,
+            country: countryCode,
+            isValidated: true,
+            normalizedAddress: result.normalizedAddress,
           });
+          
+          onShippingCostChange(costInEuros, true);
+          
+          // Update local state with normalized values if available
+          if (result.normalizedAddress) {
+            setLocalAddress({
+              street: result.normalizedAddress.street || localAddress.street,
+              postalCode: result.normalizedAddress.postalCode || localAddress.postalCode,
+              city: result.normalizedAddress.city || localAddress.city,
+              country: (result.normalizedAddress.country as CountryCode) || localAddress.country,
+            });
+          }
+        } else {
+          // Shipping calculation failed - still show address as valid but with error
+          setValidationStatus('valid');
+          setValidationMessages([
+            'Adres is geldig.',
+            `Kon bezorgkosten niet berekenen: ${shippingResult.error}`,
+          ]);
+          
+          // Update parent with validated address but no shipping cost
+          onAddressChange({
+            ...localAddress,
+            country: countryCode,
+            isValidated: true,
+            normalizedAddress: result.normalizedAddress,
+          });
+          
+          onShippingCostChange(0, false);
         }
       } else {
         setValidationStatus('invalid');
@@ -198,7 +258,7 @@ export const AddressDeliverySelector: React.FC<AddressDeliverySelectorProps> = (
       setValidationMessages(['Er is een fout opgetreden. Probeer het opnieuw.']);
       onShippingCostChange(0, false);
     }
-  }, [localAddress, isLocked, onAddressChange, onShippingCostChange]);
+  }, [localAddress, isLocked, onAddressChange, onShippingCostChange, calculateDistanceBasedShipping]);
 
   // Determine if checkout should be blocked
   const canProceed = method === 'pickup' || (method === 'delivery' && validationStatus === 'valid');
@@ -293,12 +353,15 @@ export const AddressDeliverySelector: React.FC<AddressDeliverySelectorProps> = (
           />
           <div className="flex-1">
             <div className="font-bold text-gray-900">Bezorgen</div>
-            <div className="text-xs text-gray-500">NL gratis, BE € 99,00, DE € 199,00</div>
+            <div className="text-xs text-gray-500">NL gratis, BE/DE € 1,- per km</div>
           </div>
-          {method === 'delivery' && validationStatus === 'valid' && (
+          {method === 'delivery' && validationStatus === 'valid' && !isCalculatingShipping && (
             <span className={`font-bold ${shippingCost === 0 ? 'text-green-600' : 'text-gray-900'}`}>
               {formatShippingCost(shippingCost)}
             </span>
+          )}
+          {method === 'delivery' && isCalculatingShipping && (
+            <Loader2 size={18} className="animate-spin text-[#003878]" />
           )}
         </label>
       </div>
@@ -403,9 +466,9 @@ export const AddressDeliverySelector: React.FC<AddressDeliverySelectorProps> = (
             <button
               type="button"
               onClick={handleValidateAddress}
-              disabled={isLocked || validationStatus === 'validating' || !isAddressComplete(localAddress)}
+              disabled={isLocked || validationStatus === 'validating' || isCalculatingShipping || !isAddressComplete(localAddress)}
               className={`w-full py-3 px-4 rounded-lg font-bold text-white transition-all flex items-center justify-center gap-2
-                ${validationStatus === 'validating' 
+                ${(validationStatus === 'validating' || isCalculatingShipping)
                   ? 'bg-[#003878]/70 cursor-wait' 
                   : validationStatus === 'valid'
                     ? 'bg-green-600 hover:bg-green-700'
@@ -414,19 +477,19 @@ export const AddressDeliverySelector: React.FC<AddressDeliverySelectorProps> = (
                 disabled:opacity-50 disabled:cursor-not-allowed
               `}
             >
-              {validationStatus === 'validating' && (
+              {(validationStatus === 'validating' || isCalculatingShipping) && (
                 <>
                   <Loader2 size={18} className="animate-spin" />
-                  Adres valideren...
+                  {isCalculatingShipping ? 'Bezorgkosten berekenen...' : 'Adres valideren...'}
                 </>
               )}
-              {validationStatus === 'valid' && (
+              {validationStatus === 'valid' && !isCalculatingShipping && (
                 <>
                   <Check size={18} />
                   Adres gevalideerd
                 </>
               )}
-              {(validationStatus === 'idle' || validationStatus === 'invalid') && (
+              {(validationStatus === 'idle' || validationStatus === 'invalid') && !isCalculatingShipping && (
                 <>
                   Adres valideren
                 </>
@@ -461,12 +524,17 @@ export const AddressDeliverySelector: React.FC<AddressDeliverySelectorProps> = (
             )}
 
             {/* Shipping Cost Info */}
-            {validationStatus === 'valid' && (
+            {validationStatus === 'valid' && !isCalculatingShipping && (
               <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">
-                    Bezorgkosten ({COUNTRY_LABELS[localAddress.country]}):
-                  </span>
+                  <div className="text-sm text-gray-600">
+                    <span>Bezorgkosten ({COUNTRY_LABELS[localAddress.country]})</span>
+                    {distanceKm !== null && distanceKm > 0 && (
+                      <span className="block text-xs text-gray-400 mt-0.5">
+                        {distanceKm} km × €1,- = {formatShippingCost(shippingCost)}
+                      </span>
+                    )}
+                  </div>
                   <span className={`font-bold ${shippingCost === 0 ? 'text-green-600' : 'text-gray-900'}`}>
                     {formatShippingCost(shippingCost)}
                   </span>

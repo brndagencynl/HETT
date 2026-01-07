@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { HashRouter, Routes, Route, useLocation, Navigate, useParams } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
@@ -29,6 +28,7 @@ import Returns from './pages/Returns';
 import DeliveryTerms from './pages/DeliveryTerms';
 import Mounting from './pages/Mounting';
 import Showroom from './pages/Showroom';
+import ShowroomAppointment from './src/pages/ShowroomAppointment';
 
 // New Shop Pages
 import Shop from './pages/Shop';
@@ -130,6 +130,7 @@ const AnimatedRoutes: React.FC = () => {
         <Route path="/retourneren" element={<PageTransition><Returns /></PageTransition>} />
         <Route path="/leveringsvoorwaarden" element={<PageTransition><DeliveryTerms /></PageTransition>} />
         <Route path="/showroom" element={<PageTransition><Showroom /></PageTransition>} />
+        <Route path="/showroom-afspraak" element={<PageTransition><ShowroomAppointment /></PageTransition>} />
 
         {/* Blog Routes (Shopify) */}
         <Route path="/blog" element={<PageTransition><Blog /></PageTransition>} />

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { Truck, ShieldCheck, PenTool, ArrowLeft, ChevronLeft, ChevronRight, ShoppingCart, Loader2 } from 'lucide-react';
@@ -10,6 +10,7 @@ import QuantitySelector from '../components/ui/QuantitySelector';
 import { ProductConfig, Product } from '../types';
 import { getProductByHandle } from '../src/lib/shopify';
 import { formatEUR } from '../src/utils/money';
+import { parseSpecifications } from '../src/utils/parseSpecifications';
 
 type ProductDetailShopProps = {
     /** Pass a handle directly (for sandwichpanelen canonical route) */
@@ -357,16 +358,24 @@ const ProductDetailShop: React.FC<ProductDetailShopProps> = ({ productHandle }) 
                         }}
                         description={{
                             title: `Over de ${product.title}`,
-                            intro: product.description || product.shortDescription, // Fallback if no long desc
-                            paragraphs: [
-                                "Ontdek de perfecte combinatie van stijl en functionaliteit met onze hoogwaardige verandassystemen. Speciaal ontworpen om uw buitenleven te verrijken, ongeacht het seizoen.",
-                                "Dankzij het gebruik van duurzame materialen en een slim ontwerp is montage eenvoudig en geniet u jarenlang van een onderhoudsvrij resultaat."
-                            ]
+                            intro: product.description || product.shortDescription,
+                            // Use extra description from Shopify metafield if available
+                            extraDescriptionHtml: product.extraDescription || undefined
                         }}
-                        specs={Object.entries(product.specs).map(([label, value]) => ({
-                            label: label,
-                            value: Array.isArray(value) ? value.join(', ') : String(value)
-                        }))}
+                        specs={(() => {
+                            // First try parsed specifications from Shopify metafield
+                            const shopifySpecs = parseSpecifications(product.specificationsRaw);
+                            if (shopifySpecs.length > 0) {
+                                return shopifySpecs;
+                            }
+                            // Fallback to legacy specs object
+                            const legacySpecs = Object.entries(product.specs || {}).map(([label, value]) => ({
+                                label: label,
+                                value: Array.isArray(value) ? value.join(', ') : String(value)
+                            }));
+                            // If still empty, return empty array (component will show fallback)
+                            return legacySpecs;
+                        })()}
                     />
                 </div>
             </div>

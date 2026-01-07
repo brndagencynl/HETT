@@ -84,7 +84,9 @@ export const PRODUCT_FRAGMENT = `
       { namespace: "custom", key: "category_slug" },
       { namespace: "custom", key: "size_key" },
       { namespace: "custom", key: "visibility" },
-      { namespace: "custom", key: "specs" }
+      { namespace: "custom", key: "specs" },
+      { namespace: "custom", key: "extra_description" },
+      { namespace: "custom", key: "specifications" }
     ]) {
       key
       value

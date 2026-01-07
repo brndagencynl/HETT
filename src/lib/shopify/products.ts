@@ -147,6 +147,9 @@ export function transformShopifyProduct(shopifyProduct: ShopifyProduct): Product
     // Shopify variant info for add-to-cart
     shopifyVariantId: firstVariant?.id || undefined,
     availableForSale: firstVariant?.availableForSale ?? shopifyProduct.availableForSale ?? false,
+    // Custom metafields for product detail page
+    extraDescription: getMetafield('extra_description') || undefined,
+    specificationsRaw: getMetafield('specifications') || undefined,
   };
 }
 

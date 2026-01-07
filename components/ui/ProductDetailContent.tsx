@@ -13,8 +13,8 @@ export type ProductDetailContentProps = {
         title: string;            // bijv. productnaam of “Beschrijving”
         intro?: string;
         paragraphs?: string[];
-        sections?: { heading: string; body: string }[];
-    };
+        sections?: { heading: string; body: string }[];        /** Extra description HTML from Shopify metafield (rendered with dangerouslySetInnerHTML) */
+        extraDescriptionHtml?: string;    };
     specs: { label: string; value: string }[];
 };
 
@@ -90,6 +90,14 @@ const ProductDetailContent: React.FC<ProductDetailContentProps> = ({ uspItems, d
                                 <p key={i}>{p}</p>
                             ))}
                         </div>
+
+                        {/* Extra description from Shopify metafield (may contain HTML) */}
+                        {description.extraDescriptionHtml && (
+                            <div 
+                                className="mt-6 prose prose-sm max-w-none text-gray-600 leading-7"
+                                dangerouslySetInnerHTML={{ __html: description.extraDescriptionHtml }}
+                            />
+                        )}
                     </div>
 
                     {description.sections?.map((section, i) => (
@@ -106,14 +114,18 @@ const ProductDetailContent: React.FC<ProductDetailContentProps> = ({ uspItems, d
                         <h3 className="text-xl font-bold text-[#003878] mb-6 flex items-center gap-2">
                             Specificaties
                         </h3>
-                        <div className="space-y-0 divide-y divide-gray-100">
-                            {specs.map((spec, index) => (
-                                <div key={index} className="flex justify-between py-4 group hover:bg-gray-50 transition-colors px-2 -mx-2 rounded-lg">
-                                    <span className="font-medium text-gray-500 text-sm">{spec.label}</span>
-                                    <span className="font-bold text-[#003878] text-sm text-right">{spec.value}</span>
-                                </div>
-                            ))}
-                        </div>
+                        {specs.length > 0 ? (
+                            <div className="space-y-0 divide-y divide-gray-100">
+                                {specs.map((spec, index) => (
+                                    <div key={index} className="flex justify-between py-4 group hover:bg-gray-50 transition-colors px-2 -mx-2 rounded-lg">
+                                        <span className="font-medium text-gray-500 text-sm">{spec.label}</span>
+                                        <span className="font-bold text-[#003878] text-sm text-right">{spec.value}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-gray-400 text-sm italic">Specificaties volgen binnenkort.</p>
+                        )}
                     </div>
                 </div>
 

@@ -61,6 +61,16 @@ export interface Product {
    * Whether the variant is available for sale
    */
   availableForSale?: boolean;
+  /**
+   * Extra description from Shopify metafield (custom.extra_description)
+   * May contain HTML if rich text field
+   */
+  extraDescription?: string;
+  /**
+   * Raw specifications text from Shopify metafield (custom.specifications)
+   * Format: one spec per line, "Label: Value"
+   */
+  specificationsRaw?: string;
 }
 
 // Product Configuration Types

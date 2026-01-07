@@ -19,18 +19,23 @@ import { beginCheckout, isShopifyConfigured } from '../src/lib/shopify';
 
 const Cart: React.FC = () => {
     const { 
-      cart, 
+      cart,
+      cartProducts,
+      shippingLineItem,
       removeFromCart, 
       updateQuantity, 
       total,
       totalCents,
+      subtotal,
+      subtotalCents,
       clearCart,
-      // Shipping - new quote-based system
+      // Shipping - new line item based system
       shippingMode,
       shippingCountry,
       shippingAddress,
       shippingQuote,
       shippingCost,
+      shippingCostCents,
       shippingIsValid,
       shippingIsCalculating,
       shippingError,
@@ -90,23 +95,13 @@ const Cart: React.FC = () => {
       setIsCheckingOut(true);
       setCheckoutError(null);
       
-      // Build shipping metadata for cart attributes
-      const shippingMetadata = {
-        shipping_mode: shippingMode,
-        shipping_country: shippingCountry,
-        shipping_postalCode: shippingAddress.postalCode || '',
-        shipping_city: shippingAddress.city || '',
-        shipping_km: shippingQuote?.km?.toString() || '0',
-        shipping_price: shippingQuote?.price?.toString() || '0',
-      };
-      
       try {
+        // The cart now includes the shipping line item automatically
         const result = await beginCheckout({
-          cartItems: cart,
-          shippingMetadata, // Pass shipping info
+          cartItems: cart, // Full cart including shipping line
           onStart: () => {
             console.log('[Checkout] Starting Shopify checkout...');
-            console.log('[Checkout] Shipping metadata:', shippingMetadata);
+            console.log('[Checkout] Shipping line item:', shippingLineItem);
           },
           onCartCreated: (cartId, checkoutUrl) => {
             console.log('[Checkout] Cart created:', cartId);
@@ -146,12 +141,12 @@ const Cart: React.FC = () => {
     const VAT_RATE = 0.21;
     const totalInclVat = fromCents(grandTotalCents); // Now includes shipping
     // Items-only VAT calculations in cents (21% VAT => total = ex * 121/100)
-    const subtotalExVatCents = Math.round((totalCents * 100) / 121);
-    const vatAmountCents = totalCents - subtotalExVatCents;
+    const subtotalExVatCents = Math.round((subtotalCents * 100) / 121);
+    const vatAmountCents = subtotalCents - subtotalExVatCents;
     const subtotalExVat = fromCents(subtotalExVatCents);
     const vatAmount = fromCents(vatAmountCents);
 
-  if (cart.length === 0) {
+  if (cartProducts.length === 0) {
     return (
             <div className="min-h-screen bg-[#f6f8fa] font-sans">
         <PageHeader title="Winkelwagen" description="Uw winkelwagen is nog leeg." image="https://picsum.photos/1200/400?random=99" />
@@ -176,9 +171,9 @@ const Cart: React.FC = () => {
       <div className="container py-12 md:py-20">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
             
-            {/* Cart Items */}
+            {/* Cart Items - only show products, not shipping line */}
             <div className="lg:col-span-2 space-y-4">
-                {cart.map((item, idx) => {
+                {cartProducts.map((item, idx) => {
                   const unitPriceCents =
                     typeof item.unitPriceCents === 'number'
                       ? item.unitPriceCents
@@ -365,7 +360,7 @@ const Cart: React.FC = () => {
                     
                     <div className="space-y-4 mb-6">
                         <div className="flex justify-between text-gray-600">
-                            <span className="font-medium">Subtotaal</span>
+                            <span className="font-medium">Producten subtotaal</span>
                             <span className="font-bold">{formatMoney(subtotalExVat)}</span>
                         </div>
                         <div className="flex justify-between text-gray-600">
@@ -377,7 +372,7 @@ const Cart: React.FC = () => {
                             <span className={`font-bold ${shippingCost === 0 ? 'text-green-600' : ''}`}>
                               {shippingMode === 'pickup' 
                                 ? 'Gratis' 
-                                : shippingIsValid 
+                                : shippingIsValid && shippingCost > 0
                                   ? formatShippingPrice(shippingCost)
                                   : shippingCountry === 'NL'
                                     ? 'Gratis'

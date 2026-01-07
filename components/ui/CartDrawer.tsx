@@ -17,7 +17,7 @@ import { formatEUR } from '../../src/utils/money';
 const MotionDiv = motion.div as any;
 
 const CartDrawer: React.FC = () => {
-    const { isCartOpen, closeCart, cart, removeFromCart, totalCents } = useCart();
+    const { isCartOpen, closeCart, cart, cartProducts, removeFromCart, totalCents, subtotalCents, grandTotalCents, shippingCostCents, shippingMode, shippingIsValid } = useCart();
     const { openEditConfigurator } = useVerandaEdit();
     const { openMaatwerkEdit } = useMaatwerkEdit();
     const { openSandwichpanelenEdit } = useSandwichpanelenEdit();
@@ -117,7 +117,7 @@ const CartDrawer: React.FC = () => {
                             <div className="flex items-center gap-3">
                                 <ShoppingBag className="text-hett-primary" />
                                 <h2 className="text-xl font-black text-hett-dark">Winkelwagen</h2>
-                                <span className="bg-hett-light text-hett-primary text-xs font-bold px-2 py-1 rounded-full">{cart.length} items</span>
+                                <span className="bg-hett-light text-hett-primary text-xs font-bold px-2 py-1 rounded-full">{cartProducts.length} items</span>
                             </div>
                             <button onClick={closeCart} className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-500">
                                 <X size={24} />
@@ -126,7 +126,7 @@ const CartDrawer: React.FC = () => {
 
                         {/* Content */}
                         <div className="flex-1 overflow-y-auto p-6 space-y-4">
-                            {cart.length === 0 ? (
+                            {cartProducts.length === 0 ? (
                                 <div className="h-full flex flex-col items-center justify-center text-center opacity-60">
                                     <ShoppingBag size={64} className="mb-4 text-gray-300" />
                                     <p className="text-lg font-bold text-gray-600 mb-6">Je winkelwagen is momenteel leeg!</p>
@@ -138,7 +138,7 @@ const CartDrawer: React.FC = () => {
                                     </button>
                                 </div>
                             ) : (
-                cart.map((item, index) => {
+                cartProducts.map((item, index) => {
                                     const isVeranda = isVerandaCategory(item);
                                     const isMaatwerk = isMaatwerkVerandaItem(item);
                                     const isSandwichpanelen = item.type === 'sandwichpanelen';
@@ -276,11 +276,11 @@ const CartDrawer: React.FC = () => {
                         </div>
 
                         {/* Footer */}
-                        {cart.length > 0 && (
+                        {cartProducts.length > 0 && (
                             <div className="p-6 bg-white border-t border-gray-100 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
                                 <div className="flex justify-between items-end mb-6">
                                     <span className="text-gray-500 font-bold text-sm">Subtotaal (incl. BTW)</span>
-                                    <span className="text-3xl font-black text-hett-dark">{formatEUR(totalCents, 'cents')}</span>
+                                    <span className="text-3xl font-black text-hett-dark">{formatEUR(subtotalCents, 'cents')}</span>
                                 </div>
                                 {checkoutError && (
                                     <div className="flex items-start gap-2 p-3 mb-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">

@@ -211,7 +211,7 @@ export interface CartItem extends Product {
   totalPrice: number;
 
   /** Line item type (used for edit detection and payload contracts) */
-  type?: 'custom_veranda' | 'sandwichpanelen' | 'product';
+  type?: 'custom_veranda' | 'sandwichpanelen' | 'product' | 'shipping';
 
   /** Optional structured pricing block (used for sandwichpanelen and other configurable items) */
   pricing?: {

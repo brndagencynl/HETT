@@ -105,7 +105,9 @@ export const ShippingSection: React.FC = () => {
   }, [localAddress, isShippingLocked, setShippingAddress, fetchShippingQuote]);
 
   // Check if address is complete enough to calculate
-  const canCalculate = localAddress.postalCode.trim() && localAddress.city.trim();
+  // For NL: just need to update the address, no calculation needed
+  // For BE/DE: need postal code at minimum
+  const canCalculate = shippingCountry === 'NL' || localAddress.postalCode.trim().length >= 4;
 
   return (
     <Card padding="wide">
@@ -378,17 +380,17 @@ export const ShippingSection: React.FC = () => {
               <div className="p-4 bg-[#EDF0F2] rounded-lg border border-gray-200">
                 <div className="space-y-2">
                   {/* Distance */}
-                  {shippingQuote.km > 0 && (
+                  {shippingQuote.distanceKm > 0 && (
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-gray-600">Afstand</span>
-                      <span className="font-semibold text-gray-900">{shippingQuote.km} km</span>
+                      <span className="font-semibold text-gray-900">{shippingQuote.distanceKm.toFixed(1)} km</span>
                     </div>
                   )}
-                  {/* Delivery Time (optional) */}
-                  {shippingQuote.durationText && (
+                  {/* Quantity (km units for shipping) */}
+                  {shippingQuote.quantityKm > 0 && (
                     <div className="flex justify-between items-center text-sm">
-                      <span className="text-gray-600">Geschatte rijtijd</span>
-                      <span className="font-semibold text-gray-900">{shippingQuote.durationText}</span>
+                      <span className="text-gray-600">Eenheden</span>
+                      <span className="font-semibold text-gray-900">{shippingQuote.quantityKm} km</span>
                     </div>
                   )}
                   {/* Price */}
@@ -399,9 +401,9 @@ export const ShippingSection: React.FC = () => {
                     </span>
                   </div>
                   {/* Calculation explanation for BE/DE */}
-                  {shippingCountry !== 'NL' && shippingQuote.km > 0 && (
+                  {shippingCountry !== 'NL' && shippingQuote.quantityKm > 0 && (
                     <p className="text-xs text-gray-500 pt-1">
-                      {shippingQuote.km} km × € 1,00 = {formatShippingPrice(shippingCost)}
+                      {shippingQuote.quantityKm} km × € 1,00 = {formatShippingPrice(shippingCost)}
                     </p>
                   )}
                 </div>

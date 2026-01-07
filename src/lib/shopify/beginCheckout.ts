@@ -8,6 +8,7 @@ import type { CartLineInput } from './types';
 import type { CartItem } from '../../../types';
 import { resolveMerchandiseForCartItem } from '../../shopify/shopifyMerchandiseMap';
 import { toShopifyLineAttributes } from '../../services/config/formatConfigAttributes';
+import { isShippingLineItem, type ShippingLineItem } from '../../services/shipping';
 
 // =============================================================================
 // MAIN CHECKOUT FUNCTION
@@ -20,19 +21,10 @@ export interface BeginCheckoutOptions {
   onCartCreated?: (cartId: string, checkoutUrl: string) => void;
   /** Called on error */
   onError?: (error: Error) => void;
-  /** Local cart items to sync */
+  /** Local cart items to sync (including shipping line if present) */
   cartItems: CartItem[];
   /** Optional: clear local cart after successful redirect setup */
   clearLocalCart?: () => void;
-  /** Optional: shipping metadata to add to cart note */
-  shippingMetadata?: {
-    shipping_mode: string;
-    shipping_country: string;
-    shipping_postalCode: string;
-    shipping_city: string;
-    shipping_km: string;
-    shipping_price: string;
-  };
 }
 
 export interface BeginCheckoutResult {
@@ -53,7 +45,7 @@ export interface BeginCheckoutResult {
 export async function beginCheckout(
   options: BeginCheckoutOptions
 ): Promise<BeginCheckoutResult> {
-  const { cartItems, onStart, onCartCreated, onError, clearLocalCart, shippingMetadata } = options;
+  const { cartItems, onStart, onCartCreated, onError, clearLocalCart } = options;
   
   // Validate configuration
   if (!isShopifyConfigured()) {
@@ -80,20 +72,43 @@ export async function beginCheckout(
     
     for (let i = 0; i < cartItems.length; i++) {
       const item = cartItems[i];
+      
+      // Special handling for shipping line item
+      if (isShippingLineItem(item)) {
+        const shippingItem = item as ShippingLineItem;
+        const meta = shippingItem.shippingMeta;
+        
+        // Build shipping-specific attributes
+        const shippingAttributes = [
+          { key: 'shipping_method', value: meta.method },
+          { key: 'destination_country', value: meta.country },
+          { key: 'destination_postcode', value: meta.postalCode },
+          { key: 'destination_house_number', value: meta.houseNumber || '' },
+          { key: 'distance_km', value: meta.distanceKm.toFixed(2) },
+          { key: 'shipping_total_eur', value: (shippingItem.lineTotalCents! / 100).toFixed(2) },
+        ];
+        
+        console.log('[beginCheckout] shipping line', {
+          title: shippingItem.title,
+          variantId: shippingItem.shopifyVariantId,
+          quantity: shippingItem.quantity,
+          attributes: shippingAttributes,
+        });
+        
+        lines.push({
+          merchandiseId: shippingItem.shopifyVariantId!,
+          quantity: shippingItem.quantity,
+          attributes: shippingAttributes,
+        });
+        
+        continue;
+      }
+      
+      // Regular product items
       const { mappingKey, merchandiseId } = resolveMerchandiseForCartItem(item);
       
       // Use new clean attribute formatter
       const attributes = toShopifyLineAttributes(item);
-
-      // Add shipping metadata to first item (for audit trail)
-      if (i === 0 && shippingMetadata) {
-        attributes.push({ key: '_shipping_mode', value: shippingMetadata.shipping_mode });
-        attributes.push({ key: '_shipping_country', value: shippingMetadata.shipping_country });
-        attributes.push({ key: '_shipping_postalCode', value: shippingMetadata.shipping_postalCode });
-        attributes.push({ key: '_shipping_city', value: shippingMetadata.shipping_city });
-        attributes.push({ key: '_shipping_km', value: shippingMetadata.shipping_km });
-        attributes.push({ key: '_shipping_price', value: shippingMetadata.shipping_price });
-      }
 
       // Debug helper (requested)
       console.log('[beginCheckout] item', {

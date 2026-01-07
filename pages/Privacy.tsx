@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import PageHeader from '../components/PageHeader';
 
 const Privacy: React.FC = () => {
@@ -58,7 +59,7 @@ const Privacy: React.FC = () => {
 
           <h3>Cookies, of vergelijkbare technieken, die wij gebruiken</h3>
           <p>
-            HETT gebruikt functionele, analytische en tracking cookies. Een cookie is een klein tekstbestand dat bij het eerste bezoek aan deze website wordt opgeslagen in de browser van uw computer, tablet of smartphone. Zie ons <a href="/cookies">Cookiebeleid</a> voor meer informatie.
+            HETT gebruikt functionele, analytische en tracking cookies. Een cookie is een klein tekstbestand dat bij het eerste bezoek aan deze website wordt opgeslagen in de browser van uw computer, tablet of smartphone. Zie ons <Link to="/cookies" className="text-hett-primary hover:underline">Cookiebeleid</Link> voor meer informatie.
           </p>
 
           <h3>Gegevens inzien, aanpassen of verwijderen</h3>

@@ -18,6 +18,7 @@
  */
 
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { X, Check, Info, ChevronLeft, ChevronRight, Truck, ShieldCheck, ArrowRight, Lightbulb, Edit2, Eye, ChevronUp, ShoppingBag, Loader2, Ruler } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -850,13 +851,13 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
           />
           <span className="text-sm text-gray-700">
             Ik ga akkoord met de{' '}
-            <a href="#/algemene-voorwaarden" className="text-[#003878] underline hover:no-underline" target="_blank" rel="noopener noreferrer">
+            <Link to="/algemene-voorwaarden" className="text-[#003878] underline hover:no-underline" target="_blank" rel="noopener noreferrer">
               algemene voorwaarden
-            </a>{' '}
+            </Link>{' '}
             en heb de{' '}
-            <a href="#/privacy" className="text-[#003878] underline hover:no-underline" target="_blank" rel="noopener noreferrer">
+            <Link to="/privacy" className="text-[#003878] underline hover:no-underline" target="_blank" rel="noopener noreferrer">
               privacyverklaring
-            </a>{' '}
+            </Link>{' '}
             gelezen.
           </span>
         </label>

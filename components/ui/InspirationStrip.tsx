@@ -74,7 +74,7 @@ const InspirationStrip: React.FC<InspirationStripProps> = ({ items, projectCards
             id: String(index + 1),
             title: item.title,
             image: item.image?.url || PLACEHOLDER_IMAGE,
-            path: item.url,
+            path: item.url || '/projecten', // Fallback to projecten if URL is empty
         }))
         : staticItems;
 

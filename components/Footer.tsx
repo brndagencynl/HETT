@@ -36,20 +36,34 @@ const Footer: React.FC = () => {
                                 {column.title}
                             </h3>
                             <ul className="space-y-3 text-sm font-medium">
-                                {column.links.map((link, linkIndex) => (
-                                    <li key={linkIndex}>
-                                        <Link
-                                            to={
-                                                link.label === 'Sandwichpanelen' || link.url === '/categorie/sandwichpanelen'
-                                                    ? sandwichpanelenUrl
-                                                    : link.url
-                                            }
-                                            className="text-white hover:text-[#FF7300] transition-colors flex items-center gap-2"
-                                        >
-                                            <span>&rsaquo;</span> {link.label}
-                                        </Link>
-                                    </li>
-                                ))}
+                                {column.links.map((link, linkIndex) => {
+                                    const resolvedUrl =
+                                        link.label === 'Sandwichpanelen' || link.url === '/categorie/sandwichpanelen'
+                                            ? sandwichpanelenUrl
+                                            : link.url;
+                                    
+                                    // Only render as Link if URL is valid
+                                    if (!resolvedUrl || resolvedUrl === '#') {
+                                        return (
+                                            <li key={linkIndex}>
+                                                <span className="text-white/60 flex items-center gap-2">
+                                                    <span>&rsaquo;</span> {link.label}
+                                                </span>
+                                            </li>
+                                        );
+                                    }
+                                    
+                                    return (
+                                        <li key={linkIndex}>
+                                            <Link
+                                                to={resolvedUrl}
+                                                className="text-white hover:text-[#FF7300] transition-colors flex items-center gap-2"
+                                            >
+                                                <span>&rsaquo;</span> {link.label}
+                                            </Link>
+                                        </li>
+                                    );
+                                })}
                             </ul>
                         </div>
                     ))}
@@ -70,9 +84,9 @@ const Footer: React.FC = () => {
                                 <a href="mailto:info@hettveranda.nl" className="flex items-center gap-3 text-sm text-white hover:text-[#FF7300] transition-colors"><Mail size={18} /> info@hettveranda.nl</a>
                             </div>
                             <div className="flex gap-4 pt-2">
-                                <Facebook size={20} className="text-white cursor-pointer hover:text-[#FF7300] transition-colors" />
-                                <Instagram size={20} className="text-white cursor-pointer hover:text-[#FF7300] transition-colors" />
-                                <Linkedin size={20} className="text-white cursor-pointer hover:text-[#FF7300] transition-colors" />
+                                <span className="text-white opacity-60" aria-label="Facebook"><Facebook size={20} /></span>
+                                <span className="text-white opacity-60" aria-label="Instagram"><Instagram size={20} /></span>
+                                <span className="text-white opacity-60" aria-label="LinkedIn"><Linkedin size={20} /></span>
                             </div>
                         </div>
                     </div>

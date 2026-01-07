@@ -74,7 +74,7 @@ const Navbar: React.FC = () => {
               </button>
             </div>
           </div>
-          <div className={`px-4 overflow-hidden transition-all duration-300 ${showSearchForm ? 'max-h-20 pb-4 opacity-100' : 'max-h-0 pb-0 opacity-0'}`}>
+          <div className={`px-4 overflow-hidden ${showSearchForm ? 'max-h-20 pb-4' : 'max-h-0 pb-0 hidden'}`}>
             <form onSubmit={handleSearch} className="relative">
               <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
               <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Zoeken" className="w-full bg-gray-100 py-2.5 pl-10 pr-4 rounded-md outline-none text-sm" />
@@ -83,7 +83,7 @@ const Navbar: React.FC = () => {
         </div>
 
         {/* DESKTOP TOP BAR */}
-        <div className={`hidden md:block bg-hett-primary text-white text-[11px] font-bold py-1.5 transition-all ${isScrolled ? 'h-0 py-0 overflow-hidden opacity-0' : 'h-auto opacity-100'}`}>
+        <div className={`hidden md:block bg-hett-primary text-white text-[11px] font-bold ${isScrolled ? 'h-0 py-0 overflow-hidden' : 'h-auto py-1.5'}`}>
           <div className="max-w-[1400px] mx-auto px-6 flex justify-between items-center">
             <div className="flex gap-6 uppercase tracking-wider">
               <span className="flex items-center gap-1.5"><Check size={12} className="text-hett-brown" strokeWidth={4} /> Sinds 2016</span>
@@ -98,7 +98,7 @@ const Navbar: React.FC = () => {
         </div>
 
         {/* DESKTOP MAIN BAR */}
-        <div className={`hidden md:flex border-b border-gray-100 transition-all ${isScrolled ? 'py-2' : 'py-4'}`}>
+        <div className={`hidden md:flex border-b border-gray-100 ${isScrolled ? 'py-2' : 'py-4'}`}>
           <div className="max-w-[1400px] mx-auto px-6 flex items-center justify-between gap-10 w-full">
             <Link to="/" className="flex-shrink-0"><img src="/assets/images/hett-logo-navbar.png" alt="HETT" className="h-9" /></Link>
 

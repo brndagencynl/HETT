@@ -13,8 +13,8 @@ import { formatMoney } from '../src/pricing/pricingHelpers';
 import { fromCents } from '../src/utils/money';
 import ConfigBreakdownPopup, { getCartItemPriceBreakdown, isConfigurableCategory, isVerandaCategory, isMaatwerkVerandaItem } from '../components/ui/ConfigBreakdownPopup';
 import { CartItemPreview } from '../components/ui/ConfigPreviewImage';
-import { AddressDeliverySelector } from '../src/components/cart/AddressDeliverySelector';
-import { formatShippingCost } from '../src/services/addressValidation';
+import { ShippingSection } from '../src/components/cart/ShippingSection';
+import { formatShippingPrice } from '../src/services/shippingQuote';
 import { beginCheckout, isShopifyConfigured } from '../src/lib/shopify';
 
 const Cart: React.FC = () => {
@@ -25,15 +25,16 @@ const Cart: React.FC = () => {
       total,
       totalCents,
       clearCart,
-      // Shipping - address based with Google validation
-      shippingMethod,
+      // Shipping - new quote-based system
+      shippingMode,
+      shippingCountry,
       shippingAddress,
+      shippingQuote,
       shippingCost,
       shippingIsValid,
+      shippingIsCalculating,
+      shippingError,
       isShippingLocked,
-      setShippingMethod,
-      setShippingAddress,
-      updateShippingCost,
       unlockShipping,
       lockShipping,
       grandTotal,
@@ -67,11 +68,15 @@ const Cart: React.FC = () => {
 
     // Handle Shopify checkout
     const handleProceedToCheckout = async () => {
-      if (!shippingIsValid) {
-        // Scroll to shipping section if not valid
+      // Check if shipping quote is required
+      if (shippingMode === 'delivery' && (shippingCountry === 'BE' || shippingCountry === 'DE') && !shippingIsValid) {
+        // Scroll to shipping section if quote is missing for BE/DE
         shippingSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         return;
       }
+      
+      // For NL delivery, shipping is free so we can proceed without quote
+      // For pickup, always allow
       
       // Check if Shopify is configured
       if (!isShopifyConfigured()) {
@@ -85,11 +90,23 @@ const Cart: React.FC = () => {
       setIsCheckingOut(true);
       setCheckoutError(null);
       
+      // Build shipping metadata for cart attributes
+      const shippingMetadata = {
+        shipping_mode: shippingMode,
+        shipping_country: shippingCountry,
+        shipping_postalCode: shippingAddress.postalCode || '',
+        shipping_city: shippingAddress.city || '',
+        shipping_km: shippingQuote?.km?.toString() || '0',
+        shipping_price: shippingQuote?.price?.toString() || '0',
+      };
+      
       try {
         const result = await beginCheckout({
           cartItems: cart,
+          shippingMetadata, // Pass shipping info
           onStart: () => {
             console.log('[Checkout] Starting Shopify checkout...');
+            console.log('[Checkout] Shipping metadata:', shippingMetadata);
           },
           onCartCreated: (cartId, checkoutUrl) => {
             console.log('[Checkout] Cart created:', cartId);
@@ -117,7 +134,14 @@ const Cart: React.FC = () => {
     };
 
     // Can proceed to checkout?
-    const canCheckout = shippingIsValid && !isCheckingOut;
+    // - Pickup: always OK
+    // - Delivery NL: always OK (free shipping)
+    // - Delivery BE/DE: need valid quote
+    const canCheckout = 
+      !isCheckingOut && 
+      (shippingMode === 'pickup' || 
+       shippingCountry === 'NL' || 
+       shippingIsValid);
 
     const VAT_RATE = 0.21;
     const totalInclVat = fromCents(grandTotalCents); // Now includes shipping
@@ -332,16 +356,8 @@ const Cart: React.FC = () => {
             {/* Order Summary */}
             <div className="lg:col-span-1">
                 <div className="sticky top-32 space-y-4" ref={shippingSectionRef}>
-                  {/* Address & Delivery Selection */}
-                  <AddressDeliverySelector
-                    method={shippingMethod}
-                    address={shippingAddress}
-                    shippingCost={shippingCost}
-                    isLocked={isShippingLocked}
-                    onMethodChange={setShippingMethod}
-                    onAddressChange={setShippingAddress}
-                    onShippingCostChange={updateShippingCost}
-                  />
+                  {/* Shipping Section - new component */}
+                  <ShippingSection />
 
                   {/* Order Summary Card */}
                   <Card padding="wide">
@@ -357,9 +373,15 @@ const Cart: React.FC = () => {
                             <span className="font-bold">{formatMoney(vatAmount)}</span>
                         </div>
                         <div className="flex justify-between text-gray-600">
-                            <span className="font-medium">Bezorgkosten</span>
+                            <span className="font-medium">Verzendkosten</span>
                             <span className={`font-bold ${shippingCost === 0 ? 'text-green-600' : ''}`}>
-                              {shippingIsValid ? formatShippingCost(shippingCost) : '—'}
+                              {shippingMode === 'pickup' 
+                                ? 'Gratis' 
+                                : shippingIsValid 
+                                  ? formatShippingPrice(shippingCost)
+                                  : shippingCountry === 'NL'
+                                    ? 'Gratis'
+                                    : '—'}
                             </span>
                         </div>
                     </div>
@@ -402,9 +424,9 @@ const Cart: React.FC = () => {
                             </div>
                           </div>
                         )}
-                        {!canCheckout && shippingMethod === 'delivery' && !isCheckingOut && (
+                        {!canCheckout && shippingMode === 'delivery' && (shippingCountry === 'BE' || shippingCountry === 'DE') && !isCheckingOut && (
                           <p className="text-xs text-red-500 text-center">
-                            Valideer uw adres om verder te gaan naar afrekenen
+                            Bereken eerst je verzendkosten voor België of Duitsland.
                           </p>
                         )}
                         <Link 

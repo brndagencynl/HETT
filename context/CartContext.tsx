@@ -1,18 +1,28 @@
 
-import React, { createContext, useContext, useState, useMemo, useEffect } from 'react';
+import React, { createContext, useContext, useState, useMemo, useEffect, useCallback } from 'react';
 import { CartItem, Product, ProductConfig, MaatwerkCartPayload } from '../types';
 import { validateConfig } from '../utils/configValidation';
 import { generateConfigHash } from '../utils/hash';
 import { buildRenderSnapshot, type VerandaVisualizationConfig } from '../src/configurator/visual/verandaAssets';
 import { normalizeQuantity } from '../src/lib/cart/quantity';
 import { addCents, fromCents, mulCents, toCents } from '../src/utils/money';
+import {
+  fetchShippingQuote,
+  toShippingQuote,
+  type ShippingMode,
+  type ShippingCountry,
+  type ShippingAddress,
+  type ShippingQuote,
+} from '../src/services/shippingQuote';
 
 // =============================================================================
 // TYPES
 // =============================================================================
 
-export type ShippingMethod = 'pickup' | 'delivery';
-export type CountryCode = 'NL' | 'BE' | 'DE';
+export type { ShippingMode, ShippingCountry, ShippingAddress, ShippingQuote };
+
+// Re-export for backward compatibility
+export type CountryCode = ShippingCountry;
 
 export interface NormalizedAddress {
   street: string;
@@ -23,19 +33,23 @@ export interface NormalizedAddress {
 
 export interface DeliveryAddress {
   street: string;
+  houseNumber: string;
   postalCode: string;
   city: string;
-  country: CountryCode;
+  country: ShippingCountry;
   isValidated: boolean;
   normalizedAddress: NormalizedAddress | null;
 }
 
 interface ShippingState {
-  method: ShippingMethod;
-  address: DeliveryAddress;
+  mode: ShippingMode;
+  address: ShippingAddress; // Simple address without validation state
   costCents: number;
   isValid: boolean;
   isLocked: boolean;
+  quote: ShippingQuote | null;
+  isCalculating: boolean;
+  error: string | null;
 }
 
 interface CartContextType {
@@ -53,23 +67,34 @@ interface CartContextType {
   isCartOpen: boolean;
   openCart: () => void;
   closeCart: () => void;
-  // Shipping - address-based system with Google validation
-  shippingMethod: ShippingMethod;
-  shippingAddress: DeliveryAddress;
+  // Shipping - new quote-based system
+  shippingMode: ShippingMode;
+  shippingCountry: ShippingCountry;
+  shippingAddress: ShippingAddress;
+  shippingQuote: ShippingQuote | null;
   shippingCost: number;
   shippingCostCents: number;
   shippingIsValid: boolean;
+  shippingIsCalculating: boolean;
+  shippingError: string | null;
   isShippingLocked: boolean;
-  setShippingMethod: (method: ShippingMethod) => void;
-  setShippingAddress: (address: DeliveryAddress) => void;
-  updateShippingCost: (costCents: number, isValid: boolean) => void;
+  setShippingMode: (mode: ShippingMode) => void;
+  setShippingCountry: (country: ShippingCountry) => void;
+  setShippingAddress: (address: ShippingAddress) => void;
+  fetchShippingQuote: () => Promise<boolean>;
+  clearShippingQuote: () => void;
   lockShipping: () => void;
   unlockShipping: () => void;
   /** Total including shipping */
   grandTotal: number;
   grandTotalCents: number;
-  // Legacy aliases (for backward compatibility)
-  shippingCountry: CountryCode | null;
+  // Legacy aliases (for backward compatibility with AddressDeliverySelector)
+  /** @deprecated Use shippingAddress instead */
+  shippingAddressLegacy: DeliveryAddress;
+  /** @deprecated Use updateShippingCost instead */
+  updateShippingCost: (costCents: number, isValid: boolean) => void;
+  /** @deprecated Use setShippingAddress instead */
+  setShippingAddressLegacy: (address: DeliveryAddress) => void;
   shippingFee: number;
   shippingFeeCents: number;
   shippingPostcode: string;
@@ -81,10 +106,18 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 // CONSTANTS
 // =============================================================================
 
-const SHIPPING_STORAGE_KEY = 'hett_shipping_v2';
+const SHIPPING_STORAGE_KEY = 'hett_shipping_v3';
 
-const DEFAULT_ADDRESS: DeliveryAddress = {
+const DEFAULT_ADDRESS: ShippingAddress = {
   street: '',
+  houseNumber: '',
+  postalCode: '',
+  city: '',
+};
+
+const DEFAULT_LEGACY_ADDRESS: DeliveryAddress = {
+  street: '',
+  houseNumber: '',
   postalCode: '',
   city: '',
   country: 'NL',
@@ -93,46 +126,75 @@ const DEFAULT_ADDRESS: DeliveryAddress = {
 };
 
 const DEFAULT_SHIPPING_STATE: ShippingState = {
-  method: 'delivery',
+  mode: 'delivery',
   address: DEFAULT_ADDRESS,
   costCents: 0,
   isValid: false,
   isLocked: false,
+  quote: null,
+  isCalculating: false,
+  error: null,
 };
+
+// Country is stored separately for persistence
+const DEFAULT_COUNTRY: ShippingCountry = 'NL';
 
 // =============================================================================
 // STORAGE HELPERS
 // =============================================================================
 
-function loadShippingFromStorage(): ShippingState {
+interface StoredShippingState {
+  mode: ShippingMode;
+  country: ShippingCountry;
+  address: ShippingAddress;
+  costCents: number;
+  isValid: boolean;
+  isLocked: boolean;
+  quote: ShippingQuote | null;
+}
+
+function loadShippingFromStorage(): { shipping: ShippingState; country: ShippingCountry } {
   try {
     const stored = localStorage.getItem(SHIPPING_STORAGE_KEY);
     if (stored) {
-      const parsed = JSON.parse(stored);
+      const parsed = JSON.parse(stored) as Partial<StoredShippingState>;
       return {
-        method: parsed.method || DEFAULT_SHIPPING_STATE.method,
-        address: {
-          street: parsed.address?.street || '',
-          postalCode: parsed.address?.postalCode || '',
-          city: parsed.address?.city || '',
-          country: parsed.address?.country || 'NL',
-          isValidated: parsed.address?.isValidated || false,
-          normalizedAddress: parsed.address?.normalizedAddress || null,
+        shipping: {
+          mode: parsed.mode || DEFAULT_SHIPPING_STATE.mode,
+          address: {
+            street: parsed.address?.street || '',
+            houseNumber: parsed.address?.houseNumber || '',
+            postalCode: parsed.address?.postalCode || '',
+            city: parsed.address?.city || '',
+          },
+          costCents: parsed.costCents ?? 0,
+          isValid: parsed.isValid || false,
+          isLocked: parsed.isLocked || false,
+          quote: parsed.quote || null,
+          isCalculating: false,
+          error: null,
         },
-        costCents: parsed.costCents ?? toCents(parsed.cost ?? 0),
-        isValid: parsed.isValid || false,
-        isLocked: parsed.isLocked || false,
+        country: parsed.country || DEFAULT_COUNTRY,
       };
     }
   } catch (e) {
     console.warn('Failed to load shipping from storage:', e);
   }
-  return { ...DEFAULT_SHIPPING_STATE };
+  return { shipping: { ...DEFAULT_SHIPPING_STATE }, country: DEFAULT_COUNTRY };
 }
 
-function saveShippingToStorage(state: ShippingState): void {
+function saveShippingToStorage(state: ShippingState, country: ShippingCountry): void {
   try {
-    localStorage.setItem(SHIPPING_STORAGE_KEY, JSON.stringify(state));
+    const toStore: StoredShippingState = {
+      mode: state.mode,
+      country,
+      address: state.address,
+      costCents: state.costCents,
+      isValid: state.isValid,
+      isLocked: state.isLocked,
+      quote: state.quote,
+    };
+    localStorage.setItem(SHIPPING_STORAGE_KEY, JSON.stringify(toStore));
   } catch (e) {
     console.warn('Failed to save shipping to storage:', e);
   }
@@ -148,12 +210,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isCartOpen, setIsCartOpen] = useState(false);
   
   // Shipping state - loaded from storage
-  const [shipping, setShipping] = useState<ShippingState>(() => loadShippingFromStorage());
+  const [shipping, setShipping] = useState<ShippingState>(() => loadShippingFromStorage().shipping);
+  const [shippingCountry, setShippingCountryState] = useState<ShippingCountry>(() => loadShippingFromStorage().country);
 
   // Persist shipping state to storage
   useEffect(() => {
-    saveShippingToStorage(shipping);
-  }, [shipping]);
+    saveShippingToStorage(shipping, shippingCountry);
+  }, [shipping, shippingCountry]);
 
   const openCart = () => setIsCartOpen(true);
   const closeCart = () => setIsCartOpen(false);
@@ -220,42 +283,181 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const grandTotalCents = addCents(totalCents, shipping.isValid ? shipping.costCents : 0);
   const grandTotal = fromCents(grandTotalCents);
 
-  // Shipping setters (guarded by lock)
-  const setShippingMethod = (method: ShippingMethod) => {
+  // Shipping setters
+  const setShippingMode = useCallback((mode: ShippingMode) => {
     if (shipping.isLocked) return;
     
-    // If switching to pickup, mark as valid with 0 cost
-    if (method === 'pickup') {
+    if (mode === 'pickup') {
+      // Pickup is always free and valid
       setShipping(prev => ({
         ...prev,
-        method,
+        mode,
         costCents: 0,
         isValid: true,
+        quote: {
+          km: 0,
+          price: 0,
+          currency: 'EUR',
+          formattedPrice: 'Gratis',
+          origin: 'Hoppenkuil 17, 5626DD Eindhoven',
+          destination: 'Afhalen',
+          lastUpdated: Date.now(),
+        },
+        error: null,
       }));
     } else {
-      // If switching to delivery, use address validation state
+      // Delivery - reset validation until quote is fetched
       setShipping(prev => ({
         ...prev,
-        method,
-        isValid: prev.address.isValidated,
-        costCents: prev.address.isValidated ? prev.costCents : 0,
+        mode,
+        isValid: false,
+        quote: null,
+        error: null,
       }));
     }
-  };
-  
-  const setShippingAddress = (address: DeliveryAddress) => {
-    if (shipping.isLocked) return;
-    setShipping(prev => ({ ...prev, address }));
-  };
+  }, [shipping.isLocked]);
 
-  const updateShippingCost = (costCents: number, isValid: boolean) => {
+  const setShippingCountry = useCallback((country: ShippingCountry) => {
+    if (shipping.isLocked) return;
+    setShippingCountryState(country);
+    // Reset quote when country changes
+    setShipping(prev => ({
+      ...prev,
+      isValid: false,
+      quote: null,
+      error: null,
+    }));
+  }, [shipping.isLocked]);
+  
+  const setShippingAddressNew = useCallback((address: ShippingAddress) => {
+    if (shipping.isLocked) return;
+    setShipping(prev => ({
+      ...prev,
+      address,
+      isValid: false,
+      quote: null,
+      error: null,
+    }));
+  }, [shipping.isLocked]);
+
+  // Fetch shipping quote from API
+  const doFetchShippingQuote = useCallback(async (): Promise<boolean> => {
+    if (shipping.isLocked) return false;
+
+    // Pickup is always free
+    if (shipping.mode === 'pickup') {
+      setShipping(prev => ({
+        ...prev,
+        costCents: 0,
+        isValid: true,
+        quote: {
+          km: 0,
+          price: 0,
+          currency: 'EUR',
+          formattedPrice: 'Gratis',
+          origin: 'Hoppenkuil 17, 5626DD Eindhoven',
+          destination: 'Afhalen',
+          lastUpdated: Date.now(),
+        },
+        error: null,
+      }));
+      return true;
+    }
+
+    // Validate required fields for delivery
+    if (!shipping.address.postalCode || !shipping.address.city) {
+      setShipping(prev => ({
+        ...prev,
+        error: 'Vul postcode en plaats in.',
+        isValid: false,
+      }));
+      return false;
+    }
+
+    // Set calculating state
+    setShipping(prev => ({ ...prev, isCalculating: true, error: null }));
+
+    try {
+      const result = await fetchShippingQuote({
+        mode: 'delivery',
+        country: shippingCountry,
+        postalCode: shipping.address.postalCode,
+        houseNumber: shipping.address.houseNumber,
+        street: shipping.address.street,
+        city: shipping.address.city,
+      });
+
+      if (result.ok) {
+        const quote = toShippingQuote(result);
+        setShipping(prev => ({
+          ...prev,
+          costCents: toCents(result.price),
+          isValid: true,
+          quote,
+          isCalculating: false,
+          error: null,
+        }));
+        return true;
+      } else {
+        setShipping(prev => ({
+          ...prev,
+          costCents: 0,
+          isValid: false,
+          quote: null,
+          isCalculating: false,
+          error: 'message' in result ? result.message : 'Onbekende fout',
+        }));
+        return false;
+      }
+    } catch (error) {
+      console.error('[Shipping] Unexpected error:', error);
+      setShipping(prev => ({
+        ...prev,
+        costCents: 0,
+        isValid: false,
+        quote: null,
+        isCalculating: false,
+        error: 'Er is een fout opgetreden. Probeer het opnieuw.',
+      }));
+      return false;
+    }
+  }, [shipping.isLocked, shipping.mode, shipping.address, shippingCountry]);
+
+  const clearShippingQuote = useCallback(() => {
+    if (shipping.isLocked) return;
+    setShipping(prev => ({
+      ...prev,
+      costCents: 0,
+      isValid: false,
+      quote: null,
+      error: null,
+    }));
+  }, [shipping.isLocked]);
+
+  // Legacy: updateShippingCost for backward compatibility with AddressDeliverySelector
+  const updateShippingCost = useCallback((costCents: number, isValid: boolean) => {
     if (shipping.isLocked) return;
     setShipping(prev => ({ ...prev, costCents, isValid }));
-  };
+  }, [shipping.isLocked]);
+
+  // Legacy: setShippingAddress for backward compatibility with AddressDeliverySelector
+  const setShippingAddressLegacy = useCallback((address: DeliveryAddress) => {
+    if (shipping.isLocked) return;
+    setShipping(prev => ({
+      ...prev,
+      address: {
+        street: address.street,
+        houseNumber: (address as any).houseNumber || '',
+        postalCode: address.postalCode,
+        city: address.city,
+      },
+    }));
+    setShippingCountryState(address.country);
+  }, [shipping.isLocked]);
 
   // Shipping lock/unlock
-  const lockShipping = () => setShipping(prev => ({ ...prev, isLocked: true }));
-  const unlockShipping = () => setShipping(prev => ({ ...prev, isLocked: false }));
+  const lockShipping = useCallback(() => setShipping(prev => ({ ...prev, isLocked: true })), []);
+  const unlockShipping = useCallback(() => setShipping(prev => ({ ...prev, isLocked: false })), []);
 
   // =========================================================================
   // ADD TO CART - Main entry point
@@ -594,22 +796,38 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isCartOpen, 
       openCart, 
       closeCart,
-      // Shipping - address-based system with Google validation
-      shippingMethod: shipping.method,
+      // Shipping - new quote-based system
+      shippingMode: shipping.mode,
+      shippingCountry,
       shippingAddress: shipping.address,
+      shippingQuote: shipping.quote,
       shippingCostCents: shipping.costCents,
       shippingCost: fromCents(shipping.costCents),
       shippingIsValid: shipping.isValid,
+      shippingIsCalculating: shipping.isCalculating,
+      shippingError: shipping.error,
       isShippingLocked: shipping.isLocked,
-      setShippingMethod,
-      setShippingAddress,
-      updateShippingCost,
+      setShippingMode,
+      setShippingCountry,
+      setShippingAddress: setShippingAddressNew,
+      fetchShippingQuote: doFetchShippingQuote,
+      clearShippingQuote,
       lockShipping,
       unlockShipping,
       grandTotal,
       grandTotalCents,
-      // Legacy aliases (for backward compatibility)
-      shippingCountry: shipping.address.isValidated ? shipping.address.country : null,
+      // Legacy aliases (for backward compatibility with AddressDeliverySelector)
+      shippingAddressLegacy: {
+        ...DEFAULT_LEGACY_ADDRESS,
+        street: shipping.address.street,
+        houseNumber: shipping.address.houseNumber,
+        postalCode: shipping.address.postalCode,
+        city: shipping.address.city,
+        country: shippingCountry,
+        isValidated: shipping.isValid,
+      },
+      updateShippingCost,
+      setShippingAddressLegacy,
       shippingFeeCents: shipping.costCents,
       shippingFee: fromCents(shipping.costCents),
       shippingPostcode: shipping.address.postalCode,

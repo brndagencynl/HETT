@@ -24,6 +24,15 @@ export interface BeginCheckoutOptions {
   cartItems: CartItem[];
   /** Optional: clear local cart after successful redirect setup */
   clearLocalCart?: () => void;
+  /** Optional: shipping metadata to add to cart note */
+  shippingMetadata?: {
+    shipping_mode: string;
+    shipping_country: string;
+    shipping_postalCode: string;
+    shipping_city: string;
+    shipping_km: string;
+    shipping_price: string;
+  };
 }
 
 export interface BeginCheckoutResult {
@@ -44,7 +53,7 @@ export interface BeginCheckoutResult {
 export async function beginCheckout(
   options: BeginCheckoutOptions
 ): Promise<BeginCheckoutResult> {
-  const { cartItems, onStart, onCartCreated, onError, clearLocalCart } = options;
+  const { cartItems, onStart, onCartCreated, onError, clearLocalCart, shippingMetadata } = options;
   
   // Validate configuration
   if (!isShopifyConfigured()) {
@@ -69,11 +78,22 @@ export async function beginCheckout(
     // Build cart lines from local cart
     const lines: CartLineInput[] = [];
     
-    for (const item of cartItems) {
+    for (let i = 0; i < cartItems.length; i++) {
+      const item = cartItems[i];
       const { mappingKey, merchandiseId } = resolveMerchandiseForCartItem(item);
       
       // Use new clean attribute formatter
       const attributes = toShopifyLineAttributes(item);
+
+      // Add shipping metadata to first item (for audit trail)
+      if (i === 0 && shippingMetadata) {
+        attributes.push({ key: '_shipping_mode', value: shippingMetadata.shipping_mode });
+        attributes.push({ key: '_shipping_country', value: shippingMetadata.shipping_country });
+        attributes.push({ key: '_shipping_postalCode', value: shippingMetadata.shipping_postalCode });
+        attributes.push({ key: '_shipping_city', value: shippingMetadata.shipping_city });
+        attributes.push({ key: '_shipping_km', value: shippingMetadata.shipping_km });
+        attributes.push({ key: '_shipping_price', value: shippingMetadata.shipping_price });
+      }
 
       // Debug helper (requested)
       console.log('[beginCheckout] item', {

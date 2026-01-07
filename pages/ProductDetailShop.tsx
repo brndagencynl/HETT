@@ -292,7 +292,7 @@ const ProductDetailShop: React.FC<ProductDetailShopProps> = ({ productHandle }) 
                                             <span className="text-hett-secondary flex-shrink-0">✓</span> Direct inzicht in de prijs
                                         </div>
                                         <div className="flex items-start gap-3 text-xs font-bold text-hett-text">
-                                            <span className="text-hett-secondary flex-shrink-0">✓</span> Vrijblijvende offerte per mail
+                                            <span className="text-hett-secondary flex-shrink-0">✓</span> Gratis verzending in Nederland
                                         </div>
                                     </div>
                                 </>
@@ -352,8 +352,8 @@ const ProductDetailShop: React.FC<ProductDetailShopProps> = ({ productHandle }) 
                         ]}
                         delivery={{
                             title: "Levering & montage",
-                            text: "Wij leveren met eigen transport door de Benelux. Elk pakket is compleet en voorzien van een duidelijke montagehandleiding. Montage door ons team is optioneel (op aanvraag).",
-                            leadTimeLabel: "Gemiddelde levertijd",
+                            text: "Wij leveren met eigen transport door de Benelux en Duitsland. Elk pakket is compleet en voorzien van een duidelijke montagehandleiding.",
+                            leadTimeLabel: "Huidige levertijd",
                             leadTimeValue: "10 werkdagen"
                         }}
                         description={{

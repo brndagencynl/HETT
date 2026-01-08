@@ -656,7 +656,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
   const renderCardSelector = (options: typeof MAATWERK_ROOF_OPTIONS, configKey: keyof PartialMaatwerkConfig) => {
     const currentValue = config[configKey];
     // Get current color for dynamic thumbnail URLs
-    const selectedColor = (config.kleur || 'ral7016') as VerandaColorId;
+    const selectedColor = (config.color || 'ral7016') as VerandaColorId;
 
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -180,10 +180,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'grid' })
                             <span className="line-clamp-1">{firstUSP}</span>
                         </div>
                     )}
-                    <div className="mt-1 flex items-center gap-1 text-[10px] sm:text-xs text-green-600 font-medium leading-tight">
-                        <Truck size={14} className="flex-shrink-0" />
-                        <span>{deliveryTime}</span>
-                    </div>
                 </div>
 
                 <div className="mt-auto">
@@ -195,42 +191,54 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'grid' })
                     )}
                     
                     {requiresConfiguration ? (
-                        <button
-                            onClick={handleConfigureClick}
-                            className="w-full rounded-md py-2 sm:py-3 text-[11px] sm:text-sm font-bold flex items-center justify-center gap-1.5 sm:gap-2 shadow-sm transition-colors bg-hett-dark text-white hover:bg-hett-primary"
-                        >
-                            <Settings size={16} />
-                            Stel samen
-                        </button>
-                    ) : (
-                        <div
-                            className="flex flex-row items-stretch gap-2"
-                            onMouseDown={(e) => {
-                                // Don't let the parent Link start navigation.
-                                e.stopPropagation();
-                            }}
-                            onClick={(e) => {
-                                // Prevent Link navigation when interacting with the CTA row.
-                                e.preventDefault();
-                                e.stopPropagation();
-                            }}
-                        >
-                            <div className="w-28 flex-shrink-0">
-                                <QuantitySelector value={quantity} onChange={setQuantity} />
-                            </div>
+                        <>
                             <button
-                                onClick={handleAddToCart}
-                                disabled={isAdding}
-                                className={`flex-1 rounded-md py-2 sm:py-3 text-[11px] sm:text-sm font-bold flex items-center justify-center gap-1.5 sm:gap-2 shadow-sm transition-colors ${
-                                    isAdding 
-                                        ? 'bg-gray-400 cursor-not-allowed' 
-                                        : 'bg-hett-primary text-white hover:bg-hett-dark'
-                                }`}
+                                onClick={handleConfigureClick}
+                                className="w-full rounded-md py-2 sm:py-3 text-[11px] sm:text-sm font-bold flex items-center justify-center gap-1.5 sm:gap-2 shadow-sm transition-colors bg-hett-dark text-white hover:bg-hett-primary"
                             >
-                                <ShoppingCart size={16} />
-                                {isAdding ? 'Toevoegen...' : 'In winkelwagen'}
+                                <Settings size={16} />
+                                Stel samen
                             </button>
-                        </div>
+                            <div className="mt-2 flex items-center gap-1 text-[10px] sm:text-xs text-green-600 font-medium leading-tight">
+                                <Truck size={14} className="flex-shrink-0" />
+                                <span>{deliveryTime}</span>
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <div
+                                className="flex flex-row items-stretch gap-2"
+                                onMouseDown={(e) => {
+                                    // Don't let the parent Link start navigation.
+                                    e.stopPropagation();
+                                }}
+                                onClick={(e) => {
+                                    // Prevent Link navigation when interacting with the CTA row.
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                }}
+                            >
+                                <div className="w-28 flex-shrink-0">
+                                    <QuantitySelector value={quantity} onChange={setQuantity} />
+                                </div>
+                                <button
+                                    onClick={handleAddToCart}
+                                    disabled={isAdding}
+                                    className={`flex-1 rounded-md py-2 sm:py-3 text-[11px] sm:text-sm font-bold flex items-center justify-center gap-1.5 sm:gap-2 shadow-sm transition-colors ${
+                                        isAdding 
+                                            ? 'bg-gray-400 cursor-not-allowed' 
+                                            : 'bg-hett-primary text-white hover:bg-hett-dark'
+                                    }`}
+                                >
+                                    <ShoppingCart size={16} />
+                                    {isAdding ? 'Toevoegen...' : 'In winkelwagen'}
+                                </button>
+                            </div>
+                            <div className="mt-2 flex items-center gap-1 text-[10px] sm:text-xs text-green-600 font-medium leading-tight">
+                                <Truck size={14} className="flex-shrink-0" />
+                                <span>{deliveryTime}</span>
+                            </div>
+                        </>
                     )}
                 </div>
             </div>

@@ -24,6 +24,13 @@ import {
 import {
   buildConfigSurchargeLines,
 } from '../../services/configSurchargeLines';
+// Bundle key utilities for grouping related lines
+import {
+  generateBundleKey,
+  BUNDLE_KEY_ATTR,
+  KIND_ATTR,
+  LINE_KINDS,
+} from '../../utils/bundleKey';
 
 // =============================================================================
 // MAIN CHECKOUT FUNCTION
@@ -85,6 +92,10 @@ export async function beginCheckout(
     // Build cart lines from local cart
     const lines: CartLineInput[] = [];
     
+    // Track bundle keys for each cart item (index -> bundleKey)
+    // This allows LED and surcharge lines to reference the same bundle
+    const bundleKeyMap = new Map<number, string>();
+    
     for (let i = 0; i < cartItems.length; i++) {
       const item = cartItems[i];
       
@@ -119,11 +130,21 @@ export async function beginCheckout(
         continue;
       }
       
+      // Generate bundle_key for this cart item (links main + LED + surcharge lines)
+      const bundleKey = generateBundleKey();
+      bundleKeyMap.set(i, bundleKey);
+      
       // Regular product items
       const { mappingKey, merchandiseId } = resolveMerchandiseForCartItem(item);
       
       // Use new clean attribute formatter
       const attributes = toShopifyLineAttributes(item);
+      
+      // Add bundle grouping attributes
+      attributes.push(
+        { key: BUNDLE_KEY_ATTR, value: bundleKey },
+        { key: KIND_ATTR, value: LINE_KINDS.MAIN_PRODUCT }
+      );
 
       // Debug helper (requested)
       console.log('[beginCheckout] item', {
@@ -133,6 +154,7 @@ export async function beginCheckout(
         category: item.category,
         mappingKey,
         merchandiseId,
+        bundleKey,
         attributeCount: attributes.length,
       });
 
@@ -151,9 +173,10 @@ export async function beginCheckout(
     console.log(`[LED Checkout] isLedConfigured()=${isLedConfigured()}`);
     
     if (isLedConfigured()) {
-      const ledSourceItems: Array<{ configType: string; handle: string; widthCm: number; itemQty: number; ledQty: number }> = [];
+      const ledSourceItems: Array<{ cartIndex: number; configType: string; handle: string; widthCm: number; itemQty: number; ledQty: number; bundleKey: string }> = [];
       
-      for (const item of cartItems) {
+      for (let idx = 0; idx < cartItems.length; idx++) {
+        const item = cartItems[idx];
         // Skip shipping line
         if (isShippingLineItem(item)) continue;
         
@@ -188,18 +211,23 @@ export async function beginCheckout(
         const widthCm = extractWidthFromCartItem(ledItem);
         console.log(`[LED Checkout] → widthCm=${widthCm}`);
         
+        // Get bundle key for this item
+        const bundleKey = bundleKeyMap.get(idx) || '';
+        
         if (widthCm) {
           // Get LED qty using EXACT mapping
           const ledQty = getLedSpotCountForWidthCm(widthCm);
           
           if (ledQty > 0) {
-            console.log(`[LED Checkout] → ADDED: qty=${ledQty} for width=${widthCm}cm, itemQty=${item.quantity}`);
+            console.log(`[LED Checkout] → ADDED: qty=${ledQty} for width=${widthCm}cm, itemQty=${item.quantity}, bundleKey=${bundleKey}`);
             ledSourceItems.push({
+              cartIndex: idx,
               configType,
               handle: identifier,
               widthCm,
               itemQty: item.quantity,
               ledQty,
+              bundleKey,
             });
           } else {
             console.log(`[LED Checkout] → skipped (no LED mapping for width=${widthCm}cm)`);
@@ -221,12 +249,16 @@ export async function beginCheckout(
         console.log(`[LED Checkout] Total LED qty: ${totalLedQty}`);
         console.log(`[LED Checkout] Source items: ${ledSourceItems.length}`);
         for (const src of ledSourceItems) {
-          console.log(`[LED Checkout]   - ${src.handle}: ${src.ledQty}×${src.itemQty} = ${src.ledQty * src.itemQty} spots`);
+          console.log(`[LED Checkout]   - ${src.handle}: ${src.ledQty}×${src.itemQty} = ${src.ledQty * src.itemQty} spots (${src.bundleKey})`);
         }
+        
+        // Collect bundle keys from all source items
+        const ledBundleKeys = ledSourceItems.map(s => s.bundleKey).filter(Boolean);
         
         const ledLine = buildLedCartLine(
           totalLedQty,
-          ledSourceItems.map(s => ({ configType: s.configType, handle: s.handle, widthCm: s.widthCm }))
+          ledSourceItems.map(s => ({ configType: s.configType, handle: s.handle, widthCm: s.widthCm })),
+          ledBundleKeys
         );
         
         if (ledLine) {
@@ -244,20 +276,32 @@ export async function beginCheckout(
     // ==========================================================================
     console.log('[Config Surcharge] ========== Starting surcharge lines ==========');
     
-    // Filter out shipping lines for surcharge calculation
-    const productItems = cartItems.filter(item => !isShippingLineItem(item));
+    // Filter out shipping lines for surcharge calculation, and collect bundle keys
+    const productItemsWithBundleKeys: Array<{ item: CartItem; bundleKey: string }> = [];
+    for (let idx = 0; idx < cartItems.length; idx++) {
+      const item = cartItems[idx];
+      if (!isShippingLineItem(item)) {
+        const bundleKey = bundleKeyMap.get(idx) || '';
+        productItemsWithBundleKeys.push({ item, bundleKey });
+      }
+    }
     
-    if (productItems.length > 0) {
+    if (productItemsWithBundleKeys.length > 0) {
+      // Collect all bundle keys for the surcharge lines
+      const surchargeBundleKeys = productItemsWithBundleKeys.map(p => p.bundleKey).filter(Boolean);
+      
       const surchargeResult = buildConfigSurchargeLines(
-        productItems,
+        productItemsWithBundleKeys.map(p => p.item),
         'Configuratie opties',
-        'config-surcharge'
+        'config-surcharge',
+        surchargeBundleKeys
       );
 
       if (surchargeResult.lines.length > 0) {
         console.log(`[Config Surcharge] Adding ${surchargeResult.lines.length} price step lines`);
         console.log(`[Config Surcharge] Total: €${surchargeResult.totalEur.toFixed(2)}`);
         console.log(`[Config Surcharge] Summary: ${surchargeResult.summary}`);
+        console.log(`[Config Surcharge] Bundle keys: ${surchargeBundleKeys.join(',')}`);
         
         for (const line of surchargeResult.lines) {
           lines.push(line);

@@ -223,11 +223,13 @@ export interface LedCartLineInput {
  * 
  * @param totalQuantity - Total LED spots to add
  * @param sourceItems - Source veranda items for attribution
+ * @param bundleKeys - Optional bundle keys to link LED line to parent products
  * @returns CartLineInput for Shopify, or null if qty is 0 or LED not configured
  */
 export function buildLedCartLine(
   totalQuantity: number,
-  sourceItems: Array<{ configType: string; handle: string; widthCm: number }>
+  sourceItems: Array<{ configType: string; handle: string; widthCm: number }>,
+  bundleKeys?: string[]
 ): LedCartLineInput | null {
   if (!isLedConfigured() || totalQuantity <= 0) {
     return null;
@@ -245,14 +247,22 @@ export function buildLedCartLine(
     `Aantal spots: ${totalQuantity} × €${unitPriceFormatted}`,
   ];
   
+  const attributes: Array<{ key: string; value: string }> = [
+    // Addon identifier for grouping in cart UI
+    { key: 'addon', value: 'led_spots' },
+    // Line kind for bundle grouping
+    { key: 'kind', value: 'led_addon' },
+    // Human-readable for Shopify checkout
+    { key: 'Berekening', value: calculationLines.join('\n') },
+  ];
+  
+  // Add bundle keys if provided (links LED to parent product bundles)
+  if (bundleKeys && bundleKeys.length > 0) {
+    attributes.push({ key: 'bundle_keys', value: bundleKeys.join(',') });
+  }
+  
   return {
     merchandiseId: LED_VARIANT_ID,
     quantity: totalQuantity,
-    attributes: [
-      // Addon identifier for grouping in cart UI
-      { key: 'addon', value: 'led_spots' },
-      // Human-readable for Shopify checkout
-      { key: 'Berekening', value: calculationLines.join('\n') },
-    ],
-  };
+    attributes,  };
 }

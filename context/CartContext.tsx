@@ -653,8 +653,17 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       const cartId = `${product.id}-${configHash}`;
 
+      // NOTE: options.price from configurator includes options surcharge.
+      // At Shopify checkout, main product line uses Shopify variant price (base),
+      // and surcharge lines add option costs separately.
+      // For LOCAL cart display, we use the full price (base + options) so users
+      // see accurate totals. The InlineSurchargeBreakdown component shows the
+      // breakdown of what's included.
       const unitPriceCents = toCents(options.price ?? fromCents(product.priceCents));
       const lineTotalCents = mulCents(unitPriceCents, safeQuantity);
+      
+      // Store base price for reference (used by bundle grouping utility)
+      const basePriceCents = product.priceCents;
 
       let renderSnapshot: CartItem['render'] | undefined;
       if (configCandidate.category === 'verandas') {

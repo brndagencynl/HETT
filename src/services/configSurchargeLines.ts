@@ -65,18 +65,21 @@ export interface ConfigSurchargeLineResult {
  * @param cartItems - All cart items to process
  * @param productTitle - Title to show in checkout (e.g., "Veranda 600x300")
  * @param productHandle - Handle for reference
+ * @param bundleKeys - Optional bundle keys to link surcharge lines to parent products
  * @returns Cart lines and metadata
  */
 export function buildConfigSurchargeLines(
   cartItems: CartItem[],
   productTitle: string = 'Configuratie',
-  productHandle: string = 'config'
+  productHandle: string = 'config',
+  bundleKeys?: string[]
 ): ConfigSurchargeLineResult {
   const sourceItems: ConfigSurchargeLineResult['sourceItems'] = [];
   let totalCents = 0;
 
   console.log('[ConfigSurchargeLines] ========== Starting surcharge calculation ==========');
   console.log(`[ConfigSurchargeLines] Processing ${cartItems.length} cart items`);
+  console.log(`[ConfigSurchargeLines] Bundle keys: ${bundleKeys?.join(',') || 'none'}`);
 
   // Process each cart item
   for (const item of cartItems) {
@@ -188,6 +191,11 @@ export function buildConfigSurchargeLines(
       // Human-readable for Shopify checkout
       { key: 'Toelichting', value: toelichtingLines.join('\n') },
     ];
+    
+    // Add bundle keys if provided (links surcharge to parent product bundles)
+    if (bundleKeys && bundleKeys.length > 0) {
+      attributes.push({ key: 'bundle_keys', value: bundleKeys.join(',') });
+    }
 
     return {
       merchandiseId: step.variantId,

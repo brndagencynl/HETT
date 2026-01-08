@@ -119,15 +119,9 @@ const Home: React.FC = () => {
                                 {hero.description}
                             </p>
                             <div className="flex flex-wrap gap-4">
-                                {hero.primaryCtaUrl ? (
-                                    <Link to={hero.primaryCtaUrl} className="btn-secondary px-10 py-4 text-lg">
-                                        Stel zelf samen
-                                    </Link>
-                                ) : (
-                                    <span className="btn-secondary px-10 py-4 text-lg opacity-50 cursor-default">
-                                        Stel zelf samen
-                                    </span>
-                                )}
+                                <Link to="/categorie/verandas" className="btn-secondary px-10 py-4 text-lg">
+                                    Stel zelf samen
+                                </Link>
                             </div>
                         </div>
                     </div>

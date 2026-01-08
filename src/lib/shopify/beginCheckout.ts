@@ -111,16 +111,26 @@ export async function beginCheckout(
         const shippingItem = item as ShippingLineItem;
         const meta = shippingItem.shippingMeta;
         
-        // Build shipping-specific attributes
+        // Get readable country name
+        const countryNames: Record<string, string> = {
+          NL: 'Nederland',
+          BE: 'België',
+          DE: 'Duitsland',
+        };
+        const countryName = countryNames[meta.country] || meta.country;
+        
+        // Build CUSTOMER-FACING shipping attributes
+        // Format destination nicely
+        const destinationParts = [meta.postalCode, meta.houseNumber].filter(Boolean);
+        const destination = destinationParts.join(' ') || countryName;
+        
         const shippingAttributes = [
-          { key: 'shipping_method', value: meta.method },
-          { key: 'destination_country', value: meta.country },
-          { key: 'destination_postcode', value: meta.postalCode },
-          { key: 'destination_house_number', value: meta.houseNumber || '' },
-          { key: 'distance_km', value: meta.distanceKm.toFixed(2) },
-          { key: 'shipping_total_eur', value: (shippingItem.lineTotalCents! / 100).toFixed(2) },
+          { key: 'Bestemming', value: `${destination}, ${countryName}` },
+          { key: 'Afstand', value: `${meta.distanceKm.toFixed(1)} km` },
+          { key: 'Tarief', value: '€ 1,00 per km' },
         ];
         
+        console.log('[Checkout Props] shipping', shippingAttributes);
         console.log('[beginCheckout] shipping line', {
           title: shippingItem.title,
           variantId: shippingItem.shopifyVariantId,

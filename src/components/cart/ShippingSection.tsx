@@ -377,7 +377,7 @@ export const ShippingSection: React.FC = () => {
 
             {/* Quote Result */}
             {shippingIsValid && shippingQuote && !shippingIsCalculating && (
-              <div className="p-4 bg-[#EDF0F2] rounded-lg border border-gray-200">
+              <div className="p-4 bg-[#eff6ff] rounded-lg border border-gray-200">
                 <div className="space-y-2">
                   {/* Distance */}
                   {shippingQuote.distanceKm > 0 && (

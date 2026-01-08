@@ -63,6 +63,7 @@
 
 .btn-primary:hover {
   background: var(--color-secondary);
+  color: #fff;
 }
 
 .btn-outline {

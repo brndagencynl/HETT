@@ -34,7 +34,7 @@ const ProductDetailContent: React.FC<ProductDetailContentProps> = ({ uspItems, d
                 {uspItems.map((item, index) => {
                     const Icon = IconMap[item.icon];
                     return (
-                        <div key={index} className="bg-[#EDF0F2] rounded-2xl p-4 flex items-center gap-3">
+                        <div key={index} className="bg-[#eff6ff] rounded-2xl p-4 flex items-center gap-3">
                             <div className="bg-white p-2 rounded-lg text-[#003878] shadow-sm flex-shrink-0">
                                 <Icon size={20} className="stroke-[2.5]" />
                             </div>
@@ -48,7 +48,7 @@ const ProductDetailContent: React.FC<ProductDetailContentProps> = ({ uspItems, d
             </div>
 
             {/* 2. Delivery & Montage Block */}
-            <div className="bg-[#EDF0F2] rounded-2xl p-6 lg:p-8 flex flex-col md:flex-row gap-6 md:items-center justify-between">
+            <div className="bg-[#eff6ff] rounded-2xl p-6 lg:p-8 flex flex-col md:flex-row gap-6 md:items-center justify-between">
                 <div className="space-y-2 max-w-2xl">
                     <h3 className="text-xl font-bold text-[#003878] flex items-center gap-2">
                         <Truck size={24} className="text-[#003878]" />

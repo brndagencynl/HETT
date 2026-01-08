@@ -109,7 +109,7 @@ const CartDrawer: React.FC = () => {
                         animate={{ x: 0 }}
                         exit={{ x: '100%' }}
                         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                        className="fixed inset-y-0 right-0 z-[101] w-full md:w-[480px] bg-[#EDF0F2] shadow-2xl flex flex-col font-sans"
+                        className="fixed inset-y-0 right-0 z-[101] w-full md:w-[480px] bg-[#eff6ff] shadow-2xl flex flex-col font-sans"
                         ref={drawerRef}
                     >
                         {/* Header */}

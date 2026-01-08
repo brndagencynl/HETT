@@ -561,7 +561,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                 {/* Configuration Summary */}
                 <div className="bg-white rounded-xl border-2 border-gray-200 divide-y divide-gray-100 overflow-hidden shadow-sm">
                     {summaryItems.map((item) => (
-                        <div key={item.key} className="flex items-center justify-between p-4 hover:bg-[#EDF0F2] transition-colors">
+                        <div key={item.key} className="flex items-center justify-between p-4 hover:bg-[#eff6ff] transition-colors">
                             <div>
                                 <span className="text-sm text-gray-500 font-medium">{item.label}</span>
                                 <span className="block font-bold text-gray-900 text-base">{item.value}</span>
@@ -578,7 +578,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                 </div>
 
                 {/* Price Breakdown */}
-                <div className="bg-[#EDF0F2] rounded-xl p-6 space-y-3">
+                <div className="bg-[#eff6ff] rounded-xl p-6 space-y-3">
                     <h4 className="font-bold text-gray-900 text-lg">{t('configurator.overview.priceOverview')}</h4>
                     <div className="space-y-2 text-sm">
                         <div className="flex justify-between">

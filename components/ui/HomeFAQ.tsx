@@ -17,7 +17,7 @@ const HomeFAQ: React.FC<HomeFAQProps> = ({ items }) => {
     };
 
     return (
-        <section className="py-20 bg-[#EDF0F2]">
+        <section className="py-20 bg-[#eff6ff]">
             <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
 

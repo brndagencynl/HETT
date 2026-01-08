@@ -163,30 +163,7 @@ const About: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Values / Stats Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-12 border-t border-gray-100 pt-20">
-                    <div className="text-center group">
-                        <div className="w-20 h-20 bg-gray-50 text-hett-brown rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-sm">
-                            <Users size={36} />
-                        </div>
-                        <h3 className="text-xl font-bold text-hett-dark mb-3">Partner voor de Prof</h3>
-                        <p className="text-gray-600 leading-relaxed">Wij werken exclusief samen met professionals die verstand van zaken hebben.</p>
-                    </div>
-                    <div className="text-center group">
-                        <div className="w-20 h-20 bg-gray-50 text-hett-brown rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-sm">
-                            <Globe size={36} />
-                        </div>
-                        <h3 className="text-xl font-bold text-hett-dark mb-3">Benelux Dekking</h3>
-                        <p className="text-gray-600 leading-relaxed">Vanuit ons centrale magazijn leveren wij dagelijks door heel Nederland en België.</p>
-                    </div>
-                    <div className="text-center group">
-                        <div className="w-20 h-20 bg-gray-50 text-hett-brown rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-sm">
-                            <Award size={36} />
-                        </div>
-                        <h3 className="text-xl font-bold text-hett-dark mb-3">Gecertificeerde Kwaliteit</h3>
-                        <p className="text-gray-600 leading-relaxed">Al onze panelen voldoen aan de strengste Europese normen op het gebied van brandveiligheid.</p>
-                    </div>
-                </div>
+
 
             </div>
         </div>

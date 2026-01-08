@@ -14,7 +14,7 @@ const Delivery: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB] font-sans">
+        <div className="min-h-screen bg-[#eff6ff] font-sans">
       <PageHeader />
 
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">

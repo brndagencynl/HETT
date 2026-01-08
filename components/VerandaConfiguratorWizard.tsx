@@ -6,7 +6,8 @@ import { calcVerandaPrice } from '../src/configurator/pricing/veranda';
 import { buildVisualizationLayers, type VisualizationLayer, FALLBACK_IMAGE, FALLBACK_THUMBNAIL, type VerandaColorId, getPreloadPaths, preloadImages, getThumbnailPath, verifyThumbnailUrl } from '../src/configurator/visual/verandaAssets';
 import { t } from '../src/utils/i18n';
 import { formatEUR, toCents } from '../src/utils/money';
-import { getLedTotals, LED_UNIT_PRICE_EUR } from '../src/services/ledPricing';
+// Use shared LED addon service for both standard and maatwerk configurators
+import { getLedTotals, LED_UNIT_PRICE_EUR } from '../src/services/addons/led';
 
 const MotionDiv = motion.div as any;
 
@@ -188,10 +189,12 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
     const displayTotal = currentPrice + ledSelectedTotal;
 
     // Keep derived LED fields in config for debugging/consumers
+    // IMPORTANT: Include widthCm for LED checkout flow to extract width correctly
     useEffect(() => {
         setConfig(prev => {
             const prevAny = prev as any;
             if (
+                prevAny?.widthCm === widthCm &&
                 prevAny?.ledQty === ledInfo.qty &&
                 prevAny?.ledUnitPrice === ledInfo.unitPrice &&
                 prevAny?.ledTotalPrice === ledInfo.total &&
@@ -199,12 +202,14 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
             ) {
                 return prev;
             }
+            console.log(`[VerandaConfigurator] Setting widthCm=${widthCm} in config for LED checkout`);
             return {
                 ...prev,
+                widthCm, // Used by LED checkout flow
                 ledQty: ledInfo.qty,
                 ledUnitPrice: ledInfo.unitPrice,
                 ledTotalPrice: ledInfo.total,
-                ledWidthCm: widthCm,
+                ledWidthCm: widthCm, // Legacy field
             };
         });
     }, [ledInfo.qty, ledInfo.total, ledInfo.unitPrice, widthCm]);

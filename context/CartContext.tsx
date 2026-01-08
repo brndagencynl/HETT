@@ -21,14 +21,18 @@ import {
   type ShippingLineItem,
   type ShippingQuoteResult,
 } from '../src/services/shipping';
+// Use shared LED addon service for both standard and maatwerk configurators
 import {
   getLedSpotCountForWidthCm,
   extractWidthFromHandle,
   extractWidthFromSize,
+  extractWidthFromCartItem,
+  hasLedEnabled,
   LED_UNIT_PRICE_CENTS,
   isLedConfigured,
   type LedLineItem,
-} from '../src/services/ledPricing';
+  type LedCartItem,
+} from '../src/services/addons/led';
 
 // =============================================================================
 // TYPES
@@ -316,65 +320,69 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // ==========================================================================
   // LED SPOTS LINE (computed from veranda items with verlichting)
+  // Uses shared LED addon service for both standard and maatwerk configurators
   // ==========================================================================
   const ledLineItem = useMemo<LedLineItem | null>(() => {
+    console.log('[CartContext LED] Computing LED line item...');
     const parentItems: LedLineItem['parentItems'] = [];
     
     for (const item of cartWithCents) {
-      // Check if item has verlichting enabled
-      const config = item.config?.data as any;
-      const hasLed = 
-        config?.verlichting === true || 
-        item.maatwerkPayload?.selections?.some((s: any) => s.groupId === 'verlichting' && s.choiceId !== 'geen');
+      const identifier = item.handle || item.slug || item.id || 'unknown';
       
-      if (!hasLed) continue;
+      // Create LedCartItem for shared helpers (cast to any for type compatibility)
+      const ledItem: LedCartItem = {
+        id: item.id,
+        handle: item.handle,
+        slug: item.slug,
+        type: item.type,
+        quantity: item.quantity,
+        selectedSize: item.selectedSize,
+        config: item.config as any,
+        maatwerkPayload: item.maatwerkPayload as any,
+      };
+      
+      // Use shared helper to check if LED is enabled
+      if (!hasLedEnabled(ledItem)) {
+        console.log(`[CartContext LED] ${identifier}: LED not enabled, skipping`);
+        continue;
+      }
       
       // Determine config type
       const configType = item.type === 'custom_veranda' ? 'maatwerk' : 
                         item.config?.category === 'maatwerk_veranda' ? 'maatwerk' : 'veranda';
       
-      // Extract width
-      let widthCm: number | null = null;
-      
-      // Try maatwerk payload first
-      if (item.maatwerkPayload?.size?.width) {
-        // Exact mapping only; unmatched widths will yield qty=0 (and be skipped)
-        widthCm = item.maatwerkPayload.size.width;
-      }
-      // Try config data
-      else if (config?.widthCm) {
-        widthCm = config.widthCm;
-      }
-      else if (config?.size?.width) {
-        widthCm = config.size.width;
-      }
-      // Try selected size (standard veranda - 506/606/706)
-      else if (item.selectedSize) {
-        widthCm = extractWidthFromSize(item.selectedSize);
-      }
-      // Try extracting from handle/slug
-      else if (item.handle || item.slug || item.id) {
-        widthCm = extractWidthFromHandle(item.handle || item.slug || item.id);
-      }
+      // Use shared helper to extract width
+      const widthCm = extractWidthFromCartItem(ledItem);
       
       if (widthCm) {
         const ledQty = getLedSpotCountForWidthCm(widthCm);
-        if (ledQty === 0) continue; // Skip if no mapping for this width
+        if (ledQty === 0) {
+          console.log(`[CartContext LED] ${identifier}: no LED mapping for width=${widthCm}cm, skipping`);
+          continue;
+        }
+        console.log(`[CartContext LED] ${identifier}: type=${configType}, width=${widthCm}cm, qty=${ledQty}`);
         parentItems.push({
-          handle: item.handle || item.slug || item.id,
+          handle: identifier,
           configType,
           widthCm,
           itemQuantity: item.quantity,
           ledQty,
         });
+      } else {
+        console.log(`[CartContext LED] ${identifier}: LED enabled but no width found, skipping`);
       }
     }
     
-    if (parentItems.length === 0) return null;
+    if (parentItems.length === 0) {
+      console.log('[CartContext LED] No LED items found');
+      return null;
+    }
     
     // Calculate total LED quantity
     const totalQty = parentItems.reduce((sum, p) => sum + (p.ledQty * p.itemQuantity), 0);
     const lineTotalCents = mulCents(LED_UNIT_PRICE_CENTS, totalQty);
+    
+    console.log(`[CartContext LED] Total: ${totalQty} spots, ${fromCents(lineTotalCents)} EUR`);
     
     return {
       id: 'auto-led',

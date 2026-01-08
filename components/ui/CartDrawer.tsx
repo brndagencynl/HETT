@@ -13,7 +13,7 @@ import { CartItemPreview } from './ConfigPreviewImage';
 import ConfigBreakdownPopup from './ConfigBreakdownPopup';
 import { beginCheckout, isShopifyConfigured } from '../../src/lib/shopify';
 import { formatEUR } from '../../src/utils/money';
-import { extractWidthFromHandle, extractWidthFromSize } from '../../src/services/ledPricing';
+import { extractWidthFromHandle, extractWidthFromSize } from '../../src/services/addons/led';
 
 const MotionDiv = motion.div as any;
 

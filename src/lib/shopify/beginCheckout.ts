@@ -9,13 +9,17 @@ import type { CartItem } from '../../../types';
 import { resolveMerchandiseForCartItem } from '../../shopify/shopifyMerchandiseMap';
 import { toShopifyLineAttributes } from '../../services/config/formatConfigAttributes';
 import { isShippingLineItem, type ShippingLineItem } from '../../services/shipping';
+// Use shared LED addon service
 import {
   getLedSpotCountForWidthCm,
   extractWidthFromHandle,
   extractWidthFromSize,
   buildLedCartLine,
   isLedConfigured,
-} from '../../services/ledPricing';
+  extractWidthFromCartItem,
+  hasLedEnabled,
+  type LedCartItem,
+} from '../../services/addons/led';
 
 // =============================================================================
 // MAIN CHECKOUT FUNCTION
@@ -137,7 +141,11 @@ export async function beginCheckout(
     
     // ==========================================================================
     // LED SPOTS LINE (aggregate from all veranda items with verlichting)
+    // Uses shared LED addon service for both standard and maatwerk configurators
     // ==========================================================================
+    console.log('[LED Checkout] ========== Starting LED aggregation ==========');
+    console.log(`[LED Checkout] isLedConfigured()=${isLedConfigured()}`);
+    
     if (isLedConfigured()) {
       const ledSourceItems: Array<{ configType: string; handle: string; widthCm: number; itemQty: number; ledQty: number }> = [];
       
@@ -145,62 +153,55 @@ export async function beginCheckout(
         // Skip shipping line
         if (isShippingLineItem(item)) continue;
         
-        // Check if item has verlichting enabled
-        const config = item.config?.data as any;
-        const hasLed = 
-          config?.verlichting === true || 
-          item.maatwerkPayload?.selections?.some((s: any) => s.groupId === 'verlichting' && s.choiceId !== 'geen');
+        const identifier = item.handle || item.slug || item.id || 'unknown';
+        console.log(`[LED Checkout] Processing item: ${identifier}`);
+        
+        // Use shared helper to check LED enabled (cast for type compatibility)
+        const ledItem: LedCartItem = {
+          id: item.id,
+          handle: item.handle,
+          slug: item.slug,
+          type: item.type,
+          quantity: item.quantity,
+          selectedSize: item.selectedSize,
+          config: item.config as any,
+          maatwerkPayload: item.maatwerkPayload as any,
+        };
+        
+        const hasLed = hasLedEnabled(ledItem);
         
         if (!hasLed) {
-          console.log(`[LED Checkout] skipped - verlichting not enabled for ${item.handle || item.id}`);
+          console.log(`[LED Checkout] → skipped (verlichting not enabled)`);
           continue;
         }
         
         // Determine config type (veranda or maatwerk)
         const configType = item.type === 'custom_veranda' ? 'maatwerk' : 
                           item.config?.category === 'maatwerk_veranda' ? 'maatwerk' : 'veranda';
+        console.log(`[LED Checkout] → configType=${configType}`);
         
-        // Extract width
-        let widthCm: number | null = null;
-        
-        // Try maatwerk payload first (slider value)
-        if (item.maatwerkPayload?.size?.width) {
-          const rawWidth = item.maatwerkPayload.size.width;
-          // Exact mapping only; unmatched widths will yield qty=0 (and be skipped)
-          widthCm = rawWidth;
-        }
-        // Try config data
-        else if (config?.widthCm) {
-          widthCm = config.widthCm;
-        }
-        else if (config?.size?.width) {
-          widthCm = config.size.width;
-        }
-        // Try selected size (standard veranda - 506/606/706)
-        else if (item.selectedSize) {
-          widthCm = extractWidthFromSize(item.selectedSize);
-        }
-        // Try extracting from handle/slug
-        else if (item.handle || item.slug || item.id) {
-          widthCm = extractWidthFromHandle(item.handle || item.slug || item.id);
-        }
+        // Use shared helper to extract width
+        const widthCm = extractWidthFromCartItem(ledItem);
+        console.log(`[LED Checkout] → widthCm=${widthCm}`);
         
         if (widthCm) {
           // Get LED qty using EXACT mapping
           const ledQty = getLedSpotCountForWidthCm(widthCm);
           
           if (ledQty > 0) {
-            console.log(`[LED Checkout] added qty=${ledQty} for width=${widthCm}cm, item qty=${item.quantity}`);
+            console.log(`[LED Checkout] → ADDED: qty=${ledQty} for width=${widthCm}cm, itemQty=${item.quantity}`);
             ledSourceItems.push({
               configType,
-              handle: item.handle || item.slug || item.id,
+              handle: identifier,
               widthCm,
               itemQty: item.quantity,
               ledQty,
             });
           } else {
-            console.log(`[LED Checkout] skipped - no LED mapping for width=${widthCm}cm`);
+            console.log(`[LED Checkout] → skipped (no LED mapping for width=${widthCm}cm)`);
           }
+        } else {
+          console.log(`[LED Checkout] → skipped (could not extract width)`);
         }
       }
       
@@ -212,7 +213,12 @@ export async function beginCheckout(
           totalLedQty += src.ledQty * src.itemQty;
         }
         
-        console.log(`[LED Checkout] total LED qty=${totalLedQty} from ${ledSourceItems.length} items`);
+        console.log(`[LED Checkout] ========== LED SUMMARY ==========`);
+        console.log(`[LED Checkout] Total LED qty: ${totalLedQty}`);
+        console.log(`[LED Checkout] Source items: ${ledSourceItems.length}`);
+        for (const src of ledSourceItems) {
+          console.log(`[LED Checkout]   - ${src.handle}: ${src.ledQty}×${src.itemQty} = ${src.ledQty * src.itemQty} spots`);
+        }
         
         const ledLine = buildLedCartLine(
           totalLedQty,

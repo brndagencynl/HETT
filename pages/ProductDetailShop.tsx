@@ -12,7 +12,7 @@ import { ProductConfig, Product } from '../types';
 import { getProductByHandle } from '../src/lib/shopify';
 import { formatEUR } from '../src/utils/money';
 import { parseSpecifications } from '../src/utils/parseSpecifications';
-import { extractWidthFromHandle } from '../src/services/ledPricing';
+import { extractWidthFromHandle } from '../src/services/addons/led';
 
 type ProductDetailShopProps = {
     /** Pass a handle directly (for sandwichpanelen canonical route) */

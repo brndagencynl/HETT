@@ -23,7 +23,8 @@ import { X, Check, Info, ChevronLeft, ChevronRight, Truck, ShieldCheck, ArrowRig
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { Card } from './ui/card';
-import { getLedTotals, LED_UNIT_PRICE_EUR } from '../src/services/ledPricing';
+// Use shared LED addon service for both standard and maatwerk configurators
+import { getLedTotals, LED_UNIT_PRICE_EUR } from '../src/services/addons/led';
 
 // Custom maatwerk types and pricing - completely isolated
 import {

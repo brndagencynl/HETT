@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { useVerandaEdit } from '../context/VerandaEditContext';
-import { extractWidthFromHandle, extractWidthFromSize } from '../src/services/ledPricing';
+import { extractWidthFromHandle, extractWidthFromSize } from '../src/services/addons/led';
 import { useMaatwerkEdit } from '../context/MaatwerkEditContext';
 import { useSandwichpanelenEdit } from '../context/SandwichpanelenEditContext';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';

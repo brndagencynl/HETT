@@ -6,12 +6,24 @@
  * Uses "prijs-stappen" product variants to represent surcharge amounts.
  * 
  * Route A: Configuration options (excl. LED) → Price steps → Cart lines
+ * 
+ * All surcharge lines include:
+ * - config_id: Unique ID to group related lines
+ * - kind: 'config_surcharge_step' (for identification)
+ * - Toelichting: Human-readable summary for Shopify checkout
  */
 
 import type { CartLineInput, ShopifyCartLineAttribute } from '../lib/shopify/types';
 import type { CartItem } from '../../types';
 import { buildPriceSteps, formatPriceStepsDisplay, sumPriceSteps } from '../utils/priceSteps';
 import { getOptionsSurchargeCents, type SurchargeResult } from '../configurator/pricing/getOptionsSurchargeCents';
+
+// Simple unique ID generator (no external dependency)
+function generateConfigId(): string {
+  const timestamp = Date.now().toString(36);
+  const random = Math.random().toString(36).slice(2, 8);
+  return `cfg_${timestamp}_${random}`;
+}
 
 // =============================================================================
 // TYPES
@@ -26,6 +38,8 @@ export interface ConfigSurchargeLineResult {
   totalCents: number;
   /** Human-readable summary */
   summary: string;
+  /** Unique identifier for grouping these lines */
+  configId: string;
   /** Items that contributed to the surcharge */
   sourceItems: Array<{
     title: string;
@@ -100,6 +114,7 @@ export function buildConfigSurchargeLines(
       totalEur: 0,
       totalCents: 0,
       summary: '',
+      configId: '',
       sourceItems: [],
     };
   }
@@ -114,6 +129,7 @@ export function buildConfigSurchargeLines(
       totalEur: totalCents / 100,
       totalCents,
       summary: `Fout: kon ${(totalCents / 100).toFixed(2)} EUR niet omzetten`,
+      configId: '',
       sourceItems,
     };
   }
@@ -137,7 +153,12 @@ export function buildConfigSurchargeLines(
   console.log(`[ConfigSurchargeLines] Price steps: ${stepsSummary}`);
   console.log(`[ConfigSurchargeLines] Summary: ${truncatedSummary}`);
 
-  // Build cart lines with clean "Toelichting" attribute for Shopify checkout
+  // Generate a unique config_id for this checkout session
+  // This allows grouping all surcharge lines together in the cart UI
+  const configId = generateConfigId();
+  console.log(`[ConfigSurchargeLines] Generated config_id: ${configId}`);
+
+  // Build cart lines with grouping attributes
   const lines: CartLineInput[] = priceSteps.map(step => {
     // Build human-readable toelichting
     const toelichtingLines: string[] = [];
@@ -158,7 +179,13 @@ export function buildConfigSurchargeLines(
       toelichtingLines.push(`Opties: ${optionsSummary}`);
     }
     
+    // Attributes for grouping and display
     const attributes: ShopifyCartLineAttribute[] = [
+      // Grouping identifier (same for all lines in this config)
+      { key: 'config_id', value: configId },
+      // Line type identifier
+      { key: 'kind', value: 'config_surcharge_step' },
+      // Human-readable for Shopify checkout
       { key: 'Toelichting', value: toelichtingLines.join('\n') },
     ];
 
@@ -169,7 +196,7 @@ export function buildConfigSurchargeLines(
     };
   });
 
-  console.log(`[ConfigSurchargeLines] Created ${lines.length} cart lines`);
+  console.log(`[ConfigSurchargeLines] Created ${lines.length} cart lines with config_id: ${configId}`);
 
   return {
     lines,
@@ -177,6 +204,7 @@ export function buildConfigSurchargeLines(
     totalCents: verifyTotalCents,
     summary: truncatedSummary,
     sourceItems,
+    configId, // Include the generated config_id for reference
   };
 }
 
@@ -204,25 +232,28 @@ export function buildSingleItemSurchargeLines(
 
 /**
  * Check if a cart line is a config surcharge step line.
- * Uses the 'Toelichting' attribute (clean checkout display).
+ * Identified by: kind === 'config_surcharge_step'
  */
 export function isConfigSurchargeStepLine(attributes: ShopifyCartLineAttribute[]): boolean {
-  return attributes.some(attr => attr.key === 'Toelichting');
+  return attributes.some(attr => attr.key === 'kind' && attr.value === 'config_surcharge_step');
 }
 
 /**
  * Get surcharge step info from line attributes.
  */
 export function getConfigSurchargeStepInfo(attributes: ShopifyCartLineAttribute[]): {
+  configId: string | null;
   toelichting: string;
 } | null {
   if (!isConfigSurchargeStepLine(attributes)) {
     return null;
   }
 
+  const configIdAttr = attributes.find(a => a.key === 'config_id');
   const toelichtingAttr = attributes.find(a => a.key === 'Toelichting');
   
   return {
+    configId: configIdAttr?.value || null,
     toelichting: toelichtingAttr?.value || '',
   };
 }

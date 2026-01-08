@@ -2,21 +2,24 @@
  * Configuration Surcharge Preview Component
  * ==========================================
  * 
- * Displays a preview of the configuration surcharge that will be added
- * to Shopify checkout. This shows users what extra charges they'll see
- * for their configuration options.
+ * Displays configuration option surcharges in cart UI.
+ * 
+ * Two modes:
+ * 1. Summary mode (default): Shows total surcharge as a blue info box
+ * 2. Inline mode: Shows breakdown within a product card
  * 
  * Note: This is calculated locally based on cart items and matches
  * what will be added as price-step lines during checkout.
  */
 
 import React, { useMemo } from 'react';
-import { Settings, Info } from 'lucide-react';
+import { Settings, Info, ChevronDown, ChevronUp } from 'lucide-react';
 import { useCart } from '../../../context/CartContext';
-import { getTotalOptionsSurchargeCents } from '../../configurator/pricing/getOptionsSurchargeCents';
+import { getOptionsSurchargeCents, getTotalOptionsSurchargeCents } from '../../configurator/pricing/getOptionsSurchargeCents';
 import { formatEUR, fromCents } from '../../utils/money';
 import { buildPriceSteps, formatPriceStepsDisplay } from '../../utils/priceSteps';
 import { isShippingLineItem } from '../../services/shipping';
+import type { CartItem } from '../../../types';
 
 interface ConfigSurchargePreviewProps {
   /** Show detailed breakdown (step values) */
@@ -26,7 +29,7 @@ interface ConfigSurchargePreviewProps {
 }
 
 /**
- * Preview component showing configuration surcharge.
+ * Preview component showing total configuration surcharge.
  * Shows the total and optionally the price step breakdown.
  */
 export const ConfigSurchargePreview: React.FC<ConfigSurchargePreviewProps> = ({
@@ -70,13 +73,13 @@ export const ConfigSurchargePreview: React.FC<ConfigSurchargePreviewProps> = ({
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between">
-            <h4 className="font-bold text-blue-900">Configuratie toeslag</h4>
+            <h4 className="font-bold text-blue-900">Opties & configuratie</h4>
             <span className="font-black text-blue-900 text-lg">
               {formatEUR(surchargeInfo.totalCents, 'cents')}
             </span>
           </div>
           <p className="text-sm text-blue-700 mt-1">
-            Extra opties voor uw configuratie(s)
+            Gekozen extra's voor deze samenstelling
           </p>
           {showDetails && surchargeInfo.steps.length > 0 && (
             <div className="mt-2 text-xs text-blue-600 flex items-center gap-1">
@@ -90,6 +93,125 @@ export const ConfigSurchargePreview: React.FC<ConfigSurchargePreviewProps> = ({
   );
 };
 
+// =============================================================================
+// INLINE BREAKDOWN COMPONENT (for product cards)
+// =============================================================================
+
+interface InlineSurchargeBreakdownProps {
+  /** Cart item to show surcharge for */
+  item: CartItem;
+  /** Additional CSS classes */
+  className?: string;
+}
+
+/**
+ * Inline breakdown showing configuration options for a single product.
+ * This is INFORMATIONAL ONLY - the options value is already included in lineTotalCents.
+ * Renders within a product card, explaining what options are included in the price.
+ */
+export const InlineSurchargeBreakdown: React.FC<InlineSurchargeBreakdownProps> = ({
+  item,
+  className = '',
+}) => {
+  const [isExpanded, setIsExpanded] = React.useState(false);
+  
+  // Calculate options value for this specific item (for display info)
+  const surchargeInfo = useMemo(() => {
+    const result = getOptionsSurchargeCents(item);
+    
+    if (!result.success || result.amountCents === 0) {
+      return null;
+    }
+    
+    // Account for item quantity
+    const totalCents = result.amountCents * (item.quantity || 1);
+    
+    return {
+      totalCents,
+      totalEur: totalCents / 100,
+      configType: result.configType,
+      summary: result.summary,
+    };
+  }, [item]);
+
+  // Don't render if no options value (means no options selected beyond base)
+  if (!surchargeInfo) {
+    return null;
+  }
+
+  // Parse summary into readable lines
+  const optionLines = surchargeInfo.summary
+    .split(', ')
+    .filter(line => line.trim().length > 0);
+
+  return (
+    <div className={`bg-blue-50/50 border border-blue-100 rounded-md p-2 mt-2 ${className}`}>
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="w-full flex items-center justify-between text-left"
+      >
+        <span className="text-xs font-semibold text-blue-800">
+          Inbegrepen opties
+        </span>
+        <div className="flex items-center gap-1">
+          <span className="text-[10px] text-blue-600">
+            {formatEUR(surchargeInfo.totalCents, 'cents')} in prijs
+          </span>
+          {optionLines.length > 0 && (
+            isExpanded ? (
+              <ChevronUp size={14} className="text-blue-600" />
+            ) : (
+              <ChevronDown size={14} className="text-blue-600" />
+            )
+          )}
+        </div>
+      </button>
+      
+      {isExpanded && optionLines.length > 0 && (
+        <div className="mt-2 pt-2 border-t border-blue-100 space-y-1">
+          {optionLines.map((line, idx) => (
+            <div key={idx} className="text-[10px] text-blue-700">
+              • {line}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// =============================================================================
+// WARNING BANNER (for ungrouped surcharges)
+// =============================================================================
+
+interface SurchargeWarningBannerProps {
+  /** Additional CSS classes */
+  className?: string;
+}
+
+/**
+ * Warning banner shown when surcharge lines couldn't be grouped.
+ * This indicates a potential issue but totals are still correct.
+ */
+export const SurchargeWarningBanner: React.FC<SurchargeWarningBannerProps> = ({
+  className = '',
+}) => {
+  return (
+    <div className={`bg-amber-50 border border-amber-200 rounded-lg p-3 ${className}`}>
+      <div className="flex items-center gap-2">
+        <Info size={16} className="text-amber-600 flex-shrink-0" />
+        <p className="text-sm text-amber-800">
+          Sommige optieprijzen konden niet gegroepeerd worden. Het totaalbedrag is wel correct.
+        </p>
+      </div>
+    </div>
+  );
+};
+
+// =============================================================================
+// HOOKS
+// =============================================================================
+
 /**
  * Hook to get configuration surcharge info.
  * Useful for components that need the data without the UI.
@@ -99,7 +221,7 @@ export function useConfigSurchargePreview() {
 
   return useMemo(() => {
     if (!cart || cart.length === 0) {
-      return { totalCents: 0, totalEur: 0, hasurcharge: false };
+      return { totalCents: 0, totalEur: 0, hasSurcharge: false };
     }
 
     // Filter out shipping lines
@@ -114,6 +236,32 @@ export function useConfigSurchargePreview() {
       hasSurcharge: totalCents > 0,
     };
   }, [cart]);
+}
+
+/**
+ * Hook to get surcharge info for a specific cart item.
+ */
+export function useItemSurcharge(item: CartItem | null) {
+  return useMemo(() => {
+    if (!item) {
+      return { totalCents: 0, totalEur: 0, hasSurcharge: false, summary: '' };
+    }
+
+    const result = getOptionsSurchargeCents(item);
+    
+    if (!result.success || result.amountCents === 0) {
+      return { totalCents: 0, totalEur: 0, hasSurcharge: false, summary: '' };
+    }
+    
+    const totalCents = result.amountCents * (item.quantity || 1);
+    
+    return {
+      totalCents,
+      totalEur: totalCents / 100,
+      hasSurcharge: true,
+      summary: result.summary,
+    };
+  }, [item]);
 }
 
 export default ConfigSurchargePreview;

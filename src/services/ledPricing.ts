@@ -249,6 +249,9 @@ export function buildLedCartLine(
     merchandiseId: LED_VARIANT_ID,
     quantity: totalQuantity,
     attributes: [
+      // Addon identifier for grouping in cart UI
+      { key: 'addon', value: 'led_spots' },
+      // Human-readable for Shopify checkout
       { key: 'Berekening', value: calculationLines.join('\n') },
     ],
   };

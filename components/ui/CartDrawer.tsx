@@ -13,7 +13,7 @@ import { CartItemPreview } from './ConfigPreviewImage';
 import ConfigBreakdownPopup from './ConfigBreakdownPopup';
 import { formatEUR } from '../../src/utils/money';
 import { extractWidthFromHandle, extractWidthFromSize } from '../../src/services/addons/led';
-import { ConfigSurchargePreview } from '../../src/components/cart/ConfigSurchargePreview';
+import { InlineSurchargeBreakdown, useConfigSurchargePreview } from '../../src/components/cart/ConfigSurchargePreview';
 
 const MotionDiv = motion.div as any;
 
@@ -217,6 +217,9 @@ const CartDrawer: React.FC = () => {
                                                     )}
                                                 </div>
                                             )}
+                                            
+                                            {/* Inline Options Surcharge Breakdown */}
+                                            <InlineSurchargeBreakdown item={item} />
 
                                             <div className="flex items-center justify-between mt-2">
                                                 <div className="flex items-center gap-2 text-xs font-bold text-gray-500 bg-gray-50 px-2 py-1 rounded">
@@ -256,9 +259,6 @@ const CartDrawer: React.FC = () => {
                                     </div>
                                 </div>
                             )}
-                            
-                            {/* Configuration Surcharge Preview */}
-                            <ConfigSurchargePreview className="mt-4" />
                         </div>
 
                         {/* Footer */}
@@ -268,37 +268,16 @@ const CartDrawer: React.FC = () => {
                                     <span className="text-gray-500 font-bold text-sm">Subtotaal (incl. BTW)</span>
                                     <span className="text-3xl font-black text-hett-dark">{formatEUR(subtotalCents, 'cents')}</span>
                                 </div>
-                                {checkoutError && (
-                                    <div className="flex items-start gap-2 p-3 mb-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
-                                        <AlertCircle size={16} className="flex-shrink-0 mt-0.5" />
-                                        <p>{checkoutError}</p>
-                                    </div>
-                                )}
                                 <div className="space-y-3">
                                     <button
                                         onClick={handleCheckout}
-                                        disabled={isCheckingOut}
-                                        className={`w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 shadow-lg transition-colors ${
-                                            isCheckingOut
-                                                ? 'bg-gray-400 text-white cursor-not-allowed'
-                                                : 'bg-hett-primary text-white hover:bg-hett-dark shadow-hett-primary/20'
-                                        }`}
+                                        className="w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 shadow-lg transition-colors bg-hett-primary text-white hover:bg-hett-dark shadow-hett-primary/20"
                                     >
-                                        {isCheckingOut ? (
-                                            <>
-                                                <Loader2 size={20} className="animate-spin" />
-                                                Bezig...
-                                            </>
-                                        ) : (
-                                            <>
-                                                Afrekenen <ArrowRight size={20} />
-                                            </>
-                                        )}
+                                        Afrekenen <ArrowRight size={20} />
                                     </button>
                                     <button
                                         onClick={closeCart}
-                                        disabled={isCheckingOut}
-                                        className="w-full py-3 bg-white border-2 border-gray-100 text-gray-600 rounded-xl font-bold hover:border-gray-300 hover:text-gray-800 transition-colors disabled:opacity-50"
+                                        className="w-full py-3 bg-white border-2 border-gray-100 text-gray-600 rounded-xl font-bold hover:border-gray-300 hover:text-gray-800 transition-colors"
                                     >
                                         Verder winkelen
                                     </button>

@@ -17,7 +17,7 @@ import { CartItemPreview } from '../components/ui/ConfigPreviewImage';
 import { ShippingSection } from '../src/components/cart/ShippingSection';
 import { formatShippingPrice } from '../src/services/shippingQuote';
 import { beginCheckout, isShopifyConfigured } from '../src/lib/shopify';
-import { ConfigSurchargePreview } from '../src/components/cart/ConfigSurchargePreview';
+import { InlineSurchargeBreakdown } from '../src/components/cart/ConfigSurchargePreview';
 
 const Cart: React.FC = () => {
     const { 
@@ -311,6 +311,9 @@ const Cart: React.FC = () => {
                                         {item.selectedRoof && <p>Dak: {item.selectedRoof}</p>}
                                     </div>
                                 )}
+                                
+                                {/* Inline Options Surcharge Breakdown */}
+                                <InlineSurchargeBreakdown item={item} className="mt-2" />
 
                                 {/* Price and quantity */}
                                 <div className="flex items-center justify-between gap-3 mt-3 pt-3 border-t border-gray-100">
@@ -378,9 +381,6 @@ const Cart: React.FC = () => {
                     </div>
                   </Card>
                 )}
-                
-                {/* Configuration Surcharge Preview */}
-                <ConfigSurchargePreview showDetails className="mt-4" />
             </div>
 
             {/* Order Summary */}

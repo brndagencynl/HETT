@@ -5,7 +5,7 @@
  * LED lighting pricing depends on veranda width.
  * LED spots are added as a SEPARATE Shopify cart line.
  * 
- * LED RULES:
+ * LED RULES (EXACT MAPPING - width must match key exactly):
  * 306 cm  → 4 spots
  * 406 cm  → 6 spots
  * 506 cm  → 8 spots
@@ -25,66 +25,100 @@
 /** LED spot product handle in Shopify */
 export const LED_SPOT_PRODUCT_HANDLE = "led-spot-per-stuk";
 
-/** LED product variant ID from Shopify */
+/** LED product variant ID from Shopify (Storefront GID) */
 export const LED_VARIANT_ID = "gid://shopify/ProductVariant/53089038565703";
 
-/** LED spot unit price in EUR (for local cart display) */
+/** LED spot unit price in EUR */
 export const LED_UNIT_PRICE_EUR = 29.99;
 
 /** LED spot unit price in cents */
 export const LED_UNIT_PRICE_CENTS = 2999;
 
-/** Minimum width for LED calculation */
-const MIN_WIDTH_CM = 306;
+/** 
+ * EXACT width→LED quantity mapping table
+ * Width must match one of these keys EXACTLY to get LED spots
+ */
+const LED_WIDTH_MAPPING: Record<number, number> = {
+  306: 4,
+  406: 6,
+  506: 8,
+  606: 10,
+  706: 12,
+  806: 14,
+  906: 16,
+  1006: 18,
+  1106: 20,
+  1206: 22,
+};
 
-/** Maximum width for LED calculation */
-const MAX_WIDTH_CM = 1206;
-
-/** Minimum LED quantity */
-const MIN_LED_QTY = 4;
-
-/** Maximum LED quantity */
-const MAX_LED_QTY = 22;
+/** Supported width keys */
+export const SUPPORTED_LED_WIDTHS = Object.keys(LED_WIDTH_MAPPING).map(Number);
 
 // =============================================================================
 // LED QUANTITY CALCULATION
 // =============================================================================
 
 /**
- * Calculate number of LED spots based on veranda width
- * 
- * Formula: Start at 4 spots for 306cm, add 2 spots per 100cm increase
- * Width is clamped to [306, 1206] range
+ * Get LED spot count for a given width in cm.
+ * Uses EXACT mapping - width must match one of the supported keys.
  * 
  * @param widthCm - Veranda width in centimeters
- * @returns Number of LED spots (4-22)
+ * @returns Number of LED spots, or 0 if width doesn't match any key
  */
-export function getLedQuantity(widthCm: number): number {
-  // Clamp width to valid range
-  const clamped = Math.min(Math.max(widthCm, MIN_WIDTH_CM), MAX_WIDTH_CM);
+export function getLedSpotCountForWidthCm(widthCm: number): number {
+  const qty = LED_WIDTH_MAPPING[widthCm] ?? 0;
   
-  // Calculate step (each 100cm adds 2 spots)
-  const step = Math.round((clamped - MIN_WIDTH_CM) / 100);
-  const qty = MIN_LED_QTY + step * 2;
+  console.log(`[LED] widthCm=${widthCm}`);
+  console.log(`[LED] qty=${qty}`);
   
-  // Clamp result to valid range
-  const result = Math.min(Math.max(qty, MIN_LED_QTY), MAX_LED_QTY);
+  if (qty === 0) {
+    console.log(`[LED] No mapping for width ${widthCm}, skipping`);
+  }
   
-  console.log(`[LED] widthCm=${widthCm} → qty=${result}`);
-  
-  return result;
+  return qty;
 }
 
 /**
- * Snap width to nearest supported step (306, 406, 506, ..., 1206)
+ * Get total LED price for a given width in cm.
+ * 
+ * @param widthCm - Veranda width in centimeters
+ * @returns Total price in EUR (qty × unit price), or 0 if no mapping
+ */
+export function getLedTotalForWidthCm(widthCm: number): number {
+  const qty = getLedSpotCountForWidthCm(widthCm);
+  return qty * LED_UNIT_PRICE_EUR;
+}
+
+/**
+ * @deprecated Use getLedSpotCountForWidthCm instead
+ */
+export function getLedQuantity(widthCm: number): number {
+  return getLedSpotCountForWidthCm(widthCm);
+}
+
+/**
+ * Normalize width to nearest supported LED width key.
+ * Only use this for maatwerk slider values that need snapping.
  * 
  * @param widthCm - Raw width in centimeters
- * @returns Snapped width (306, 406, 506, etc.)
+ * @returns Nearest supported width key, or null if out of range
  */
-export function snapToLedWidth(widthCm: number): number {
-  const clamped = Math.min(Math.max(widthCm, MIN_WIDTH_CM), MAX_WIDTH_CM);
-  const step = Math.round((clamped - MIN_WIDTH_CM) / 100);
-  return MIN_WIDTH_CM + step * 100;
+export function normalizeToLedWidth(widthCm: number): number | null {
+  if (widthCm < 256 || widthCm > 1256) return null; // Too far out of range
+  
+  // Find nearest supported width
+  let nearest = SUPPORTED_LED_WIDTHS[0];
+  let minDiff = Math.abs(widthCm - nearest);
+  
+  for (const w of SUPPORTED_LED_WIDTHS) {
+    const diff = Math.abs(widthCm - w);
+    if (diff < minDiff) {
+      minDiff = diff;
+      nearest = w;
+    }
+  }
+  
+  return nearest;
 }
 
 // =============================================================================
@@ -168,7 +202,7 @@ export interface LedCartLineInput {
  * 
  * @param totalQuantity - Total LED spots to add
  * @param sourceItems - Source veranda items for attribution
- * @returns CartLineInput for Shopify, or null if LED not configured
+ * @returns CartLineInput for Shopify, or null if qty is 0 or LED not configured
  */
 export function buildLedCartLine(
   totalQuantity: number,
@@ -178,21 +212,20 @@ export function buildLedCartLine(
     return null;
   }
   
-  console.log(`[LED] adding Shopify line qty=${totalQuantity} variant=LED`);
+  console.log(`[LED] added line with GID=${LED_VARIANT_ID} qty=${totalQuantity}`);
   
-  // Combine source info for attribution
-  const widths = sourceItems.map(s => s.widthCm).join(',');
-  const handles = sourceItems.map(s => s.handle).join(',');
-  const types = [...new Set(sourceItems.map(s => s.configType))].join(',');
+  // Use first source item for primary attribution (or combine if multiple)
+  const widthCm = sourceItems[0]?.widthCm ?? 0;
   
   return {
     merchandiseId: LED_VARIANT_ID,
     quantity: totalQuantity,
     attributes: [
-      { key: 'source', value: 'auto-led' },
-      { key: 'parent_type', value: types },
-      { key: 'parent_handles', value: handles },
-      { key: 'widths_cm', value: widths },
+      { key: 'config_type', value: 'addon' },
+      { key: 'addon', value: 'led_spots' },
+      { key: 'width_cm', value: String(widthCm) },
+      { key: 'unit_price', value: String(LED_UNIT_PRICE_EUR) },
+      { key: 'derived_qty', value: String(totalQuantity) },
     ],
   };
 }

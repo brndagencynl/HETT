@@ -22,7 +22,8 @@ import {
   type ShippingQuoteResult,
 } from '../src/services/shipping';
 import {
-  getLedQuantity,
+  getLedSpotCountForWidthCm,
+  normalizeToLedWidth,
   extractWidthFromHandle,
   extractWidthFromSize,
   LED_UNIT_PRICE_CENTS,
@@ -338,7 +339,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // Try maatwerk payload first
       if (item.maatwerkPayload?.size?.width) {
-        widthCm = item.maatwerkPayload.size.width;
+        // For maatwerk, normalize slider value to nearest supported width
+        widthCm = normalizeToLedWidth(item.maatwerkPayload.size.width);
       }
       // Try config data
       else if (config?.widthCm) {
@@ -347,7 +349,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       else if (config?.size?.width) {
         widthCm = config.size.width;
       }
-      // Try selected size (standard veranda)
+      // Try selected size (standard veranda - 506/606/706)
       else if (item.selectedSize) {
         widthCm = extractWidthFromSize(item.selectedSize);
       }
@@ -357,7 +359,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       
       if (widthCm) {
-        const ledQty = getLedQuantity(widthCm);
+        const ledQty = getLedSpotCountForWidthCm(widthCm);
+        if (ledQty === 0) continue; // Skip if no mapping for this width
         parentItems.push({
           handle: item.handle || item.slug || item.id,
           configType,

@@ -10,7 +10,8 @@ import { resolveMerchandiseForCartItem } from '../../shopify/shopifyMerchandiseM
 import { toShopifyLineAttributes } from '../../services/config/formatConfigAttributes';
 import { isShippingLineItem, type ShippingLineItem } from '../../services/shipping';
 import {
-  getLedQuantity,
+  getLedSpotCountForWidthCm,
+  normalizeToLedWidth,
   extractWidthFromHandle,
   extractWidthFromSize,
   buildLedCartLine,
@@ -139,7 +140,7 @@ export async function beginCheckout(
     // LED SPOTS LINE (aggregate from all veranda items with verlichting)
     // ==========================================================================
     if (isLedConfigured()) {
-      const ledSourceItems: Array<{ configType: string; handle: string; widthCm: number; itemQty: number }> = [];
+      const ledSourceItems: Array<{ configType: string; handle: string; widthCm: number; itemQty: number; ledQty: number }> = [];
       
       for (const item of cartItems) {
         // Skip shipping line
@@ -153,16 +154,18 @@ export async function beginCheckout(
         
         if (!hasLed) continue;
         
-        // Determine config type
+        // Determine config type (veranda or maatwerk)
         const configType = item.type === 'custom_veranda' ? 'maatwerk' : 
                           item.config?.category === 'maatwerk_veranda' ? 'maatwerk' : 'veranda';
         
         // Extract width
         let widthCm: number | null = null;
         
-        // Try maatwerk payload first
+        // Try maatwerk payload first (slider value)
         if (item.maatwerkPayload?.size?.width) {
-          widthCm = item.maatwerkPayload.size.width;
+          const rawWidth = item.maatwerkPayload.size.width;
+          // For maatwerk, normalize to nearest supported width
+          widthCm = normalizeToLedWidth(rawWidth);
         }
         // Try config data
         else if (config?.widthCm) {
@@ -171,7 +174,7 @@ export async function beginCheckout(
         else if (config?.size?.width) {
           widthCm = config.size.width;
         }
-        // Try selected size (standard veranda)
+        // Try selected size (standard veranda - 506/606/706)
         else if (item.selectedSize) {
           widthCm = extractWidthFromSize(item.selectedSize);
         }
@@ -181,22 +184,28 @@ export async function beginCheckout(
         }
         
         if (widthCm) {
-          ledSourceItems.push({
-            configType,
-            handle: item.handle || item.slug || item.id,
-            widthCm,
-            itemQty: item.quantity,
-          });
+          // Get LED qty using EXACT mapping
+          const ledQty = getLedSpotCountForWidthCm(widthCm);
+          
+          if (ledQty > 0) {
+            ledSourceItems.push({
+              configType,
+              handle: item.handle || item.slug || item.id,
+              widthCm,
+              itemQty: item.quantity,
+              ledQty,
+            });
+          }
+          // Note: getLedSpotCountForWidthCm already logs "[LED] No mapping for width X, skipping" if qty=0
         }
       }
       
-      // Calculate total LED quantity
+      // Calculate total LED quantity and add line
       if (ledSourceItems.length > 0) {
         let totalLedQty = 0;
         
         for (const src of ledSourceItems) {
-          const ledPerUnit = getLedQuantity(src.widthCm);
-          totalLedQty += ledPerUnit * src.itemQty;
+          totalLedQty += src.ledQty * src.itemQty;
         }
         
         const ledLine = buildLedCartLine(

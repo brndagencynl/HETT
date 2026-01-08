@@ -96,14 +96,14 @@ const Home: React.FC = () => {
     }, []);
 
     return (
-        <div className="pb-20 bg-hett-bg">
+        <div className="pt-4 pb-20 bg-hett-bg">
 
             {/* Hero Section */}
             <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mb-8">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div className="lg:col-span-2 relative rounded-xl overflow-hidden group min-h-[400px] md:min-h-[500px] card-retail p-0">
                         <img
-                            src={hero.image?.url || '/assets/images/hero_veranda.png'}
+                            src={'/assets/images/home_hero.JPG'}
                             alt={hero.title}
                             className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
                         />
@@ -134,7 +134,7 @@ const Home: React.FC = () => {
 
                     <div className="grid grid-cols-2 lg:grid-cols-1 gap-3 md:gap-6">
                         <Link to="/products/sandwichpaneel" className="card-retail p-0 relative overflow-hidden group flex-1 block min-h-[160px] md:min-h-0">
-                            <img src="/assets/images/showroom_advice.png" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-60" alt="Service" />
+                            <img src="/assets/images/sandwichpaneel_home.jpeg" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-60" alt="Service" />
                             <div className="absolute inset-0 bg-hett-dark/20"></div>
                             <div className="absolute bottom-3 left-3 md:bottom-6 md:left-6">
                                 <span className="bg-hett-primary text-white text-[8px] md:text-[10px] font-bold px-2 md:px-3 py-0.5 md:py-1 rounded-md mb-1 md:mb-2 inline-block uppercase">Sandwichpanelen</span>
@@ -142,7 +142,7 @@ const Home: React.FC = () => {
                             </div>
                         </Link>
                         <Link to="/maatwerk-configurator" className="card-retail p-0 relative overflow-hidden group flex-1 block min-h-[160px] md:min-h-0">
-                            <img src="/assets/images/showroom_advice.png" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-60" alt="Maatwerk" />
+                            <img src="/assets/images/maatwerk_veranda_home.JPG" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-60" alt="Maatwerk" />
                             <div className="absolute inset-0 bg-hett-dark/20"></div>
                             <div className="absolute bottom-3 left-3 md:bottom-6 md:left-6">
                                 <span className="bg-hett-primary text-white text-[8px] md:text-[10px] font-bold px-2 md:px-3 py-0.5 md:py-1 rounded-md mb-1 md:mb-2 inline-block uppercase">Ook mogelijk in maatwerk</span>
@@ -204,7 +204,7 @@ const Home: React.FC = () => {
             </div>
 
             {/* Feature Block - Sandwichpanelen */}
-            <HomeFeatureBlock />
+            <HomeFeatureBlock imageSrc="/assets/images/isopar_home.jpeg" />
 
             {/* Showroom Section */}
             <HomeShowroomSection />

@@ -155,10 +155,8 @@ const Category: React.FC = () => {
 
     const categoryIntro =
         categorySlug === 'accessoires'
-            ? 'Bij HETT Veranda vindt u accessoires die perfect aansluiten op onze veranda\'s en panelen, zoals LED-verlichting en afwerkingscomponenten. Eenvoudig mee te bestellen.'
-            : isVerandaCategory
-            ? 'Ontdek onze hoogwaardige aluminium veranda\'s, ontworpen voor comfort, uitstraling en duurzaamheid. Of je nu kiest voor een strak modern design of een tijdloze uitstraling: bij HETT stel je jouw veranda volledig samen op basis van jouw wensen en afmetingen. Onze veranda\'s zijn geschikt voor zowel particuliere tuinen als professionele toepassingen en kunnen eenvoudig worden uitgebreid met zijwanden, glazen schuifwanden, dakopties en verlichting.'
-            : `Bij HETT.nl vind je een ruime selectie aan hoogwaardige ${categoryName.toLowerCase()} van topmerken. Onze systemen zijn verkrijgbaar in verschillende maten en materialen, waaronder aluminium en gepoedercoat staal, zodat je altijd de juiste oplossing hebt voor jouw tuinproject.`;
+            ? 'Bij HETT Veranda vindt u accessoires die perfect aansluiten op onze veranda’s en panelen, zoals LED-verlichting en afwerkingscomponenten. Eenvoudig mee te bestellen.'            : isVerandaCategory
+            ? 'Ontdek onze hoogwaardige aluminium veranda's, ontworpen voor comfort, uitstraling en duurzaamheid. Of je nu kiest voor een strak modern design of een tijdloze uitstraling: bij HETT stel je jouw veranda volledig samen op basis van jouw wensen en afmetingen. Onze veranda's zijn geschikt voor zowel particuliere tuinen als professionele toepassingen en kunnen eenvoudig worden uitgebreid met zijwanden, glazen schuifwanden, dakopties en verlichting.'            : `Bij HETT.nl vind je een ruime selectie aan hoogwaardige ${categoryName.toLowerCase()} van topmerken. Onze systemen zijn verkrijgbaar in verschillende maten en materialen, waaronder aluminium en gepoedercoat staal, zodat je altijd de juiste oplossing hebt voor jouw tuinproject.`;
 
     // Filter to only show public products first, then apply category/brand filters
     const filteredProducts = products.filter(p => {

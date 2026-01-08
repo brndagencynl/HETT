@@ -778,14 +778,14 @@ export const FALLBACK_HERO: HomepageHero = {
   primaryCtaUrl: '/categorie/overkappingen',
   secondaryCtaLabel: '',
   secondaryCtaUrl: '',
-  image: { url: '/assets/images/hero_veranda.png' },
+  image: { url: '/assets/images/home_hero.JPG' },
 };
 
 export const FALLBACK_USPS: HomepageUsp[] = [
   { iconName: 'Wrench', title: 'Zelf te monteren', text: 'Eenvoudig zelf te monteren' },
   { iconName: 'Truck', title: 'Snelle levering', text: 'Binnen 10 werkdagen geleverd' },
   { iconName: 'Package', title: 'Gratis bezorging', text: 'Gratis thuisbezorgd' },
-  { iconName: 'Award', title: 'Duitse kwaliteit', text: 'Duitse Precisie & Vakmanschap' },
+  { iconName: 'Award', title: 'Duitse kwaliteit', text: 'Precisie & Vakmanschap' },
 ];
 
 export const FALLBACK_FAQ: FaqItem[] = [

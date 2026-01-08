@@ -45,7 +45,7 @@ const HomeShowroomSection: React.FC = () => {
                     <div className="flex-1 w-full">
                         <div className="relative aspect-[4/3] w-full rounded-2xl overflow-hidden shadow-xl bg-gray-100 group">
                             <img
-                                src="/assets/images/showroom_advice.png"
+                                src="/assets/images/home_showroom.JPG"
                                 alt="HETT Showroom"
                                 className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                             />

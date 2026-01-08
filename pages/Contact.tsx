@@ -78,6 +78,13 @@ const Contact: React.FC = () => {
                 Liever chatten? Klik dan op de link en kijk of we online zijn.
               </p>
               <button 
+                onClick={() => {
+                  if (window.Tawk_API?.maximize) {
+                    window.Tawk_API.maximize();
+                  } else {
+                    console.warn('[TawkTo] Chat widget is nog niet geladen. Probeer het later opnieuw.');
+                  }
+                }}
                 className="text-hett-primary font-medium text-sm inline-flex items-center gap-1 hover:gap-2 transition-all"
               >
                 Open chat gesprek <ArrowRight size={16} />

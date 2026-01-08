@@ -52,7 +52,7 @@ const About: React.FC = () => {
             <PageHeader
                 title="De standaard in Verandabouw"
                 subtitle="Over HETT"
-                description="Wij leveren niet zomaar panelen; wij leveren de basis voor hoogwaardige buitenruimtes. Ontdek ons verhaal en onze missie."
+                description="Wij leveren niet zomaar veranda's; wij leveren de basis voor hoogwaardige buitenruimtes. Ontdek ons verhaal en onze missie."
                 image="/assets/images/hero_veranda.png"
             />
 
@@ -62,14 +62,14 @@ const About: React.FC = () => {
                 {/* Intro Section */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-32">
                     <div>
-                        <span className="text-hett-brown font-bold uppercase tracking-widest text-sm mb-2 block">Ons Verhaal</span>
-                        <h2 className="text-3xl md:text-4xl font-black text-hett-dark mb-6">Gedreven door kwaliteit en esthetiek</h2>
+                        <span className="text-hett-brown font-bold uppercase tracking-widest text-sm mb-2 block">ONS VERHAAL</span>
+                        <h2 className="text-3xl md:text-4xl font-black text-hett-dark mb-6">Gedreven door kwaliteit en maatwerk</h2>
                         <div className="prose prose-lg text-gray-600 leading-relaxed">
                             <p>
-                                HETT is ontstaan vanuit een duidelijke behoefte in de markt: verandabouwers en montagebedrijven zochten naar sandwichpanelen die niet alleen thermisch goed presteren, maar er ook esthetisch perfect uitzien voor residentiële toepassingen.
+                                Bij HETT Veranda draait alles om één ding: een veranda die klopt. In uitstraling, in afwerking en in gebruiksgemak. We combineren strakke aluminium profielen met slimme oplossingen voor dak, goot en wanden—zodat je buitenruimte aanvoelt als een volwaardige uitbreiding van je woning.
                             </p>
                             <p>
-                                Waar traditionele industriebouwpanelen vaak grof zijn, focust HETT zich op verfijning. Strakkere profielen, betere coatings en kleuren die aansluiten bij de huidige woontrends.
+                                Of je nu kiest voor een standaard veranda of een maatwerk samenstelling: je ziet direct wat je krijgt en wat het kost. Transparant, overzichtelijk en gemaakt om jarenlang van te genieten.
                             </p>
                         </div>
                     </div>

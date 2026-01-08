@@ -137,15 +137,29 @@ export function buildConfigSurchargeLines(
   console.log(`[ConfigSurchargeLines] Price steps: ${stepsSummary}`);
   console.log(`[ConfigSurchargeLines] Summary: ${truncatedSummary}`);
 
-  // Build cart lines
+  // Build cart lines with clean "Toelichting" attribute for Shopify checkout
   const lines: CartLineInput[] = priceSteps.map(step => {
+    // Build human-readable toelichting
+    const toelichtingLines: string[] = [];
+    
+    // Add product title(s)
+    const uniqueTitles = [...new Set(sourceItems.map(s => s.title))];
+    for (const title of uniqueTitles) {
+      toelichtingLines.push(title);
+    }
+    
+    // Add options summary with prices
+    const optionsSummary = sourceItems
+      .filter(s => s.summary && s.summary.length > 0)
+      .map(s => s.summary)
+      .join(', ');
+    
+    if (optionsSummary) {
+      toelichtingLines.push(`Opties: ${optionsSummary}`);
+    }
+    
     const attributes: ShopifyCartLineAttribute[] = [
-      { key: 'kind', value: 'config_surcharge_step' },
-      { key: 'step', value: String(step.step) },
-      { key: 'config_type', value: sourceItems.map(s => s.configType).join(',') },
-      { key: 'config_title', value: productTitle },
-      { key: 'config_handle', value: productHandle },
-      { key: 'config_summary', value: truncatedSummary },
+      { key: 'Toelichting', value: toelichtingLines.join('\n') },
     ];
 
     return {
@@ -190,36 +204,25 @@ export function buildSingleItemSurchargeLines(
 
 /**
  * Check if a cart line is a config surcharge step line.
- * Uses the 'kind' attribute.
+ * Uses the 'Toelichting' attribute (clean checkout display).
  */
 export function isConfigSurchargeStepLine(attributes: ShopifyCartLineAttribute[]): boolean {
-  return attributes.some(attr => 
-    attr.key === 'kind' && attr.value === 'config_surcharge_step'
-  );
+  return attributes.some(attr => attr.key === 'Toelichting');
 }
 
 /**
  * Get surcharge step info from line attributes.
  */
 export function getConfigSurchargeStepInfo(attributes: ShopifyCartLineAttribute[]): {
-  step: number;
-  configType: string;
-  configTitle: string;
-  configSummary: string;
+  toelichting: string;
 } | null {
   if (!isConfigSurchargeStepLine(attributes)) {
     return null;
   }
 
-  const getValue = (key: string): string => {
-    const attr = attributes.find(a => a.key === key);
-    return attr?.value || '';
-  };
-
+  const toelichtingAttr = attributes.find(a => a.key === 'Toelichting');
+  
   return {
-    step: parseInt(getValue('step'), 10) || 0,
-    configType: getValue('config_type'),
-    configTitle: getValue('config_title'),
-    configSummary: getValue('config_summary'),
+    toelichting: toelichtingAttr?.value || '',
   };
 }

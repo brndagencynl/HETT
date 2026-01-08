@@ -238,15 +238,18 @@ export function buildLedCartLine(
   // Use first source item for primary attribution (or combine if multiple)
   const widthCm = sourceItems[0]?.widthCm ?? 0;
   
+  // Build clean multiline "Berekening" attribute for Shopify checkout
+  const unitPriceFormatted = LED_UNIT_PRICE_EUR.toFixed(2).replace('.', ',');
+  const calculationLines = [
+    `Breedte: ${widthCm} cm`,
+    `Aantal spots: ${totalQuantity} × €${unitPriceFormatted}`,
+  ];
+  
   return {
     merchandiseId: LED_VARIANT_ID,
     quantity: totalQuantity,
     attributes: [
-      { key: 'config_type', value: 'addon' },
-      { key: 'addon', value: 'led_spots' },
-      { key: 'width_cm', value: String(widthCm) },
-      { key: 'unit_price', value: String(LED_UNIT_PRICE_EUR) },
-      { key: 'derived_qty', value: String(totalQuantity) },
+      { key: 'Berekening', value: calculationLines.join('\n') },
     ],
   };
 }

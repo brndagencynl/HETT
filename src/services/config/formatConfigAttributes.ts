@@ -3,11 +3,12 @@
  * 
  * Converts raw cart item configuration into human-readable attributes
  * for display in Shopify checkout and order details.
+ * 
+ * Output: Single "Configuratie" multiline attribute + optional "Referentie" ID
  */
 
 import type { CartItem, VerandaConfig, SandwichConfig } from '../../../types';
 import { formatEUR, toCents } from '../../utils/money';
-import { MAATWERK_DEPTH_BUCKETS, MAATWERK_WIDTH_BUCKETS, mapToBucket } from '../../configurators/custom/maatwerkShopifyMapping';
 
 // =============================================================================
 // TYPES
@@ -300,84 +301,56 @@ function formatSandwichpanelenSummary(item: CartItem): string {
 // =============================================================================
 
 /**
- * Build individual Shopify line attributes for standard veranda
- * Each config option gets its own attribute with human-readable key/value
+ * Build single clean Configuratie attribute for standard veranda
+ * Combines all options into one readable multiline value for Shopify checkout
  */
 function buildVerandaAttributes(item: CartItem): ShopifyLineAttribute[] {
   const config = item.config?.data as VerandaConfig | undefined;
-  const attributes: ShopifyLineAttribute[] = [];
   
-  if (!config) return attributes;
+  if (!config) return [];
+  
+  // Build multiline configuration summary
+  const lines: string[] = [];
   
   // Color (Kleur)
   const color = config.color || config.kleur;
   if (color) {
-    attributes.push({ key: 'Kleur', value: getLabel(color, COLOR_LABELS) });
+    lines.push(`Kleur: ${getLabel(color, COLOR_LABELS)}`);
   }
   
-  // Daktype (Dak)
+  // Daktype
   if (config.daktype) {
-    attributes.push({ key: 'Daktype', value: getLabel(config.daktype, DAKTYPE_LABELS) });
+    lines.push(`Daktype: ${getLabel(config.daktype, DAKTYPE_LABELS)}`);
   }
   
   // Goot
   if (config.goot) {
-    attributes.push({ key: 'Goot', value: getLabel(config.goot, GOOT_LABELS) });
+    lines.push(`Goot: ${getLabel(config.goot, GOOT_LABELS)}`);
   }
   
   // Zijwand links
-  attributes.push({ 
-    key: 'Zijwand links', 
-    value: getLabel(config.zijwand_links || 'geen', ZIJWAND_LABELS) 
-  });
+  lines.push(`Zijwand links: ${getLabel(config.zijwand_links || 'geen', ZIJWAND_LABELS)}`);
   
   // Zijwand rechts
-  attributes.push({ 
-    key: 'Zijwand rechts', 
-    value: getLabel(config.zijwand_rechts || 'geen', ZIJWAND_LABELS) 
-  });
+  lines.push(`Zijwand rechts: ${getLabel(config.zijwand_rechts || 'geen', ZIJWAND_LABELS)}`);
   
   // Voorzijde
-  attributes.push({ 
-    key: 'Voorzijde', 
-    value: getLabel(config.voorzijde || 'geen', VOORZIJDE_LABELS) 
-  });
+  lines.push(`Voorzijde: ${getLabel(config.voorzijde || 'geen', VOORZIJDE_LABELS)}`);
   
   // Verlichting
-  attributes.push({ 
-    key: 'Verlichting', 
-    value: formatBoolean(config.verlichting) 
-  });
+  lines.push(`Verlichting: ${formatBoolean(config.verlichting)}`);
   
-  return attributes;
+  return [{ key: 'Configuratie', value: lines.join('\n') }];
 }
 
 /**
- * Build individual Shopify line attributes for maatwerk veranda
- * Includes readable pricing breakdown with maatwerk_toeslag
+ * Build single clean Configuratie attribute for maatwerk veranda
+ * Combines all options into one readable multiline value for Shopify checkout
  */
 function buildMaatwerkAttributes(item: CartItem): ShopifyLineAttribute[] {
   const payload = item.maatwerkPayload;
-  const attributes: ShopifyLineAttribute[] = [];
   
-  if (!payload) return attributes;
-  
-  // Config type indicator
-  attributes.push({ key: 'config_type', value: 'maatwerk' });
-  
-  // Dimensions (actual slider value, not bucket)
-  attributes.push({ key: 'maat', value: `${payload.size.width} x ${payload.size.depth} cm` });
-  
-  // Pricing breakdown - always show with 2 decimals
-  const shopifyVariantPrice = payload.shopifyVariantPrice ?? payload.priceBreakdown?.shopifyVariantPrice ?? payload.priceBreakdown?.anchor?.anchorPrice ?? 0;
-  const maatwerkSurcharge = payload.maatwerkSurcharge ?? payload.priceBreakdown?.maatwerkSurcharge ?? 750;
-  const optionsTotal = payload.optionsTotal ?? payload.priceBreakdown?.optionsTotal ?? 0;
-  const grandTotal = payload.totalPrice ?? payload.priceBreakdown?.grandTotal ?? 0;
-  
-  attributes.push({ key: 'prijs_basis', value: formatEUR(toCents(shopifyVariantPrice), 'cents') });
-  attributes.push({ key: 'maatwerk_toeslag', value: formatEUR(toCents(maatwerkSurcharge), 'cents') });
-  attributes.push({ key: 'opties_totaal', value: formatEUR(toCents(optionsTotal), 'cents') });
-  attributes.push({ key: 'totaal', value: formatEUR(toCents(grandTotal), 'cents') });
+  if (!payload) return [];
   
   // Helper to get selection value
   const getSelection = (groupId: string): string | undefined => {
@@ -385,83 +358,86 @@ function buildMaatwerkAttributes(item: CartItem): ShopifyLineAttribute[] {
     return sel?.choiceLabel;
   };
   
+  // Build multiline configuration summary
+  const lines: string[] = [];
+  
+  // Dimensions (actual slider value)
+  lines.push(`Afmeting: ${payload.size.width} × ${payload.size.depth} cm`);
+  lines.push(`Type: Maatwerk`);
+  
   // Color
   const color = getSelection('kleur') || getSelection('color');
   if (color) {
-    attributes.push({ key: 'kleur', value: color });
+    lines.push(`Kleur: ${color}`);
   }
   
   // Daktype
   const daktype = getSelection('daktype') || getSelection('dak');
   if (daktype) {
-    attributes.push({ key: 'daktype', value: daktype });
+    lines.push(`Daktype: ${daktype}`);
   }
   
   // Goot
   const goot = getSelection('goot');
   if (goot) {
-    attributes.push({ key: 'goot', value: goot });
+    lines.push(`Goot: ${goot}`);
   }
   
   // Zijwanden
-  attributes.push({ 
-    key: 'zijwand_links', 
-    value: getSelection('zijwand_links') || getSelection('zijwandLinks') || 'Geen' 
-  });
-  attributes.push({ 
-    key: 'zijwand_rechts', 
-    value: getSelection('zijwand_rechts') || getSelection('zijwandRechts') || 'Geen' 
-  });
+  lines.push(`Zijwand links: ${getSelection('zijwand_links') || getSelection('zijwandLinks') || 'Geen'}`);
+  lines.push(`Zijwand rechts: ${getSelection('zijwand_rechts') || getSelection('zijwandRechts') || 'Geen'}`);
   
   // Voorzijde
-  attributes.push({ 
-    key: 'voorzijde', 
-    value: getSelection('voorzijde') || 'Geen' 
-  });
+  lines.push(`Voorzijde: ${getSelection('voorzijde') || 'Geen'}`);
   
   // Verlichting
   const verlichting = getSelection('verlichting');
-  if (verlichting) {
-    attributes.push({ key: 'verlichting', value: verlichting });
-  }
+  lines.push(`Verlichting: ${verlichting ? 'Ja' : 'Nee'}`);
   
-  return attributes;
+  return [{ key: 'Configuratie', value: lines.join('\n') }];
 }
 
 /**
- * Build individual Shopify line attributes for sandwichpanelen
+ * Build single clean Configuratie attribute for sandwichpanelen
+ * Combines all options into one readable multiline value for Shopify checkout
  */
 function buildSandwichpanelenAttributes(item: CartItem): ShopifyLineAttribute[] {
   const config = item.config?.data as SandwichConfig | undefined;
-  const attributes: ShopifyLineAttribute[] = [];
   
-  if (!config) return attributes;
+  if (!config) return [];
+  
+  // Build multiline configuration summary
+  const lines: string[] = [];
   
   // Working width
   if (config.workingWidthMm) {
-    attributes.push({ key: 'Werkende breedte', value: `${config.workingWidthMm} mm` });
+    lines.push(`Werkende breedte: ${config.workingWidthMm} mm`);
   }
   
   // Length
   const length = config.lengthMm || config.length;
   if (length) {
-    attributes.push({ key: 'Lengte', value: `${length} mm` });
+    lines.push(`Lengte: ${length} mm`);
   }
   
   // Color
   const color = config.color || config.kleur;
   if (color) {
-    attributes.push({ key: 'Kleur', value: getLabel(color, COLOR_LABELS) });
+    lines.push(`Kleur: ${getLabel(color, COLOR_LABELS)}`);
   }
   
   // U-profiles
   if (config.extras?.uProfiles?.enabled) {
-    attributes.push({ key: 'U-profielen', value: `${config.extras.uProfiles.meters} m` });
+    lines.push(`U-profielen: ${config.extras.uProfiles.meters} m`);
   } else if (config.extra_u_profielen_m) {
-    attributes.push({ key: 'U-profielen', value: `${config.extra_u_profielen_m} m` });
+    lines.push(`U-profielen: ${config.extra_u_profielen_m} m`);
   }
   
-  return attributes;
+  if (lines.length === 0) {
+    return [];
+  }
+  
+  return [{ key: 'Configuratie', value: lines.join('\n') }];
 }
 
 // =============================================================================
@@ -489,32 +465,8 @@ export function toShopifyLineAttributes(item: CartItem): ShopifyLineAttribute[] 
   }
   
   const attributes: ShopifyLineAttribute[] = [];
-
-  // Extra machine-readable attributes for maatwerk mapping/troubleshooting (underscore prefix = internal)
-  if (configType === 'maatwerk') {
-    const originalWidthCm = item.maatwerkPayload?.size?.width ?? (item as any)?.config?.data?.widthCm;
-    const originalDepthCm = item.maatwerkPayload?.size?.depth ?? (item as any)?.config?.data?.depthCm;
-
-    const bucketW =
-      item.maatwerkPayload?.bucketWidthCm ??
-      (item as any)?.config?.data?.bucketWidthCm ??
-      (typeof originalWidthCm === 'number' ? mapToBucket(originalWidthCm, MAATWERK_WIDTH_BUCKETS) : undefined);
-    const bucketD =
-      item.maatwerkPayload?.bucketDepthCm ??
-      (item as any)?.config?.data?.bucketDepthCm ??
-      (typeof originalDepthCm === 'number' ? mapToBucket(originalDepthCm, MAATWERK_DEPTH_BUCKETS) : undefined);
-
-    // Internal bucket info (for order processing, not display)
-    if (typeof bucketW === 'number') {
-      attributes.push({ key: '_bucket_breedte', value: String(bucketW) });
-    }
-    if (typeof bucketD === 'number') {
-      attributes.push({ key: '_bucket_diepte', value: String(bucketD) });
-    }
-    // NOTE: JSON blob removed - all config is now in readable attributes above
-  }
   
-  // Build individual attributes based on config type
+  // Build single "Configuratie" attribute based on config type
   let configAttributes: ShopifyLineAttribute[] = [];
   switch (configType) {
     case 'veranda':
@@ -528,25 +480,17 @@ export function toShopifyLineAttributes(item: CartItem): ShopifyLineAttribute[] 
       break;
   }
   
-  // Add config attributes
+  // Add config attributes (single "Configuratie" multiline attribute)
   attributes.push(...configAttributes);
   
-  // Preview image (if available)
-  const previewUrl = getPreviewUrl(item);
-  if (previewUrl) {
-    attributes.push({ key: 'Preview', value: previewUrl });
-    // Also add the explicit key expected by ShopifyCartContext and integrations
-    attributes.push({ key: '_preview_url', value: previewUrl });
-  }
-  
-  // Config ID for support reference
+  // Config ID for support reference (optional second attribute)
   const configId = generateConfigId(item);
   attributes.push({ key: 'Referentie', value: configId });
   
   // Log for debugging
   console.log('[Checkout Attributes]', {
     type: configType,
-    attributes: attributes.map(a => ({ key: a.key, value: a.value.slice(0, 100) + (a.value.length > 100 ? '...' : '') })),
+    attributeCount: attributes.length,
   });
   
   return attributes;

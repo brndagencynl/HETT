@@ -9,6 +9,13 @@ import type { CartItem } from '../../../types';
 import { resolveMerchandiseForCartItem } from '../../shopify/shopifyMerchandiseMap';
 import { toShopifyLineAttributes } from '../../services/config/formatConfigAttributes';
 import { isShippingLineItem, type ShippingLineItem } from '../../services/shipping';
+import {
+  getLedQuantity,
+  extractWidthFromHandle,
+  extractWidthFromSize,
+  buildLedCartLine,
+  isLedConfigured,
+} from '../../services/ledPricing';
 
 // =============================================================================
 // MAIN CHECKOUT FUNCTION
@@ -126,6 +133,81 @@ export async function beginCheckout(
         quantity: item.quantity,
         attributes: attributes.length > 0 ? attributes : undefined,
       });
+    }
+    
+    // ==========================================================================
+    // LED SPOTS LINE (aggregate from all veranda items with verlichting)
+    // ==========================================================================
+    if (isLedConfigured()) {
+      const ledSourceItems: Array<{ configType: string; handle: string; widthCm: number; itemQty: number }> = [];
+      
+      for (const item of cartItems) {
+        // Skip shipping line
+        if (isShippingLineItem(item)) continue;
+        
+        // Check if item has verlichting enabled
+        const config = item.config?.data as any;
+        const hasLed = 
+          config?.verlichting === true || 
+          item.maatwerkPayload?.selections?.some((s: any) => s.groupId === 'verlichting' && s.choiceId !== 'geen');
+        
+        if (!hasLed) continue;
+        
+        // Determine config type
+        const configType = item.type === 'custom_veranda' ? 'maatwerk' : 
+                          item.config?.category === 'maatwerk_veranda' ? 'maatwerk' : 'veranda';
+        
+        // Extract width
+        let widthCm: number | null = null;
+        
+        // Try maatwerk payload first
+        if (item.maatwerkPayload?.size?.width) {
+          widthCm = item.maatwerkPayload.size.width;
+        }
+        // Try config data
+        else if (config?.widthCm) {
+          widthCm = config.widthCm;
+        }
+        else if (config?.size?.width) {
+          widthCm = config.size.width;
+        }
+        // Try selected size (standard veranda)
+        else if (item.selectedSize) {
+          widthCm = extractWidthFromSize(item.selectedSize);
+        }
+        // Try extracting from handle/slug
+        else if (item.handle || item.slug || item.id) {
+          widthCm = extractWidthFromHandle(item.handle || item.slug || item.id);
+        }
+        
+        if (widthCm) {
+          ledSourceItems.push({
+            configType,
+            handle: item.handle || item.slug || item.id,
+            widthCm,
+            itemQty: item.quantity,
+          });
+        }
+      }
+      
+      // Calculate total LED quantity
+      if (ledSourceItems.length > 0) {
+        let totalLedQty = 0;
+        
+        for (const src of ledSourceItems) {
+          const ledPerUnit = getLedQuantity(src.widthCm);
+          totalLedQty += ledPerUnit * src.itemQty;
+        }
+        
+        const ledLine = buildLedCartLine(
+          totalLedQty,
+          ledSourceItems.map(s => ({ configType: s.configType, handle: s.handle, widthCm: s.widthCm }))
+        );
+        
+        if (ledLine) {
+          lines.push(ledLine);
+        }
+      }
     }
     
     if (lines.length === 0) {

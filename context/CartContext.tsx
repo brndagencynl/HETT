@@ -21,6 +21,14 @@ import {
   type ShippingLineItem,
   type ShippingQuoteResult,
 } from '../src/services/shipping';
+import {
+  getLedQuantity,
+  extractWidthFromHandle,
+  extractWidthFromSize,
+  LED_UNIT_PRICE_CENTS,
+  isLedConfigured,
+  type LedLineItem,
+} from '../src/services/ledPricing';
 
 // =============================================================================
 // TYPES
@@ -74,6 +82,8 @@ interface CartContextType {
   cartProducts: CartItem[];
   /** Shipping line item if exists */
   shippingLineItem: ShippingLineItem | null;
+  /** LED spots line item (auto-computed from veranda items with verlichting) */
+  ledLineItem: LedLineItem | null;
   addToCart: (product: Product, quantity: number, options: any) => void;
   addMaatwerkToCart: (payload: MaatwerkCartPayload) => void;
   removeFromCart: (index: number) => void;
@@ -304,8 +314,84 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   }, [normalizedCart]);
 
+  // ==========================================================================
+  // LED SPOTS LINE (computed from veranda items with verlichting)
+  // ==========================================================================
+  const ledLineItem = useMemo<LedLineItem | null>(() => {
+    const parentItems: LedLineItem['parentItems'] = [];
+    
+    for (const item of cartWithCents) {
+      // Check if item has verlichting enabled
+      const config = item.config?.data as any;
+      const hasLed = 
+        config?.verlichting === true || 
+        item.maatwerkPayload?.selections?.some((s: any) => s.groupId === 'verlichting' && s.choiceId !== 'geen');
+      
+      if (!hasLed) continue;
+      
+      // Determine config type
+      const configType = item.type === 'custom_veranda' ? 'maatwerk' : 
+                        item.config?.category === 'maatwerk_veranda' ? 'maatwerk' : 'veranda';
+      
+      // Extract width
+      let widthCm: number | null = null;
+      
+      // Try maatwerk payload first
+      if (item.maatwerkPayload?.size?.width) {
+        widthCm = item.maatwerkPayload.size.width;
+      }
+      // Try config data
+      else if (config?.widthCm) {
+        widthCm = config.widthCm;
+      }
+      else if (config?.size?.width) {
+        widthCm = config.size.width;
+      }
+      // Try selected size (standard veranda)
+      else if (item.selectedSize) {
+        widthCm = extractWidthFromSize(item.selectedSize);
+      }
+      // Try extracting from handle/slug
+      else if (item.handle || item.slug || item.id) {
+        widthCm = extractWidthFromHandle(item.handle || item.slug || item.id);
+      }
+      
+      if (widthCm) {
+        const ledQty = getLedQuantity(widthCm);
+        parentItems.push({
+          handle: item.handle || item.slug || item.id,
+          configType,
+          widthCm,
+          itemQuantity: item.quantity,
+          ledQty,
+        });
+      }
+    }
+    
+    if (parentItems.length === 0) return null;
+    
+    // Calculate total LED quantity
+    const totalQty = parentItems.reduce((sum, p) => sum + (p.ledQty * p.itemQuantity), 0);
+    const lineTotalCents = mulCents(LED_UNIT_PRICE_CENTS, totalQty);
+    
+    return {
+      id: 'auto-led',
+      type: 'led-spots',
+      title: 'LED verlichting (spots)',
+      quantity: totalQty,
+      unitPriceCents: LED_UNIT_PRICE_CENTS,
+      lineTotalCents,
+      readonly: true,
+      source: 'auto-led',
+      parentItems,
+    };
+  }, [cartWithCents]);
+
   // Calculate totals in cents (products only - canonical)
-  const subtotalCents = cartWithCents.reduce((sum, item) => sum + (item.lineTotalCents || 0), 0);
+  const productSubtotalCents = cartWithCents.reduce((sum, item) => sum + (item.lineTotalCents || 0), 0);
+  // Add LED line to subtotal
+  const ledTotalCents = ledLineItem?.lineTotalCents || 0;
+  const subtotalCents = addCents(productSubtotalCents, ledTotalCents);
   const subtotal = fromCents(subtotalCents);
   // Legacy aliases
   const totalCents = subtotalCents;
@@ -846,6 +932,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       cart: fullCartWithCents,
       cartProducts: cartWithCents,
       shippingLineItem,
+      ledLineItem,
       addToCart,
       addMaatwerkToCart,
       removeFromCart, 

@@ -5,7 +5,7 @@ import { useVerandaEdit } from '../context/VerandaEditContext';
 import { useMaatwerkEdit } from '../context/MaatwerkEditContext';
 import { useSandwichpanelenEdit } from '../context/SandwichpanelenEditContext';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Trash2, ArrowRight, Plus, Minus, ShoppingBag, Info, Pencil, Loader2, AlertCircle } from 'lucide-react';
+import { Trash2, ArrowRight, Plus, Minus, ShoppingBag, Info, Pencil, Loader2, AlertCircle, Zap } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import Button from '../components/ui/button';
 import { Card } from '../components/ui/card';
@@ -22,6 +22,7 @@ const Cart: React.FC = () => {
       cart,
       cartProducts,
       shippingLineItem,
+      ledLineItem,
       removeFromCart, 
       updateQuantity, 
       total,
@@ -346,6 +347,30 @@ const Cart: React.FC = () => {
                     </Card>
                 );
                 })}
+                
+                {/* LED Spots Line (auto-computed, readonly) */}
+                {ledLineItem && (
+                  <Card padding="normal" className="bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-200/50">
+                    <div className="flex gap-4 items-center">
+                      <div className="w-16 h-16 flex items-center justify-center bg-amber-100 rounded-lg flex-shrink-0">
+                        <Zap className="w-8 h-8 text-amber-600" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-bold text-hett-dark">{ledLineItem.title}</h3>
+                        <p className="text-sm text-gray-500">Automatisch berekend op basis van veranda breedte</p>
+                        <div className="flex items-center gap-2 mt-1 text-sm">
+                          <span className="text-amber-700 font-medium">{ledLineItem.quantity} spots</span>
+                          <span className="text-gray-400">×</span>
+                          <span className="text-gray-600">{formatMoney(fromCents(ledLineItem.unitPriceCents))}</span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wide">Totaal</div>
+                        <div className="font-black text-lg md:text-xl text-hett-dark">{formatMoney(fromCents(ledLineItem.lineTotalCents))}</div>
+                      </div>
+                    </div>
+                  </Card>
+                )}
             </div>
 
             {/* Order Summary */}

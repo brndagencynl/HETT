@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
-import { X, ShoppingBag, Trash2, ArrowRight, ShieldCheck, Pencil, Info, Loader2, AlertCircle } from 'lucide-react';
+import { X, ShoppingBag, Trash2, ArrowRight, ShieldCheck, Pencil, Info, Loader2, AlertCircle, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../../context/CartContext';
 import { useVerandaEdit } from '../../context/VerandaEditContext';
@@ -17,7 +17,7 @@ import { formatEUR } from '../../src/utils/money';
 const MotionDiv = motion.div as any;
 
 const CartDrawer: React.FC = () => {
-    const { isCartOpen, closeCart, cart, cartProducts, removeFromCart, totalCents, subtotalCents, grandTotalCents, shippingCostCents, shippingMode, shippingIsValid } = useCart();
+    const { isCartOpen, closeCart, cart, cartProducts, ledLineItem, removeFromCart, totalCents, subtotalCents, grandTotalCents, shippingCostCents, shippingMode, shippingIsValid } = useCart();
     const { openEditConfigurator } = useVerandaEdit();
     const { openMaatwerkEdit } = useMaatwerkEdit();
     const { openSandwichpanelenEdit } = useSandwichpanelenEdit();
@@ -272,6 +272,25 @@ const CartDrawer: React.FC = () => {
                                         )}                                    </div>
                                 );
                                 })
+                            )}
+                            
+                            {/* LED Spots Line (auto-computed, readonly) */}
+                            {ledLineItem && (
+                                <div className="bg-gradient-to-r from-amber-50 to-yellow-50 p-4 rounded-xl border border-amber-200/50 flex gap-4 relative">
+                                    <div className="w-16 h-16 flex items-center justify-center bg-amber-100 rounded-lg flex-shrink-0">
+                                        <Zap className="w-8 h-8 text-amber-600" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <h3 className="font-bold text-hett-dark text-sm truncate">{ledLineItem.title}</h3>
+                                        <p className="text-xs text-gray-500 mt-0.5">Automatisch berekend op basis van breedte</p>
+                                        <div className="flex items-center justify-between mt-2">
+                                            <div className="flex items-center gap-2 text-xs font-bold text-amber-700 bg-amber-100/50 px-2 py-1 rounded">
+                                                <span>Aantal: {ledLineItem.quantity} spots</span>
+                                            </div>
+                                            <span className="font-black text-hett-dark">{formatEUR(ledLineItem.lineTotalCents, 'cents')}</span>
+                                        </div>
+                                    </div>
+                                </div>
                             )}
                         </div>
 

@@ -66,16 +66,16 @@ const Delivery: React.FC = () => {
                              <h2 className="text-2xl font-black text-hett-dark mb-4">Verzendkosten</h2>
                              <ul className="space-y-3">
                                 <li className="flex justify-between items-center border-b border-gray-100 pb-2">
-                                    <span className="text-gray-600">Bestellingen &gt; € 2.500,00</span>
+                                    <span className="text-gray-600">Nederland</span>
                                     <span className="font-bold text-green-600">Gratis</span>
                                 </li>
                                 <li className="flex justify-between items-center border-b border-gray-100 pb-2">
-                                    <span className="text-gray-600">Nederland (standaard)</span>
-                                    <span className="font-bold text-hett-dark">€ 75,00</span>
+                                    <span className="text-gray-600">Duitsland (standaard)</span>
+                                    <span className="font-bold text-hett-dark">€ 1,00 per kilometer</span>
                                 </li>
                                 <li className="flex justify-between items-center pb-2">
                                     <span className="text-gray-600">België (standaard)</span>
-                                    <span className="font-bold text-hett-dark">€ 95,00</span>
+                                    <span className="font-bold text-hett-dark">€ 1,00 per kilometer</span>
                                 </li>
                              </ul>
                         </div>

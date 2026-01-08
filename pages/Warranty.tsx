@@ -111,7 +111,7 @@ const Warranty: React.FC = () => {
                 <li className="relative">
                     <span className="absolute -left-[39px] top-0 w-6 h-6 bg-hett-brown text-white text-xs font-bold rounded-full flex items-center justify-center">1</span>
                     <strong className="block text-gray-900">Meld uw klacht</strong>
-                    <p className="text-sm text-gray-600">Stuur een e-mail naar <a href="mailto:service@hett.nl" className="text-hett-brown underline">service@hett.nl</a> onder vermelding van uw ordernummer.</p>
+                    <p className="text-sm text-gray-600">Stuur een e-mail naar <a href="mailto:info@hettveranda.nl" className="text-hett-brown underline">info@hettveranda.nl</a> onder vermelding van uw ordernummer.</p>
                 </li>
                 <li className="relative">
                     <span className="absolute -left-[39px] top-0 w-6 h-6 bg-hett-brown text-white text-xs font-bold rounded-full flex items-center justify-center">2</span>

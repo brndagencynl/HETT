@@ -174,9 +174,15 @@ export function getOverlayPath(
   return `${RENDER_BASE_PATH}/${color}/${groupId}/${filename}.png`;
 }
 
+/** Placeholder/fallback thumbnail */
+export const FALLBACK_THUMBNAIL = '/renders/veranda/placeholder-thumb.svg';
+
 /**
  * Get thumbnail image path for an option choice
  * Used in the option selector cards/radios
+ * 
+ * File naming convention: {groupId}_{choiceId}.png (flat structure)
+ * Example: daktype_poly_helder.png, voorzijde_glas_helder.png
  */
 export function getThumbnailPath(
   groupId: string,
@@ -185,18 +191,37 @@ export function getThumbnailPath(
 ): string {
   // 'geen' option uses a generic "none" thumbnail
   if (NO_OVERLAY_CHOICES.includes(choiceId.toLowerCase())) {
-    return `${RENDER_BASE_PATH}/shared/thumbnails/geen.png`;
+    // Try color-specific 'geen' thumbnail first, else fallback
+    return `${RENDER_BASE_PATH}/${color}/thumbnails/${groupId}_geen.png`;
   }
   
   // Groups without overlay images (verlichting) - use shared thumbnails
   if (!hasOverlayImages(groupId)) {
-    return `${RENDER_BASE_PATH}/shared/thumbnails/${groupId}/${choiceId}.png`;
+    return `${RENDER_BASE_PATH}/shared/thumbnails/${groupId}_${choiceId}.png`;
   }
   
   // Apply asset filename mapping
   const filename = getAssetFilename(choiceId);
-  // Color-dependent thumbnail
-  return `${RENDER_BASE_PATH}/${color}/thumbnails/${groupId}/${filename}.png`;
+  // Color-dependent thumbnail with flat naming: {groupId}_{choiceId}.png
+  return `${RENDER_BASE_PATH}/${color}/thumbnails/${groupId}_${filename}.png`;
+}
+
+/**
+ * Verify thumbnail URL accessibility (dev diagnostics)
+ * Call once on mount to detect 404s early
+ */
+export async function verifyThumbnailUrl(url: string): Promise<boolean> {
+  try {
+    const response = await fetch(url, { method: 'HEAD' });
+    if (!response.ok) {
+      console.warn('[Thumbnail 404]', url);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.warn('[Thumbnail fetch error]', url, err);
+    return false;
+  }
 }
 
 /**

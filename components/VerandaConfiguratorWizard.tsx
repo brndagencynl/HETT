@@ -3,7 +3,7 @@ import { X, Check, Info, ChevronLeft, ChevronRight, Truck, ShieldCheck, ArrowRig
 import { motion, AnimatePresence } from 'framer-motion';
 import { VERANDA_OPTIONS_UI, DEFAULT_VERANDA_CONFIG, VerandaConfig, COLOR_OPTIONS, DEFAULT_COLOR } from '../src/configurator/schemas/veranda';
 import { calcVerandaPrice } from '../src/configurator/pricing/veranda';
-import { buildVisualizationLayers, type VisualizationLayer, FALLBACK_IMAGE, type VerandaColorId, getPreloadPaths, preloadImages } from '../src/configurator/visual/verandaAssets';
+import { buildVisualizationLayers, type VisualizationLayer, FALLBACK_IMAGE, FALLBACK_THUMBNAIL, type VerandaColorId, getPreloadPaths, preloadImages, getThumbnailPath, verifyThumbnailUrl } from '../src/configurator/visual/verandaAssets';
 import { t } from '../src/utils/i18n';
 import { formatEUR, toCents } from '../src/utils/money';
 
@@ -139,7 +139,7 @@ const SafeImage = ({ src, alt, className, fallback = FALLBACK_IMAGE }: { src: st
     
     const handleError = useCallback(() => {
         if (!hasError) {
-            console.warn(`[VerandaConfigurator] Image failed to load: ${src}`);
+            console.warn('[Thumb missing]', src, { fallbackUsed: fallback });
             setHasError(true);
             setImgSrc(fallback);
         }
@@ -212,6 +212,17 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
         });
         preloadImages(paths);
     }, [currentStepIndex, config.color]);
+
+    // DEV: Verify thumbnail URLs on mount (diagnostics)
+    useEffect(() => {
+        if (import.meta.env.DEV) {
+            const sampleUrl = getThumbnailPath('daktype', 'poly_helder', 'ral7016');
+            console.log('[Thumbnail] Sample URL:', sampleUrl);
+            verifyThumbnailUrl(sampleUrl).then(ok => {
+                console.log('[Thumbnail] Sample accessible:', ok);
+            });
+        }
+    }, []);
 
     const currentStep = STEPS[currentStepIndex];
     const canProceed = isStepComplete(currentStep, config);
@@ -391,43 +402,56 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
 
         // Card-based selector (for daktype)
         if (optionDef.type === 'card') {
+            // Get current color for dynamic thumbnail URLs
+            const selectedColor = (config.color || 'ral7016') as VerandaColorId;
+            
             return (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {optionDef.choices.map((choice: any) => (
-                        <div
-                            key={choice.value}
-                            onClick={() => setConfig(prev => ({ ...prev, [optionDef.key]: choice.value }))}
-                            className={`relative rounded-xl overflow-hidden cursor-pointer transition-all border-2 ${
-                                currentValue === choice.value 
-                                    ? 'border-[#003878] ring-2 ring-[#003878]/20 shadow-lg' 
-                                    : 'border-gray-200 hover:border-gray-300 hover:shadow-md'
-                            }`}
-                        >
-                            {currentValue === choice.value && (
-                                <div className="absolute top-3 left-3 z-10 w-8 h-8 bg-[#003878] rounded-full flex items-center justify-center text-white shadow-md">
-                                    <Check size={18} strokeWidth={3} />
-                                </div>
-                            )}
-                            <button
-                                onClick={(e) => { e.stopPropagation(); setInfoModal({ title: choice.label, text: choice.description }) }}
-                                className="absolute top-3 right-3 z-10 w-8 h-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center text-gray-600 hover:text-[#003878] shadow-sm transition-colors"
+                    {optionDef.choices.map((choice: any) => {
+                        // Generate dynamic thumbnail URL based on selected color
+                        const thumbnailUrl = getThumbnailPath(optionDef.key, choice.value, selectedColor);
+                        
+                        return (
+                            <div
+                                key={choice.value}
+                                onClick={() => setConfig(prev => ({ ...prev, [optionDef.key]: choice.value }))}
+                                className={`relative rounded-xl overflow-hidden cursor-pointer transition-all border-2 ${
+                                    currentValue === choice.value 
+                                        ? 'border-[#003878] ring-2 ring-[#003878]/20 shadow-lg' 
+                                        : 'border-gray-200 hover:border-gray-300 hover:shadow-md'
+                                }`}
                             >
-                                <Info size={16} />
-                            </button>
-                            <div className="aspect-[4/3] bg-gray-100">
-                                <img src={choice.image} alt={choice.label} className="w-full h-full object-cover" />
-                            </div>
-                            <div className="p-4 bg-white">
-                                <span className="block text-base font-bold text-gray-900 mb-1">{choice.label}</span>
-                                <span className="text-sm text-gray-600">{choice.description}</span>
-                                {choice.price > 0 && (
-                                    <span className="inline-block mt-2 bg-[#FF7300]/10 text-[#FF7300] text-sm font-bold px-3 py-1 rounded-full">
-                                        + {formatEUR(toCents(choice.price), 'cents')}
-                                    </span>
+                                {currentValue === choice.value && (
+                                    <div className="absolute top-3 left-3 z-10 w-8 h-8 bg-[#003878] rounded-full flex items-center justify-center text-white shadow-md">
+                                        <Check size={18} strokeWidth={3} />
+                                    </div>
                                 )}
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); setInfoModal({ title: choice.label, text: choice.description }) }}
+                                    className="absolute top-3 right-3 z-10 w-8 h-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center text-gray-600 hover:text-[#003878] shadow-sm transition-colors"
+                                >
+                                    <Info size={16} />
+                                </button>
+                                <div className="aspect-[4/3] bg-gray-100">
+                                    <SafeImage 
+                                        src={thumbnailUrl} 
+                                        alt={choice.label} 
+                                        className="w-full h-full object-cover"
+                                        fallback={FALLBACK_THUMBNAIL}
+                                    />
+                                </div>
+                                <div className="p-4 bg-white">
+                                    <span className="block text-base font-bold text-gray-900 mb-1">{choice.label}</span>
+                                    <span className="text-sm text-gray-600">{choice.description}</span>
+                                    {choice.price > 0 && (
+                                        <span className="inline-block mt-2 bg-[#FF7300]/10 text-[#FF7300] text-sm font-bold px-3 py-1 rounded-full">
+                                            + {formatEUR(toCents(choice.price), 'cents')}
+                                        </span>
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             );
         }

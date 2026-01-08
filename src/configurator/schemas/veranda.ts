@@ -34,6 +34,8 @@ import {
 
 import {
     DEFAULT_COLOR,
+    getThumbnailPath,
+    FALLBACK_THUMBNAIL,
 } from '../visual/verandaAssets';
 
 // =============================================================================
@@ -174,9 +176,9 @@ export const VERANDA_OPTIONS_UI = [
         required: true,
         choices: ROOF_TYPE_OPTIONS.map(c => ({
             ...toUIChoice(c),
-            image: c.id === 'poly_helder' 
-                ? "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=400"
-                : "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=400",
+            // Image will be dynamically resolved using getThumbnailPath in the component
+            // based on selected color. Default to ral7016 for initial render.
+            image: getThumbnailPath('daktype', c.id, DEFAULT_COLOR),
         })),
     },
     {

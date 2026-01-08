@@ -73,7 +73,7 @@ import {
 } from '../src/configurators/custom/maatwerkShopifyMapping';
 
 // Reuse visual layer system for preview (but from existing assets)
-import { buildVisualizationLayers, type VisualizationLayer, FALLBACK_IMAGE, type VerandaColorId } from '../src/configurator/visual/verandaAssets';
+import { buildVisualizationLayers, type VisualizationLayer, FALLBACK_IMAGE, FALLBACK_THUMBNAIL, type VerandaColorId, getThumbnailPath, verifyThumbnailUrl } from '../src/configurator/visual/verandaAssets';
 
 const MotionDiv = motion.div as any;
 
@@ -106,7 +106,7 @@ const SafeImage = ({ src, alt, className, fallback = FALLBACK_IMAGE }: { src: st
   
   const handleError = useCallback(() => {
     if (!hasError) {
-      console.warn(`[MaatwerkConfigurator] Image failed to load: ${src}`);
+      console.warn('[Thumb missing]', src, { fallbackUsed: fallback });
       setHasError(true);
       setImgSrc(fallback);
     }
@@ -619,11 +619,15 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
 
   const renderCardSelector = (options: typeof MAATWERK_ROOF_OPTIONS, configKey: keyof PartialMaatwerkConfig) => {
     const currentValue = config[configKey];
+    // Get current color for dynamic thumbnail URLs
+    const selectedColor = (config.kleur || 'ral7016') as VerandaColorId;
 
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {options.map((choice) => {
           const price = config.size ? getMaatwerkOptionPrice(choice.pricing, config.size) : 0;
+          // Generate dynamic thumbnail URL based on selected color
+          const thumbnailUrl = getThumbnailPath(String(configKey), choice.id, selectedColor);
           
           return (
             <div
@@ -648,8 +652,13 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
                   <Info size={16} />
                 </button>
               )}
-              <div className="aspect-[4/3] bg-gray-100 flex items-center justify-center">
-                <Eye size={40} className="text-gray-300" />
+              <div className="aspect-[4/3] bg-gray-100">
+                <SafeImage 
+                  src={thumbnailUrl} 
+                  alt={choice.label} 
+                  className="w-full h-full object-cover"
+                  fallback={FALLBACK_THUMBNAIL}
+                />
               </div>
               <div className="p-4 bg-white">
                 <span className="block text-base font-bold text-gray-900 mb-1">{choice.label}</span>

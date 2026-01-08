@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Menu, X, ShoppingCart, Search as SearchIcon, Check, Star, User, Heart, ChevronRight } from 'lucide-react';
+import { Menu, X, ShoppingCart, Search as SearchIcon, Check, Star, User, Heart, ChevronRight, Loader2 } from 'lucide-react';
 import { NAV_ITEMS } from '../constants';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
+import { searchProducts } from '../src/lib/shopify';
+import type { Product } from '../types';
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,9 +14,99 @@ const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
+  // Autosuggest state
+  const [suggestOpen, setSuggestOpen] = useState(false);
+  const [suggestLoading, setSuggestLoading] = useState(false);
+  const [suggestResults, setSuggestResults] = useState<Product[]>([]);
+  const [suggestError, setSuggestError] = useState<string | null>(null);
+  const searchWrapperRef = useRef<HTMLFormElement>(null);
+  const mobileSearchWrapperRef = useRef<HTMLFormElement>(null);
+  const requestIdRef = useRef(0);
+
   const { itemCount, openCart } = useCart();
   const { count: wishlistCount } = useWishlist();
   const navigate = useNavigate();
+
+  // Debounced search
+  useEffect(() => {
+    const trimmed = searchQuery.trim();
+    if (trimmed.length < 2) {
+      setSuggestOpen(false);
+      setSuggestResults([]);
+      setSuggestError(null);
+      return;
+    }
+
+    setSuggestLoading(true);
+    setSuggestOpen(true);
+    const currentRequestId = ++requestIdRef.current;
+
+    const timeoutId = setTimeout(async () => {
+      console.log('[Search] query', trimmed);
+      try {
+        const result = await searchProducts(trimmed, { first: 6 });
+        // Ignore stale responses
+        if (currentRequestId !== requestIdRef.current) return;
+        console.log('[Search] results', result.products.length);
+        setSuggestResults(result.products);
+        setSuggestError(null);
+      } catch (err) {
+        if (currentRequestId !== requestIdRef.current) return;
+        console.error('[Search] error', err);
+        setSuggestError('Zoeken mislukt');
+        setSuggestResults([]);
+      } finally {
+        if (currentRequestId === requestIdRef.current) {
+          setSuggestLoading(false);
+        }
+      }
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        searchWrapperRef.current &&
+        !searchWrapperRef.current.contains(e.target as Node) &&
+        mobileSearchWrapperRef.current &&
+        !mobileSearchWrapperRef.current.contains(e.target as Node)
+      ) {
+        setSuggestOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Close dropdown on ESC
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setSuggestOpen(false);
+      }
+    };
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, []);
+
+  const handleResultClick = useCallback((handle: string) => {
+    navigate(`/producten/${handle}`);
+    setSuggestOpen(false);
+    setSearchQuery('');
+    setIsOpen(false);
+  }, [navigate]);
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('nl-NL', {
+      style: 'currency',
+      currency: 'EUR',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(price);
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -39,10 +131,12 @@ const Navbar: React.FC = () => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
+      // If we already have results, navigate to full search page
       navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
       setIsOpen(false);
       setSearchQuery('');
       setIsSearchOpen(false);
+      setSuggestOpen(false);
     }
   };
 
@@ -74,10 +168,56 @@ const Navbar: React.FC = () => {
               </button>
             </div>
           </div>
-          <div className={`px-4 overflow-hidden ${showSearchForm ? 'max-h-20 pb-4' : 'max-h-0 pb-0 hidden'}`}>
-            <form onSubmit={handleSearch} className="relative">
-              <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-              <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Zoeken" className="w-full bg-gray-100 py-2.5 pl-10 pr-4 rounded-md outline-none text-sm" />
+          <div className={`px-4 overflow-hidden ${showSearchForm ? 'max-h-96 pb-4' : 'max-h-0 pb-0 hidden'}`}>
+            <form ref={mobileSearchWrapperRef} onSubmit={handleSearch} className="relative">
+              <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 z-10" size={18} />
+              <input 
+                type="text" 
+                value={searchQuery} 
+                onChange={(e) => setSearchQuery(e.target.value)} 
+                placeholder="Zoeken" 
+                className="w-full bg-gray-100 py-2.5 pl-10 pr-4 rounded-md outline-none text-sm" 
+              />
+              {/* Mobile Autosuggest Dropdown */}
+              {suggestOpen && (
+                <div className="absolute left-0 right-0 top-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-80 overflow-y-auto">
+                  {suggestLoading && (
+                    <div className="flex items-center justify-center gap-2 py-4 text-gray-500 text-sm">
+                      <Loader2 size={16} className="animate-spin" />
+                      <span>Zoeken...</span>
+                    </div>
+                  )}
+                  {!suggestLoading && suggestError && (
+                    <div className="py-4 px-4 text-center text-red-500 text-sm">{suggestError}</div>
+                  )}
+                  {!suggestLoading && !suggestError && suggestResults.length === 0 && (
+                    <div className="py-4 px-4 text-center text-gray-500 text-sm">Geen resultaten</div>
+                  )}
+                  {!suggestLoading && !suggestError && suggestResults.length > 0 && (
+                    <ul>
+                      {suggestResults.map((product) => (
+                        <li key={product.id}>
+                          <button
+                            type="button"
+                            onClick={() => handleResultClick(product.handle || product.id)}
+                            className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors text-left border-b border-gray-100 last:border-b-0"
+                          >
+                            <img
+                              src={product.imageUrl}
+                              alt={product.title}
+                              className="w-12 h-12 object-cover rounded-md bg-gray-100 flex-shrink-0"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-bold text-hett-dark truncate">{product.title}</p>
+                              <p className="text-sm text-hett-primary font-semibold">{formatPrice(product.price)}</p>
+                            </div>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
             </form>
           </div>
         </div>
@@ -102,9 +242,56 @@ const Navbar: React.FC = () => {
           <div className="max-w-[1400px] mx-auto px-6 flex items-center justify-between gap-10 w-full">
             <Link to="/" className="flex-shrink-0"><img src="/assets/images/hett-logo-navbar.png" alt="HETT" className="h-9" /></Link>
 
-            <form onSubmit={handleSearch} className={`relative flex flex-grow max-w-xl transition-all ${showSearchForm ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-              <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Waar ben je naar op zoek?" className="w-full pl-5 pr-12 py-2.5 border border-gray-200 bg-gray-50 rounded-md text-sm outline-none focus:border-hett-primary focus:bg-white" />
+            <form ref={searchWrapperRef} onSubmit={handleSearch} className={`relative flex flex-grow max-w-xl transition-all ${showSearchForm ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+              <input 
+                type="text" 
+                value={searchQuery} 
+                onChange={(e) => setSearchQuery(e.target.value)} 
+                placeholder="Waar ben je naar op zoek?" 
+                className="w-full pl-5 pr-12 py-2.5 border border-gray-200 bg-gray-50 rounded-md text-sm outline-none focus:border-hett-primary focus:bg-white" 
+              />
               <button type="submit" className="absolute right-1 top-1/2 -translate-y-1/2 p-2 bg-hett-primary text-white rounded-md"><SearchIcon size={16} /></button>
+              
+              {/* Desktop Autosuggest Dropdown */}
+              {suggestOpen && (
+                <div className="absolute left-0 right-0 top-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-96 overflow-y-auto">
+                  {suggestLoading && (
+                    <div className="flex items-center justify-center gap-2 py-4 text-gray-500 text-sm">
+                      <Loader2 size={16} className="animate-spin" />
+                      <span>Zoeken...</span>
+                    </div>
+                  )}
+                  {!suggestLoading && suggestError && (
+                    <div className="py-4 px-4 text-center text-red-500 text-sm">{suggestError}</div>
+                  )}
+                  {!suggestLoading && !suggestError && suggestResults.length === 0 && (
+                    <div className="py-4 px-4 text-center text-gray-500 text-sm">Geen resultaten</div>
+                  )}
+                  {!suggestLoading && !suggestError && suggestResults.length > 0 && (
+                    <ul>
+                      {suggestResults.map((product) => (
+                        <li key={product.id}>
+                          <button
+                            type="button"
+                            onClick={() => handleResultClick(product.handle || product.id)}
+                            className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors text-left border-b border-gray-100 last:border-b-0"
+                          >
+                            <img
+                              src={product.imageUrl}
+                              alt={product.title}
+                              className="w-12 h-12 object-cover rounded-md bg-gray-100 flex-shrink-0"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-bold text-hett-dark truncate">{product.title}</p>
+                              <p className="text-sm text-hett-primary font-semibold">{formatPrice(product.price)}</p>
+                            </div>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
             </form>
 
             <div className="flex items-center gap-6">

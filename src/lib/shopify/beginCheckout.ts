@@ -7,7 +7,8 @@ import { createCart, resetCart, isShopifyConfigured, ShopifyError } from './inde
 import type { CartLineInput } from './types';
 import type { CartItem } from '../../../types';
 import { resolveMerchandiseForCartItem } from '../../shopify/shopifyMerchandiseMap';
-import { toShopifyLineAttributes } from '../../services/config/formatConfigAttributes';
+// Use new clean attribute builder
+import { toCleanShopifyLineAttributes } from '../../services/cart/lineItemAttributes';
 import { isShippingLineItem, type ShippingLineItem } from '../../services/shipping';
 // Use shared LED addon service
 import {
@@ -24,13 +25,19 @@ import {
 import {
   buildConfigSurchargeLines,
 } from '../../services/configSurchargeLines';
-// Bundle key utilities for grouping related lines
+// Bundle key utilities for grouping related lines (use prefixed keys)
 import {
   generateBundleKey,
-  BUNDLE_KEY_ATTR,
-  KIND_ATTR,
-  LINE_KINDS,
 } from '../../utils/bundleKey';
+
+// Internal attribute keys (underscore prefix to minimize checkout display)
+const INTERNAL_BUNDLE_KEY = '_bundle_key';
+const INTERNAL_KIND = '_kind';
+const INTERNAL_KINDS = {
+  MAIN_PRODUCT: 'main_product',
+  LED_ADDON: 'led_addon',
+  CONFIG_SURCHARGE: 'config_surcharge',
+} as const;
 
 // =============================================================================
 // MAIN CHECKOUT FUNCTION
@@ -137,16 +144,17 @@ export async function beginCheckout(
       // Regular product items
       const { mappingKey, merchandiseId } = resolveMerchandiseForCartItem(item);
       
-      // Use new clean attribute formatter
-      const attributes = toShopifyLineAttributes(item);
+      // Use new clean attribute formatter (customer-facing only)
+      const attributes = toCleanShopifyLineAttributes(item);
       
-      // Add bundle grouping attributes
+      // Add INTERNAL bundle grouping attributes (underscore prefix)
       attributes.push(
-        { key: BUNDLE_KEY_ATTR, value: bundleKey },
-        { key: KIND_ATTR, value: LINE_KINDS.MAIN_PRODUCT }
+        { key: INTERNAL_BUNDLE_KEY, value: bundleKey },
+        { key: INTERNAL_KIND, value: INTERNAL_KINDS.MAIN_PRODUCT }
       );
 
-      // Debug helper (requested)
+      // Debug log for testing
+      console.log('[Checkout Props] main', attributes.filter(a => !a.key.startsWith('_')));
       console.log('[beginCheckout] item', {
         title: item.title,
         internalType: item.type,

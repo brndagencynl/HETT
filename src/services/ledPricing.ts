@@ -221,6 +221,13 @@ export interface LedCartLineInput {
 /**
  * Build LED Shopify cart line input
  * 
+ * CUSTOMER-FACING ATTRIBUTES ONLY:
+ * - Aantal spots: 12
+ * - Prijs per spot: € 29,99
+ * 
+ * NO technical keys visible to customer (addon, kind, width_cm, derived_qty, unit_price)
+ * Internal bundle grouping uses "_" prefixed keys.
+ * 
  * @param totalQuantity - Total LED spots to add
  * @param sourceItems - Source veranda items for attribution
  * @param bundleKeys - Optional bundle keys to link LED line to parent products
@@ -237,32 +244,27 @@ export function buildLedCartLine(
   
   console.log(`[LED] added line with GID=${LED_VARIANT_ID} qty=${totalQuantity}`);
   
-  // Use first source item for primary attribution (or combine if multiple)
-  const widthCm = sourceItems[0]?.widthCm ?? 0;
+  // Format price with comma as decimal separator (Dutch format)
+  const unitPriceFormatted = `€ ${LED_UNIT_PRICE_EUR.toFixed(2).replace('.', ',')}`;
   
-  // Build clean multiline "Berekening" attribute for Shopify checkout
-  const unitPriceFormatted = LED_UNIT_PRICE_EUR.toFixed(2).replace('.', ',');
-  const calculationLines = [
-    `Breedte: ${widthCm} cm`,
-    `Aantal spots: ${totalQuantity} × €${unitPriceFormatted}`,
-  ];
-  
+  // CUSTOMER-FACING attributes only
   const attributes: Array<{ key: string; value: string }> = [
-    // Addon identifier for grouping in cart UI
-    { key: 'addon', value: 'led_spots' },
-    // Line kind for bundle grouping
-    { key: 'kind', value: 'led_addon' },
-    // Human-readable for Shopify checkout
-    { key: 'Berekening', value: calculationLines.join('\n') },
+    { key: 'Aantal spots', value: String(totalQuantity) },
+    { key: 'Prijs per spot', value: unitPriceFormatted },
   ];
   
-  // Add bundle keys if provided (links LED to parent product bundles)
+  // INTERNAL bundle grouping (underscore prefix to minimize checkout display)
   if (bundleKeys && bundleKeys.length > 0) {
-    attributes.push({ key: 'bundle_keys', value: bundleKeys.join(',') });
+    attributes.push({ key: '_bundle_keys', value: bundleKeys.join(',') });
   }
+  attributes.push({ key: '_kind', value: 'led_addon' });
+  
+  // Debug log for testing
+  console.log('[Checkout Props] led', attributes);
   
   return {
     merchandiseId: LED_VARIANT_ID,
     quantity: totalQuantity,
-    attributes,  };
+    attributes,
+  };
 }

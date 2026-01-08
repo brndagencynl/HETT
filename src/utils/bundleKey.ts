@@ -50,11 +50,24 @@ export function generateBundleKeyFromItem(
 // BUNDLE KEY ATTRIBUTE CONSTANTS
 // =============================================================================
 
-/** Attribute key for bundle identification */
-export const BUNDLE_KEY_ATTR = 'bundle_key';
+/** 
+ * Attribute key for bundle identification
+ * IMPORTANT: Prefixed with underscore to minimize checkout display
+ */
+export const BUNDLE_KEY_ATTR = '_bundle_key';
 
-/** Attribute key for line kind identification */
-export const KIND_ATTR = 'kind';
+/** 
+ * Attribute key for line kind identification
+ * IMPORTANT: Prefixed with underscore to minimize checkout display
+ */
+export const KIND_ATTR = '_kind';
+
+/** 
+ * Legacy attribute keys (for backwards compatibility detection)
+ * @deprecated Use prefixed keys instead
+ */
+export const LEGACY_BUNDLE_KEY_ATTR = 'bundle_key';
+export const LEGACY_KIND_ATTR = 'kind';
 
 /** Line kinds for identifying line types */
 export const LINE_KINDS = {
@@ -63,7 +76,7 @@ export const LINE_KINDS = {
   /** LED addon line */
   LED_ADDON: 'led_addon',
   /** Configuration surcharge step line */
-  CONFIG_SURCHARGE: 'config_surcharge_step',
+  CONFIG_SURCHARGE: 'config_surcharge',
 } as const;
 
 // =============================================================================
@@ -98,17 +111,19 @@ export function createLedAddonKindAttribute(): LineAttribute {
 
 /**
  * Extract bundle key from line attributes
+ * Supports both new prefixed (_bundle_key) and legacy (bundle_key) keys
  */
 export function getBundleKeyFromAttributes(attributes: LineAttribute[]): string | null {
-  const attr = attributes.find(a => a.key === BUNDLE_KEY_ATTR);
+  const attr = attributes.find(a => a.key === BUNDLE_KEY_ATTR || a.key === LEGACY_BUNDLE_KEY_ATTR);
   return attr?.value || null;
 }
 
 /**
  * Extract kind from line attributes
+ * Supports both new prefixed (_kind) and legacy (kind) keys
  */
 export function getKindFromAttributes(attributes: LineAttribute[]): string | null {
-  const attr = attributes.find(a => a.key === KIND_ATTR);
+  const attr = attributes.find(a => a.key === KIND_ATTR || a.key === LEGACY_KIND_ATTR);
   return attr?.value || null;
 }
 
@@ -125,8 +140,7 @@ export function isMainProductLine(attributes: LineAttribute[]): boolean {
  */
 export function isLedAddonLine(attributes: LineAttribute[]): boolean {
   const kind = getKindFromAttributes(attributes);
-  return kind === LINE_KINDS.LED_ADDON;
-  // Also check legacy attribute
+  return kind === LINE_KINDS.LED_ADDON || kind === 'led_addon';
 }
 
 /**
@@ -134,5 +148,5 @@ export function isLedAddonLine(attributes: LineAttribute[]): boolean {
  */
 export function isConfigSurchargeStepLine(attributes: LineAttribute[]): boolean {
   const kind = getKindFromAttributes(attributes);
-  return kind === LINE_KINDS.CONFIG_SURCHARGE;
+  return kind === LINE_KINDS.CONFIG_SURCHARGE || kind === 'config_surcharge_step';
 }

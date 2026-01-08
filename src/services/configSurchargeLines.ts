@@ -7,10 +7,13 @@
  * 
  * Route A: Configuration options (excl. LED) → Price steps → Cart lines
  * 
- * All surcharge lines include:
- * - config_id: Unique ID to group related lines
- * - kind: 'config_surcharge_step' (for identification)
- * - Toelichting: Human-readable summary for Shopify checkout
+ * CUSTOMER-FACING ATTRIBUTES:
+ * - Toelichting: "Glazen schuifwand getint (+€1.150), Polycarbonaat spie (+€215), ..."
+ * 
+ * NO technical keys visible to customer:
+ * - kind, config_id, step, config_type, config_handle, config_title, config_summary
+ * 
+ * Internal bundle grouping uses "_" prefixed keys.
  */
 
 import type { CartLineInput, ShopifyCartLineAttribute } from '../lib/shopify/types';
@@ -156,46 +159,55 @@ export function buildConfigSurchargeLines(
   console.log(`[ConfigSurchargeLines] Price steps: ${stepsSummary}`);
   console.log(`[ConfigSurchargeLines] Summary: ${truncatedSummary}`);
 
-  // Generate a unique config_id for this checkout session
-  // This allows grouping all surcharge lines together in the cart UI
+  // Generate a unique config_id for this checkout session (internal use only)
   const configId = generateConfigId();
   console.log(`[ConfigSurchargeLines] Generated config_id: ${configId}`);
 
-  // Build cart lines with grouping attributes
+  // Build CUSTOMER-FACING toelichting from all source items
+  // Format: "Optienaam (+€X,XX), Optienaam2 (+€Y,YY), ..."
+  // Deduplicate option labels and sum prices for same options
+  const optionPrices = new Map<string, number>();
+  for (const src of sourceItems) {
+    // Parse the summary which contains "Label (€XX.XX), Label2 (€YY.YY)"
+    if (src.summary) {
+      const optionMatches = src.summary.matchAll(/([^,()]+)\s*\(€([\d.,]+)\)/g);
+      for (const match of optionMatches) {
+        const label = match[1].trim();
+        const price = parseFloat(match[2].replace(',', '.'));
+        if (label && !isNaN(price) && price > 0) {
+          // Sum prices for same option across items
+          optionPrices.set(label, (optionPrices.get(label) || 0) + price);
+        }
+      }
+    }
+  }
+  
+  // Build clean toelichting string
+  const toelichtingParts: string[] = [];
+  for (const [label, price] of optionPrices) {
+    // Format price with Dutch comma separator
+    const priceFormatted = price.toFixed(2).replace('.', ',');
+    toelichtingParts.push(`${label} (+€${priceFormatted})`);
+  }
+  
+  // Fallback if no options parsed
+  const toelichtingValue = toelichtingParts.length > 0 
+    ? toelichtingParts.join(', ')
+    : 'Configuratie opties';
+
+  // Build cart lines with CUSTOMER-FACING attributes only
   const lines: CartLineInput[] = priceSteps.map(step => {
-    // Build human-readable toelichting
-    const toelichtingLines: string[] = [];
-    
-    // Add product title(s)
-    const uniqueTitles = [...new Set(sourceItems.map(s => s.title))];
-    for (const title of uniqueTitles) {
-      toelichtingLines.push(title);
-    }
-    
-    // Add options summary with prices
-    const optionsSummary = sourceItems
-      .filter(s => s.summary && s.summary.length > 0)
-      .map(s => s.summary)
-      .join(', ');
-    
-    if (optionsSummary) {
-      toelichtingLines.push(`Opties: ${optionsSummary}`);
-    }
-    
-    // Attributes for grouping and display
+    // CUSTOMER-FACING: Only "Toelichting" visible to customer
     const attributes: ShopifyCartLineAttribute[] = [
-      // Grouping identifier (same for all lines in this config)
-      { key: 'config_id', value: configId },
-      // Line type identifier
-      { key: 'kind', value: 'config_surcharge_step' },
-      // Human-readable for Shopify checkout
-      { key: 'Toelichting', value: toelichtingLines.join('\n') },
+      { key: 'Toelichting', value: toelichtingValue },
     ];
     
-    // Add bundle keys if provided (links surcharge to parent product bundles)
+    // INTERNAL bundle grouping (underscore prefix to minimize checkout display)
     if (bundleKeys && bundleKeys.length > 0) {
-      attributes.push({ key: 'bundle_keys', value: bundleKeys.join(',') });
+      attributes.push({ key: '_bundle_keys', value: bundleKeys.join(',') });
     }
+    attributes.push({ key: '_kind', value: 'config_surcharge' });
+    attributes.push({ key: '_config_id', value: configId });
 
     return {
       merchandiseId: step.variantId,
@@ -204,6 +216,8 @@ export function buildConfigSurchargeLines(
     };
   });
 
+  // Debug log for testing
+  console.log('[Checkout Props] surcharge', lines.length > 0 ? lines[0].attributes : []);
   console.log(`[ConfigSurchargeLines] Created ${lines.length} cart lines with config_id: ${configId}`);
 
   return {
@@ -240,14 +254,19 @@ export function buildSingleItemSurchargeLines(
 
 /**
  * Check if a cart line is a config surcharge step line.
- * Identified by: kind === 'config_surcharge_step'
+ * Identified by: _kind === 'config_surcharge' (underscore prefix)
+ * Also supports legacy 'kind' === 'config_surcharge_step' for backwards compatibility
  */
 export function isConfigSurchargeStepLine(attributes: ShopifyCartLineAttribute[]): boolean {
-  return attributes.some(attr => attr.key === 'kind' && attr.value === 'config_surcharge_step');
+  return attributes.some(attr => 
+    (attr.key === '_kind' && attr.value === 'config_surcharge') ||
+    (attr.key === 'kind' && attr.value === 'config_surcharge_step')
+  );
 }
 
 /**
  * Get surcharge step info from line attributes.
+ * Supports both prefixed (_config_id) and legacy (config_id) keys.
  */
 export function getConfigSurchargeStepInfo(attributes: ShopifyCartLineAttribute[]): {
   configId: string | null;
@@ -257,7 +276,8 @@ export function getConfigSurchargeStepInfo(attributes: ShopifyCartLineAttribute[
     return null;
   }
 
-  const configIdAttr = attributes.find(a => a.key === 'config_id');
+  // Support both new prefixed and legacy keys
+  const configIdAttr = attributes.find(a => a.key === '_config_id' || a.key === 'config_id');
   const toelichtingAttr = attributes.find(a => a.key === 'Toelichting');
   
   return {

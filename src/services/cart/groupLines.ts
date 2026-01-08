@@ -4,15 +4,15 @@
  * 
  * Groups Shopify cart lines by config_id to prevent duplicate display.
  * 
- * Line Types:
- * - Main product lines: Normal products (veranda, maatwerk, sandwichpanelen, accessories)
- * - Surcharge lines: kind === 'config_surcharge_step'
- * - LED addon lines: addon === 'led_spots'
+ * Line Types (identified by _kind attribute, with legacy fallbacks):
+ * - Main product lines: _kind === 'main_product' OR normal products
+ * - Surcharge lines: _kind === 'config_surcharge' OR legacy 'config_surcharge_step'
+ * - LED addon lines: _kind === 'led_addon' OR legacy addon === 'led_spots'
  * 
  * Output:
  * - mainLines: Products to show as cards
  * - addons: LED lines to show as addon cards
- * - surchargesByConfigId: Aggregated surcharges grouped by config_id
+ * - surchargesByConfigId: Aggregated surcharges grouped by _config_id
  * - ungroupedSurcharges: Surcharge lines without config_id (warning state)
  */
 
@@ -90,26 +90,33 @@ export function parseAttributes(attributes: Array<{ key: string; value: string }
 
 /**
  * Check if a line is a config surcharge step line
- * Identified by: kind === 'config_surcharge_step' OR has 'Toelichting' attribute (legacy)
+ * Supports both new prefixed (_kind) and legacy (kind) keys
+ * Identified by: _kind === 'config_surcharge' OR kind === 'config_surcharge_step'
  */
 export function isConfigSurchargeLine(attributes: Record<string, string>): boolean {
-  return attributes['kind'] === 'config_surcharge_step' || 
-         ('Toelichting' in attributes && !('addon' in attributes));
+  return attributes['_kind'] === 'config_surcharge' ||
+         attributes['kind'] === 'config_surcharge_step' || 
+         (attributes['Toelichting'] && !attributes['addon'] && !attributes['Aantal spots']);
 }
 
 /**
  * Check if a line is an LED addon line
- * Identified by: addon === 'led_spots'
+ * Supports both new prefixed (_kind) and legacy (addon) keys
+ * Identified by: _kind === 'led_addon' OR addon === 'led_spots' OR has 'Aantal spots'
  */
 export function isLedAddonLine(attributes: Record<string, string>): boolean {
-  return attributes['addon'] === 'led_spots';
+  return attributes['_kind'] === 'led_addon' ||
+         attributes['kind'] === 'led_addon' ||
+         attributes['addon'] === 'led_spots' ||
+         'Aantal spots' in attributes;
 }
 
 /**
  * Get config_id from attributes
+ * Supports both new prefixed (_config_id) and legacy (config_id) keys
  */
 export function getConfigId(attributes: Record<string, string>): string | null {
-  return attributes['config_id'] || null;
+  return attributes['_config_id'] || attributes['config_id'] || null;
 }
 
 // =============================================================================

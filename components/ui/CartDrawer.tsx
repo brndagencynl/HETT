@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
-import { X, ShoppingBag, Trash2, ArrowRight, ShieldCheck, Pencil, Info, Loader2, AlertCircle, Zap } from 'lucide-react';
+import { X, ShoppingBag, Trash2, ArrowRight, ShieldCheck, Pencil, Info, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../../context/CartContext';
 import { useVerandaEdit } from '../../context/VerandaEditContext';
@@ -11,7 +11,6 @@ import { isConfigOnly } from '../../utils/productRules';
 import { isVerandaCategory, isMaatwerkVerandaItem } from './ConfigBreakdownPopup';
 import { CartItemPreview } from './ConfigPreviewImage';
 import ConfigBreakdownPopup from './ConfigBreakdownPopup';
-import { beginCheckout, isShopifyConfigured } from '../../src/lib/shopify';
 import { formatEUR } from '../../src/utils/money';
 import { extractWidthFromHandle, extractWidthFromSize } from '../../src/services/addons/led';
 import { ConfigSurchargePreview } from '../../src/components/cart/ConfigSurchargePreview';
@@ -26,10 +25,6 @@ const CartDrawer: React.FC = () => {
     const navigate = useNavigate();
     const drawerRef = useRef<HTMLDivElement>(null);
     const [breakdownPopupKey, setBreakdownPopupKey] = useState<string | null>(null);
-    
-    // Checkout state
-    const [isCheckingOut, setIsCheckingOut] = useState(false);
-    const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
     // Close on escape key
     useEffect(() => {
@@ -46,48 +41,10 @@ const CartDrawer: React.FC = () => {
         };
     }, [isCartOpen, closeCart]);
     
-    // Reset checkout state when drawer opens
-    useEffect(() => {
-        if (isCartOpen) {
-            setCheckoutError(null);
-            setIsCheckingOut(false);
-        }
-    }, [isCartOpen]);
-    
-    // Handle Shopify checkout from drawer
-    const handleCheckout = async () => {
-        // Check if Shopify is configured
-        if (!isShopifyConfigured()) {
-            // Fallback to cart page
-            closeCart();
-            navigate('/cart');
-            return;
-        }
-        
-        // Start Shopify checkout
-        setIsCheckingOut(true);
-        setCheckoutError(null);
-        
-        try {
-            const result = await beginCheckout({
-                cartItems: cart,
-                onError: (error) => {
-                    console.error('[CartDrawer] Checkout error:', error);
-                },
-            });
-            
-            if (result.success && result.checkoutUrl) {
-                // Redirect to Shopify checkout
-                window.location.href = result.checkoutUrl;
-            } else {
-                setCheckoutError(result.error || 'Er is een fout opgetreden.');
-                setIsCheckingOut(false);
-            }
-        } catch (error) {
-            console.error('[CartDrawer] Unexpected error:', error);
-            setCheckoutError('Er is een onverwachte fout opgetreden.');
-            setIsCheckingOut(false);
-        }
+    // Handle checkout - always go to cart page first
+    const handleCheckout = () => {
+        closeCart();
+        navigate('/cart');
     };
 
     if (!isCartOpen) return null;

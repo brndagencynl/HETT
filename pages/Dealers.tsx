@@ -66,7 +66,7 @@ const Dealers: React.FC = () => {
                     <div className="mt-6 flex items-center justify-center gap-2 text-gray-500 text-sm">
                         <Phone size={16} />
                         <span>Of bel direct:</span>
-                        <a href="tel:0401234567" className="font-bold text-hett-dark hover:underline">040 - 123 4567</a>
+                        <a href="tel:+31685406033" className="font-bold text-hett-dark hover:underline">+31 (0)6 85 40 60 33</a>
                     </div>
                 </div>
             </div>

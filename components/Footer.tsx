@@ -80,7 +80,7 @@ const Footer: React.FC = () => {
                                 </div>
                             </div>
                             <div className="flex flex-col gap-3">
-                                <a href="tel:0401234567" className="flex items-center gap-3 text-sm text-white hover:text-[#FF7300] transition-colors"><Phone size={18} /> 040 123 4567</a>
+                                <a href="tel:+31685406033" className="flex items-center gap-3 text-sm text-white hover:text-[#FF7300] transition-colors"><Phone size={18} /> +31 (0)6 85 40 60 33</a>
                                 <a href="mailto:info@hettveranda.nl" className="flex items-center gap-3 text-sm text-white hover:text-[#FF7300] transition-colors"><Mail size={18} /> info@hettveranda.nl</a>
                             </div>
                             <div className="flex gap-4 pt-2">

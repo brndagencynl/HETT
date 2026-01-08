@@ -80,6 +80,11 @@ export type VerandaConfig = {
     zijwand_rechts: ZijwandValue;
     voorzijde: VoorzijdeValue;
     verlichting: boolean;
+    /** Derived LED info for display/debugging (does not affect base product line price) */
+    ledQty?: number;
+    ledUnitPrice?: number;
+    ledTotalPrice?: number;
+    ledWidthCm?: number;
     /** @deprecated Use color instead */
     profileColor?: ProfileColorValue;
     /** @deprecated Use color instead */

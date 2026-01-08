@@ -23,6 +23,7 @@ interface EditingCartItem {
   cartIndex: number;
   productTitle: string;
   basePrice: number;
+  widthCm: number;
   initialConfig: Partial<VerandaConfig>;
 }
 
@@ -32,6 +33,7 @@ interface VerandaEditContextType {
     cartIndex: number;
     productTitle: string;
     basePrice: number;
+    widthCm?: number;
     initialConfig?: Partial<VerandaConfig>;
   }) => void;
   /** Whether the configurator is currently open in edit mode */
@@ -52,9 +54,10 @@ export const VerandaEditProvider: React.FC<{ children: React.ReactNode }> = ({ c
     cartIndex: number;
     productTitle: string;
     basePrice: number;
+    widthCm?: number;
     initialConfig?: Partial<VerandaConfig>;
   }) => {
-    const { cartIndex, productTitle, basePrice, initialConfig } = params;
+    const { cartIndex, productTitle, basePrice, initialConfig, widthCm } = params;
 
     // Determine if config is missing or incomplete
     const hasValidConfig = initialConfig && 
@@ -65,6 +68,7 @@ export const VerandaEditProvider: React.FC<{ children: React.ReactNode }> = ({ c
       cartIndex,
       productTitle,
       basePrice,
+      widthCm: typeof widthCm === 'number' ? widthCm : 606,
       initialConfig: initialConfig || {},
     });
 
@@ -133,6 +137,7 @@ export const VerandaEditProvider: React.FC<{ children: React.ReactNode }> = ({ c
           ref={configuratorRef}
           productTitle={editingItem.productTitle}
           basePrice={editingItem.basePrice}
+          widthCm={editingItem.widthCm}
           onSubmit={handleEditSubmit}
           mode="edit"
           showResetMessage={configWasReset}

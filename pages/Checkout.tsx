@@ -2,6 +2,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { useVerandaEdit } from '../context/VerandaEditContext';
+import { extractWidthFromHandle, extractWidthFromSize } from '../src/services/ledPricing';
 import { useMaatwerkEdit } from '../context/MaatwerkEditContext';
 import { useSandwichpanelenEdit } from '../context/SandwichpanelenEditContext';
 import { Navigate, useNavigate, Link } from 'react-router-dom';
@@ -34,8 +35,9 @@ const Checkout: React.FC = () => {
     total, 
     totalCents,
     clearCart, 
-    shippingMethod, 
+    shippingMode, 
     shippingAddress,
+    shippingCountry,
     shippingCost, 
     shippingIsValid,
     grandTotal, 
@@ -399,6 +401,11 @@ const Checkout: React.FC = () => {
                                                                     productTitle: item.title,
                                                                     basePrice,
                                                                     initialConfig,
+                                                              widthCm:
+                                                                extractWidthFromSize(item.selectedSize || '') ??
+                                                                extractWidthFromHandle(item.handle || item.slug || item.id || '') ??
+                                                                (initialConfig as any)?.widthCm ??
+                                                                606,
                                                                 })}
                                                                 className="relative z-10 text-gray-400 hover:text-hett-primary pointer-events-auto min-w-[36px] min-h-[36px]"
                                                                 title="Bewerken"
@@ -490,11 +497,11 @@ const Checkout: React.FC = () => {
                                         </div>
                                         <div className="flex justify-between text-gray-600 text-sm">
                                             <span className="font-medium flex items-center gap-2">
-                                              {shippingMethod === 'pickup' 
+                                              {shippingMode === 'pickup' 
                                                 ? 'Afhalen in Eindhoven' 
-                                                : shippingAddress.normalizedAddress 
-                                                  ? getAddressSummary(shippingAddress.normalizedAddress)
-                                                  : `Bezorgen naar ${COUNTRY_LABELS[shippingAddress.country] || shippingAddress.country}`
+                                                : shippingAddress.city 
+                                                  ? `Bezorgen naar ${shippingAddress.city}`
+                                                  : `Bezorgen naar ${COUNTRY_LABELS[shippingCountry] || shippingCountry}`
                                               }
                                               <Link 
                                                 to="/cart?editShipping=1" 

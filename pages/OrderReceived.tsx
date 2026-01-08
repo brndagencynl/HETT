@@ -53,7 +53,7 @@ const OrderReceived: React.FC = () => {
         </div>
 
         <p className="text-center text-gray-400 text-sm mt-8">
-            Heeft u vragen? Neem contact op via <a href="tel:0401234567" className="text-hett-dark font-bold hover:underline">040 - 123 4567</a> of <a href="mailto:info@hett.nl" className="text-hett-dark font-bold hover:underline">info@hett.nl</a>
+            Heeft u vragen? Neem contact op via <a href="tel:+31685406033" className="text-hett-dark font-bold hover:underline">+31 (0)6 85 40 60 33</a> of <a href="mailto:info@hett.nl" className="text-hett-dark font-bold hover:underline">info@hett.nl</a>
         </p>
 
       </div>

@@ -275,8 +275,8 @@ export const MAATWERK_EXTRAS_OPTIONS: MaatwerkOptionChoice[] = [
   {
     id: 'led_verlichting',
     label: 'LED Verlichting',
-    description: 'Complete LED verlichting set (6 spots)',
-    pricing: { type: 'fixed', price: 199 },
+    description: 'LED spots (wordt apart berekend op basis van breedte)',
+    pricing: { type: 'fixed', price: 0 },
   },
 ];
 

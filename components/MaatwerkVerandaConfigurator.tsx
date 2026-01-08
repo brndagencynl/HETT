@@ -19,10 +19,11 @@
 
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { X, Check, Info, ChevronLeft, ChevronRight, Truck, ShieldCheck, ArrowRight, Lightbulb, Edit2, Eye, ChevronUp, ShoppingBag, Loader2, Ruler } from 'lucide-react';
+import { X, Check, Info, ChevronLeft, ChevronRight, Truck, ShieldCheck, ArrowRight, Lightbulb, Edit2, Eye, ChevronUp, ShoppingBag, Loader2, Ruler, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { Card } from './ui/card';
+import { getLedTotals, LED_UNIT_PRICE_EUR } from '../src/services/ledPricing';
 
 // Custom maatwerk types and pricing - completely isolated
 import {
@@ -183,6 +184,35 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
   // Price calculation
   const priceBreakdown = useMemo(() => calculateMaatwerkPrice(config), [config]);
 
+  // LED totals based on width (exact mapping)
+  const rawWidthForLed = config.size?.width ?? 0;
+  const ledInfo = useMemo(() => getLedTotals(rawWidthForLed), [rawWidthForLed]);
+  const ledAvailable = ledInfo.qty > 0;
+  const ledSelectedTotal = config.verlichting ? ledInfo.total : 0;
+  const displayGrandTotal = priceBreakdown.grandTotal + ledSelectedTotal;
+
+  // Keep derived LED fields in config for debugging/consumers
+  useEffect(() => {
+    setConfig(prev => {
+      const prevAny = prev as any;
+      if (
+        prevAny?.ledQty === ledInfo.qty &&
+        prevAny?.ledUnitPrice === ledInfo.unitPrice &&
+        prevAny?.ledTotalPrice === ledInfo.total &&
+        prevAny?.ledWidthCm === rawWidthForLed
+      ) {
+        return prev;
+      }
+      return {
+        ...prev,
+        ledQty: ledInfo.qty,
+        ledUnitPrice: ledInfo.unitPrice,
+        ledTotalPrice: ledInfo.total,
+        ledWidthCm: rawWidthForLed,
+      };
+    });
+  }, [ledInfo.qty, ledInfo.total, ledInfo.unitPrice, rawWidthForLed]);
+
   // Visual layers - reuse existing asset system
   const visualLayers = useMemo((): VisualizationLayer[] => {
     const color = (config.color || 'ral7016') as VerandaColorId;
@@ -265,6 +295,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
       const basePrice = shopifyVariantPrice + maatwerkSurcharge;
       const optionsTotal = priceBreakdown.optionsTotal;
       const grandTotal = basePrice + optionsTotal;
+      const displayGrandTotalForPayload = grandTotal + (config.verlichting ? ledInfo.total : 0);
 
       console.log('[Maatwerk Price]', {
         variantId: variantResult.id,
@@ -273,6 +304,10 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
         base: basePrice,
         optionsTotal,
         grandTotal,
+        ledSelected: !!config.verlichting,
+        ledQty: ledInfo.qty,
+        ledTotal: ledInfo.total,
+        displayGrandTotal: displayGrandTotalForPayload,
       });
 
       // Build payload with Shopify-based pricing
@@ -293,7 +328,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
         maatwerkSurcharge,
         basePrice,
         optionsTotal,
-        grandTotal,
+        grandTotal: displayGrandTotalForPayload,
         anchor: {
           anchorSizeKey: `${bucketW}x${bucketD}`,
           anchorPrice: shopifyVariantPrice,
@@ -732,18 +767,24 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
   };
 
   // ==========================================================================
-  // TOGGLE SELECTOR (for verlichting)
+  // TOGGLE SELECTOR (for verlichting) - with dynamic LED pricing
   // ==========================================================================
 
   const renderToggleSelector = () => {
-    const choice = MAATWERK_EXTRAS_OPTIONS[0];
     const currentValue = config.verlichting;
-    const price = config.size ? getMaatwerkOptionPrice(choice.pricing, config.size) : 0;
+
+    const rawWidth = rawWidthForLed;
+    console.log(`[LED UI] widthCm=${rawWidth}`);
+    console.log(`[LED UI] qty=${ledInfo.qty}`);
+    console.log(`[LED UI] total=${ledInfo.total.toFixed(2)}`);
+    console.log(`[LED UI] enabled=${!!currentValue}`);
 
     return (
       <div className="max-w-2xl">
         <div
-          onClick={() => setConfig(prev => ({ ...prev, verlichting: !currentValue }))}
+          onClick={() => {
+            setConfig(prev => ({ ...prev, verlichting: !currentValue }));
+          }}
           className={`flex items-center justify-between p-6 rounded-xl border-2 cursor-pointer transition-all ${
             currentValue
               ? 'border-[#003878] bg-[#003878]/5 shadow-md ring-2 ring-[#003878]/10'
@@ -757,10 +798,24 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
               <Lightbulb size={28} fill={currentValue ? "currentColor" : "none"} />
             </div>
             <div>
-              <span className="font-bold text-gray-900 text-lg block">{choice.label}</span>
-              <span className="text-sm text-gray-600">{choice.description}</span>
-              {price > 0 && (
-                <span className="block text-sm text-[#FF7300] font-semibold mt-1">+ {formatMaatwerkPrice(price)}</span>
+              <span className="font-bold text-gray-900 text-lg block">LED verlichting</span>
+              {ledAvailable ? (
+                <>
+                  <span className="text-sm text-gray-600">
+                    Voeg {ledInfo.qty} LED spots toe (€ {LED_UNIT_PRICE_EUR.toFixed(2).replace('.', ',')} per stuk)
+                  </span>
+                  <span className="block text-sm text-[#FF7300] font-semibold mt-1">
+                    + € {ledInfo.total.toFixed(2).replace('.', ',')}
+                  </span>
+                </>
+              ) : (
+                <span className="text-sm text-amber-600 flex items-center gap-1 mt-1">
+                  <AlertTriangle size={14} />
+                  {rawWidth > 0 
+                    ? 'LED is voor deze breedte niet beschikbaar. (+ € 0,00)'
+                    : 'Selecteer eerst afmetingen om LED prijs te berekenen.'
+                  }
+                </span>
               )}
             </div>
           </div>
@@ -769,11 +824,20 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
               type="checkbox"
               className="sr-only peer"
               checked={!!currentValue}
-              onChange={(e) => setConfig(prev => ({ ...prev, verlichting: e.target.checked }))}
+              onChange={(e) => {
+                setConfig(prev => ({ ...prev, verlichting: e.target.checked }));
+              }}
             />
             <div className="w-14 h-8 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-[#003878] shadow-inner" />
           </label>
         </div>
+        {/* Warning if LED is ON but no mapping */}
+        {currentValue && !ledAvailable && (
+          <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-center gap-2 text-amber-700 text-sm">
+            <AlertTriangle size={16} />
+            LED is voor deze breedte niet beschikbaar en wordt niet toegevoegd.
+          </div>
+        )}
         <p className="mt-4 text-sm text-gray-500 italic px-2">
           Deze stap is optioneel.
         </p>
@@ -786,6 +850,13 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
   // ==========================================================================
 
   const renderOverview = () => {
+    const rawWidth = rawWidthForLed;
+    const ledSummaryValue = config.verlichting
+      ? (ledInfo.qty > 0
+        ? `Ja, ${ledInfo.qty} LED spots (€ ${ledInfo.total.toFixed(2).replace('.', ',')})`
+        : `Ja (niet beschikbaar voor ${rawWidth} cm)`)
+      : 'Nee';
+    
     const summaryItems = [
       { stepIndex: 0, label: 'Afmetingen', value: config.size ? formatMaatwerkSize(config.size) : '-', key: 'afmetingen' },
       { stepIndex: 1, label: 'Kleur profiel', value: getMaatwerkOptionLabel('color', config.color), key: 'color' },
@@ -794,7 +865,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
       { stepIndex: 4, label: 'Zijwand links', value: getMaatwerkOptionLabel('zijwand_links', config.zijwand_links), key: 'zijwand_links' },
       { stepIndex: 5, label: 'Zijwand rechts', value: getMaatwerkOptionLabel('zijwand_rechts', config.zijwand_rechts), key: 'zijwand_rechts' },
       { stepIndex: 6, label: 'Voorzijde', value: getMaatwerkOptionLabel('voorzijde', config.voorzijde), key: 'voorzijde' },
-      { stepIndex: 7, label: "Extra's", value: config.verlichting ? 'Ja, LED spots' : 'Nee', key: 'verlichting' },
+      { stepIndex: 7, label: "Extra's", value: ledSummaryValue, key: 'verlichting' },
     ];
 
     return (
@@ -845,7 +916,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
             ))}
             <div className="border-t-2 border-gray-300 pt-3 mt-3 flex justify-between items-center">
               <span className="font-bold text-gray-900 text-base">Totaal incl. BTW</span>
-              <span className="font-black text-2xl text-[#003878]">{formatMaatwerkPrice(priceBreakdown.grandTotal)}</span>
+              <span className="font-black text-2xl text-[#003878]">{formatMaatwerkPrice(displayGrandTotal)}</span>
             </div>
           </div>
         </div>
@@ -1050,7 +1121,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
             </div>
             <div className="hidden sm:block text-right flex-shrink-0">
               <div className="text-xs text-hett-muted uppercase tracking-wide">Totaal incl. BTW</div>
-              <div className="text-2xl font-black text-hett-primary">{formatMaatwerkPrice(priceBreakdown.grandTotal)}</div>
+              <div className="text-2xl font-black text-hett-primary">{formatMaatwerkPrice(displayGrandTotal)}</div>
             </div>
           </div>
           )}
@@ -1128,7 +1199,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
                   <div className="flex items-center justify-between sm:hidden mb-3">
                     <div>
                       <div className="text-[11px] text-gray-500 uppercase tracking-wide">Totaal incl. BTW</div>
-                      <div className="text-xl font-black text-[#003878]">{formatMaatwerkPrice(priceBreakdown.grandTotal)}</div>
+                      <div className="text-xl font-black text-[#003878]">{formatMaatwerkPrice(displayGrandTotal)}</div>
                     </div>
                   </div>
 

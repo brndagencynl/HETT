@@ -7,6 +7,7 @@ import { useEffect } from 'react';
  * - Duplicate guard: checks if script already exists
  * - Async loading: doesn't block rendering
  * - Cleanup: removes script on unmount (though unlikely in App.tsx)
+ * - Body class toggle: adds/removes 'tawk-visible' for CTA collision avoidance
  * 
  * Usage: Place <TawkTo /> once in App.tsx, outside of routes.
  */
@@ -25,6 +26,31 @@ const TawkTo: React.FC = () => {
     // Initialize Tawk globals
     window.Tawk_API = window.Tawk_API || {};
     window.Tawk_LoadStart = new Date();
+
+    /**
+     * Tawk.to visibility callbacks
+     * Toggle body.tawk-visible class so CSS can shift fixed CTAs
+     * to avoid overlap with the chat bubble.
+     */
+    window.Tawk_API.onLoad = function() {
+      // Widget loaded - add class (bubble is visible by default)
+      document.body.classList.add('tawk-visible');
+    };
+
+    window.Tawk_API.onChatMinimized = function() {
+      // Chat minimized but bubble still visible - keep class
+      document.body.classList.add('tawk-visible');
+    };
+
+    window.Tawk_API.onChatMaximized = function() {
+      // Chat expanded - keep class
+      document.body.classList.add('tawk-visible');
+    };
+
+    window.Tawk_API.onChatHidden = function() {
+      // Widget completely hidden - remove class
+      document.body.classList.remove('tawk-visible');
+    };
 
     // Create and inject script
     const script = document.createElement('script');
@@ -48,6 +74,8 @@ const TawkTo: React.FC = () => {
       if (existingScript) {
         existingScript.remove();
       }
+      // Remove body class on cleanup
+      document.body.classList.remove('tawk-visible');
       // Note: We don't delete window.Tawk_API here as Tawk may still be running
     };
   }, []);

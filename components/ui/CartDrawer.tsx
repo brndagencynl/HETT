@@ -13,6 +13,7 @@ import { CartItemPreview } from './ConfigPreviewImage';
 import ConfigBreakdownPopup from './ConfigBreakdownPopup';
 import { beginCheckout, isShopifyConfigured } from '../../src/lib/shopify';
 import { formatEUR } from '../../src/utils/money';
+import { extractWidthFromHandle, extractWidthFromSize } from '../../src/services/ledPricing';
 
 const MotionDiv = motion.div as any;
 
@@ -174,6 +175,11 @@ const CartDrawer: React.FC = () => {
                                                                 productTitle: item.title,
                                                                 basePrice,
                                                                 initialConfig,
+                                                                widthCm:
+                                                                    extractWidthFromSize(item.selectedSize || '') ??
+                                                                    extractWidthFromHandle(item.handle || item.slug || item.id || '') ??
+                                                                    (initialConfig as any)?.widthCm ??
+                                                                    606,
                                                             })}
                                                             className="flex-shrink-0 p-1.5 min-w-[32px] min-h-[32px] flex items-center justify-center text-gray-400 hover:text-hett-primary hover:bg-hett-light rounded-md transition-colors"
                                                             title="Bewerken"

@@ -9,35 +9,35 @@ const WHY_ITEMS = [
         id: 'buitenleven',
         title: "Altijd binnen, het hele jaar buiten!",
         text: "Met een HETT veranda geniet u vier seizoenen lang van uw tuin. Beschut tegen regen en wind, maar met het volledige buitengevoel creëert u een verlengstuk van uw woonkamer.",
-        image: "/assets/images/hero_veranda.png",
+        image: "/assets/images/waarom_1.JPG",
         icon: Leaf
     },
     {
         id: 'maatwerk',
         title: "Maatwerk voor elke tuin",
         text: "Geen tuin is hetzelfde. Daarom leveren wij al onze systemen op de millimeter nauwkeurig. Of het nu gaat om een schuine gevel, een specifieke diepte of een bijzondere kleur; wij realiseren het.",
-        image: "/assets/images/inspiration_tuinkamer.png",
+        image: "/assets/images/waarom_2.JPG",
         icon: Ruler
     },
     {
         id: 'garantie',
         title: "10 jaar garantie op alle veranda's",
         text: "Wij geven op al onze veranda's 10 jaar garantie op het materiaal, de constructie en de coating. Hiermee koopt u een echt kwaliteitsproduct met jarenlang zorgeloos plezier. Tevens voldoen wij aan de strengste normen.",
-        image: "/assets/images/glass_sliding_walls.png",
+        image: "/assets/images/waarom_3.JPG",
         icon: ShieldCheck
     },
     {
         id: 'service',
         title: "Klantgerichte service en transparantie",
         text: "Van eerlijk advies in de showroom tot heldere communicatie over de levering. Wij houden van korte lijnen en afspraak is afspraak. Geen verrassingen achteraf.",
-        image: "/assets/images/showroom_advice.png",
+        image: "/assets/images/waarom_4.JPG",
         icon: HeartHandshake
     },
     {
         id: 'montage',
         title: "Eenvoudige montage",
         text: "Onze systemen zijn ontworpen als slimme bouwpakketten voor de handige doe-het-zelver of professional. Met onze uitgebreide handleidingen en video's kunt u direct aan de slag.",
-        image: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=2070&auto=format&fit=crop",
+        image: "/assets/images/waarom_5.JPG",
         icon: Wrench
     }
 ];
@@ -74,8 +74,8 @@ const About: React.FC = () => {
                         </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
-                        <img src="/assets/images/inspiration_tuinkamer.png" className="rounded-2xl w-full h-full object-cover shadow-lg transform translate-y-8" alt="Productie" />
-                        <img src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=2069&auto=format&fit=crop" className="rounded-2xl w-full h-full object-cover shadow-lg" alt="Montage" />
+                        <img src="/assets/images/overons_1.JPG" className="rounded-2xl w-full h-full object-cover shadow-lg transform translate-y-8" alt="Productie" />
+                        <img src="/assets/images/overons_2.JPG" className="rounded-2xl w-full h-full object-cover shadow-lg" alt="Montage" />
                     </div>
                 </div>
 

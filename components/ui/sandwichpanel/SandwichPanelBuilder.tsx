@@ -294,7 +294,7 @@ const SandwichPanelBuilder: React.FC<Props> = ({ product, basePrice, onAddToCart
                         <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600 mr-3">
                             <ShieldCheck size={18} />
                         </div>
-                        <div className="flex-grow font-bold text-hett-dark text-sm">10 Jaar Fabrieksgarantie</div>
+                        <div className="flex-grow font-bold text-hett-dark text-sm">5 Jaar Fabrieksgarantie</div>
                     </div>
                 </div>
             </div>

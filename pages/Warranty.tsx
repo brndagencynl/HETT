@@ -67,7 +67,7 @@ const Warranty: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                 <div className="border border-gray-100 p-6 rounded-2xl bg-gray-50">
-                    <h3 className="font-bold text-hett-dark text-xl mb-2">10 Jaar Garantie</h3>
+                    <h3 className="font-bold text-hett-dark text-xl mb-2">5 Jaar Garantie</h3>
                     <p className="text-sm text-gray-500 mb-4">Op aluminium profielen & coating</p>
                     <p className="text-gray-600 text-sm">
                         Wij garanderen dat de aluminium profielen niet zullen doorroesten en dat de poedercoating niet zal afbladderen of overmatig verkleuren onder normale weersomstandigheden.

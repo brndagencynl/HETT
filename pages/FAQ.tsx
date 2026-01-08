@@ -56,7 +56,7 @@ const FAQ_CATEGORIES: FAQCategory[] = [
   { id: 'bestellen', title: 'Bestellen & configureren', icon: ShoppingBag },
   { id: 'bezorgen', title: 'Bezorging & afhalen', icon: Truck, path: '/bezorging' },
   { id: 'betalen', title: 'Betalen', icon: CreditCard, path: '/betaalmethoden' },
-  { id: 'montage', title: 'Producten & montage', icon: Pen, path: '/montage-handleiding' },
+  { id: 'montage', title: 'Producten & montage', icon: Pen, path: '/montage' },
   { id: 'garantie', title: 'Garantie & service', icon: ShieldCheck, path: '/garantie-en-klachten' },
   { id: 'showroom', title: 'Showroom & advies', icon: MapPin, path: '/showroom' },
 ];

@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { useVerandaEdit } from '../context/VerandaEditContext';
+import { extractWidthFromHandle, extractWidthFromSize } from '../src/services/ledPricing';
 import { useMaatwerkEdit } from '../context/MaatwerkEditContext';
 import { useSandwichpanelenEdit } from '../context/SandwichpanelenEditContext';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
@@ -233,6 +234,11 @@ const Cart: React.FC = () => {
                                                     productTitle: item.title,
                                                     basePrice,
                                                     initialConfig,
+                                              widthCm:
+                                                extractWidthFromSize(item.selectedSize || '') ??
+                                                extractWidthFromHandle(item.handle || item.slug || item.id || '') ??
+                                                (initialConfig as any)?.widthCm ??
+                                                606,
                                                 })}
                                                 className="p-2 text-gray-400 hover:text-hett-primary transition-colors rounded-lg hover:bg-gray-100"
                                                 title="Bewerken"

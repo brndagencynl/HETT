@@ -86,6 +86,12 @@ export interface MaatwerkConfig {
   zijwand_rechts: MaatwerkZijwandValue;
   voorzijde: MaatwerkVoorzijdeValue;
   verlichting: boolean;
+
+  /** Derived LED info for display/debugging (does not affect base product line price) */
+  ledQty?: number;
+  ledUnitPrice?: number;
+  ledTotalPrice?: number;
+  ledWidthCm?: number;
 }
 
 /**

@@ -90,6 +90,27 @@ export function getLedTotalForWidthCm(widthCm: number): number {
 }
 
 /**
+ * Get full LED totals object for UI display.
+ * 
+ * @param widthCm - Veranda width in centimeters
+ * @returns Object with qty, unitPrice, and total
+ */
+export function getLedTotals(widthCm: number): { qty: number; unitPrice: number; total: number } {
+  const qty = getLedSpotCountForWidthCm(widthCm);
+  const total = qty * LED_UNIT_PRICE_EUR;
+  
+  console.log(`[LED UI] widthCm=${widthCm}`);
+  console.log(`[LED UI] qty=${qty}`);
+  console.log(`[LED UI] total=${total.toFixed(2)}`);
+  
+  return {
+    qty,
+    unitPrice: LED_UNIT_PRICE_EUR,
+    total,
+  };
+}
+
+/**
  * @deprecated Use getLedSpotCountForWidthCm instead
  */
 export function getLedQuantity(widthCm: number): number {

@@ -30,7 +30,7 @@ const HomeShowroomSection: React.FC = () => {
                         </div>
 
                         <div className="flex flex-wrap gap-4 pt-2">
-                            <Link to="/contact" className="btn-primary px-8 py-3.5 text-base shadow-sm hover:shadow-md transition-all group">
+                            <Link to="/showroom" className="btn-primary px-8 py-3.5 text-base shadow-sm hover:shadow-md transition-all group">
                                 Bezoek de showroom
                                 <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                             </Link>

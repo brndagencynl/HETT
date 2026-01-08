@@ -23,7 +23,6 @@ import {
 } from '../src/services/shipping';
 import {
   getLedSpotCountForWidthCm,
-  normalizeToLedWidth,
   extractWidthFromHandle,
   extractWidthFromSize,
   LED_UNIT_PRICE_CENTS,
@@ -339,8 +338,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // Try maatwerk payload first
       if (item.maatwerkPayload?.size?.width) {
-        // For maatwerk, normalize slider value to nearest supported width
-        widthCm = normalizeToLedWidth(item.maatwerkPayload.size.width);
+        // Exact mapping only; unmatched widths will yield qty=0 (and be skipped)
+        widthCm = item.maatwerkPayload.size.width;
       }
       // Try config data
       else if (config?.widthCm) {

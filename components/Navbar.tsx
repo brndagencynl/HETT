@@ -365,9 +365,9 @@ const Navbar: React.FC = () => {
 
               <div className="p-6 border-t border-gray-100 bg-gray-50">
                 <p className="text-xs text-gray-400 font-medium mb-4">Hulp nodig? Bel ons direct:</p>
-                <a href="tel:0401234567" className="flex items-center gap-3 text-hett-dark font-bold text-lg">
+                <a href="tel:+31685406033" className="flex items-center gap-3 text-hett-dark font-bold text-lg">
                   <Star size={20} className="text-hett-secondary" fill="currentColor" />
-                  040 123 4567
+                  +31 (0)6 85 40 60 33
                 </a>
               </div>
             </motion.div>

@@ -68,11 +68,8 @@ const Mounting: React.FC = () => {
                         <FileText className="text-hett-brown" /> PDF Handleidingen
                     </h3>
                     <div className="space-y-4">
-                        <ManualCard title="Montagehandleiding HETT Premium Veranda" version="v2024.1" size="4.2 MB" />
+                        <ManualCard title="Montagehandleiding HETT Veranda" version="v2024.1" size="4.2 MB" />
                         <ManualCard title="Montagehandleiding Glazen Schuifwand" version="v2.0" size="1.8 MB" />
-                        <ManualCard title="Installatie LED Verlichting" version="v1.0" size="0.5 MB" />
-                        <ManualCard title="Montage Zijspie (Polycarbonaat & Glas)" version="v2023.4" size="2.1 MB" />
-                        <ManualCard title="Fundering & Betonpoeren plaatsen" version="v1.2" size="1.1 MB" />
                     </div>
                 </div>
 
@@ -84,7 +81,7 @@ const Mounting: React.FC = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 group cursor-pointer">
                             <div className="aspect-video bg-gray-200 relative">
-                                <img src="https://picsum.photos/600/340?random=vid1" className="w-full h-full object-cover opacity-90" alt="Video thumb" />
+                                <img src="#" className="w-full h-full object-cover opacity-90" alt="Video thumb" />
                                 <div className="absolute inset-0 flex items-center justify-center">
                                     <PlayCircle size={48} className="text-white drop-shadow-lg group-hover:scale-110 transition-transform" />
                                 </div>
@@ -95,7 +92,7 @@ const Mounting: React.FC = () => {
                         </div>
                         <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 group cursor-pointer">
                             <div className="aspect-video bg-gray-200 relative">
-                                <img src="https://picsum.photos/600/340?random=vid2" className="w-full h-full object-cover opacity-90" alt="Video thumb" />
+                                <img src="#" className="w-full h-full object-cover opacity-90" alt="Video thumb" />
                                 <div className="absolute inset-0 flex items-center justify-center">
                                     <PlayCircle size={48} className="text-white drop-shadow-lg group-hover:scale-110 transition-transform" />
                                 </div>
@@ -129,8 +126,8 @@ const Mounting: React.FC = () => {
                     <div className="mt-8 pt-6 border-t border-gray-100">
                         <h4 className="font-bold text-hett-dark text-sm mb-2">Hulp nodig tijdens montage?</h4>
                         <p className="text-xs text-gray-500 mb-4">Onze technische dienst is bereikbaar voor korte vragen.</p>
-                        <a href="tel:0401234567" className="block w-full text-center bg-gray-50 text-hett-dark font-bold py-3 rounded-xl hover:bg-gray-100 transition-colors text-sm">
-                            Bel 040 - 123 4567
+                        <a href="tel:+31685406033" className="block w-full text-center bg-gray-50 text-hett-dark font-bold py-3 rounded-xl hover:bg-gray-100 transition-colors text-sm">
+                            Bel +31 (0)6 85 40 60 33
                         </a>
                     </div>
                 </div>

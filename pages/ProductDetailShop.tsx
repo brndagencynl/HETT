@@ -12,6 +12,7 @@ import { ProductConfig, Product } from '../types';
 import { getProductByHandle } from '../src/lib/shopify';
 import { formatEUR } from '../src/utils/money';
 import { parseSpecifications } from '../src/utils/parseSpecifications';
+import { extractWidthFromHandle } from '../src/services/ledPricing';
 
 type ProductDetailShopProps = {
     /** Pass a handle directly (for sandwichpanelen canonical route) */
@@ -220,6 +221,7 @@ const ProductDetailShop: React.FC<ProductDetailShopProps> = ({ productHandle }) 
                 ref={configuratorRef}
                 productTitle={product.title}
                 basePrice={product.price}
+                widthCm={extractWidthFromHandle(product.handle || resolvedHandle || product.id || '') || 606}
                 onSubmit={handleVerandaSubmit}
             />
 

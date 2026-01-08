@@ -73,7 +73,7 @@ const Showroom: React.FC = () => {
                                 </p>
                                 <p>
                                     <a href="mailto:info@hett.nl" className="flex items-center gap-2 hover:text-hett-brown font-medium"><Mail size={16} /> info@hett.nl</a>
-                                    <a href="tel:0401234567" className="flex items-center gap-2 hover:text-hett-brown font-medium"><Phone size={16} /> 040 207 6003</a>
+                                    <a href="tel:+31685406033" className="flex items-center gap-2 hover:text-hett-brown font-medium"><Phone size={16} /> +31 (0)6 85 40 60 33</a>
                                 </p>
                             </div>
 

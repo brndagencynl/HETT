@@ -11,7 +11,6 @@ import { toShopifyLineAttributes } from '../../services/config/formatConfigAttri
 import { isShippingLineItem, type ShippingLineItem } from '../../services/shipping';
 import {
   getLedSpotCountForWidthCm,
-  normalizeToLedWidth,
   extractWidthFromHandle,
   extractWidthFromSize,
   buildLedCartLine,
@@ -152,7 +151,10 @@ export async function beginCheckout(
           config?.verlichting === true || 
           item.maatwerkPayload?.selections?.some((s: any) => s.groupId === 'verlichting' && s.choiceId !== 'geen');
         
-        if (!hasLed) continue;
+        if (!hasLed) {
+          console.log(`[LED Checkout] skipped - verlichting not enabled for ${item.handle || item.id}`);
+          continue;
+        }
         
         // Determine config type (veranda or maatwerk)
         const configType = item.type === 'custom_veranda' ? 'maatwerk' : 
@@ -164,8 +166,8 @@ export async function beginCheckout(
         // Try maatwerk payload first (slider value)
         if (item.maatwerkPayload?.size?.width) {
           const rawWidth = item.maatwerkPayload.size.width;
-          // For maatwerk, normalize to nearest supported width
-          widthCm = normalizeToLedWidth(rawWidth);
+          // Exact mapping only; unmatched widths will yield qty=0 (and be skipped)
+          widthCm = rawWidth;
         }
         // Try config data
         else if (config?.widthCm) {
@@ -188,6 +190,7 @@ export async function beginCheckout(
           const ledQty = getLedSpotCountForWidthCm(widthCm);
           
           if (ledQty > 0) {
+            console.log(`[LED Checkout] added qty=${ledQty} for width=${widthCm}cm, item qty=${item.quantity}`);
             ledSourceItems.push({
               configType,
               handle: item.handle || item.slug || item.id,
@@ -195,8 +198,9 @@ export async function beginCheckout(
               itemQty: item.quantity,
               ledQty,
             });
+          } else {
+            console.log(`[LED Checkout] skipped - no LED mapping for width=${widthCm}cm`);
           }
-          // Note: getLedSpotCountForWidthCm already logs "[LED] No mapping for width X, skipping" if qty=0
         }
       }
       
@@ -208,6 +212,8 @@ export async function beginCheckout(
           totalLedQty += src.ledQty * src.itemQty;
         }
         
+        console.log(`[LED Checkout] total LED qty=${totalLedQty} from ${ledSourceItems.length} items`);
+        
         const ledLine = buildLedCartLine(
           totalLedQty,
           ledSourceItems.map(s => ({ configType: s.configType, handle: s.handle, widthCm: s.widthCm }))
@@ -216,6 +222,8 @@ export async function beginCheckout(
         if (ledLine) {
           lines.push(ledLine);
         }
+      } else {
+        console.log(`[LED Checkout] no LED items to add`);
       }
     }
     

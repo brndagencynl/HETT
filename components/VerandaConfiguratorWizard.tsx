@@ -1,11 +1,12 @@
 import React, { useState, forwardRef, useImperativeHandle, useMemo, useCallback, useEffect } from 'react';
-import { X, Check, Info, ChevronLeft, ChevronRight, Truck, ShieldCheck, ArrowRight, Lightbulb, Edit2, Eye, ChevronUp, ShoppingBag, Loader2 } from 'lucide-react';
+import { X, Check, Info, ChevronLeft, ChevronRight, Truck, ShieldCheck, ArrowRight, Lightbulb, Edit2, Eye, ChevronUp, ShoppingBag, Loader2, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { VERANDA_OPTIONS_UI, DEFAULT_VERANDA_CONFIG, VerandaConfig, COLOR_OPTIONS, DEFAULT_COLOR } from '../src/configurator/schemas/veranda';
 import { calcVerandaPrice } from '../src/configurator/pricing/veranda';
 import { buildVisualizationLayers, type VisualizationLayer, FALLBACK_IMAGE, FALLBACK_THUMBNAIL, type VerandaColorId, getPreloadPaths, preloadImages, getThumbnailPath, verifyThumbnailUrl } from '../src/configurator/visual/verandaAssets';
 import { t } from '../src/utils/i18n';
 import { formatEUR, toCents } from '../src/utils/money';
+import { getLedTotals, LED_UNIT_PRICE_EUR } from '../src/services/ledPricing';
 
 const MotionDiv = motion.div as any;
 
@@ -30,6 +31,8 @@ export interface VerandaPriceBreakdown {
 interface VerandaConfiguratorWizardProps {
     productTitle?: string;
     basePrice?: number;
+    /** Width of the veranda in cm (e.g. 506, 606, 706) - used for dynamic LED pricing */
+    widthCm?: number;
     onSubmit?: (config: VerandaConfig, mode: 'order' | 'quote', price: number, details: { label: string, value: string }[], priceBreakdown: VerandaPriceBreakdown) => void;
     /** 'new' (default) adds to cart, 'edit' updates existing item */
     mode?: 'new' | 'edit';
@@ -162,7 +165,7 @@ const SafeImage = ({ src, alt, className, fallback = FALLBACK_IMAGE }: { src: st
 };
 
 const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, VerandaConfiguratorWizardProps>(
-    ({ productTitle = "HETT Premium Veranda", basePrice = 1250, onSubmit, mode = 'new', showResetMessage = false, onCancel }, ref) => {
+    ({ productTitle = "HETT Premium Veranda", basePrice = 1250, widthCm = 606, onSubmit, mode = 'new', showResetMessage = false, onCancel }, ref) => {
     
     const [isOpen, setIsOpen] = useState(false);
     const [currentStepIndex, setCurrentStepIndex] = useState(0);
@@ -173,15 +176,45 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
     const [isSubmitting, setIsSubmitting] = useState(false); // Loading state for add-to-cart
     const [didSubmit, setDidSubmit] = useState(false); // Track if form was submitted successfully
 
+    // LED totals based on width (exact mapping)
+    const ledInfo = useMemo(() => getLedTotals(widthCm), [widthCm]);
+    const ledAvailable = ledInfo.qty > 0;
+    const ledSelectedTotal = config.verlichting ? ledInfo.total : 0;
+
     // Price calculation - basePrice comes from Shopify product.price
     const { total: currentPrice, items: priceItems, basePrice: calcBasePrice } = calcVerandaPrice(basePrice, config as VerandaConfig);
+
+    // Display-only totals: base product + options + (optional) LED add-on
+    const displayTotal = currentPrice + ledSelectedTotal;
+
+    // Keep derived LED fields in config for debugging/consumers
+    useEffect(() => {
+        setConfig(prev => {
+            const prevAny = prev as any;
+            if (
+                prevAny?.ledQty === ledInfo.qty &&
+                prevAny?.ledUnitPrice === ledInfo.unitPrice &&
+                prevAny?.ledTotalPrice === ledInfo.total &&
+                prevAny?.ledWidthCm === widthCm
+            ) {
+                return prev;
+            }
+            return {
+                ...prev,
+                ledQty: ledInfo.qty,
+                ledUnitPrice: ledInfo.unitPrice,
+                ledTotalPrice: ledInfo.total,
+                ledWidthCm: widthCm,
+            };
+        });
+    }, [ledInfo.qty, ledInfo.total, ledInfo.unitPrice, widthCm]);
     
     // Log pricing source for debugging
     console.log('[VerandaConfigurator] Pricing:', {
         basePriceProp: basePrice,
         calculatedBasePrice: calcBasePrice,
         optionsTotal: priceItems.reduce((sum, item) => sum + item.amount, 0),
-        grandTotal: currentPrice,
+        grandTotal: displayTotal,
         source: 'Shopify via product.price prop',
     });
 
@@ -282,17 +315,51 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
 
         try {
             if (onSubmit) {
-                const details = Object.keys(config).map(key => ({
-                    label: VERANDA_OPTIONS_UI.find(f => f.key === key)?.label || key,
-                    value: getOptionLabel(key, config[key as keyof VerandaConfig])
-                }));
+                const detailKeys = VERANDA_OPTIONS_UI.map(o => o.key);
+                const details = detailKeys.map(key => {
+                    if (key === 'verlichting') {
+                        if (!config.verlichting) {
+                            return {
+                                label: VERANDA_OPTIONS_UI.find(f => f.key === key)?.label || key,
+                                value: t('configurator.selection.no'),
+                            };
+                        }
+
+                        if (ledInfo.qty > 0) {
+                            return {
+                                label: VERANDA_OPTIONS_UI.find(f => f.key === key)?.label || key,
+                                value: `Ja, ${ledInfo.qty} LED spots (€ ${ledInfo.total.toFixed(2).replace('.', ',')})`,
+                            };
+                        }
+
+                        return {
+                            label: VERANDA_OPTIONS_UI.find(f => f.key === key)?.label || key,
+                            value: `Ja (niet beschikbaar voor ${widthCm} cm)`,
+                        };
+                    }
+
+                    return {
+                        label: VERANDA_OPTIONS_UI.find(f => f.key === key)?.label || key,
+                        value: getOptionLabel(key, config[key as keyof VerandaConfig])
+                    };
+                });
                 
                 // Build price breakdown for the popup
                 const priceBreakdown: VerandaPriceBreakdown = {
                     basePrice: calcBasePrice,
-                    items: priceItems,
-                    optionsTotal: priceItems.reduce((sum, item) => sum + item.amount, 0),
-                    grandTotal: currentPrice,
+                    items: config.verlichting
+                        ? [
+                            ...priceItems,
+                            {
+                                label: ledInfo.qty > 0
+                                    ? `LED spots (${ledInfo.qty}x € ${ledInfo.unitPrice.toFixed(2).replace('.', ',')})`
+                                    : 'LED spots (niet beschikbaar)',
+                                amount: ledSelectedTotal,
+                            },
+                          ]
+                        : priceItems,
+                                        optionsTotal: priceItems.reduce((sum, item) => sum + item.amount, 0) + (config.verlichting ? ledSelectedTotal : 0),
+                    grandTotal: displayTotal,
                 };
                 
                 // Mark as submitted before calling onSubmit (prevents onCancel from being called)
@@ -300,6 +367,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                 
                 // Call parent handler which adds to cart
                 // Cart drawer will open automatically via CartContext.addToCart
+                // IMPORTANT: pass base configurator price (excl. LED) to cart line to avoid double-counting
                 onSubmit(config as VerandaConfig, 'order', currentPrice, details, priceBreakdown);
             }
             
@@ -323,19 +391,54 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
         }
 
         if (onSubmit) {
-            const details = Object.keys(config).map(key => ({
-                label: VERANDA_OPTIONS_UI.find(f => f.key === key)?.label || key,
-                value: getOptionLabel(key, config[key as keyof VerandaConfig])
-            }));
+            const detailKeys = VERANDA_OPTIONS_UI.map(o => o.key);
+            const details = detailKeys.map(key => {
+                if (key === 'verlichting') {
+                    if (!config.verlichting) {
+                        return {
+                            label: VERANDA_OPTIONS_UI.find(f => f.key === key)?.label || key,
+                            value: t('configurator.selection.no'),
+                        };
+                    }
+
+                    if (ledInfo.qty > 0) {
+                        return {
+                            label: VERANDA_OPTIONS_UI.find(f => f.key === key)?.label || key,
+                            value: `Ja, ${ledInfo.qty} LED spots (€ ${ledInfo.total.toFixed(2).replace('.', ',')})`,
+                        };
+                    }
+
+                    return {
+                        label: VERANDA_OPTIONS_UI.find(f => f.key === key)?.label || key,
+                        value: `Ja (niet beschikbaar voor ${widthCm} cm)`,
+                    };
+                }
+
+                return {
+                    label: VERANDA_OPTIONS_UI.find(f => f.key === key)?.label || key,
+                    value: getOptionLabel(key, config[key as keyof VerandaConfig])
+                };
+            });
             
             // Build price breakdown for the popup
             const priceBreakdown: VerandaPriceBreakdown = {
                 basePrice: calcBasePrice,
-                items: priceItems,
-                optionsTotal: priceItems.reduce((sum, item) => sum + item.amount, 0),
-                grandTotal: currentPrice,
+                items: config.verlichting
+                    ? [
+                        ...priceItems,
+                        {
+                            label: ledInfo.qty > 0
+                                ? `LED spots (${ledInfo.qty}x € ${ledInfo.unitPrice.toFixed(2).replace('.', ',')})`
+                                : 'LED spots (niet beschikbaar)',
+                            amount: ledSelectedTotal,
+                        },
+                      ]
+                    : priceItems,
+                                optionsTotal: priceItems.reduce((sum, item) => sum + item.amount, 0) + (config.verlichting ? ledSelectedTotal : 0),
+                grandTotal: displayTotal,
             };
             
+            // IMPORTANT: pass base configurator price (excl. LED) to keep behavior consistent with order flow
             onSubmit(config as VerandaConfig, 'quote', currentPrice, details, priceBreakdown);
         }
         
@@ -456,13 +559,19 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
             );
         }
 
-        // Toggle selector (for verlichting)
+        // Toggle selector (for verlichting) - with dynamic LED pricing
         if (optionDef.type === 'toggle') {
-            const choice = optionDef.choices[0];
+            console.log(`[LED UI] widthCm=${widthCm}`);
+            console.log(`[LED UI] qty=${ledInfo.qty}`);
+            console.log(`[LED UI] total=${ledInfo.total.toFixed(2)}`);
+            console.log(`[LED UI] enabled=${!!currentValue}`);
+            
             return (
                 <div className="max-w-2xl">
                     <div
-                        onClick={() => setConfig(prev => ({ ...prev, [optionDef.key]: !currentValue }))}
+                        onClick={() => {
+                            setConfig(prev => ({ ...prev, [optionDef.key]: !currentValue }));
+                        }}
                         className={`flex items-center justify-between p-6 rounded-xl border-2 cursor-pointer transition-all ${
                             currentValue 
                                 ? 'border-[#003878] bg-[#003878]/5 shadow-md ring-2 ring-[#003878]/10' 
@@ -476,10 +585,21 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                                 <Lightbulb size={28} fill={currentValue ? "currentColor" : "none"} />
                             </div>
                             <div>
-                                <span className="font-bold text-gray-900 text-lg block">{choice.label}</span>
-                                <span className="text-sm text-gray-600">{choice.description}</span>
-                                {choice.price > 0 && (
-                                    <span className="block text-sm text-[#FF7300] font-semibold mt-1">+ {formatEUR(toCents(choice.price), 'cents')}</span>
+                                <span className="font-bold text-gray-900 text-lg block">LED verlichting</span>
+                                {ledAvailable ? (
+                                    <>
+                                        <span className="text-sm text-gray-600">
+                                            Voeg {ledInfo.qty} LED spots toe (€ {LED_UNIT_PRICE_EUR.toFixed(2).replace('.', ',')} per stuk)
+                                        </span>
+                                        <span className="block text-sm text-[#FF7300] font-semibold mt-1">
+                                            + € {ledInfo.total.toFixed(2).replace('.', ',')}
+                                        </span>
+                                    </>
+                                ) : (
+                                    <span className="text-sm text-amber-600 flex items-center gap-1 mt-1">
+                                        <AlertTriangle size={14} />
+                                        LED is voor deze breedte niet beschikbaar. (+ € 0,00)
+                                    </span>
                                 )}
                             </div>
                         </div>
@@ -488,11 +608,20 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                                 type="checkbox"
                                 className="sr-only peer"
                                 checked={!!currentValue}
-                                onChange={(e) => setConfig(prev => ({ ...prev, [optionDef.key]: e.target.checked }))}
+                                onChange={(e) => {
+                                    setConfig(prev => ({ ...prev, [optionDef.key]: e.target.checked }));
+                                }}
                             />
-                            <div className="w-14 h-8 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-[#003878] shadow-inner"></div>
+                            <div className="w-14 h-8 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-[#003878] shadow-inner" />
                         </label>
                     </div>
+                    {/* Warning if LED is ON but no mapping */}
+                    {currentValue && !ledAvailable && (
+                        <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-center gap-2 text-amber-700 text-sm">
+                            <AlertTriangle size={16} />
+                            LED is voor deze breedte niet beschikbaar en wordt niet toegevoegd.
+                        </div>
+                    )}
                     {!currentStep.required && (
                         <p className="mt-4 text-sm text-gray-500 italic px-2">
                             {t('configurator.hints.optionalStep')}
@@ -546,6 +675,12 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
     };
 
     const renderOverview = () => {
+        const ledSummaryValue = config.verlichting
+            ? (ledInfo.qty > 0
+                ? `Ja, ${ledInfo.qty} LED spots (€ ${ledInfo.total.toFixed(2).replace('.', ',')})`
+                : `Ja (niet beschikbaar voor ${widthCm} cm)`)
+            : t('configurator.selection.no');
+        
         // Summary items in exact step order
         const summaryItems = [
             { stepIndex: 0, label: t('configurator.steps.color.title'), value: getOptionLabel('color', config.color), key: 'color' },
@@ -554,7 +689,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
             { stepIndex: 3, label: t('configurator.steps.zijwand_links.title'), value: getOptionLabel('zijwand_links', config.zijwand_links), key: 'zijwand_links' },
             { stepIndex: 4, label: t('configurator.steps.zijwand_rechts.title'), value: getOptionLabel('zijwand_rechts', config.zijwand_rechts), key: 'zijwand_rechts' },
             { stepIndex: 5, label: t('configurator.steps.voorzijde.title'), value: getOptionLabel('voorzijde', config.voorzijde), key: 'voorzijde' },
-            { stepIndex: 6, label: t('configurator.steps.verlichting.title'), value: config.verlichting ? t('configurator.selection.yesLedSpots') : t('configurator.selection.no'), key: 'verlichting' },
+            { stepIndex: 6, label: t('configurator.steps.verlichting.title'), value: ledSummaryValue, key: 'verlichting' },
         ];
 
         return (
@@ -617,7 +752,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                         ))}
                         <div className="border-t-2 border-gray-300 pt-3 mt-3 flex justify-between items-center">
                             <span className="font-bold text-gray-900 text-base">{t('configurator.overview.totalInclVat')}</span>
-                            <span className="font-black text-2xl text-[#003878]">{formatEUR(toCents(currentPrice), 'cents')}</span>
+                            <span className="font-black text-2xl text-[#003878]">{formatEUR(toCents(displayTotal), 'cents')}</span>
                         </div>
                     </div>
                 </div>
@@ -722,11 +857,13 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
             key: 'verlichting',
             label: t('configurator.steps.verlichting.title'),
             value: config.verlichting !== undefined 
-                ? (config.verlichting ? t('configurator.selection.yesLedSpots') : t('configurator.selection.no'))
+                ? (config.verlichting 
+                    ? `Ja, ${getLedTotals(widthCm).qty} spots`
+                    : t('configurator.selection.no'))
                 : null,
             stepIndex: 6,
         },
-    ], [config, getOptionLabel, t]);
+    ], [config, getOptionLabel, t, widthCm]);
 
     // Reusable Selection Summary Component - shows all options
     const SelectionSummary = ({ showEditButtons = true }: { showEditButtons?: boolean }) => (
@@ -1045,7 +1182,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                                     {/* Price */}
                                     <div className="mb-4">
                                         <span className="text-[10px] text-gray-500 uppercase tracking-wide font-medium">{t('configurator.footer.totalPriceInclVat')}</span>
-                                        <span className="block text-2xl font-black text-[#003878]">{formatEUR(toCents(currentPrice), 'cents')}</span>
+                                        <span className="block text-2xl font-black text-[#003878]">{formatEUR(toCents(displayTotal), 'cents')}</span>
                                     </div>
 
                                     {/* Navigation Buttons */}
@@ -1128,7 +1265,8 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                         </div>
 
                         {/* ========== MOBILE FOOTER (only <1024px) ========== */}
-                        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40">
+                        {/* configurator-cta: shifts left when Tawk.to chat is visible */}
+                        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 configurator-cta">
                             {/* Mobile: Selection Button */}
                             <div className="px-5 py-3 border-b border-gray-100">
                                 <button
@@ -1154,7 +1292,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                                     {/* Price */}
                                     <div>
                                         <span className="text-[10px] text-gray-500 uppercase tracking-wide font-medium">{t('configurator.footer.totalPriceInclVat')}</span>
-                                        <span className="block text-2xl font-black text-[#003878]">{formatEUR(toCents(currentPrice), 'cents')}</span>
+                                        <span className="block text-2xl font-black text-[#003878]">{formatEUR(toCents(displayTotal), 'cents')}</span>
                                     </div>
 
                                     {/* Navigation Buttons */}

@@ -206,8 +206,8 @@ export default async function handler(
   // Check API key
   const apiKey = process.env.GOOGLE_MAPS_API_KEY;
   if (!apiKey) {
-    console.error('[Distance API] GOOGLE_MAPS_API_KEY not configured');
-    res.status(500).json({ error: 'Server configuration error: API key not set' });
+    console.error('[Distance API] GOOGLE_MAPS_API_KEY not configured in environment');
+    res.status(500).json({ error: 'Afstandsberekening niet beschikbaar. Neem contact op met de klantenservice.' });
     return;
   }
 

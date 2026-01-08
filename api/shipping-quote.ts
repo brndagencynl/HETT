@@ -353,11 +353,11 @@ export default async function handler(
   // ==========================================================================
   const apiKey = process.env.GOOGLE_MAPS_API_KEY;
   if (!apiKey) {
-    console.error('[Shipping] GOOGLE_MAPS_API_KEY not configured');
+    console.error('[Shipping] GOOGLE_MAPS_API_KEY not configured in environment');
     const error: ShippingQuoteError = {
       ok: false,
       code: 'CONFIG_ERROR',
-      message: 'Server configuration error. Please contact support.',
+      message: 'Bezorgkosten kunnen momenteel niet worden berekend. Neem contact op met de klantenservice.',
     };
     res.status(500).json(error);
     return;

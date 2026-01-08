@@ -14,6 +14,7 @@ import ConfigBreakdownPopup from './ConfigBreakdownPopup';
 import { beginCheckout, isShopifyConfigured } from '../../src/lib/shopify';
 import { formatEUR } from '../../src/utils/money';
 import { extractWidthFromHandle, extractWidthFromSize } from '../../src/services/addons/led';
+import { ConfigSurchargePreview } from '../../src/components/cart/ConfigSurchargePreview';
 
 const MotionDiv = motion.div as any;
 
@@ -298,6 +299,9 @@ const CartDrawer: React.FC = () => {
                                     </div>
                                 </div>
                             )}
+                            
+                            {/* Configuration Surcharge Preview */}
+                            <ConfigSurchargePreview className="mt-4" />
                         </div>
 
                         {/* Footer */}

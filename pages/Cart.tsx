@@ -17,6 +17,7 @@ import { CartItemPreview } from '../components/ui/ConfigPreviewImage';
 import { ShippingSection } from '../src/components/cart/ShippingSection';
 import { formatShippingPrice } from '../src/services/shippingQuote';
 import { beginCheckout, isShopifyConfigured } from '../src/lib/shopify';
+import { ConfigSurchargePreview } from '../src/components/cart/ConfigSurchargePreview';
 
 const Cart: React.FC = () => {
     const { 
@@ -377,6 +378,9 @@ const Cart: React.FC = () => {
                     </div>
                   </Card>
                 )}
+                
+                {/* Configuration Surcharge Preview */}
+                <ConfigSurchargePreview showDetails className="mt-4" />
             </div>
 
             {/* Order Summary */}

@@ -20,6 +20,10 @@ import {
   hasLedEnabled,
   type LedCartItem,
 } from '../../services/addons/led';
+// Configuration surcharge lines (Route A)
+import {
+  buildConfigSurchargeLines,
+} from '../../services/configSurchargeLines';
 
 // =============================================================================
 // MAIN CHECKOUT FUNCTION
@@ -230,6 +234,36 @@ export async function beginCheckout(
         }
       } else {
         console.log(`[LED Checkout] no LED items to add`);
+      }
+    }
+
+    // ==========================================================================
+    // CONFIGURATION SURCHARGE LINES (Route A)
+    // Uses "prijs-stappen" product variants to represent option surcharges
+    // LED is handled separately above - this excludes LED
+    // ==========================================================================
+    console.log('[Config Surcharge] ========== Starting surcharge lines ==========');
+    
+    // Filter out shipping lines for surcharge calculation
+    const productItems = cartItems.filter(item => !isShippingLineItem(item));
+    
+    if (productItems.length > 0) {
+      const surchargeResult = buildConfigSurchargeLines(
+        productItems,
+        'Configuratie opties',
+        'config-surcharge'
+      );
+
+      if (surchargeResult.lines.length > 0) {
+        console.log(`[Config Surcharge] Adding ${surchargeResult.lines.length} price step lines`);
+        console.log(`[Config Surcharge] Total: €${surchargeResult.totalEur.toFixed(2)}`);
+        console.log(`[Config Surcharge] Summary: ${surchargeResult.summary}`);
+        
+        for (const line of surchargeResult.lines) {
+          lines.push(line);
+        }
+      } else {
+        console.log('[Config Surcharge] No surcharge lines to add (optionsTotal = 0 or error)');
       }
     }
     

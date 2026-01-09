@@ -16,6 +16,11 @@
  * - Structure supports both scenarios
  */
 
+import {
+  getGlassWallPrice,
+  type GlassVariant,
+} from '../../config/pricing/glassSlidingWalls';
+
 // =============================================================================
 // TYPE DEFINITIONS
 // =============================================================================
@@ -43,7 +48,8 @@ export type VerandaDepth = 250 | 300 | 350 | 400;
 export type OptionPricing = 
   | { type: 'fixed'; price: number }
   | { type: 'byWidth'; prices: Record<VerandaWidth, number> }
-  | { type: 'bySize'; prices: Record<VerandaProductSize, number> };
+  | { type: 'bySize'; prices: Record<VerandaProductSize, number> }
+  | { type: 'byGlassWall'; variant: GlassVariant }; // Uses glassSlidingWalls.ts price table
 
 /** Structure for a single option choice */
 export interface OptionChoice {
@@ -159,7 +165,8 @@ export const ROOF_TYPE_OPTIONS: OptionChoice[] = [
 
 /**
  * STEP 2: Front Side (Voorzijde)
- * Prices depend on WIDTH only (not depth)
+ * Glass sliding wall prices use the shared glassSlidingWalls.ts price table
+ * which maps width (306-1206 cm) to prices for helder/getint variants.
  */
 export const FRONT_SIDE_OPTIONS: OptionChoice[] = [
   {
@@ -174,28 +181,14 @@ export const FRONT_SIDE_OPTIONS: OptionChoice[] = [
     label: 'Glass sliding wall clear',
     labelNL: 'Glazen schuifwand helder',
     description: 'Heldere glazen panelen over de gehele breedte.',
-    pricing: {
-      type: 'byWidth',
-      prices: {
-        500: 999,
-        600: 1150,
-        700: 1450,
-      },
-    },
+    pricing: { type: 'byGlassWall', variant: 'helder' },
   },
   {
     id: 'glas_schuifwand_getint',
     label: 'Glass sliding wall tinted',
     labelNL: 'Glazen schuifwand getint',
     description: 'Getinte glazen panelen over de gehele breedte voor extra privacy.',
-    pricing: {
-      type: 'byWidth',
-      prices: {
-        500: 999,
-        600: 1150,
-        700: 1450,
-      },
-    },
+    pricing: { type: 'byGlassWall', variant: 'getint' },
   },
 ] as const;
 
@@ -421,7 +414,7 @@ export function getBasePrice(
 
 /**
  * Calculate option price based on pricing type
- * Automatically handles fixed, byWidth, and bySize pricing
+ * Automatically handles fixed, byWidth, bySize, and byGlassWall pricing
  * 
  * @param pricing - The pricing configuration for the option
  * @param size - The selected product size
@@ -440,6 +433,12 @@ export function getOptionPrice(
     
     case 'bySize':
       return pricing.prices[size] ?? 0;
+    
+    case 'byGlassWall':
+      // Extract width from product size string (e.g., "506x300" → 506, "706x400" → 706)
+      // The width is already in cm and matches the glass wall price table keys
+      const widthCm = getWidthFromSize(size);
+      return getGlassWallPrice(widthCm, pricing.variant);
     
     default:
       return 0;

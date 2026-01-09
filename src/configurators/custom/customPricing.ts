@@ -30,16 +30,22 @@ import {
 
 import { addCents, formatEUR, fromCents, mulCents, toCents } from '../../utils/money';
 
+import {
+  getGlassWallPrice,
+  type GlassVariant,
+} from '../../config/pricing/glassSlidingWalls';
+
 // =============================================================================
 // PRICING TYPES
 // =============================================================================
 
-/** Option pricing can be fixed, by width range, by depth range, or by area */
+/** Option pricing can be fixed, by width range, by depth range, by area, or glass wall lookup */
 export type MaatwerkOptionPricing =
   | { type: 'fixed'; price: number }
   | { type: 'byWidth'; basePrice: number; pricePerCm: number }  // Linear pricing based on width
   | { type: 'byDepth'; basePrice: number; pricePerCm: number }  // Linear pricing based on depth
-  | { type: 'byArea'; pricePerM2: number };
+  | { type: 'byArea'; pricePerM2: number }
+  | { type: 'byGlassWall'; variant: GlassVariant };  // Uses glassSlidingWalls.ts price table
 
 export interface MaatwerkOptionChoice {
   id: string;
@@ -237,7 +243,8 @@ export const MAATWERK_SIDEWALL_OPTIONS: MaatwerkOptionChoice[] = [
 
 /**
  * Front side options
- * Now uses linear pricing based on width
+ * Uses the shared glassSlidingWalls.ts price table for glass sliding walls.
+ * Width comes from the maatwerk slider, snapped to nearest supported key.
  */
 export const MAATWERK_FRONT_OPTIONS: MaatwerkOptionChoice[] = [
   {
@@ -250,21 +257,13 @@ export const MAATWERK_FRONT_OPTIONS: MaatwerkOptionChoice[] = [
     id: 'glas_schuifwand_helder',
     label: 'Glazen schuifwand helder',
     description: 'Heldere glazen panelen over de gehele breedte.',
-    pricing: {
-      type: 'byWidth',
-      basePrice: 300,   // Base at minimum width
-      pricePerCm: 1.50, // ~€1.50 per cm width
-    },
+    pricing: { type: 'byGlassWall', variant: 'helder' },
   },
   {
     id: 'glas_schuifwand_getint',
     label: 'Glazen schuifwand getint',
     description: 'Getinte glazen panelen over de gehele breedte voor extra privacy.',
-    pricing: {
-      type: 'byWidth',
-      basePrice: 300,   // Base at minimum width
-      pricePerCm: 1.50, // ~€1.50 per cm width (adjust as needed)
-    },
+    pricing: { type: 'byGlassWall', variant: 'getint' },
   },
 ];
 
@@ -349,6 +348,11 @@ export function getMaatwerkOptionPrice(
       // Calculate area in m² and multiply by rate
       const areaM2 = (size.width / 100) * (size.depth / 100);
       return fromCents(Math.round(areaM2 * pricing.pricePerM2 * 100));
+    
+    case 'byGlassWall':
+      // Use the shared glass wall price table
+      // Width from maatwerk slider is passed directly (already in cm)
+      return getGlassWallPrice(size.width, pricing.variant);
     
     default:
       return 0;

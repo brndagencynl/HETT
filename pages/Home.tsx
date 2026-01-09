@@ -103,7 +103,7 @@ const Home: React.FC = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div className="lg:col-span-2 relative rounded-xl overflow-hidden group min-h-[400px] md:min-h-[500px] card-retail p-0">
                         <img
-                            src={'/assets/images/home_hero.JPG'}
+                            src={'/assets/images/home_hero.jpeg'}
                             alt={hero.title}
                             className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
                         />

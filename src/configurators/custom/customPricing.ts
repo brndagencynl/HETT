@@ -62,12 +62,104 @@ export interface MaatwerkOptionGroup {
 }
 
 // =============================================================================
-// BASE PRICE CALCULATION (Using Anchor Products)
+// BASE PRICE MATRIX (Maatwerk Configurator)
 // =============================================================================
 
 /**
- * Fallback pricing parameters (used if anchor product not found)
- * This should rarely happen if the matrix catalog is correctly configured
+ * Maatwerk base price matrix by width × depth (in cm).
+ * Format: "WIDTHxDEPTH" => price in EUR
+ */
+const MAATWERK_PRICE_MATRIX: Record<string, number> = {
+  // 306 width
+  '306x250': 699,
+  '306x300': 759,
+  '306x350': 829,
+  '306x400': 899,
+  '306x450': 969,
+  '306x500': 1039,
+  // 406 width
+  '406x250': 1119,
+  '406x300': 1199,
+  '406x350': 1299,
+  '406x400': 1399,
+  '406x450': 1499,
+  '406x500': 1599,
+  // 506 width
+  '506x250': 1350,
+  '506x300': 1475,
+  '506x350': 1600,
+  '506x400': 1730,
+  '506x450': 1860,
+  '506x500': 1990,
+  // 606 width
+  '606x250': 1550,
+  '606x300': 1699,
+  '606x350': 1850,
+  '606x400': 1999,
+  '606x450': 2149,
+  '606x500': 2299,
+  // 706 width
+  '706x250': 1749,
+  '706x300': 1949,
+  '706x350': 2099,
+  '706x400': 2499,
+  '706x450': 2499,
+  '706x500': 1999,
+  // 806 width
+  '806x250': 1999,
+  '806x300': 2119,
+  '806x350': 2399,
+  '806x400': 2599,
+  '806x450': 2749,
+  '806x500': 2999,
+  // 906 width
+  '906x250': 2245,
+  '906x300': 2499,
+  '906x350': 2699,
+  '906x400': 2899,
+  '906x450': 3099,
+  '906x500': 3299,
+  // 1006 width
+  '1006x250': 2449,
+  '1006x300': 2699,
+  '1006x350': 2949,
+  '1006x400': 3199,
+  '1006x450': 3449,
+  '1006x500': 3699,
+  // 1106 width
+  '1106x250': 2699,
+  '1106x300': 2949,
+  '1106x350': 3249,
+  '1106x400': 3499,
+  '1106x450': 3799,
+  '1106x500': 4099,
+  // 1206 width
+  '1206x250': 2799,
+  '1206x300': 3049,
+  '1206x350': 3449,
+  '1206x400': 3799,
+  '1206x450': 4099,
+  '1206x500': 4399,
+};
+
+/**
+ * Get maatwerk base price from the price matrix.
+ * 
+ * @param anchorSizeKey - Size key in format "WIDTHxDEPTH" (e.g., "706x350")
+ * @returns Price in EUR, or null if not found
+ */
+function getMaatwerkMatrixPrice(anchorSizeKey: string): number | null {
+  const price = MAATWERK_PRICE_MATRIX[anchorSizeKey];
+  if (price !== undefined) {
+    console.log(`[MaatwerkPrice] Found matrix price for ${anchorSizeKey}: €${price}`);
+    return price;
+  }
+  console.warn(`[MaatwerkPrice] No matrix price for ${anchorSizeKey}`);
+  return null;
+}
+
+/**
+ * Fallback pricing parameters (used if matrix price not found)
  */
 const FALLBACK_PRICING = {
   minimumPrice: 1100,
@@ -78,7 +170,7 @@ const FALLBACK_PRICING = {
 };
 
 /**
- * Calculate fallback price (if anchor product not found)
+ * Calculate fallback price (if matrix price not found)
  */
 function getFallbackPrice(width: number, depth: number): number {
   const area = width * depth;
@@ -96,11 +188,7 @@ function getFallbackPrice(width: number, depth: number): number {
 
 /**
  * Get the anchor product for a given custom size
- * Returns the product info including price
- * 
- * Note: Since we removed local PRODUCTS mock data, we now use
- * the fallback pricing formula for anchor prices. In the future,
- * this could be enhanced to fetch prices from Shopify.
+ * Returns the product info including price from the matrix
  */
 export function getAnchorProductForSize(size: MaatwerkSize): {
   anchorWidth: number;
@@ -112,8 +200,9 @@ export function getAnchorProductForSize(size: MaatwerkSize): {
   const anchorDepth = mapToAnchorDepth(size.depth);
   const anchorSizeKey = mapToAnchorSize(size.width, size.depth);
   
-  // Use fallback pricing formula (no longer dependent on mock PRODUCTS)
-  const anchorPrice = getFallbackPrice(anchorWidth, anchorDepth);
+  // Try to get price from matrix, fallback to formula if not found
+  const matrixPrice = getMaatwerkMatrixPrice(anchorSizeKey);
+  const anchorPrice = matrixPrice ?? getFallbackPrice(anchorWidth, anchorDepth);
   
   return { anchorWidth, anchorDepth, anchorSizeKey, anchorPrice };
 }

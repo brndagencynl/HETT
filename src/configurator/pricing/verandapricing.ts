@@ -44,12 +44,54 @@ export type VerandaWidth = 500 | 600 | 700;
 /** Depth extracted from product size */  
 export type VerandaDepth = 250 | 300 | 350 | 400;
 
+/**
+ * Sandwich wall (volledig) price table by depth in cm.
+ * These are prices per single side wall.
+ */
+export const SANDWICH_WALL_PRICE_BY_DEPTH: Record<number, number> = {
+  250: 337.50,
+  300: 405.00,
+  350: 472.50,
+  400: 540.00,
+  450: 607.50,
+  500: 675.00,
+};
+
+/**
+ * Sandwich + poly spie price table by depth in cm.
+ * These are prices per single side wall.
+ */
+export const SANDWICH_POLYSPIE_PRICE_BY_DEPTH: Record<number, number> = {
+  250: 325.00,
+  300: 390.00,
+  350: 455.00,
+  400: 520.00,
+  450: 585.00,
+  500: 650.00,
+};
+
+/**
+ * Poly spie (driehoek) price table by depth in cm.
+ * These are prices per single side wall.
+ */
+export const POLY_SPIE_PRICE_BY_DEPTH: Record<number, number> = {
+  250: 100.00,
+  300: 120.00,
+  350: 140.00,
+  400: 160.00,
+  450: 180.00,
+  500: 200.00,
+};
+
 /** Option pricing can be fixed OR size-dependent */
 export type OptionPricing = 
   | { type: 'fixed'; price: number }
   | { type: 'byWidth'; prices: Record<VerandaWidth, number> }
   | { type: 'bySize'; prices: Record<VerandaProductSize, number> }
-  | { type: 'byGlassWall'; variant: GlassVariant }; // Uses glassSlidingWalls.ts price table
+  | { type: 'byGlassWall'; variant: GlassVariant } // Uses glassSlidingWalls.ts price table
+  | { type: 'bySandwichDepth' } // Uses SANDWICH_WALL_PRICE_BY_DEPTH table
+  | { type: 'bySandwichPolyspieDepth' } // Uses SANDWICH_POLYSPIE_PRICE_BY_DEPTH table
+  | { type: 'byPolySpieDepth' }; // Uses POLY_SPIE_PRICE_BY_DEPTH table
 
 /** Structure for a single option choice */
 export interface OptionChoice {
@@ -210,42 +252,21 @@ export const SIDE_WALL_OPTIONS: OptionChoice[] = [
     label: 'Polycarbonate spie',
     labelNL: 'Polycarbonaat spie (driehoek)',
     description: 'Dicht de driehoek boven een schutting met polycarbonaat.',
-    pricing: {
-      type: 'bySize',
-      prices: {
-        '500x250': 175, '500x300': 195, '500x350': 215, '500x400': 235,
-        '600x250': 195, '600x300': 215, '600x350': 240, '600x400': 265,
-        '700x250': 215, '700x300': 240, '700x350': 270, '700x400': 300,
-      },
-    },
+    pricing: { type: 'byPolySpieDepth' },
   },
   {
     id: 'sandwich_polyspie',
     label: 'Sandwich panel + poly spie',
     labelNL: 'Sandwichpaneel + poly spie',
     description: 'Geïsoleerde wand met polycarbonaat driehoek.',
-    pricing: {
-      type: 'bySize',
-      prices: {
-        '500x250': 450, '500x300': 495, '500x350': 545, '500x400': 595,
-        '600x250': 495, '600x300': 550, '600x350': 610, '600x400': 670,
-        '700x250': 545, '700x300': 610, '700x350': 680, '700x400': 750,
-      },
-    },
+    pricing: { type: 'bySandwichPolyspieDepth' },
   },
   {
     id: 'sandwich_vol',
     label: 'Full sandwich panel',
     labelNL: 'Volledig sandwichpaneel',
     description: 'Volledig geïsoleerde wand van sandwichpanelen.',
-    pricing: {
-      type: 'bySize',
-      prices: {
-        '500x250': 595, '500x300': 665, '500x350': 735, '500x400': 810,
-        '600x250': 665, '600x300': 745, '600x350': 830, '600x400': 920,
-        '700x250': 735, '700x300': 830, '700x350': 930, '700x400': 1035,
-      },
-    },
+    pricing: { type: 'bySandwichDepth' },
   },
 ] as const;
 
@@ -414,7 +435,7 @@ export function getBasePrice(
 
 /**
  * Calculate option price based on pricing type
- * Automatically handles fixed, byWidth, bySize, and byGlassWall pricing
+ * Automatically handles fixed, byWidth, bySize, byGlassWall, and bySandwichDepth pricing
  * 
  * @param pricing - The pricing configuration for the option
  * @param size - The selected product size
@@ -439,6 +460,36 @@ export function getOptionPrice(
       // The width is already in cm and matches the glass wall price table keys
       const widthCm = getWidthFromSize(size);
       return getGlassWallPrice(widthCm, pricing.variant);
+    
+    case 'bySandwichDepth':
+      // Extract depth from product size and look up in sandwich wall price table
+      const depthCm = getDepthFromSize(size);
+      const sandwichPrice = SANDWICH_WALL_PRICE_BY_DEPTH[depthCm];
+      if (sandwichPrice !== undefined) {
+        return sandwichPrice;
+      }
+      console.warn('[SandwichWall] No price for depth', depthCm);
+      return 0;
+    
+    case 'bySandwichPolyspieDepth':
+      // Extract depth from product size and look up in sandwich+polyspie price table
+      const depthCmPoly = getDepthFromSize(size);
+      const polyspiePrice = SANDWICH_POLYSPIE_PRICE_BY_DEPTH[depthCmPoly];
+      if (polyspiePrice !== undefined) {
+        return polyspiePrice;
+      }
+      console.warn('[SandwichPolyspie] No price for depth', depthCmPoly);
+      return 0;
+    
+    case 'byPolySpieDepth':
+      // Extract depth from product size and look up in poly spie price table
+      const depthCmPolySpie = getDepthFromSize(size);
+      const polySpiePrice = POLY_SPIE_PRICE_BY_DEPTH[depthCmPolySpie];
+      if (polySpiePrice !== undefined) {
+        return polySpiePrice;
+      }
+      console.warn('[PolySpie] No price for depth', depthCmPolySpie);
+      return 0;
     
     default:
       return 0;

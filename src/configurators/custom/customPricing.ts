@@ -39,13 +39,55 @@ import {
 // PRICING TYPES
 // =============================================================================
 
-/** Option pricing can be fixed, by width range, by depth range, by area, or glass wall lookup */
+/**
+ * Sandwich wall (volledig) price table by depth in cm.
+ * These are prices per single side wall.
+ */
+export const MAATWERK_SANDWICH_WALL_PRICE_BY_DEPTH: Record<number, number> = {
+  250: 337.50,
+  300: 405.00,
+  350: 472.50,
+  400: 540.00,
+  450: 607.50,
+  500: 675.00,
+};
+
+/**
+ * Sandwich + poly spie price table by depth in cm.
+ * These are prices per single side wall.
+ */
+export const MAATWERK_SANDWICH_POLYSPIE_PRICE_BY_DEPTH: Record<number, number> = {
+  250: 325.00,
+  300: 390.00,
+  350: 455.00,
+  400: 520.00,
+  450: 585.00,
+  500: 650.00,
+};
+
+/**
+ * Poly spie (driehoek) price table by depth in cm.
+ * These are prices per single side wall.
+ */
+export const MAATWERK_POLY_SPIE_PRICE_BY_DEPTH: Record<number, number> = {
+  250: 100.00,
+  300: 120.00,
+  350: 140.00,
+  400: 160.00,
+  450: 180.00,
+  500: 200.00,
+};
+
+/** Option pricing can be fixed, by width range, by depth range, by area, glass wall lookup, or sandwich depth */
 export type MaatwerkOptionPricing =
   | { type: 'fixed'; price: number }
   | { type: 'byWidth'; basePrice: number; pricePerCm: number }  // Linear pricing based on width
   | { type: 'byDepth'; basePrice: number; pricePerCm: number }  // Linear pricing based on depth
   | { type: 'byArea'; pricePerM2: number }
-  | { type: 'byGlassWall'; variant: GlassVariant };  // Uses glassSlidingWalls.ts price table
+  | { type: 'byGlassWall'; variant: GlassVariant }  // Uses glassSlidingWalls.ts price table
+  | { type: 'bySandwichDepth' }  // Uses MAATWERK_SANDWICH_WALL_PRICE_BY_DEPTH table
+  | { type: 'bySandwichPolyspieDepth' }  // Uses MAATWERK_SANDWICH_POLYSPIE_PRICE_BY_DEPTH table
+  | { type: 'byPolySpieDepth' };  // Uses MAATWERK_POLY_SPIE_PRICE_BY_DEPTH table
 
 export interface MaatwerkOptionChoice {
   id: string;
@@ -302,31 +344,19 @@ export const MAATWERK_SIDEWALL_OPTIONS: MaatwerkOptionChoice[] = [
     id: 'poly_spie',
     label: 'Polycarbonaat spie (driehoek)',
     description: 'Dicht de driehoek boven een schutting met polycarbonaat.',
-    pricing: {
-      type: 'byDepth',
-      basePrice: 75,    // Base at minimum depth
-      pricePerCm: 0.42, // ~€0.42 per cm depth
-    },
+    pricing: { type: 'byPolySpieDepth' },
   },
   {
     id: 'sandwich_polyspie',
     label: 'Sandwichpaneel + poly spie',
     description: 'Geïsoleerde wand met polycarbonaat driehoek.',
-    pricing: {
-      type: 'byDepth',
-      basePrice: 195,   // Base at minimum depth
-      pricePerCm: 1.03, // ~€1.03 per cm depth
-    },
+    pricing: { type: 'bySandwichPolyspieDepth' },
   },
   {
     id: 'sandwich_vol',
     label: 'Volledig sandwichpaneel',
     description: 'Volledig geïsoleerde wand van sandwichpanelen.',
-    pricing: {
-      type: 'byDepth',
-      basePrice: 200,   // Base at minimum depth  
-      pricePerCm: 1.58, // ~€1.58 per cm depth
-    },
+    pricing: { type: 'bySandwichDepth' },
   },
 ];
 
@@ -442,6 +472,67 @@ export function getMaatwerkOptionPrice(
       // Use the shared glass wall price table
       // Width from maatwerk slider is passed directly (already in cm)
       return getGlassWallPrice(size.width, pricing.variant);
+    
+    case 'bySandwichDepth':
+      // Use the sandwich wall price table based on depth
+      // For maatwerk, we need to snap to the nearest supported depth (ceiling)
+      const supportedDepths = Object.keys(MAATWERK_SANDWICH_WALL_PRICE_BY_DEPTH).map(Number).sort((a, b) => a - b);
+      let depthKey = supportedDepths[supportedDepths.length - 1]; // Default to max
+      for (const d of supportedDepths) {
+        if (d >= size.depth) {
+          depthKey = d;
+          break;
+        }
+      }
+      const sandwichPrice = MAATWERK_SANDWICH_WALL_PRICE_BY_DEPTH[depthKey];
+      if (sandwichPrice !== undefined) {
+        if (depthKey !== size.depth) {
+          console.log(`[MaatwerkSandwichWall] depth ${size.depth} snapped to ${depthKey}, price: €${sandwichPrice}`);
+        }
+        return sandwichPrice;
+      }
+      console.warn('[MaatwerkSandwichWall] No price for depth', size.depth);
+      return 0;
+    
+    case 'bySandwichPolyspieDepth':
+      // Use the sandwich+polyspie price table based on depth
+      const supportedPolyspieDepths = Object.keys(MAATWERK_SANDWICH_POLYSPIE_PRICE_BY_DEPTH).map(Number).sort((a, b) => a - b);
+      let polyspieDepthKey = supportedPolyspieDepths[supportedPolyspieDepths.length - 1]; // Default to max
+      for (const d of supportedPolyspieDepths) {
+        if (d >= size.depth) {
+          polyspieDepthKey = d;
+          break;
+        }
+      }
+      const polyspiePrice = MAATWERK_SANDWICH_POLYSPIE_PRICE_BY_DEPTH[polyspieDepthKey];
+      if (polyspiePrice !== undefined) {
+        if (polyspieDepthKey !== size.depth) {
+          console.log(`[MaatwerkSandwichPolyspie] depth ${size.depth} snapped to ${polyspieDepthKey}, price: €${polyspiePrice}`);
+        }
+        return polyspiePrice;
+      }
+      console.warn('[MaatwerkSandwichPolyspie] No price for depth', size.depth);
+      return 0;
+    
+    case 'byPolySpieDepth':
+      // Use the poly spie price table based on depth
+      const supportedPolySpieDepths = Object.keys(MAATWERK_POLY_SPIE_PRICE_BY_DEPTH).map(Number).sort((a, b) => a - b);
+      let polySpieDepthKey = supportedPolySpieDepths[supportedPolySpieDepths.length - 1]; // Default to max
+      for (const d of supportedPolySpieDepths) {
+        if (d >= size.depth) {
+          polySpieDepthKey = d;
+          break;
+        }
+      }
+      const polySpiePrice = MAATWERK_POLY_SPIE_PRICE_BY_DEPTH[polySpieDepthKey];
+      if (polySpiePrice !== undefined) {
+        if (polySpieDepthKey !== size.depth) {
+          console.log(`[MaatwerkPolySpie] depth ${size.depth} snapped to ${polySpieDepthKey}, price: €${polySpiePrice}`);
+        }
+        return polySpiePrice;
+      }
+      console.warn('[MaatwerkPolySpie] No price for depth', size.depth);
+      return 0;
     
     default:
       return 0;

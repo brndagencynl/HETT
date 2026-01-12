@@ -54,6 +54,9 @@ import Page from './pages/Page';
 // Maatwerk Configurator
 import MaatwerkConfiguratorPage from './pages/MaatwerkConfigurator';
 
+// Veranda Category Page (configurator entry)
+import VerandaCategoryPage from './pages/VerandaCategoryPage';
+
 // Shopify Test
 import ShopifyTest from './pages/ShopifyTest';
 
@@ -101,6 +104,10 @@ const AnimatedRoutes: React.FC = () => {
 
         {/* Shop Routes */}
         <Route path="/shop" element={<PageTransition><Shop /></PageTransition>} />
+        {/* Veranda category: show configurator entry instead of product grid */}
+        <Route path="/categorie/verandas" element={<PageTransition><VerandaCategoryPage /></PageTransition>} />
+        <Route path="/categorie/overkappingen" element={<Navigate to="/categorie/verandas" replace />} />
+        {/* Other categories: show product grid */}
         <Route path="/categorie/:categorySlug" element={<PageTransition><Category /></PageTransition>} />
         <Route path="/products/:handle" element={<PageTransition><ProductDetailShop /></PageTransition>} />
         {/* Legacy route redirect */}

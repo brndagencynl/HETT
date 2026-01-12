@@ -180,9 +180,6 @@ const Home: React.FC = () => {
                 </div>
             </div>
 
-            {/* Feature Block - Sandwichpanelen */}
-            <HomeFeatureBlock imageSrc="/assets/images/isopar_home.jpeg" />
-
             {/* Showroom Section */}
             <HomeShowroomSection />
 

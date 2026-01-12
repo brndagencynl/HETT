@@ -101,11 +101,13 @@
         border-bottom: 1px solid var(--border-color);
         background: white;
         margin-top: 0;
+        position: relative;
+        z-index: 10;
       }
       .hett-container { max-width: 1400px; margin: 0 auto; padding: 12px 24px; }
-      .hett-breadcrumbs { font-size: 13px; color: var(--color-text-muted); display: flex; align-items: center; }
-      .hett-breadcrumbs a { color: var(--color-text-muted); text-decoration: none; }
-      .hett-breadcrumbs a:hover { color: var(--color-primary); }
+      .hett-breadcrumbs { font-size: 13px; color: var(--color-text-muted); display: flex; align-items: center; flex-wrap: wrap; }
+      .hett-breadcrumbs a { color: var(--color-text-muted); text-decoration: none; padding: 4px 0; display: inline-block; }
+      .hett-breadcrumbs a:hover { color: var(--color-primary); text-decoration: underline; }
       .hett-breadcrumbs .separator { margin: 0 8px; color: #D1D5DB; font-weight: 300; }
 
       /* Sidebar Navigation Style (Matches user screenshot) */

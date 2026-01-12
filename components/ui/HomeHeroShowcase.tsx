@@ -36,11 +36,11 @@ const heroItems: HeroItem[] = [
     enabled: true,
   },
   {
-    id: 'glazen-schuifwand',
-    label: 'Glazen schuifwand',
-    title: 'Glazen Schuifwanden',
-    subtitle: 'Geniet van uw veranda het hele jaar door met een glazen schuifwand.',
-    ctaText: 'Bekijk schuifwanden',
+    id: 'maatwerk-veranda',
+    label: 'Maatwerk',
+    title: 'Maatwerk Veranda',
+    subtitle: 'Speciale maten? Geen probleem met onze maatwerk configurator.',
+    ctaText: 'Configureer nu',
     ctaHref: '/maatwerk-configurator',
     backgroundImage: '/assets/images/homepagina_2.jpg',
     thumbnail: '/assets/images/homepagina_2.jpg',
@@ -80,7 +80,7 @@ const HomeHeroShowcase: React.FC = () => {
         />
         
         {/* Dark Overlay Gradient */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-black/20 to-black/10" />
         
         {/* Content */}
         <div className="relative z-10 h-full min-h-[500px] md:min-h-[550px] lg:min-h-[600px] flex flex-col justify-between p-6 md:p-10 lg:p-14">

@@ -22,6 +22,7 @@ import HomeFeatureBlock from '../components/ui/HomeFeatureBlock';
 import HomeShowroomSection from '../components/ui/HomeShowroomSection';
 import HomeFAQ from '../components/ui/HomeFAQ';
 import VerandaPresetCard from '../components/ui/VerandaPresetCard';
+import HomeHeroShowcase from '../components/ui/HomeHeroShowcase';
 import { POPULAIRE_VERANDA_KAARTEN } from '../config/homepageContent';
 
 // Icon mapping for USPs
@@ -79,67 +80,9 @@ const Home: React.FC = () => {
     return (
         <div className="pt-4 pb-20 bg-hett-bg">
 
+            {/* Hero Section - Full-width showcase with thumbnail strip */}
+            <HomeHeroShowcase />
 
-            {/* Hero Section - 50/50 Two Column Layout */}
-            <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mb-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Standaard Veranda Block */}
-                    <Link 
-                        to="/categorie/verandas" 
-                        className="relative rounded-xl overflow-hidden group min-h-[350px] md:min-h-[450px] lg:min-h-[500px] card-retail p-0 block"
-                    >
-                        <img
-                            src="/assets/images/homepagina_2.jpg"
-                            alt="Standaard veranda's"
-                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-hett-dark/80 via-hett-dark/40 to-transparent"></div>
-                        <div className="absolute inset-0 p-6 md:p-8 lg:p-10 flex flex-col justify-end">
-                            <span className="bg-hett-secondary text-white text-[10px] md:text-xs font-bold px-3 py-1 rounded-md mb-3 inline-block uppercase w-fit">
-                                STANDAARD
-                            </span>
-                            <h2 className="text-2xl md:text-3xl lg:text-4xl font-black text-white mb-3 leading-tight">
-                                Standaard veranda's
-                            </h2>
-                            <p className="text-white/90 text-sm md:text-base lg:text-lg font-medium mb-6 max-w-md">
-                                Kies een standaard maat en stel uw veranda samen in de configurator.
-                            </p>
-                            <span className="btn-secondary px-6 md:px-8 py-3 md:py-4 text-sm md:text-base w-fit inline-flex items-center gap-2 group-hover:gap-3 transition-all">
-                                Stel standaard samen
-                                <ArrowRight size={18} />
-                            </span>
-                        </div>
-                    </Link>
-
-                    {/* Maatwerk Veranda Block */}
-                    <Link 
-                        to="/maatwerk-configurator" 
-                        className="relative rounded-xl overflow-hidden group min-h-[350px] md:min-h-[450px] lg:min-h-[500px] card-retail p-0 block"
-                    >
-                        <img
-                            src="/assets/images/homepagina_1.jpg"
-                            alt="Maatwerk veranda's"
-                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-hett-dark/80 via-hett-dark/40 to-transparent"></div>
-                        <div className="absolute inset-0 p-6 md:p-8 lg:p-10 flex flex-col justify-end">
-                            <span className="bg-hett-primary text-white text-[10px] md:text-xs font-bold px-3 py-1 rounded-md mb-3 inline-block uppercase w-fit">
-                                MAATWERK
-                            </span>
-                            <h2 className="text-2xl md:text-3xl lg:text-4xl font-black text-white mb-3 leading-tight">
-                                Maatwerk veranda's
-                            </h2>
-                            <p className="text-white/90 text-sm md:text-base lg:text-lg font-medium mb-6 max-w-md">
-                                Bepaal zelf breedte en diepte en kies alle opties op maat.
-                            </p>
-                            <span className="btn-secondary px-6 md:px-8 py-3 md:py-4 text-sm md:text-base w-fit inline-flex items-center gap-2 group-hover:gap-3 transition-all">
-                                Stel maatwerk samen
-                                <ArrowRight size={18} />
-                            </span>
-                        </div>
-                    </Link>
-                </div>
-            </div>
             {/* USP Bar - Dynamic from Shopify */}
             <div className="bg-hett-light py-6 border-y border-gray-200 mb-0">
                 <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">

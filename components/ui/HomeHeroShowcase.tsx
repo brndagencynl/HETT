@@ -31,8 +31,8 @@ const heroItems: HeroItem[] = [
     subtitle: 'De beste en voordeligste in de markt voor de doe-het-zelver!',
     ctaText: 'Stel zelf samen',
     ctaHref: '/verandas',
-    backgroundImage: '/assets/images/homepagina_1.jpg',
-    thumbnail: '/assets/images/homepagina_1.jpg',
+    backgroundImage: '/assets/images/homepagina_1.webp',
+    thumbnail: '/assets/images/homepagina_1.webp',
     enabled: true,
   },
   {
@@ -42,8 +42,8 @@ const heroItems: HeroItem[] = [
     subtitle: 'Speciale maten? Geen probleem met onze maatwerk configurator.',
     ctaText: 'Configureer nu',
     ctaHref: '/maatwerk-configurator',
-    backgroundImage: '/assets/images/homepagina_2.jpg',
-    thumbnail: '/assets/images/homepagina_2.jpg',
+    backgroundImage: '/assets/images/homepagina_2.webp',
+    thumbnail: '/assets/images/homepagina_2.webp',
     enabled: true,
   },
 ];

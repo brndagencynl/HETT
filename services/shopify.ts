@@ -813,13 +813,13 @@ export const FALLBACK_FAQ: FaqItem[] = [
 
 export const FALLBACK_INSPIRATION: InspirationCard[] = [
   {
-    image: { url: '/assets/images/inspiration1.jpg' },
+    image: { url: '/assets/images/inspiration1.webp' },
     title: 'Moderne Veranda',
     subtitle: 'Strak design met aluminium',
     url: '/projecten/moderne-veranda',
   },
   {
-    image: { url: '/assets/images/inspiration2.jpg' },
+    image: { url: '/assets/images/inspiration2.webp' },
     title: 'Klassieke Overkapping',
     subtitle: 'Tijdloos en elegant',
     url: '/projecten/klassieke-overkapping',

@@ -190,7 +190,7 @@ export function createShippingLineItem(
     title: `Bezorgkosten (${quote.quantityKm} km)`,
     category: 'accessoires', // Doesn't matter for display
     shopifyVariantId: shippingProduct.shopifyVariantId,
-    imageUrl: shippingProduct.imageUrl || '/assets/images/shipping-icon.png',
+    imageUrl: shippingProduct.imageUrl || '/assets/images/shipping-icon.webp',
     shortDescription: `Bezorging naar ${selection.postalCode}, ${selection.country}`,
     description: '',
     specs: {},

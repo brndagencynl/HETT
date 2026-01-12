@@ -12,7 +12,7 @@ interface HomeFeatureBlockProps {
 
 const HomeFeatureBlock: React.FC<HomeFeatureBlockProps> = ({
     title = "Isopar® Plus Lambris: strak geïsoleerde wanden.",
-    imageSrc = "/assets/images/productafb.jpg",
+    imageSrc = "/assets/images/productafb.webp",
     imageAlt = "Isopar® Plus Lambris",
     reverse = false,
 }) => {

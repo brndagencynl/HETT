@@ -8,17 +8,17 @@
  * ASSET STRUCTURE:
  * /public/renders/veranda/
  *   ├── {color}/                    (ral7016, ral9005, ral9001)
- *   │   ├── base.png               (base image for color)
- *   │   ├── daktype/{choiceId}.png
- *   │   ├── goot/{choiceId}.png
- *   │   ├── zijwand_links/{choiceId}.png
- *   │   ├── zijwand_rechts/{choiceId}.png
- *   │   └── voorzijde/{choiceId}.png
+ *   │   ├── base.webp               (base image for color)
+ *   │   ├── daktype/{choiceId}.webp
+ *   │   ├── goot/{choiceId}.webp
+ *   │   ├── zijwand_links/{choiceId}.webp
+ *   │   ├── zijwand_rechts/{choiceId}.webp
+ *   │   └── voorzijde/{choiceId}.webp
  *   └── shared/
  *       └── thumbnails/            (shared thumbnails)
  * 
  * OVERLAY STACK ORDER (z-index):
- * 1. base.png (z: 0)
+ * 1. base.webp (z: 0)
  * 2. daktype overlay (z: 10)
  * 3. goot overlay (z: 20)
  * 4. zijwand_links overlay (z: 30)
@@ -60,7 +60,7 @@ const RENDER_BASE_PATH = '/renders/veranda';
 export const DEFAULT_COLOR: VerandaColorId = 'ral7016';
 
 /** Fallback/placeholder image */
-export const FALLBACK_IMAGE = '/renders/veranda/fallback.png';
+export const FALLBACK_IMAGE = '/renders/veranda/fallback.webp';
 
 /** Choice IDs that should not have overlays */
 const NO_OVERLAY_CHOICES = ['geen', 'none', 'false', ''];
@@ -142,7 +142,7 @@ export function normalizeColorId(color: string | undefined | null): VerandaColor
  * Get the base image path for a color
  */
 export function getBaseImagePath(color: VerandaColorId = DEFAULT_COLOR): string {
-  return `${RENDER_BASE_PATH}/${color}/base.png`;
+  return `${RENDER_BASE_PATH}/${color}/base.webp`;
 }
 
 /**
@@ -171,7 +171,7 @@ export function getOverlayPath(
   const filename = getAssetFilename(choiceId);
   
   // Color-dependent path
-  return `${RENDER_BASE_PATH}/${color}/${groupId}/${filename}.png`;
+  return `${RENDER_BASE_PATH}/${color}/${groupId}/${filename}.webp`;
 }
 
 /** Placeholder/fallback thumbnail */
@@ -181,8 +181,8 @@ export const FALLBACK_THUMBNAIL = '/renders/veranda/placeholder-thumb.svg';
  * Get thumbnail image path for an option choice
  * Used in the option selector cards/radios
  * 
- * File naming convention: {groupId}_{choiceId}.png (flat structure)
- * Example: daktype_poly_helder.png, voorzijde_glas_helder.png
+ * File naming convention: {groupId}_{choiceId}.webp (flat structure)
+ * Example: daktype_poly_helder.webp, voorzijde_glas_helder.webp
  */
 export function getThumbnailPath(
   groupId: string,
@@ -192,18 +192,18 @@ export function getThumbnailPath(
   // 'geen' option uses a generic "none" thumbnail
   if (NO_OVERLAY_CHOICES.includes(choiceId.toLowerCase())) {
     // Try color-specific 'geen' thumbnail first, else fallback
-    return `${RENDER_BASE_PATH}/${color}/thumbnails/${groupId}_geen.png`;
+    return `${RENDER_BASE_PATH}/${color}/thumbnails/${groupId}_geen.webp`;
   }
   
   // Groups without overlay images (verlichting) - use shared thumbnails
   if (!hasOverlayImages(groupId)) {
-    return `${RENDER_BASE_PATH}/shared/thumbnails/${groupId}_${choiceId}.png`;
+    return `${RENDER_BASE_PATH}/shared/thumbnails/${groupId}_${choiceId}.webp`;
   }
   
   // Apply asset filename mapping
   const filename = getAssetFilename(choiceId);
-  // Color-dependent thumbnail with flat naming: {groupId}_{choiceId}.png
-  return `${RENDER_BASE_PATH}/${color}/thumbnails/${groupId}_${filename}.png`;
+  // Color-dependent thumbnail with flat naming: {groupId}_{choiceId}.webp
+  return `${RENDER_BASE_PATH}/${color}/thumbnails/${groupId}_${filename}.webp`;
 }
 
 /**
@@ -228,14 +228,14 @@ export async function verifyThumbnailUrl(url: string): Promise<boolean> {
  * Get color swatch/preview image for color selector
  */
 export function getColorSwatchPath(color: VerandaColorId): string {
-  return `${RENDER_BASE_PATH}/${color}/swatch.png`;
+  return `${RENDER_BASE_PATH}/${color}/swatch.webp`;
 }
 
 /**
  * Get color preview image (larger than swatch, for cards)
  */
 export function getColorPreviewPath(color: VerandaColorId): string {
-  return `${RENDER_BASE_PATH}/${color}/preview.png`;
+  return `${RENDER_BASE_PATH}/${color}/preview.webp`;
 }
 
 // =============================================================================

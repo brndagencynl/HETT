@@ -8,7 +8,7 @@ export const MOCK_POSTS: Post[] = [
         excerpt: 'De winter komt eraan. Met deze eenvoudige tips zorgt u ervoor dat uw aluminium overkapping in topconditie blijft tijdens vorst en sneeuw.',
         date: '21-12-2024',
         category: 'Onderhoud',
-        image: '/assets/images/hero_veranda.png',
+        image: '/assets/images/hero_veranda.webp',
         readingTime: '3 min'
     },
     {
@@ -18,7 +18,7 @@ export const MOCK_POSTS: Post[] = [
         excerpt: 'Wilt u het hele jaar door genieten van uw tuin? Ontdek de voordelen van glazen schuifwanden en maak van uw overkapping een tuinkamer.',
         date: '15-12-2024',
         category: 'Inspiratie',
-        image: '/assets/images/glass_sliding_walls.png',
+        image: '/assets/images/glass_sliding_walls.webp',
         readingTime: '4 min'
     },
     {
@@ -28,7 +28,7 @@ export const MOCK_POSTS: Post[] = [
         excerpt: 'Industrieel en modern. Zwarte overkappingen zijn niet meer weg te denken. Bekijk prachtige voorbeelden van onze klanten.',
         date: '10-12-2024',
         category: 'Trends',
-        image: '/assets/images/inspiration_tuinkamer.png',
+        image: '/assets/images/inspiration_tuinkamer.webp',
         readingTime: '2 min'
     },
     {
@@ -38,7 +38,7 @@ export const MOCK_POSTS: Post[] = [
         excerpt: 'Zelf uw veranda monteren was nog nooit zo makkelijk. Onze nieuwe video guide neemt u mee door het hele proces, van fundering tot dak.',
         date: '01-12-2024',
         category: 'Montage',
-        image: '/assets/images/inspiration_carport.png',
+        image: '/assets/images/inspiration_carport.webp',
         readingTime: '5 min'
     },
     {
@@ -48,7 +48,7 @@ export const MOCK_POSTS: Post[] = [
         excerpt: 'De regels rondom vergunningsvrij bouwen uitgelegd. Waar moet u op letten bij het plaatsen van een overkapping in uw achtertuin?',
         date: '28-11-2024',
         category: 'Advies',
-        image: '/assets/images/sandwich_panels_roof.png',
+        image: '/assets/images/sandwich_panels_roof.webp',
         readingTime: '6 min'
     },
     {

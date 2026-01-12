@@ -59,7 +59,7 @@ const STOREFRONT_API_URL = SHOPIFY_DOMAIN
   : '';
 
 const BLOG_HANDLE = 'projecten';
-const PLACEHOLDER_IMAGE = '/assets/images/project-placeholder.jpg';
+const PLACEHOLDER_IMAGE = '/assets/images/project-placeholder.webp';
 
 /**
  * Extract first image URL from HTML content

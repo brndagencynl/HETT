@@ -4,7 +4,7 @@ import { ChevronRight, ArrowRight } from 'lucide-react';
 import { InspirationCard, FALLBACK_INSPIRATION } from '../../services/shopify';
 import type { ProjectCard } from '../../src/services/shopify';
 
-const PLACEHOLDER_IMAGE = '/assets/images/project-placeholder.jpg';
+const PLACEHOLDER_IMAGE = '/assets/images/project-placeholder.webp';
 
 interface InspirationItem {
     id: string;
@@ -18,31 +18,31 @@ const staticItems: InspirationItem[] = [
     {
         id: '1',
         title: 'Overkappingen',
-        image: '/assets/images/hero_veranda.png',
+        image: '/assets/images/hero_veranda.webp',
         path: '/categorie/overkappingen'
     },
     {
         id: '2',
         title: 'Tuinkamers',
-        image: '/assets/images/inspiration_tuinkamer.png',
+        image: '/assets/images/inspiration_tuinkamer.webp',
         path: '/projecten'
     },
     {
         id: '3',
         title: 'Carports',
-        image: '/assets/images/inspiration_carport.png',
+        image: '/assets/images/inspiration_carport.webp',
         path: '/projecten'
     },
     {
         id: '4',
         title: 'Bedrijfshallen',
-        image: '/assets/images/sandwich_panels_roof.png',
+        image: '/assets/images/sandwich_panels_roof.webp',
         path: '/categorie/sandwichpanelen'
     },
     {
         id: '5',
         title: 'Schuifwanden',
-        image: '/assets/images/glass_sliding_walls.png',
+        image: '/assets/images/glass_sliding_walls.webp',
         path: '/categorie/accessoires'
     },
     {

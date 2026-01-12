@@ -94,7 +94,7 @@ const Footer: React.FC = () => {
 
                 <div className="border-t border-white/20 pt-8 flex flex-col md:flex-row justify-between items-center gap-6">
                     <div className="flex items-center gap-4">
-                        <img src="/assets/images/hett-logo-navbar.png" alt="HETT" className="h-8 object-contain" />
+                        <img src="/assets/images/hett-logo-navbar.webp" alt="HETT" className="h-8 object-contain" />
                         <p className="text-[10px] text-white">Hoogwaardige Veranda's voor iedereen.</p>
                     </div>
 

@@ -99,7 +99,7 @@ export const MaatwerkEditProvider: React.FC<{ children: React.ReactNode }> = ({ 
         // keep same line item id, but update displayed info
         title: 'Maatwerk Veranda',
         shortDescription: `Maatwerk veranda ${sizeSummary}`,
-        imageUrl: `/renders/veranda/${String(colorId)}/base.png`,
+        imageUrl: `/renders/veranda/${String(colorId)}/base.webp`,
 
         // pricing
         price: unitTotal,

@@ -157,7 +157,7 @@ export function transformShopifyProduct(shopifyProduct: ShopifyProduct): Product
     shortDescription: toExcerpt(description, 180),
     // Keep description as Shopify plain-text description to avoid rendering raw HTML tags in the UI.
     description,
-    imageUrl: shopifyProduct.featuredImage?.url || '/assets/images/placeholder.jpg',
+    imageUrl: shopifyProduct.featuredImage?.url || '/assets/images/placeholder.webp',
     specs,
     isNew: tags.includes('nieuw'),
     isBestseller: tags.includes('bestseller'),

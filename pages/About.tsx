@@ -53,7 +53,7 @@ const About: React.FC = () => {
                 title="De standaard in Verandabouw"
                 subtitle="Over HETT"
                 description="Wij leveren niet zomaar veranda's; wij leveren de basis voor hoogwaardige buitenruimtes. Ontdek ons verhaal en onze missie."
-                image="/assets/images/hero_veranda.png"
+                image="/assets/images/hero_veranda.webp"
             />
 
             {/* Content */}

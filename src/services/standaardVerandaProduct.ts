@@ -148,7 +148,7 @@ function generateFallbackProduct(): StandaardVerandaProduct {
     handle: STANDAARD_VERANDA_HANDLE,
     title: 'Standaard Veranda',
     description: 'Hoogwaardige aluminium veranda met standaard afmetingen. Snel leverbaar en eenvoudig te configureren.',
-    imageUrl: '/assets/images/home_hero.jpeg',
+    imageUrl: '/assets/images/home_hero.webp',
     availableWidths: WIDTHS,
     variants,
   };
@@ -246,7 +246,7 @@ export async function getStandaardVerandaProduct(): Promise<StandaardVerandaProd
       handle: product.handle,
       title: product.title,
       description: product.description,
-      imageUrl: product.featuredImage?.url || '/assets/images/home_hero.jpeg',
+      imageUrl: product.featuredImage?.url || '/assets/images/home_hero.webp',
       availableWidths,
       variants,
     };

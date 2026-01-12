@@ -88,7 +88,7 @@ const ProductDetailShop: React.FC<ProductDetailShopProps> = ({ productHandle }) 
                 // In the future, we can extend transformShopifyProduct to include all images
                 const images = shopifyProduct.imageUrl 
                     ? [shopifyProduct.imageUrl]
-                    : ['/assets/images/placeholder.jpg'];
+                    : ['/assets/images/placeholder.webp'];
                 setGalleryImages(images);
                 setActiveImage(images[0]);
             } catch (err) {

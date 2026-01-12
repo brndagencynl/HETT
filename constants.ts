@@ -17,7 +17,7 @@ export const NAV_ITEMS: NavItem[] = [
 // =============================================================================
 
 export const PROJECTS: Project[] = [
-  { id: 'prj-1', title: 'Luxe Tuinkamer Utrecht', category: 'Tuinkamer', imageUrl: '/assets/images/inspiration_tuinkamer.png', description: 'Volledig geïsoleerd.', location: 'Utrecht' }
+  { id: 'prj-1', title: 'Luxe Tuinkamer Utrecht', category: 'Tuinkamer', imageUrl: '/assets/images/inspiration_tuinkamer.webp', description: 'Volledig geïsoleerd.', location: 'Utrecht' }
 ];
 
 export const NEWS_ITEMS: NewsItem[] = [

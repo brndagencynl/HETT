@@ -32,7 +32,7 @@ const Products: React.FC = () => {
         title="Producten"
         subtitle="Onze Collectie"
         description="Hoogwaardige panelen en profielen voor de professionele bouwer. Bekijk ons exclusieve assortiment."
-        image="/product-kroc.jpg"
+        image="/product-kroc.webp"
         action={{ label: "Bekijk Configurator", link: "/configurator" }}
       />
 

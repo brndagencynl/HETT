@@ -820,7 +820,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       price: fromCents(unitPriceCents),
       shortDescription: `Maatwerk veranda ${sizeSummary}`,
       description: 'Op maat geconfigureerde aluminium veranda',
-      imageUrl: `/renders/veranda/${String(payload.selections.find(s => s.groupId === 'color')?.choiceId || 'ral7016')}/base.png`, // Default preview
+      imageUrl: `/renders/veranda/${String(payload.selections.find(s => s.groupId === 'color')?.choiceId || 'ral7016')}/base.webp`, // Default preview
       specs: {},
       requiresConfiguration: false, // Already configured
 

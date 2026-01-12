@@ -1,5 +1,5 @@
 
-export type CategorySlug = 'verandas' | 'sandwichpanelen' | 'accessoires';
+export type CategorySlug = 'verandas' | 'accessoires';
 
 /**
  * Product visibility type

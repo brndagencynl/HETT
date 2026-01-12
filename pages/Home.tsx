@@ -89,7 +89,7 @@ const Home: React.FC = () => {
                         className="relative rounded-xl overflow-hidden group min-h-[350px] md:min-h-[450px] lg:min-h-[500px] card-retail p-0 block"
                     >
                         <img
-                            src="/assets/images/home_hero.jpeg"
+                            src="/assets/images/homepagina_2.jpg"
                             alt="Standaard veranda's"
                             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                         />
@@ -117,7 +117,7 @@ const Home: React.FC = () => {
                         className="relative rounded-xl overflow-hidden group min-h-[350px] md:min-h-[450px] lg:min-h-[500px] card-retail p-0 block"
                     >
                         <img
-                            src="/assets/images/maatwerk_veranda_home.JPG"
+                            src="/assets/images/homepagina_1.jpg"
                             alt="Maatwerk veranda's"
                             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                         />

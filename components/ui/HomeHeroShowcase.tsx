@@ -27,7 +27,7 @@ const heroItems: HeroItem[] = [
   {
     id: 'veranda',
     label: 'Veranda',
-    title: 'Al een Veranda vanaf € 699',
+    title: 'Al een Veranda vanaf €699',
     subtitle: 'De beste en voordeligste in de markt voor de doe-het-zelver!',
     ctaText: 'Stel zelf samen',
     ctaHref: '/verandas',

@@ -149,14 +149,9 @@ const ProjectDetail: React.FC = () => {
                             </div>
 
                             <div className="space-y-4">
+
                                 <Link
-                                    to="/contact"
-                                    className="flex items-center justify-center w-full bg-hett-dark text-white font-bold py-3 rounded hover:bg-slate-800 transition-colors"
-                                >
-                                    Offerte Aanvragen
-                                </Link>
-                                <Link
-                                    to="/categorie/overkappingen"
+                                    to="/categorie/verandas"
                                     className="flex items-center justify-center w-full bg-white border border-hett-dark text-hett-dark font-bold py-3 rounded hover:bg-gray-50 transition-colors"
                                 >
                                     Stel zelf samen <ArrowRight size={16} className="ml-2" />

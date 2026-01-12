@@ -98,55 +98,67 @@ const Home: React.FC = () => {
     return (
         <div className="pt-4 pb-20 bg-hett-bg">
 
-            {/* Hero Section */}
-            <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mb-8">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div className="lg:col-span-2 relative rounded-xl overflow-hidden group min-h-[400px] md:min-h-[500px] card-retail p-0">
-                        <img
-                            src={'/assets/images/home_hero.jpeg'}
-                            alt={hero.title}
-                            className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-r from-hett-dark/70 to-transparent"></div>
-                        <div className="absolute inset-0 p-8 md:p-12 flex flex-col justify-center max-w-xl">
-                            <span className="text-hett-secondary uppercase tracking-widest text-sm font-bold mb-3">
-                                HETT Veranda’s
-                            </span>
-                            <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-4 leading-tight">
-                                Al een Veranda vanaf € 699
-                            </h2>
-                            <p className="text-white/90 text-lg md:text-xl font-medium mb-8">
-                                {hero.description}
-                            </p>
-                            <div className="flex flex-wrap gap-4">
-                                <Link to="/categorie/verandas" className="btn-secondary px-10 py-4 text-lg">
-                                    Stel zelf samen
-                                </Link>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div className="grid grid-cols-2 lg:grid-cols-1 gap-3 md:gap-6">
-                        <Link to="/products/sandwichpaneel" className="card-retail p-0 relative overflow-hidden group flex-1 block min-h-[160px] md:min-h-0">
-                            <img src="/assets/images/sandwichpaneel_home.jpeg" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-60" alt="Service" />
-                            <div className="absolute inset-0 bg-hett-dark/20"></div>
-                            <div className="absolute bottom-3 left-3 md:bottom-6 md:left-6">
-                                <span className="bg-hett-primary text-white text-[8px] md:text-[10px] font-bold px-2 md:px-3 py-0.5 md:py-1 rounded-md mb-1 md:mb-2 inline-block uppercase">Sandwichpanelen</span>
-                                <h3 className="text-hett-dark font-black text-sm md:text-xl">Sandwichpanelen</h3>
-                            </div>
-                        </Link>
-                        <Link to="/maatwerk-configurator" className="card-retail p-0 relative overflow-hidden group flex-1 block min-h-[160px] md:min-h-0">
-                            <img src="/assets/images/maatwerk_veranda_home.JPG" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-60" alt="Maatwerk" />
-                            <div className="absolute inset-0 bg-hett-dark/20"></div>
-                            <div className="absolute bottom-3 left-3 md:bottom-6 md:left-6">
-                                <span className="bg-hett-primary text-white text-[8px] md:text-[10px] font-bold px-2 md:px-3 py-0.5 md:py-1 rounded-md mb-1 md:mb-2 inline-block uppercase">Ook mogelijk in maatwerk</span>
-                                <h3 className="text-hett-dark font-black text-sm md:text-xl">Maatwerk veranda's beschikbaar</h3>
-                            </div>
-                        </Link>
-                    </div>
+            {/* Hero Section - 50/50 Two Column Layout */}
+            <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Standaard Veranda Block */}
+                    <Link 
+                        to="/categorie/verandas" 
+                        className="relative rounded-xl overflow-hidden group min-h-[350px] md:min-h-[450px] lg:min-h-[500px] card-retail p-0 block"
+                    >
+                        <img
+                            src="/assets/images/home_hero.jpeg"
+                            alt="Standaard veranda's"
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-hett-dark/80 via-hett-dark/40 to-transparent"></div>
+                        <div className="absolute inset-0 p-6 md:p-8 lg:p-10 flex flex-col justify-end">
+                            <span className="bg-hett-secondary text-white text-[10px] md:text-xs font-bold px-3 py-1 rounded-md mb-3 inline-block uppercase w-fit">
+                                STANDAARD
+                            </span>
+                            <h2 className="text-2xl md:text-3xl lg:text-4xl font-black text-white mb-3 leading-tight">
+                                Standaard veranda's
+                            </h2>
+                            <p className="text-white/90 text-sm md:text-base lg:text-lg font-medium mb-6 max-w-md">
+                                Kies een standaard maat en stel uw veranda samen in de configurator.
+                            </p>
+                            <span className="btn-secondary px-6 md:px-8 py-3 md:py-4 text-sm md:text-base w-fit inline-flex items-center gap-2 group-hover:gap-3 transition-all">
+                                Stel standaard samen
+                                <ArrowRight size={18} />
+                            </span>
+                        </div>
+                    </Link>
+
+                    {/* Maatwerk Veranda Block */}
+                    <Link 
+                        to="/maatwerk-configurator" 
+                        className="relative rounded-xl overflow-hidden group min-h-[350px] md:min-h-[450px] lg:min-h-[500px] card-retail p-0 block"
+                    >
+                        <img
+                            src="/assets/images/maatwerk_veranda_home.JPG"
+                            alt="Maatwerk veranda's"
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-hett-dark/80 via-hett-dark/40 to-transparent"></div>
+                        <div className="absolute inset-0 p-6 md:p-8 lg:p-10 flex flex-col justify-end">
+                            <span className="bg-hett-primary text-white text-[10px] md:text-xs font-bold px-3 py-1 rounded-md mb-3 inline-block uppercase w-fit">
+                                MAATWERK
+                            </span>
+                            <h2 className="text-2xl md:text-3xl lg:text-4xl font-black text-white mb-3 leading-tight">
+                                Maatwerk veranda's
+                            </h2>
+                            <p className="text-white/90 text-sm md:text-base lg:text-lg font-medium mb-6 max-w-md">
+                                Bepaal zelf breedte en diepte en kies alle opties op maat.
+                            </p>
+                            <span className="btn-secondary px-6 md:px-8 py-3 md:py-4 text-sm md:text-base w-fit inline-flex items-center gap-2 group-hover:gap-3 transition-all">
+                                Stel maatwerk samen
+                                <ArrowRight size={18} />
+                            </span>
+                        </div>
+                    </Link>
                 </div>
             </div>
-
             {/* USP Bar - Dynamic from Shopify */}
             <div className="bg-hett-light py-6 border-y border-gray-200 mb-0">
                 <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
@@ -202,22 +214,6 @@ const Home: React.FC = () => {
 
             {/* Showroom Section */}
             <HomeShowroomSection />
-
-            {/* Inspiratie Section - Uses Shopify Projects */}
-            <InspirationStrip projectCards={projectCards} />
-
-            {/* Blog & Nieuws Section */}
-            {loading ? (
-                <div className="py-24 text-center bg-white border-b border-gray-100">
-                    <span className="text-hett-muted font-medium animate-pulse">Nieuws laden...</span>
-                </div>
-            ) : error || blogPosts.length === 0 ? (
-                <div className="hidden"></div>
-            ) : (
-                <BlogCarousel items={blogPosts} />
-            )}
-
-           
 
             {/* FAQ Section */}
             <HomeFAQ items={faqItems} />

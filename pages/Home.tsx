@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Check, Star, Wrench, Truck, Package, Award, Loader2 } from 'lucide-react';
+import { ArrowRight, Check, Star, Wrench, Truck, Package, Award } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { Post, Product } from '../types';
-import { getAllProducts } from '../src/lib/shopify';
+import { Post } from '../types';
 import { content } from '../services/content';
 import {
     getHomepageHero,
@@ -22,7 +21,8 @@ import BlogCarousel from '../components/ui/BlogCarousel';
 import HomeFeatureBlock from '../components/ui/HomeFeatureBlock';
 import HomeShowroomSection from '../components/ui/HomeShowroomSection';
 import HomeFAQ from '../components/ui/HomeFAQ';
-import ProductCard from '../components/ui/ProductCard';
+import VerandaPresetCard from '../components/ui/VerandaPresetCard';
+import { POPULAIRE_VERANDA_KAARTEN } from '../config/homepageContent';
 
 // Icon mapping for USPs
 const iconMap: Record<string, LucideIcon> = {
@@ -34,10 +34,6 @@ const iconMap: Record<string, LucideIcon> = {
 };
 
 const Home: React.FC = () => {
-    // Shopify products state
-    const [products, setProducts] = useState<Product[]>([]);
-    const [productsLoading, setProductsLoading] = useState(true);
-
     // Shopify content state
     const [hero, setHero] = useState<HomepageHero>(FALLBACK_HERO);
     const [usps, setUsps] = useState<HomepageUsp[]>(FALLBACK_USPS);
@@ -48,21 +44,6 @@ const Home: React.FC = () => {
     const [blogPosts, setBlogPosts] = useState<Post[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
-
-    // Fetch Shopify products
-    useEffect(() => {
-        const fetchProducts = async () => {
-            try {
-                const shopifyProducts = await getAllProducts();
-                setProducts(shopifyProducts);
-            } catch (err) {
-                console.error('Failed to fetch products:', err);
-            } finally {
-                setProductsLoading(false);
-            }
-        };
-        fetchProducts();
-    }, []);
 
     // Fetch all Shopify content
     useEffect(() => {
@@ -178,7 +159,7 @@ const Home: React.FC = () => {
                 </div>
             </div>
             
- {/* Popular Products - Grid layout */}
+            {/* Populaire keuzes - Hardcoded Veranda Cards */}
             <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pt-10 mb-20">
                 {/* Header - same style as Inspiratie section */}
                 <div className="flex items-center justify-between mb-8">
@@ -191,22 +172,12 @@ const Home: React.FC = () => {
                     </Link>
                 </div>
 
-                {productsLoading ? (
-                    <div className="flex items-center justify-center py-20">
-                        <Loader2 className="w-8 h-8 animate-spin text-hett-secondary" />
-                        <span className="ml-3 text-hett-muted font-medium">Producten laden...</span>
-                    </div>
-                ) : products.length === 0 ? (
-                    <div className="text-center py-20 bg-white rounded-xl">
-                        <p className="text-hett-muted font-medium">Geen producten gevonden</p>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-                        {products.slice(0, 4).map((product) => (
-                            <ProductCard key={product.id} product={product} />
-                        ))}
-                    </div>
-                )}
+                {/* 3-column grid: 1 col mobile, 2 col tablet, 3 col desktop */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {POPULAIRE_VERANDA_KAARTEN.map((card) => (
+                        <VerandaPresetCard key={card.key} card={card} />
+                    ))}
+                </div>
             </div>
 
             {/* Feature Block - Sandwichpanelen */}

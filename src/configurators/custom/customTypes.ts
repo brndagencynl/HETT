@@ -176,7 +176,7 @@ export interface MaatwerkAnchorInfo {
   anchorSizeKey: string;
   /** The anchor product's base price (from Shopify variant) */
   anchorPrice: number;
-  /** Custom fee added for maatwerk (€750) */
+  /** Custom fee added for maatwerk (€364.99) */
   customFee: number;
 }
 
@@ -188,7 +188,7 @@ export interface MaatwerkPriceBreakdown {
   basePrice: number;
   /** Base price from Shopify variant (before surcharge) */
   shopifyVariantPrice?: number;
-  /** Maatwerk surcharge (€750) */
+  /** Maatwerk surcharge (€364.99) */
   maatwerkSurcharge?: number;
   selections: MaatwerkSelection[];
   optionsTotal: number;
@@ -208,7 +208,7 @@ export interface MaatwerkCartPayload {
   basePrice: number;
   /** Base price from Shopify variant (before surcharge) */
   shopifyVariantPrice?: number;
-  /** Maatwerk surcharge (€750) */
+  /** Maatwerk surcharge (€364.99) */
   maatwerkSurcharge?: number;
   optionsTotal: number;
   totalPrice: number;

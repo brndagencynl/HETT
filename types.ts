@@ -155,7 +155,7 @@ export interface MaatwerkCartPayload {
   basePrice: number;
   /** Base price from Shopify variant (before surcharge) */
   shopifyVariantPrice?: number;
-  /** Maatwerk surcharge (e.g. €750) */
+  /** Maatwerk surcharge (e.g. €364.99) */
   maatwerkSurcharge?: number;
   optionsTotal: number;
   totalPrice: number;

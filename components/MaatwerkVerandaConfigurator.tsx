@@ -602,7 +602,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
         <Card padding="tight" className="bg-amber-50 border border-amber-200 flex items-start gap-2.5">
           <Info size={16} className="text-amber-600 mt-0.5 flex-shrink-0" />
           <div className="text-sm text-amber-800 leading-snug">
-            <strong>Maatwerk:</strong> Kies elke maat tot op de centimeter. De prijs wordt automatisch berekend op basis van de gekozen afmetingen, plus € 750,00 maatwerk toeslag.
+            <strong>Maatwerk:</strong> Kies elke maat tot op de centimeter. De prijs wordt automatisch berekend op basis van de gekozen afmetingen, plus € 364,99 maatwerk toeslag.
           </div>
         </Card>
       </div>

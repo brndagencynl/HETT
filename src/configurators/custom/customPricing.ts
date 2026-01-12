@@ -7,7 +7,7 @@
  * PRICING STRATEGY (NEW):
  * - User enters custom dimensions (any cm value within range)
  * - We map those dimensions to the nearest anchor product (ceiling)
- * - Base price = Anchor product price + €750 custom fee
+ * - Base price = Anchor product price + €364.99 custom fee
  * - Option prices: can be fixed, byWidthRange, byDepthRange, or byArea
  * 
  * Supports continuous slider values (1cm increments).
@@ -252,7 +252,7 @@ export function getAnchorProductForSize(size: MaatwerkSize): {
 /**
  * Get base price for a custom maatwerk configuration
  * 
- * PRICING: Anchor product price + €750 custom fee
+ * PRICING: Anchor product price + €364.99 custom fee
  * 
  * @param size - User's requested custom dimensions
  * @returns Base price including custom fee

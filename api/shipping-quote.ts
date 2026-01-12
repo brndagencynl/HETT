@@ -101,16 +101,30 @@ interface GoogleDistanceMatrixResponse {
 // CONSTANTS
 // =============================================================================
 
-const ORIGIN_ADDRESS = 'Hoppenkuil 17, 5626DD Eindhoven, Netherlands';
+const ORIGIN_ADDRESS = 'Hoppenkuil 17, 5626DD Eindhoven, NL';
 const VALID_COUNTRIES: CountryCode[] = ['NL', 'BE', 'DE'];
 const VALID_MODES: ShippingMode[] = ['pickup', 'delivery'];
 const PRICE_PER_KM = 1.00; // €1 per km for BE/DE
 const MAX_INPUT_LENGTH = 200;
 
+// Fallback prices when Google API fails (approximate distances from Eindhoven)
+const FALLBACK_PRICES: Record<CountryCode, number> = {
+  NL: 0,    // NL is always free
+  BE: 100,  // ~100km average to Belgium
+  DE: 150,  // ~150km average to Germany
+};
+
 const COUNTRY_NAMES: Record<CountryCode, string> = {
   NL: 'Netherlands',
   BE: 'Belgium',
   DE: 'Germany',
+};
+
+// ISO 3166-1 alpha-2 codes for address formatting
+const COUNTRY_ISO_CODES: Record<CountryCode, string> = {
+  NL: 'NL',
+  BE: 'BE',
+  DE: 'DE',
 };
 
 // =============================================================================
@@ -203,10 +217,11 @@ function validateRequest(body: unknown):
 }
 
 function buildDestination(data: ShippingQuoteRequest): string {
-  const countryName = COUNTRY_NAMES[data.country];
+  const isoCode = COUNTRY_ISO_CODES[data.country];
   const parts: string[] = [];
 
-  // Build address: "Street HouseNumber, PostalCode City, Country"
+  // Build address: "Street HouseNumber, PostalCode City, ISO_CODE"
+  // Always include ISO country code for reliable geocoding
   if (data.street) {
     if (data.houseNumber) {
       parts.push(`${data.street} ${data.houseNumber}`);
@@ -216,9 +231,30 @@ function buildDestination(data: ShippingQuoteRequest): string {
   }
 
   parts.push(`${data.postalCode} ${data.city}`);
-  parts.push(countryName);
+  parts.push(isoCode); // Use ISO code instead of full country name
 
   return parts.join(', ');
+}
+
+/**
+ * Calculate fallback price when Google API is unavailable
+ */
+function calculateFallbackPrice(country: CountryCode): ShippingQuoteSuccess {
+  const fallbackKm = FALLBACK_PRICES[country];
+  const price = country === 'NL' ? 0 : fallbackKm * PRICE_PER_KM;
+  
+  console.warn(`[Shipping] Using fallback price for ${country}: ${fallbackKm}km = €${price}`);
+  
+  return {
+    ok: true,
+    km: fallbackKm,
+    price,
+    currency: 'EUR',
+    formattedPrice: formatPrice(price),
+    origin: ORIGIN_ADDRESS,
+    destination: `${country} (geschatte afstand)`,
+    durationText: undefined,
+  };
 }
 
 async function fetchGoogleDistance(
@@ -352,50 +388,48 @@ export default async function handler(
   // DELIVERY BE/DE - €1 per km
   // ==========================================================================
   const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+  
+  // If no API key configured, use fallback pricing (never fail checkout)
   if (!apiKey) {
-    console.error('[Shipping] GOOGLE_MAPS_API_KEY not configured in environment');
-    const error: ShippingQuoteError = {
-      ok: false,
-      code: 'CONFIG_ERROR',
-      message: 'Bezorgkosten kunnen momenteel niet worden berekend. Neem contact op met de klantenservice.',
-    };
-    res.status(500).json(error);
+    console.error('[Shipping] GOOGLE_MAPS_API_KEY not configured - using fallback pricing for', data.country);
+    const fallbackResponse = calculateFallbackPrice(data.country);
+    res.status(200).json(fallbackResponse);
     return;
   }
 
   const destination = buildDestination(data);
-  console.log('[Shipping] calculating distance to:', destination);
+  console.log('[Shipping] Calculating distance from:', ORIGIN_ADDRESS);
+  console.log('[Shipping] Calculating distance to:', destination);
+  console.log('[Shipping] Country:', data.country, '| ISO:', COUNTRY_ISO_CODES[data.country]);
 
   try {
     const googleResponse = await fetchGoogleDistance(ORIGIN_ADDRESS, destination, apiKey);
+    
+    console.log('[Shipping] Google API response status:', googleResponse.status);
+    if (googleResponse.error_message) {
+      console.error('[Shipping] Google API error_message:', googleResponse.error_message);
+    }
 
     if (googleResponse.status !== 'OK') {
-      console.error('[Shipping] Google API error:', googleResponse.status, googleResponse.error_message);
-      const error: ShippingQuoteError = {
-        ok: false,
-        code: 'GOOGLE_ERROR',
-        message: googleResponse.error_message || 'Kon geen route berekenen. Probeer het later opnieuw.',
-      };
-      res.status(400).json(error);
+      console.error('[Shipping] Google API top-level error:', googleResponse.status, googleResponse.error_message);
+      // Use fallback instead of failing
+      console.warn('[Shipping] Falling back to estimated price due to Google API error');
+      const fallbackResponse = calculateFallbackPrice(data.country);
+      res.status(200).json(fallbackResponse);
       return;
     }
 
     const element = googleResponse.rows?.[0]?.elements?.[0];
+    console.log('[Shipping] Element status:', element?.status);
+    
     if (!element || element.status !== 'OK') {
       const errorStatus = element?.status || 'UNKNOWN';
       console.error('[Shipping] Element error:', errorStatus);
       
-      let message = 'Adres niet gevonden. Controleer de gegevens en probeer opnieuw.';
-      if (errorStatus === 'ZERO_RESULTS') {
-        message = 'Geen route gevonden naar dit adres.';
-      }
-
-      const error: ShippingQuoteError = {
-        ok: false,
-        code: 'INVALID_ADDRESS',
-        message,
-      };
-      res.status(400).json(error);
+      // Use fallback instead of failing - Shopify checkout must never break
+      console.warn('[Shipping] Falling back to estimated price due to element error:', errorStatus);
+      const fallbackResponse = calculateFallbackPrice(data.country);
+      res.status(200).json(fallbackResponse);
       return;
     }
 
@@ -403,6 +437,8 @@ export default async function handler(
     const distanceMeters = element.distance?.value ?? 0;
     const km = Math.round((distanceMeters / 1000) * 10) / 10; // One decimal
     const price = Math.round(km * PRICE_PER_KM * 100) / 100; // Two decimals
+
+    console.log('[Shipping] Distance calculated:', km, 'km | Price:', price, 'EUR');
 
     const response: ShippingQuoteSuccess = {
       ok: true,
@@ -415,15 +451,13 @@ export default async function handler(
       durationText: element.duration?.text,
     };
 
-    console.log('[Shipping] response', response);
+    console.log('[Shipping] Success response:', JSON.stringify(response));
     res.status(200).json(response);
   } catch (error) {
-    console.error('[Shipping] error', error);
-    const errorResponse: ShippingQuoteError = {
-      ok: false,
-      code: 'GOOGLE_ERROR',
-      message: 'Er is een fout opgetreden bij het berekenen van de verzendkosten. Probeer het later opnieuw.',
-    };
-    res.status(500).json(errorResponse);
+    // Catch-all: use fallback pricing so checkout never fails
+    console.error('[Shipping] Unexpected error:', error);
+    console.warn('[Shipping] Using fallback pricing due to unexpected error');
+    const fallbackResponse = calculateFallbackPrice(data.country);
+    res.status(200).json(fallbackResponse);
   }
 }

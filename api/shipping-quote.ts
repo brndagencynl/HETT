@@ -271,13 +271,25 @@ async function fetchGoogleDistance(
   });
 
   const url = `https://maps.googleapis.com/maps/api/distancematrix/json?${params.toString()}`;
+  
+  console.log('[Shipping] Google API request URL (without key):', url.replace(apiKey, 'REDACTED'));
+  
   const response = await fetch(url);
+  const responseText = await response.text();
+  
+  console.log('[Shipping] Google API raw response:', responseText);
 
   if (!response.ok) {
+    console.error('[Shipping] Google API HTTP error:', response.status, responseText);
     throw new Error(`Google API HTTP error: ${response.status}`);
   }
 
-  return response.json();
+  try {
+    return JSON.parse(responseText);
+  } catch (e) {
+    console.error('[Shipping] Failed to parse Google API response:', e);
+    throw new Error('Failed to parse Google API response');
+  }
 }
 
 // =============================================================================

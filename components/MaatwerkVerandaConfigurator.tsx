@@ -505,10 +505,10 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
             <div className="flex-1 relative h-6 flex items-center">
               {/* Track background */}
               <div className="absolute inset-x-0 h-2.5 bg-gray-200 rounded-full" />
-              {/* Track fill */}
+              {/* Track fill - use calc to account for thumb radius (12px) so fill ends at thumb center */}
               <div 
-                className="absolute left-0 h-2.5 bg-[#003878] rounded-full transition-all duration-75"
-                style={{ width: `${percent}%` }}
+                className="absolute left-0 h-2.5 bg-[#003878] rounded-full pointer-events-none"
+                style={{ width: `calc(${percent}% + ${12 - (percent / 100) * 24}px)` }}
               />
               {/* Actual range input */}
               <input
@@ -523,12 +523,11 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
                 onTouchStart={handleSliderMouseDown}
                 onMouseUp={handleSliderMouseUp}
                 onTouchEnd={handleSliderMouseUp}
-                className="absolute inset-0 w-full h-full cursor-pointer appearance-none bg-transparent
+                className="absolute inset-0 w-full h-full cursor-pointer appearance-none bg-transparent z-10
                   [&::-webkit-slider-runnable-track]:h-2.5 [&::-webkit-slider-runnable-track]:bg-transparent
                   [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 
                   [&::-webkit-slider-thumb]:bg-[#003878] [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-grab
                   [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white
-                  [&::-webkit-slider-thumb]:relative [&::-webkit-slider-thumb]:z-10
                   [&::-moz-range-track]:h-2.5 [&::-moz-range-track]:bg-transparent
                   [&::-moz-range-thumb]:w-6 [&::-moz-range-thumb]:h-6 [&::-moz-range-thumb]:bg-[#003878] 
                   [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:cursor-grab [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white

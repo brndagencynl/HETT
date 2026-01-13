@@ -103,7 +103,7 @@ const Home: React.FC = () => {
             </div>
             
             {/* Populaire keuzes - Hardcoded Veranda Cards */}
-            <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pt-10 mb-20">
+            //<div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pt-10 mb-20">
                 {/* Header - same style as Inspiratie section */}
                 <div className="flex items-center justify-between mb-8">
                     <h2 className="text-2xl md:text-3xl font-black text-hett-dark">Populaire keuzes</h2>

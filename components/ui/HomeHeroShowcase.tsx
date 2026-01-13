@@ -1,16 +1,32 @@
 /**
- * HomeHeroShowcase Component
- * ==========================
+ * HomeHeroShowcase Component (Optimized)
+ * ======================================
  * 
- * Full-width hero with background image, overlay, content, and
- * a thumbnail carousel strip at the bottom for category navigation.
+ * Performance optimized hero with:
+ * - AVIF + WebP fallback using <picture> elements
+ * - Responsive srcset for different viewport sizes
+ * - Blur placeholder for hero image
+ * - Lazy loading for thumbnails
+ * - Thumbnails rendered after initial hero mount
+ * - Improved thumbnail visibility (larger, better contrast)
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
 
-// Hero items configuration - easily editable
+// =============================================================================
+// TYPES
+// =============================================================================
+
+interface HeroImageSet {
+  avif1920: string;
+  webp1920: string;
+  avif1024: string;
+  webp1024: string;
+  webp640: string;
+}
+
 interface HeroItem {
   id: string;
   label: string;
@@ -18,10 +34,14 @@ interface HeroItem {
   subtitle: string;
   ctaText: string;
   ctaHref: string;
-  backgroundImage: string;
+  images: HeroImageSet;
   thumbnail: string;
   enabled: boolean;
 }
+
+// =============================================================================
+// HERO ITEMS CONFIGURATION
+// =============================================================================
 
 const heroItems: HeroItem[] = [
   {
@@ -31,8 +51,14 @@ const heroItems: HeroItem[] = [
     subtitle: 'De beste en voordeligste in de markt voor de doe-het-zelver!',
     ctaText: 'Stel zelf samen',
     ctaHref: '/verandas',
-    backgroundImage: '/assets/images/homepagina_1.webp',
-    thumbnail: '/assets/images/homepagina_1.webp',
+    images: {
+      avif1920: '/assets/images/homepagina_hero_1_1920.avif',
+      webp1920: '/assets/images/homepagina_hero_1_1920.webp',
+      avif1024: '/assets/images/homepagina_hero_1_1024.avif',
+      webp1024: '/assets/images/homepagina_hero_1_1024.webp',
+      webp640: '/assets/images/homepagina_hero_1_640.webp',
+    },
+    thumbnail: '/assets/images/homepagina_thumb_1.webp',
     enabled: true,
   },
   {
@@ -42,18 +68,170 @@ const heroItems: HeroItem[] = [
     subtitle: 'Speciale maten? Geen probleem met onze maatwerk configurator.',
     ctaText: 'Configureer nu',
     ctaHref: '/maatwerk-configurator',
-    backgroundImage: '/assets/images/homepagina_2.webp',
-    thumbnail: '/assets/images/homepagina_2.webp',
+    images: {
+      avif1920: '/assets/images/homepagina_hero_2_1920.avif',
+      webp1920: '/assets/images/homepagina_hero_2_1920.webp',
+      avif1024: '/assets/images/homepagina_hero_2_1024.avif',
+      webp1024: '/assets/images/homepagina_hero_2_1024.webp',
+      webp640: '/assets/images/homepagina_hero_2_640.webp',
+    },
+    thumbnail: '/assets/images/homepagina_thumb_2.webp',
     enabled: true,
   },
 ];
 
+// Blur placeholder - simple gray SVG (tiny base64)
+const BLUR_PLACEHOLDER = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiMyYTJhMmEiLz48L3N2Zz4=';
+
+// =============================================================================
+// HERO IMAGE COMPONENT (Optimized)
+// =============================================================================
+
+interface HeroImageProps {
+  images: HeroImageSet;
+  alt: string;
+  priority?: boolean;
+}
+
+const HeroImage: React.FC<HeroImageProps> = ({ images, alt, priority = false }) => {
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  return (
+    <div className="absolute inset-0">
+      {/* Blur placeholder background */}
+      <div 
+        className={`absolute inset-0 bg-gray-800 transition-opacity duration-500 ${
+          isLoaded ? 'opacity-0' : 'opacity-100'
+        }`}
+        style={{
+          backgroundImage: `url(${BLUR_PLACEHOLDER})`,
+          backgroundSize: 'cover',
+          filter: 'blur(20px)',
+          transform: 'scale(1.1)',
+        }}
+      />
+      
+      {/* Main image with <picture> for format fallback */}
+      <picture>
+        {/* AVIF for modern browsers - desktop */}
+        <source
+          type="image/avif"
+          media="(min-width: 1024px)"
+          srcSet={images.avif1920}
+        />
+        {/* WebP for desktop */}
+        <source
+          type="image/webp"
+          media="(min-width: 1024px)"
+          srcSet={images.webp1920}
+        />
+        {/* AVIF for tablet */}
+        <source
+          type="image/avif"
+          media="(min-width: 640px)"
+          srcSet={images.avif1024}
+        />
+        {/* WebP for tablet */}
+        <source
+          type="image/webp"
+          media="(min-width: 640px)"
+          srcSet={images.webp1024}
+        />
+        {/* WebP for mobile */}
+        <source
+          type="image/webp"
+          srcSet={images.webp640}
+        />
+        {/* Fallback img */}
+        <img
+          src={images.webp1920}
+          alt={alt}
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
+            isLoaded ? 'opacity-100' : 'opacity-0'
+          }`}
+          onLoad={() => setIsLoaded(true)}
+          loading={priority ? 'eager' : 'lazy'}
+          decoding={priority ? 'sync' : 'async'}
+          // @ts-expect-error fetchPriority not yet in React types
+          fetchpriority={priority ? 'high' : 'auto'}
+        />
+      </picture>
+    </div>
+  );
+};
+
+// =============================================================================
+// THUMBNAIL COMPONENT (Lazy loaded)
+// =============================================================================
+
+interface ThumbnailProps {
+  item: HeroItem;
+  isActive: boolean;
+  onClick: () => void;
+}
+
+const Thumbnail: React.FC<ThumbnailProps> = ({ item, isActive, onClick }) => {
+  return (
+    <button
+      onClick={onClick}
+      className="flex flex-col items-center gap-2.5 flex-shrink-0 group"
+    >
+      {/* Thumbnail image container - larger for better visibility */}
+      <div className={`
+        w-[72px] h-[72px] md:w-[88px] md:h-[88px] 
+        rounded-xl overflow-hidden transition-all duration-200
+        border-2 shadow-sm
+        ${isActive
+          ? 'ring-[3px] ring-teal-500 ring-offset-2 border-teal-500 scale-105'
+          : 'border-gray-300 hover:border-gray-400 hover:ring-2 hover:ring-gray-300 hover:ring-offset-1 hover:scale-102'
+        }
+      `}>
+        <img
+          src={item.thumbnail}
+          srcSet={`${item.thumbnail} 1x, ${item.thumbnail} 2x`}
+          alt={item.label}
+          className="w-full h-full object-cover"
+          loading="lazy"
+          decoding="async"
+        />
+      </div>
+      {/* Label */}
+      <span className={`
+        text-sm md:text-base font-bold whitespace-nowrap transition-colors
+        ${isActive 
+          ? 'text-teal-600' 
+          : 'text-gray-700 group-hover:text-gray-900'
+        }
+      `}>
+        {item.label}
+      </span>
+    </button>
+  );
+};
+
+// =============================================================================
+// MAIN COMPONENT
+// =============================================================================
+
 const HomeHeroShowcase: React.FC = () => {
   const [activeIndex, setActiveIndex] = useState(0);
-  const activeItem = heroItems[activeIndex];
+  const [thumbnailsReady, setThumbnailsReady] = useState(false);
 
-  // Only show enabled items in the carousel, or show all but disabled ones are not clickable
+  // Delay thumbnail rendering until after initial hero mount (optimize LCP)
+  useEffect(() => {
+    // Use requestIdleCallback for non-critical rendering, fallback to setTimeout
+    const callback = () => setThumbnailsReady(true);
+    if ('requestIdleCallback' in window) {
+      const id = requestIdleCallback(callback, { timeout: 100 });
+      return () => cancelIdleCallback(id);
+    } else {
+      const id = setTimeout(callback, 50);
+      return () => clearTimeout(id);
+    }
+  }, []);
+
   const visibleItems = heroItems.filter(item => item.enabled);
+  const currentItem = visibleItems[activeIndex] || heroItems[0];
 
   const handlePrev = () => {
     setActiveIndex((prev) => (prev === 0 ? visibleItems.length - 1 : prev - 1));
@@ -67,20 +245,18 @@ const HomeHeroShowcase: React.FC = () => {
     setActiveIndex(index);
   };
 
-  // For now, only show veranda since others are disabled
-  const currentItem = visibleItems[activeIndex] || heroItems[0];
-
   return (
     <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mb-8">
       <div className="relative rounded-[28px] overflow-hidden min-h-[500px] md:min-h-[550px] lg:min-h-[600px]">
-        {/* Background Image */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center transition-all duration-700"
-          style={{ backgroundImage: `url(${currentItem.backgroundImage})` }}
+        {/* Hero Background Image (Priority loaded) */}
+        <HeroImage
+          images={currentItem.images}
+          alt={currentItem.title}
+          priority={activeIndex === 0}
         />
         
         {/* Dark Overlay Gradient */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-black/20 to-black/10" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-black/25 to-black/10" />
         
         {/* Content */}
         <div className="relative z-10 h-full min-h-[500px] md:min-h-[550px] lg:min-h-[600px] flex flex-col justify-between p-6 md:p-10 lg:p-14">
@@ -113,53 +289,49 @@ const HomeHeroShowcase: React.FC = () => {
           
           {/* Bottom Thumbnail Strip */}
           <div className="mt-8">
-            <div className="flex items-center justify-center gap-4">
-              {/* Prev Button - Outside the white container */}
+            <div className="flex items-center justify-center gap-3 md:gap-4">
+              {/* Prev Button */}
               <button
                 onClick={handlePrev}
-                className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white flex items-center justify-center transition-colors flex-shrink-0 shadow-lg"
+                className="w-11 h-11 md:w-12 md:h-12 rounded-full bg-white/95 backdrop-blur-md hover:bg-white flex items-center justify-center transition-all flex-shrink-0 shadow-lg hover:shadow-xl border border-gray-200"
                 aria-label="Vorige"
               >
-                <ChevronLeft size={20} className="text-gray-600" />
+                <ChevronLeft size={22} className="text-gray-700" />
               </button>
               
-              {/* White pill container with thumbnails */}
-              <div className="bg-white/95 backdrop-blur-sm rounded-[28px] px-6 py-4 flex items-center shadow-lg">
-                <div className="flex items-center gap-4 md:gap-6 overflow-x-auto no-scrollbar">
-                  {heroItems.map((item, index) => (
-                    <button
-                      key={item.id}
-                      onClick={() => handleThumbnailClick(index)}
-                      className="flex flex-col items-center gap-2 flex-shrink-0 group"
-                    >
-                      <div className={`w-16 h-16 md:w-20 md:h-20 rounded-xl overflow-hidden transition-all ${
-                        index === activeIndex
-                          ? 'ring-[3px] ring-teal-500 ring-offset-2'
-                          : 'hover:ring-2 hover:ring-gray-300 hover:ring-offset-1'
-                      }`}>
-                        <img
-                          src={item.thumbnail}
-                          alt={item.label}
-                          className="w-full h-full object-cover"
-                        />
+              {/* Thumbnail Container - Semi-opaque with backdrop blur */}
+              <div className="bg-white/90 backdrop-blur-md rounded-[24px] px-5 md:px-8 py-4 md:py-5 flex items-center shadow-xl border border-white/50">
+                {thumbnailsReady ? (
+                  <div className="flex items-center gap-5 md:gap-8 overflow-x-auto no-scrollbar">
+                    {heroItems.map((item, index) => (
+                      <Thumbnail
+                        key={item.id}
+                        item={item}
+                        isActive={index === activeIndex}
+                        onClick={() => handleThumbnailClick(index)}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  // Placeholder while thumbnails load
+                  <div className="flex items-center gap-5 md:gap-8">
+                    {heroItems.map((item) => (
+                      <div key={item.id} className="flex flex-col items-center gap-2.5">
+                        <div className="w-[72px] h-[72px] md:w-[88px] md:h-[88px] rounded-xl bg-gray-200 animate-pulse" />
+                        <div className="h-4 w-16 bg-gray-200 rounded animate-pulse" />
                       </div>
-                      <span className={`text-xs md:text-sm font-semibold whitespace-nowrap transition-colors ${
-                        index === activeIndex ? 'text-teal-600' : 'text-gray-600 group-hover:text-gray-800'
-                      }`}>
-                        {item.label}
-                      </span>
-                    </button>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
               
-              {/* Next Button - Outside the white container */}
+              {/* Next Button */}
               <button
                 onClick={handleNext}
-                className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white flex items-center justify-center transition-colors flex-shrink-0 shadow-lg"
+                className="w-11 h-11 md:w-12 md:h-12 rounded-full bg-white/95 backdrop-blur-md hover:bg-white flex items-center justify-center transition-all flex-shrink-0 shadow-lg hover:shadow-xl border border-gray-200"
                 aria-label="Volgende"
               >
-                <ChevronRight size={20} className="text-gray-600" />
+                <ChevronRight size={22} className="text-gray-700" />
               </button>
             </div>
           </div>

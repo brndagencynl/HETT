@@ -8,7 +8,9 @@ import { normalizeQuantity } from '../src/lib/cart/quantity';
 import { addCents, fromCents, mulCents, toCents } from '../src/utils/money';
 import {
   fetchShippingQuote,
+  isShippingBlocked,
   type ShippingMode,
+  type ShippingQuoteResponse,
 } from '../src/services/shippingQuote';
 import {
   type ShippingCountry,
@@ -21,6 +23,10 @@ import {
   type ShippingLineItem,
   type ShippingQuoteResult,
 } from '../src/services/shipping';
+import {
+  classifyCart,
+  isWaddeneiland,
+} from '../src/services/shipping/shippingRules';
 // Use shared LED addon service for both standard and maatwerk configurators
 import {
   getLedSpotCountForWidthCm,
@@ -460,25 +466,39 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setCart(prev => prev.filter(item => !isShippingLineItem(item)));
   }, []);
 
-  // Calculate and apply shipping as cart line item
+  // Calculate and apply shipping as cart line item (NEW v2 logic)
   const calculateAndApplyShipping = useCallback(async (): Promise<boolean> => {
     if (shipping.isLocked) return false;
 
     // Pickup mode: no shipping line needed
     if (shipping.mode === 'pickup') {
-      // Remove any existing shipping line
       setCart(prev => prev.filter(item => !isShippingLineItem(item)));
       return true;
     }
 
-    // NL delivery: free shipping, no line needed
-    if (shipping.country === 'NL') {
+    // Classify cart contents to determine shipping rules
+    const cartClassification = classifyCart(cartWithCents);
+    const hasVeranda = cartClassification.hasVeranda;
+    
+    console.log('[Shipping] Cart classification:', {
+      hasVeranda,
+      hasAccessoires: cartClassification.hasAccessoires,
+      verandaCount: cartClassification.verandaItems.length,
+      accessoireCount: cartClassification.accessoireItems.length,
+    });
+
+    // Check for Waddeneilanden (Netherlands only) - block delivery
+    if (shipping.country === 'NL' && isWaddeneiland(shipping.address.postalCode, shipping.address.city)) {
+      setShipping(prev => ({
+        ...prev,
+        isCalculating: false,
+        error: 'Wij bezorgen helaas niet naar de Waddeneilanden. Neem contact met ons op voor alternatieven.',
+      }));
       setCart(prev => prev.filter(item => !isShippingLineItem(item)));
-      return true;
+      return false;
     }
 
-    // BE/DE delivery: calculate distance and add shipping line
-    // Validate required fields
+    // Validate required fields for delivery
     if (!shipping.address.postalCode) {
       setShipping(prev => ({
         ...prev,
@@ -491,7 +511,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setShipping(prev => ({ ...prev, isCalculating: true, error: null }));
 
     try {
-      // Fetch distance from Google API
+      // Fetch shipping quote from API (new v2 endpoint with cart classification)
       const result = await fetchShippingQuote({
         mode: 'delivery',
         country: shipping.country,
@@ -499,18 +519,49 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         houseNumber: shipping.address.houseNumber,
         street: shipping.address.street,
         city: shipping.address.city,
+        hasVeranda, // NEW: pass cart classification
       });
 
+      // Handle blocked response (Waddeneilanden)
+      if (isShippingBlocked(result)) {
+        setShipping(prev => ({
+          ...prev,
+          isCalculating: false,
+          error: result.message,
+        }));
+        setCart(prev => prev.filter(item => !isShippingLineItem(item)));
+        return false;
+      }
+
+      // Handle error response
       if (!result.ok) {
         setShipping(prev => ({
           ...prev,
           isCalculating: false,
-          error: 'message' in result ? result.message : 'Kan afstand niet berekenen. Controleer het adres.',
+          error: 'message' in result ? result.message : 'Kan verzendkosten niet berekenen.',
         }));
         return false;
       }
 
-      // Get shipping product from Shopify
+      console.log('[Shipping] API response:', {
+        type: result.type,
+        km: result.km,
+        priceCents: result.priceCents,
+        description: result.description,
+      });
+
+      // Free shipping - no line item needed
+      if (result.type === 'free' || result.priceCents === 0) {
+        setCart(prev => prev.filter(item => !isShippingLineItem(item)));
+        setShipping(prev => ({
+          ...prev,
+          isCalculating: false,
+          error: null,
+        }));
+        return true;
+      }
+
+      // Get shipping product from Shopify for paid shipping
       const shippingProduct = await getShippingProduct();
       if (!shippingProduct) {
         setShipping(prev => ({
@@ -521,9 +572,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return false;
       }
 
-      // Calculate quantity and create line item
-      // result.km is the distance from Google API
-      const quoteResult = calculateShippingFromDistance(result.km, shipping.country);
+      // Create quote result for line item
+      const quoteResult: ShippingQuoteResult = {
+        distanceKm: result.km || 0,
+        quantityKm: result.type === 'veranda_flat' ? 1 : (result.type === 'accessories' ? 1 : (result.km || 0)),
+        totalCents: result.priceCents,
+        totalEur: result.priceEur,
+      };
       
       // Create the shipping selection for line item metadata
       const selection = {
@@ -537,11 +592,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       const shippingLine = createShippingLineItem(shippingProduct, quoteResult, selection);
 
-      // Add or update shipping line in cart (only if there's a cost)
+      // Add or update shipping line in cart
       setCart(prev => {
-        // Remove any existing shipping line
         const withoutShipping = prev.filter(item => !isShippingLineItem(item));
-        // Add new shipping line if not null (has cost)
         if (shippingLine) {
           return [...withoutShipping, shippingLine];
         }
@@ -555,10 +608,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }));
 
       console.log('[Shipping] Applied shipping line:', {
-        distanceKm: quoteResult.distanceKm,
-        quantityKm: quoteResult.quantityKm,
-        totalCents: quoteResult.totalCents,
-        totalEur: quoteResult.totalEur,
+        type: result.type,
+        distanceKm: result.km,
+        totalCents: result.priceCents,
+        description: result.description,
       });
 
       return true;
@@ -571,7 +624,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }));
       return false;
     }
-  }, [shipping.isLocked, shipping.mode, shipping.country, shipping.address]);
+  }, [shipping.isLocked, shipping.mode, shipping.country, shipping.address, cartWithCents]);
 
   // Legacy: clearShippingQuote - now just removes shipping line
   const clearShippingQuote = useCallback(() => {

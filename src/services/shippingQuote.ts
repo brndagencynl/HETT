@@ -1,9 +1,14 @@
 /**
- * Shipping Quote Service
- * ======================
+ * Shipping Quote Service (v2)
+ * ===========================
  * 
  * Frontend service to call the /api/shipping-quote serverless endpoint.
- * Handles shipping cost calculation based on delivery mode and address.
+ * 
+ * New shipping rules:
+ * - Veranda: free within 300km, €299.99 beyond
+ * - Accessories only: €29.99 flat rate
+ * - Waddeneilanden: blocked
+ * - Pickup: free
  */
 
 // =============================================================================
@@ -12,6 +17,7 @@
 
 export type ShippingMode = 'pickup' | 'delivery';
 export type ShippingCountry = 'NL' | 'BE' | 'DE';
+export type ShippingType = 'free' | 'veranda_flat' | 'accessories' | 'pickup';
 
 export interface ShippingAddress {
   street: string;
@@ -27,13 +33,16 @@ export interface ShippingQuoteRequest {
   houseNumber: string;
   street: string;
   city: string;
+  hasVeranda: boolean; // NEW: Whether cart contains veranda products
 }
 
 export interface ShippingQuote {
-  km: number;
-  price: number;
-  currency: 'EUR';
+  type: ShippingType;
+  km: number | null;
+  priceCents: number;
+  priceEur: number;
   formattedPrice: string;
+  description: string;
   origin: string;
   destination: string;
   durationText?: string;
@@ -42,22 +51,39 @@ export interface ShippingQuote {
 
 export interface ShippingQuoteSuccess {
   ok: true;
-  km: number;
-  price: number;
-  currency: 'EUR';
+  type: ShippingType;
+  km: number | null;
+  priceCents: number;
+  priceEur: number;
   formattedPrice: string;
+  description: string;
   origin: string;
   destination: string;
   durationText?: string;
 }
 
+export interface ShippingQuoteBlocked {
+  ok: false;
+  blocked: true;
+  code: 'WADDENEILANDEN';
+  message: string;
+}
+
 export interface ShippingQuoteError {
   ok: false;
+  blocked?: false;
   code: 'INVALID_ADDRESS' | 'GOOGLE_ERROR' | 'MISSING_FIELDS' | 'CONFIG_ERROR' | 'NETWORK_ERROR';
   message: string;
 }
 
-export type ShippingQuoteResponse = ShippingQuoteSuccess | ShippingQuoteError;
+export type ShippingQuoteResponse = ShippingQuoteSuccess | ShippingQuoteBlocked | ShippingQuoteError;
+
+/**
+ * Check if response is a blocked response (Waddeneilanden)
+ */
+export function isShippingBlocked(response: ShippingQuoteResponse): response is ShippingQuoteBlocked {
+  return !response.ok && 'blocked' in response && response.blocked === true;
+}
 
 // =============================================================================
 // API CALL
@@ -133,7 +159,8 @@ export async function fetchShippingQuote(
 export function buildShippingQuoteRequest(
   mode: ShippingMode,
   country: ShippingCountry,
-  address: ShippingAddress
+  address: ShippingAddress,
+  hasVeranda: boolean = false
 ): ShippingQuoteRequest {
   return {
     mode,
@@ -142,6 +169,7 @@ export function buildShippingQuoteRequest(
     houseNumber: address.houseNumber,
     street: address.street,
     city: address.city,
+    hasVeranda,
   };
 }
 
@@ -150,10 +178,12 @@ export function buildShippingQuoteRequest(
  */
 export function toShippingQuote(response: ShippingQuoteSuccess): ShippingQuote {
   return {
+    type: response.type,
     km: response.km,
-    price: response.price,
-    currency: response.currency,
+    priceCents: response.priceCents,
+    priceEur: response.priceEur,
     formattedPrice: response.formattedPrice,
+    description: response.description,
     origin: response.origin,
     destination: response.destination,
     durationText: response.durationText,
@@ -165,16 +195,17 @@ export function toShippingQuote(response: ShippingQuoteSuccess): ShippingQuote {
  * Format shipping cost for display.
  * Always shows 2 decimals.
  */
-export function formatShippingPrice(price: number): string {
-  if (price === 0) {
+export function formatShippingPrice(priceCents: number): string {
+  if (priceCents === 0) {
     return 'Gratis';
   }
+  const priceEur = priceCents / 100;
   return new Intl.NumberFormat('nl-NL', {
     style: 'currency',
     currency: 'EUR',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(price);
+  }).format(priceEur);
 }
 
 /**
@@ -185,16 +216,19 @@ export function isShippingAvailable(country: string): country is ShippingCountry
 }
 
 /**
- * Get shipping description based on country.
+ * Get shipping description based on cart contents.
  */
-export function getShippingDescription(mode: ShippingMode, country?: ShippingCountry): string {
+export function getShippingDescription(mode: ShippingMode, hasVeranda: boolean, country?: ShippingCountry): string {
   if (mode === 'pickup') {
     return 'Gratis afhalen in Eindhoven';
   }
-  if (country === 'NL') {
-    return 'Gratis bezorging in Nederland';
+  
+  if (!hasVeranda) {
+    return 'Verzendkosten accessoires: €29,99';
   }
-  return 'Bezorgkosten: € 1,00 per km vanaf Eindhoven';
+  
+  // Veranda orders
+  return 'Gratis bezorging binnen 300km. Daarbuiten: €299,99';
 }
 
 /**

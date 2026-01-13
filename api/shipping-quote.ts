@@ -1,13 +1,20 @@
 /**
- * Vercel Serverless Function: Shipping Quote
- * ==========================================
+ * Vercel Serverless Function: Shipping Quote (v2)
+ * ================================================
  * 
- * Calculates shipping cost based on delivery mode and distance.
+ * New shipping rules:
  * 
- * Pricing rules:
- * - Pickup: Free (€0)
- * - Delivery NL: Free (€0)
- * - Delivery BE/DE: €1 per km (exact distance from Eindhoven warehouse)
+ * 1. **Pickup**: Free (€0)
+ * 
+ * 2. **Veranda orders**:
+ *    - Within 300km from Eindhoven: FREE
+ *    - Beyond 300km: €299.99 flat rate
+ * 
+ * 3. **Accessories-only orders**: €29.99 flat rate (no distance calculation)
+ * 
+ * 4. **Waddeneilanden**: Blocked (no delivery)
+ * 
+ * 5. **Mixed orders (veranda + accessories)**: Veranda rules apply
  * 
  * Endpoint: POST /api/shipping-quote
  * 
@@ -16,25 +23,37 @@
  *   mode: 'pickup' | 'delivery',
  *   country: 'NL' | 'BE' | 'DE',
  *   postalCode: string,
- *   houseNumber: string,
- *   street: string,
- *   city: string
+ *   houseNumber?: string,
+ *   street?: string,
+ *   city: string,
+ *   hasVeranda: boolean  // NEW: Whether cart contains veranda products
  * }
  * 
  * Response (success):
  * {
  *   ok: true,
- *   km: number,
- *   price: number,
- *   currency: 'EUR',
+ *   type: 'free' | 'veranda_flat' | 'accessories' | 'pickup',
+ *   km: number | null,
+ *   priceCents: number,
+ *   priceEur: number,
  *   formattedPrice: string,
+ *   description: string,
  *   origin: string,
  *   destination: string
+ * }
+ * 
+ * Response (blocked):
+ * {
+ *   ok: false,
+ *   blocked: true,
+ *   code: 'WADDENEILANDEN',
+ *   message: string
  * }
  * 
  * Response (error):
  * {
  *   ok: false,
+ *   blocked: false,
  *   code: 'INVALID_ADDRESS' | 'GOOGLE_ERROR' | 'MISSING_FIELDS' | 'CONFIG_ERROR',
  *   message: string
  * }
@@ -48,6 +67,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 type ShippingMode = 'pickup' | 'delivery';
 type CountryCode = 'NL' | 'BE' | 'DE';
+type ShippingType = 'free' | 'veranda_flat' | 'accessories' | 'pickup';
 
 interface ShippingQuoteRequest {
   mode: ShippingMode;
@@ -56,26 +76,37 @@ interface ShippingQuoteRequest {
   houseNumber: string;
   street: string;
   city: string;
+  hasVeranda: boolean;
 }
 
 interface ShippingQuoteSuccess {
   ok: true;
-  km: number;
-  price: number;
-  currency: 'EUR';
+  type: ShippingType;
+  km: number | null;
+  priceCents: number;
+  priceEur: number;
   formattedPrice: string;
+  description: string;
   origin: string;
   destination: string;
   durationText?: string;
 }
 
+interface ShippingQuoteBlocked {
+  ok: false;
+  blocked: true;
+  code: 'WADDENEILANDEN';
+  message: string;
+}
+
 interface ShippingQuoteError {
   ok: false;
+  blocked: false;
   code: 'INVALID_ADDRESS' | 'GOOGLE_ERROR' | 'MISSING_FIELDS' | 'CONFIG_ERROR';
   message: string;
 }
 
-type ShippingQuoteResponse = ShippingQuoteSuccess | ShippingQuoteError;
+type ShippingQuoteResponse = ShippingQuoteSuccess | ShippingQuoteBlocked | ShippingQuoteError;
 
 interface GoogleDistanceMatrixResponse {
   status: string;
@@ -104,21 +135,12 @@ interface GoogleDistanceMatrixResponse {
 const ORIGIN_ADDRESS = 'Hoppenkuil 17, 5626DD Eindhoven, NL';
 const VALID_COUNTRIES: CountryCode[] = ['NL', 'BE', 'DE'];
 const VALID_MODES: ShippingMode[] = ['pickup', 'delivery'];
-const PRICE_PER_KM = 1.00; // €1 per km for BE/DE
 const MAX_INPUT_LENGTH = 200;
 
-// Fallback prices when Google API fails (approximate distances from Eindhoven)
-const FALLBACK_PRICES: Record<CountryCode, number> = {
-  NL: 0,    // NL is always free
-  BE: 100,  // ~100km average to Belgium
-  DE: 150,  // ~150km average to Germany
-};
-
-const COUNTRY_NAMES: Record<CountryCode, string> = {
-  NL: 'Netherlands',
-  BE: 'Belgium',
-  DE: 'Germany',
-};
+// Shipping rule constants
+const FREE_SHIPPING_RADIUS_KM = 300;
+const VERANDA_BEYOND_RADIUS_CENTS = 29999; // €299.99
+const ACCESSORIES_SHIPPING_CENTS = 2999;   // €29.99
 
 // ISO 3166-1 alpha-2 codes for address formatting
 const COUNTRY_ISO_CODES: Record<CountryCode, string> = {
@@ -126,6 +148,50 @@ const COUNTRY_ISO_CODES: Record<CountryCode, string> = {
   BE: 'BE',
   DE: 'DE',
 };
+
+// =============================================================================
+// WADDENEILANDEN BLOCKLIST
+// =============================================================================
+
+const WADDENEILANDEN_POSTCODES: string[] = [
+  // Texel
+  '1791', '1792', '1793', '1794', '1795', '1796', '1797',
+  // Vlieland
+  '8891', '8892', '8893', '8894', '8895', '8896', '8897', '8898', '8899',
+  // Terschelling
+  '8881', '8882', '8883', '8884', '8885',
+  // Ameland (9160-9164 range)
+  '9160', '9161', '9162', '9163', '9164',
+  // Schiermonnikoog
+  '9166',
+];
+
+const WADDENEILANDEN_PLACES: string[] = [
+  'texel', 'vlieland', 'terschelling', 'ameland', 'schiermonnikoog',
+  'den burg', 'de cocksdorp', 'oosterend', 'de koog',
+  'west-terschelling', 'midsland', 'hoorn', 'formerum', 'lies',
+  'hollum', 'ballum', 'nes', 'buren',
+];
+
+function isWaddeneiland(postalCode: string, city?: string): boolean {
+  // Check postal code (first 4 digits)
+  const normalizedPostal = (postalCode || '').replace(/\s/g, '').substring(0, 4);
+  if (WADDENEILANDEN_POSTCODES.includes(normalizedPostal)) {
+    return true;
+  }
+
+  // Check city name
+  if (city) {
+    const normalizedCity = city.toLowerCase().trim();
+    for (const place of WADDENEILANDEN_PLACES) {
+      if (normalizedCity.includes(place) || place.includes(normalizedCity)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
 
 // =============================================================================
 // HELPERS
@@ -136,13 +202,14 @@ function sanitize(input: unknown, maxLen = MAX_INPUT_LENGTH): string {
   return input.trim().replace(/[<>{}[\]\\]/g, '').slice(0, maxLen);
 }
 
-function formatPrice(price: number): string {
+function formatPrice(cents: number): string {
+  const eur = cents / 100;
   return new Intl.NumberFormat('nl-NL', {
     style: 'currency',
     currency: 'EUR',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(price);
+  }).format(eur);
 }
 
 function validateRequest(body: unknown): 
@@ -152,18 +219,18 @@ function validateRequest(body: unknown):
   if (!body || typeof body !== 'object') {
     return {
       valid: false,
-      error: { ok: false, code: 'MISSING_FIELDS', message: 'Request body is required' },
+      error: { ok: false, blocked: false, code: 'MISSING_FIELDS', message: 'Request body is required' },
     };
   }
 
-  const { mode, country, postalCode, houseNumber, street, city } = body as Record<string, unknown>;
+  const { mode, country, postalCode, houseNumber, street, city, hasVeranda } = body as Record<string, unknown>;
 
   // Validate mode
   const cleanMode = sanitize(mode) as ShippingMode;
   if (!VALID_MODES.includes(cleanMode)) {
     return {
       valid: false,
-      error: { ok: false, code: 'MISSING_FIELDS', message: `mode must be one of: ${VALID_MODES.join(', ')}` },
+      error: { ok: false, blocked: false, code: 'MISSING_FIELDS', message: `mode must be one of: ${VALID_MODES.join(', ')}` },
     };
   }
 
@@ -178,6 +245,7 @@ function validateRequest(body: unknown):
         houseNumber: '',
         street: '',
         city: '',
+        hasVeranda: Boolean(hasVeranda),
       },
     };
   }
@@ -187,7 +255,7 @@ function validateRequest(body: unknown):
   if (!VALID_COUNTRIES.includes(cleanCountry)) {
     return {
       valid: false,
-      error: { ok: false, code: 'MISSING_FIELDS', message: `country must be one of: ${VALID_COUNTRIES.join(', ')}` },
+      error: { ok: false, blocked: false, code: 'MISSING_FIELDS', message: `country must be one of: ${VALID_COUNTRIES.join(', ')}` },
     };
   }
 
@@ -199,7 +267,7 @@ function validateRequest(body: unknown):
   if (!cleanPostalCode || !cleanCity) {
     return {
       valid: false,
-      error: { ok: false, code: 'MISSING_FIELDS', message: 'postalCode and city are required for delivery' },
+      error: { ok: false, blocked: false, code: 'MISSING_FIELDS', message: 'postalCode and city are required for delivery' },
     };
   }
 
@@ -212,6 +280,7 @@ function validateRequest(body: unknown):
       houseNumber: cleanHouseNumber,
       street: cleanStreet,
       city: cleanCity,
+      hasVeranda: Boolean(hasVeranda),
     },
   };
 }
@@ -220,8 +289,6 @@ function buildDestination(data: ShippingQuoteRequest): string {
   const isoCode = COUNTRY_ISO_CODES[data.country];
   const parts: string[] = [];
 
-  // Build address: "Street HouseNumber, PostalCode City, ISO_CODE"
-  // Always include ISO country code for reliable geocoding
   if (data.street) {
     if (data.houseNumber) {
       parts.push(`${data.street} ${data.houseNumber}`);
@@ -231,30 +298,9 @@ function buildDestination(data: ShippingQuoteRequest): string {
   }
 
   parts.push(`${data.postalCode} ${data.city}`);
-  parts.push(isoCode); // Use ISO code instead of full country name
+  parts.push(isoCode);
 
   return parts.join(', ');
-}
-
-/**
- * Calculate fallback price when Google API is unavailable
- */
-function calculateFallbackPrice(country: CountryCode): ShippingQuoteSuccess {
-  const fallbackKm = FALLBACK_PRICES[country];
-  const price = country === 'NL' ? 0 : fallbackKm * PRICE_PER_KM;
-  
-  console.warn(`[Shipping] Using fallback price for ${country}: ${fallbackKm}km = €${price}`);
-  
-  return {
-    ok: true,
-    km: fallbackKm,
-    price,
-    currency: 'EUR',
-    formattedPrice: formatPrice(price),
-    origin: ORIGIN_ADDRESS,
-    destination: `${country} (geschatte afstand)`,
-    durationText: undefined,
-  };
 }
 
 async function fetchGoogleDistance(
@@ -272,24 +318,57 @@ async function fetchGoogleDistance(
 
   const url = `https://maps.googleapis.com/maps/api/distancematrix/json?${params.toString()}`;
   
-  console.log('[Shipping] Google API request URL (without key):', url.replace(apiKey, 'REDACTED'));
+  console.log('[Shipping] Fetching distance to:', destination);
   
   const response = await fetch(url);
-  const responseText = await response.text();
   
-  console.log('[Shipping] Google API raw response:', responseText);
-
   if (!response.ok) {
-    console.error('[Shipping] Google API HTTP error:', response.status, responseText);
     throw new Error(`Google API HTTP error: ${response.status}`);
   }
 
-  try {
-    return JSON.parse(responseText);
-  } catch (e) {
-    console.error('[Shipping] Failed to parse Google API response:', e);
-    throw new Error('Failed to parse Google API response');
+  return response.json();
+}
+
+// =============================================================================
+// SHIPPING CALCULATION
+// =============================================================================
+
+function calculateShipping(
+  hasVeranda: boolean,
+  distanceKm: number | null
+): { type: ShippingType; priceCents: number; description: string } {
+  // Veranda in cart
+  if (hasVeranda) {
+    if (distanceKm === null) {
+      // Can't calculate yet - default to free (will trigger distance fetch)
+      return {
+        type: 'free',
+        priceCents: 0,
+        description: 'Bezorgkosten worden berekend...',
+      };
+    }
+
+    if (distanceKm <= FREE_SHIPPING_RADIUS_KM) {
+      return {
+        type: 'free',
+        priceCents: 0,
+        description: `Gratis bezorging (${distanceKm.toFixed(0)} km)`,
+      };
+    } else {
+      return {
+        type: 'veranda_flat',
+        priceCents: VERANDA_BEYOND_RADIUS_CENTS,
+        description: `Bezorgkosten veranda (${distanceKm.toFixed(0)} km)`,
+      };
+    }
   }
+
+  // Accessories only
+  return {
+    type: 'accessories',
+    priceCents: ACCESSORIES_SHIPPING_CENTS,
+    description: 'Verzendkosten accessoires',
+  };
 }
 
 // =============================================================================
@@ -300,7 +379,7 @@ export default async function handler(
   req: VercelRequest,
   res: VercelResponse
 ): Promise<void> {
-  // CORS headers for local development
+  // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -311,16 +390,16 @@ export default async function handler(
   }
 
   if (req.method !== 'POST') {
-    res.status(405).json({ ok: false, code: 'MISSING_FIELDS', message: 'Method not allowed. Use POST.' });
+    res.status(405).json({ ok: false, blocked: false, code: 'MISSING_FIELDS', message: 'Method not allowed. Use POST.' });
     return;
   }
 
-  console.log('[Shipping] request payload', req.body);
+  console.log('[Shipping] Request payload:', JSON.stringify(req.body));
 
   // Validate request
   const validation = validateRequest(req.body);
   if (validation.valid === false) {
-    console.log('[Shipping] validation error', validation.error);
+    console.log('[Shipping] Validation error:', validation.error);
     res.status(422).json(validation.error);
     return;
   }
@@ -333,131 +412,146 @@ export default async function handler(
   if (data.mode === 'pickup') {
     const response: ShippingQuoteSuccess = {
       ok: true,
+      type: 'pickup',
       km: 0,
-      price: 0,
-      currency: 'EUR',
+      priceCents: 0,
+      priceEur: 0,
       formattedPrice: formatPrice(0),
+      description: 'Gratis afhalen in Eindhoven',
       origin: ORIGIN_ADDRESS,
       destination: 'Afhalen in Eindhoven',
     };
-    console.log('[Shipping] response (pickup)', response);
+    console.log('[Shipping] Response (pickup):', JSON.stringify(response));
     res.status(200).json(response);
     return;
   }
 
   // ==========================================================================
-  // DELIVERY NL - Free but optionally compute distance
+  // WADDENEILANDEN CHECK - Block delivery
   // ==========================================================================
-  if (data.country === 'NL') {
-    // For NL, shipping is free. We can optionally compute distance for display.
-    const apiKey = process.env.GOOGLE_MAPS_API_KEY;
-    
-    if (apiKey) {
-      try {
-        const destination = buildDestination(data);
-        const googleResponse = await fetchGoogleDistance(ORIGIN_ADDRESS, destination, apiKey);
-        
-        if (googleResponse.status === 'OK') {
-          const element = googleResponse.rows?.[0]?.elements?.[0];
-          if (element?.status === 'OK' && element.distance) {
-            const km = Math.round((element.distance.value / 1000) * 10) / 10;
-            const response: ShippingQuoteSuccess = {
-              ok: true,
-              km,
-              price: 0, // NL is always free
-              currency: 'EUR',
-              formattedPrice: formatPrice(0),
-              origin: googleResponse.origin_addresses?.[0] || ORIGIN_ADDRESS,
-              destination: googleResponse.destination_addresses?.[0] || destination,
-              durationText: element.duration?.text,
-            };
-            console.log('[Shipping] response (NL with distance)', response);
-            res.status(200).json(response);
-            return;
-          }
-        }
-      } catch (error) {
-        console.log('[Shipping] NL distance calculation failed, returning free anyway:', error);
-      }
-    }
+  if (data.country === 'NL' && isWaddeneiland(data.postalCode, data.city)) {
+    const blockedResponse: ShippingQuoteBlocked = {
+      ok: false,
+      blocked: true,
+      code: 'WADDENEILANDEN',
+      message: 'Wij bezorgen helaas niet naar de Waddeneilanden. Neem contact met ons op voor alternatieven.',
+    };
+    console.log('[Shipping] Response (blocked - Waddeneilanden):', JSON.stringify(blockedResponse));
+    res.status(200).json(blockedResponse); // 200 so it's not treated as error
+    return;
+  }
 
-    // Fallback: return free shipping without distance
+  // ==========================================================================
+  // ACCESSORIES ONLY - Fixed price, no distance calculation needed
+  // ==========================================================================
+  if (!data.hasVeranda) {
+    const shipping = calculateShipping(false, null);
     const response: ShippingQuoteSuccess = {
       ok: true,
-      km: 0,
-      price: 0,
-      currency: 'EUR',
-      formattedPrice: formatPrice(0),
+      type: shipping.type,
+      km: null, // No distance calculation for accessories
+      priceCents: shipping.priceCents,
+      priceEur: shipping.priceCents / 100,
+      formattedPrice: formatPrice(shipping.priceCents),
+      description: shipping.description,
       origin: ORIGIN_ADDRESS,
       destination: buildDestination(data),
     };
-    console.log('[Shipping] response (NL fallback)', response);
+    console.log('[Shipping] Response (accessories only):', JSON.stringify(response));
     res.status(200).json(response);
     return;
   }
 
   // ==========================================================================
-  // DELIVERY BE/DE - €1 per km
+  // VERANDA IN CART - Calculate distance
   // ==========================================================================
   const apiKey = process.env.GOOGLE_MAPS_API_KEY;
   
-  // If no API key configured, use fallback pricing (never fail checkout)
   if (!apiKey) {
-    console.error('[Shipping] GOOGLE_MAPS_API_KEY not configured - using fallback pricing for', data.country);
-    const fallbackResponse = calculateFallbackPrice(data.country);
-    res.status(200).json(fallbackResponse);
+    // No API key - use fallback (assume within radius for NL, beyond for BE/DE)
+    console.error('[Shipping] GOOGLE_MAPS_API_KEY not configured');
+    const fallbackKm = data.country === 'NL' ? 100 : 400; // Assume NL is within radius
+    const shipping = calculateShipping(true, fallbackKm);
+    const response: ShippingQuoteSuccess = {
+      ok: true,
+      type: shipping.type,
+      km: fallbackKm,
+      priceCents: shipping.priceCents,
+      priceEur: shipping.priceCents / 100,
+      formattedPrice: formatPrice(shipping.priceCents),
+      description: `${shipping.description} (geschat)`,
+      origin: ORIGIN_ADDRESS,
+      destination: buildDestination(data),
+    };
+    res.status(200).json(response);
     return;
   }
 
   const destination = buildDestination(data);
   console.log('[Shipping] Calculating distance from:', ORIGIN_ADDRESS);
   console.log('[Shipping] Calculating distance to:', destination);
-  console.log('[Shipping] Country:', data.country, '| ISO:', COUNTRY_ISO_CODES[data.country]);
 
   try {
     const googleResponse = await fetchGoogleDistance(ORIGIN_ADDRESS, destination, apiKey);
     
-    console.log('[Shipping] Google API response status:', googleResponse.status);
-    if (googleResponse.error_message) {
-      console.error('[Shipping] Google API error_message:', googleResponse.error_message);
-    }
+    console.log('[Shipping] Google API status:', googleResponse.status);
 
     if (googleResponse.status !== 'OK') {
-      console.error('[Shipping] Google API top-level error:', googleResponse.status, googleResponse.error_message);
-      // Use fallback instead of failing
-      console.warn('[Shipping] Falling back to estimated price due to Google API error');
-      const fallbackResponse = calculateFallbackPrice(data.country);
-      res.status(200).json(fallbackResponse);
+      console.error('[Shipping] Google API error:', googleResponse.status, googleResponse.error_message);
+      // Fallback to flat rate
+      const fallbackKm = data.country === 'NL' ? 100 : 400;
+      const shipping = calculateShipping(true, fallbackKm);
+      const response: ShippingQuoteSuccess = {
+        ok: true,
+        type: shipping.type,
+        km: fallbackKm,
+        priceCents: shipping.priceCents,
+        priceEur: shipping.priceCents / 100,
+        formattedPrice: formatPrice(shipping.priceCents),
+        description: `${shipping.description} (geschat)`,
+        origin: ORIGIN_ADDRESS,
+        destination,
+      };
+      res.status(200).json(response);
       return;
     }
 
     const element = googleResponse.rows?.[0]?.elements?.[0];
-    console.log('[Shipping] Element status:', element?.status);
     
     if (!element || element.status !== 'OK') {
-      const errorStatus = element?.status || 'UNKNOWN';
-      console.error('[Shipping] Element error:', errorStatus);
-      
-      // Use fallback instead of failing - Shopify checkout must never break
-      console.warn('[Shipping] Falling back to estimated price due to element error:', errorStatus);
-      const fallbackResponse = calculateFallbackPrice(data.country);
-      res.status(200).json(fallbackResponse);
+      console.error('[Shipping] Element error:', element?.status);
+      // Fallback
+      const fallbackKm = data.country === 'NL' ? 100 : 400;
+      const shipping = calculateShipping(true, fallbackKm);
+      const response: ShippingQuoteSuccess = {
+        ok: true,
+        type: shipping.type,
+        km: fallbackKm,
+        priceCents: shipping.priceCents,
+        priceEur: shipping.priceCents / 100,
+        formattedPrice: formatPrice(shipping.priceCents),
+        description: `${shipping.description} (geschat)`,
+        origin: ORIGIN_ADDRESS,
+        destination,
+      };
+      res.status(200).json(response);
       return;
     }
 
-    // Calculate distance and price
-    const distanceMeters = element.distance?.value ?? 0;
-    const km = Math.round((distanceMeters / 1000) * 10) / 10; // One decimal
-    const price = Math.round(km * PRICE_PER_KM * 100) / 100; // Two decimals
+    // Calculate distance and shipping
+    const distanceKm = Math.round((element.distance?.value || 0) / 1000);
+    const shipping = calculateShipping(true, distanceKm);
 
-    console.log('[Shipping] Distance calculated:', km, 'km | Price:', price, 'EUR');
+    console.log('[Shipping] Distance:', distanceKm, 'km | Type:', shipping.type, '| Price:', shipping.priceCents / 100, 'EUR');
 
     const response: ShippingQuoteSuccess = {
       ok: true,
-      km,
-      price,
-      currency: 'EUR',
-      formattedPrice: formatPrice(price),
+      type: shipping.type,
+      km: distanceKm,
+      priceCents: shipping.priceCents,
+      priceEur: shipping.priceCents / 100,
+      formattedPrice: formatPrice(shipping.priceCents),
+      description: shipping.description,
       origin: googleResponse.origin_addresses?.[0] || ORIGIN_ADDRESS,
       destination: googleResponse.destination_addresses?.[0] || destination,
       durationText: element.duration?.text,
@@ -466,10 +560,21 @@ export default async function handler(
     console.log('[Shipping] Success response:', JSON.stringify(response));
     res.status(200).json(response);
   } catch (error) {
-    // Catch-all: use fallback pricing so checkout never fails
+    // Catch-all: use fallback
     console.error('[Shipping] Unexpected error:', error);
-    console.warn('[Shipping] Using fallback pricing due to unexpected error');
-    const fallbackResponse = calculateFallbackPrice(data.country);
-    res.status(200).json(fallbackResponse);
+    const fallbackKm = data.country === 'NL' ? 100 : 400;
+    const shipping = calculateShipping(true, fallbackKm);
+    const response: ShippingQuoteSuccess = {
+      ok: true,
+      type: shipping.type,
+      km: fallbackKm,
+      priceCents: shipping.priceCents,
+      priceEur: shipping.priceCents / 100,
+      formattedPrice: formatPrice(shipping.priceCents),
+      description: `${shipping.description} (geschat)`,
+      origin: ORIGIN_ADDRESS,
+      destination: buildDestination(data),
+    };
+    res.status(200).json(response);
   }
 }

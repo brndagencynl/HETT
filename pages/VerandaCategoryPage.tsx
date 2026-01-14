@@ -13,6 +13,7 @@ import PageHeader from '../components/PageHeader';
 import VerandaConfiguratorWizard, { VerandaConfiguratorWizardRef, VerandaPriceBreakdown } from '../components/VerandaConfiguratorWizard';
 import { VerandaConfig } from '../src/configurator/schemas/veranda';
 import { useCart } from '../context/CartContext';
+import { ProductConfig } from '../types';
 import {
   getStandaardVerandaProduct,
   getAvailableDepthsForWidth,
@@ -38,6 +39,9 @@ const VerandaCategoryPage: React.FC = () => {
 
   // UI state
   const [showConfigurator, setShowConfigurator] = useState(false);
+  
+  // Cart validation error state (for inline display)
+  const [cartError, setCartError] = useState<string | null>(null);
 
   // Fetch product data
   useEffect(() => {
@@ -119,13 +123,41 @@ const VerandaCategoryPage: React.FC = () => {
       requiresConfiguration: true,
     };
 
-    // Add to cart with configuration
-    addToCart(cartProduct, 1, {
-      ...config,
+    // Build ProductConfig structure expected by CartContext
+    const productConfig: ProductConfig = {
+      category: 'verandas',
+      data: {
+        ...config,
+        // Include size info in config data for reference
+        widthCm: selectedWidth!,
+        depthCm: selectedDepth!,
+      } as VerandaConfig & { widthCm: number; depthCm: number },
+    };
+
+    // Clear any previous error
+    setCartError(null);
+
+    // Add to cart with properly structured payload
+    const result = addToCart(cartProduct, 1, {
+      price: price,
+      config: productConfig,
+      configuration: config, // legacy field
+      details: details,
+      priceBreakdown: priceBreakdown,
+      isConfigured: true,
       widthCm: selectedWidth!,
       depthCm: selectedDepth!,
       variantId: selectedVariant.id,
     });
+
+    // Handle validation errors with inline message instead of alert
+    if (!result.success && result.errors) {
+      console.error('[VerandaCategoryPage] Add to cart failed:', result.errors);
+      setCartError(result.errors.join('. '));
+      // Auto-clear error after 5 seconds
+      setTimeout(() => setCartError(null), 5000);
+      return;
+    }
 
     console.log('[VerandaCategoryPage] Added to cart:', {
       product: cartProduct.title,
@@ -357,6 +389,27 @@ const VerandaCategoryPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Inline Cart Validation Error Toast */}
+      {cartError && (
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 max-w-md w-full mx-4">
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 shadow-lg flex items-start gap-3">
+            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-red-100 flex items-center justify-center">
+              <span className="text-red-600 text-lg">!</span>
+            </div>
+            <div className="flex-1">
+              <p className="text-red-800 font-medium text-sm">Configuratie onvolledig</p>
+              <p className="text-red-600 text-sm mt-1">{cartError}</p>
+            </div>
+            <button 
+              onClick={() => setCartError(null)}
+              className="text-red-400 hover:text-red-600 transition-colors"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Configurator Modal */}
       {selectedVariant && (

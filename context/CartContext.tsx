@@ -94,7 +94,7 @@ interface CartContextType {
   shippingLineItem: ShippingLineItem | null;
   /** LED spots line item (auto-computed from veranda items with verlichting) */
   ledLineItem: LedLineItem | null;
-  addToCart: (product: Product, quantity: number, options: any) => void;
+  addToCart: (product: Product, quantity: number, options: any) => { success: boolean; errors?: string[] };
   addMaatwerkToCart: (payload: MaatwerkCartPayload) => void;
   removeFromCart: (index: number) => void;
   updateQuantity: (index: number, quantity: number) => void;
@@ -663,7 +663,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // ADD TO CART - Main entry point
   // =========================================================================
 
-  const addToCart = (product: Product, quantity: number, options: any) => {
+  const addToCart = (product: Product, quantity: number, options: any): { success: boolean; errors?: string[] } => {
     const safeQuantity = normalizeQuantity(quantity);
     const category = product.category;
 
@@ -685,15 +685,16 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (!configCandidate) {
         console.warn(`[CartContext] Blocked: ${product.title} requires configuration.`);
-        alert('Kies eerst je opties in de configurator voordat je toevoegt aan winkelwagen.');
-        return;
+        return { 
+          success: false, 
+          errors: ['Kies eerst je opties in de configurator voordat je toevoegt aan winkelwagen.'] 
+        };
       }
 
       const validation = validateConfig(category, configCandidate);
       if (!validation.ok) {
-        console.warn(`[CartContext] Blocked: Invalid config`, validation.errors);
-        alert(`Configuratie incompleet: ${validation.errors.join(', ')}`);
-        return;
+        console.warn(`[CartContext] Blocked: Invalid config`, validation.errors, validation.debug);
+        return { success: false, errors: validation.errors };
       }
 
       const configHash = generateConfigHash(configCandidate.data);
@@ -776,7 +777,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       console.log('[CartContext] Configured item added to cart:', cartId);
       setIsCartOpen(true);
-      return;
+      return { success: true };
     }
 
     // =========================================================================
@@ -785,8 +786,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Check for Shopify variant ID - required for Shopify checkout
     if (!product.shopifyVariantId) {
       console.error('[CartContext] ERROR: No shopifyVariantId for accessory:', product.id);
-      alert('Dit product heeft geen beschikbare variant in Shopify. Neem contact op met support.');
-      return;
+      return { 
+        success: false, 
+        errors: ['Dit product heeft geen beschikbare variant in Shopify. Neem contact op met support.'] 
+      };
     }
 
     console.log('[CartContext] Adding accessory to cart:', {
@@ -835,6 +838,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     console.log('[CartContext] Accessory added, opening cart drawer');
     setIsCartOpen(true);
+    return { success: true };
   };
 
   /**

@@ -52,6 +52,7 @@ export interface ShippingLineItem extends CartItem {
     houseNumber: string;
     distanceKm: number;
     quantityKm: number;
+    shippingType?: 'free' | 'veranda_flat' | 'accessories' | 'pickup';
   };
 }
 
@@ -177,8 +178,24 @@ export function createShippingLineItem(
   selection: ShippingSelection
 ): ShippingLineItem | null {
   // No line item needed if free
-  if (quote.quantityKm === 0 || quote.totalCents === 0) {
+  if (quote.totalCents === 0) {
     return null;
+  }
+
+  // For Shopify: the shipping product is priced at €1/unit
+  // So quantity = totalCents / 100 to get the correct total
+  // e.g. €29.99 = 2999 cents / 100 = 29.99 units (rounded to 30)
+  // e.g. €299.99 = 29999 cents / 100 = 299.99 units (rounded to 300)
+  const shopifyQuantity = Math.round(quote.totalCents / PRICE_PER_KM_CENTS);
+  
+  // Determine title based on shipping type
+  let title = 'Bezorgkosten';
+  if (quote.type === 'accessories') {
+    title = 'Verzendkosten accessoires';
+  } else if (quote.type === 'veranda_flat') {
+    title = `Bezorgkosten veranda (${quote.distanceKm.toFixed(0)} km)`;
+  } else if (quote.distanceKm > 0) {
+    title = `Bezorgkosten (${quote.distanceKm.toFixed(0)} km)`;
   }
 
   const lineItem: ShippingLineItem = {
@@ -189,19 +206,19 @@ export function createShippingLineItem(
     isShippingLine: true,
 
     // Product info from Shopify
-    title: `Bezorgkosten (${quote.quantityKm} km)`,
+    title,
     category: 'accessoires', // Doesn't matter for display
     shopifyVariantId: shippingProduct.shopifyVariantId,
     imageUrl: shippingProduct.imageUrl || '/assets/images/shipping-icon.webp',
     shortDescription: `Bezorging naar ${selection.postalCode}, ${selection.country}`,
-    description: '',
+    description: quote.description || '',
     specs: {},
     requiresConfiguration: false,
 
-    // Pricing
+    // Pricing - use calculated quantity to match Shopify
     priceCents: PRICE_PER_KM_CENTS,
     price: fromCents(PRICE_PER_KM_CENTS),
-    quantity: quote.quantityKm,
+    quantity: shopifyQuantity,
     unitPriceCents: PRICE_PER_KM_CENTS,
     lineTotalCents: quote.totalCents,
     totalPrice: quote.totalEur,
@@ -213,15 +230,21 @@ export function createShippingLineItem(
       postalCode: selection.postalCode,
       houseNumber: selection.houseNumber,
       distanceKm: quote.distanceKm,
-      quantityKm: quote.quantityKm,
+      quantityKm: shopifyQuantity,
+      shippingType: quote.type,
     },
 
-    // Display details
-    details: [
-      { label: 'Afstand', value: `${quote.distanceKm.toFixed(1)} km` },
-      { label: 'Prijs per km', value: '€ 1,00' },
-      { label: 'Totaal', value: `€ ${quote.totalEur.toFixed(2)}` },
-    ],
+    // Display details based on shipping type
+    details: quote.type === 'accessories' || quote.type === 'veranda_flat'
+      ? [
+          { label: 'Type', value: quote.type === 'accessories' ? 'Accessoires' : 'Veranda' },
+          { label: 'Totaal', value: `€ ${quote.totalEur.toFixed(2)}` },
+        ]
+      : [
+          { label: 'Afstand', value: `${quote.distanceKm.toFixed(1)} km` },
+          { label: 'Prijs per km', value: '€ 1,00' },
+          { label: 'Totaal', value: `€ ${quote.totalEur.toFixed(2)}` },
+        ],
   };
 
   return lineItem;

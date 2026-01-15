@@ -124,10 +124,20 @@ export async function beginCheckout(
         const destinationParts = [meta.postalCode, meta.houseNumber].filter(Boolean);
         const destination = destinationParts.join(' ') || countryName;
         
+        // Determine tariff display based on shipping type
+        let tariefValue = '€ 1,00 per km';
+        if (meta.shippingType === 'accessories') {
+          tariefValue = 'Vast tarief accessoires € 29,99';
+        } else if (meta.shippingType === 'veranda_flat') {
+          tariefValue = 'Vast tarief veranda > 300 km: € 299,99';
+        } else if (meta.shippingType === 'free') {
+          tariefValue = 'Gratis bezorging';
+        }
+        
         const shippingAttributes = [
           { key: 'Bestemming', value: `${destination}, ${countryName}` },
           { key: 'Afstand', value: `${meta.distanceKm.toFixed(1)} km` },
-          { key: 'Tarief', value: '€ 1,00 per km' },
+          { key: 'Tarief', value: tariefValue },
         ];
         
         console.log('[Checkout Props] shipping', shippingAttributes);

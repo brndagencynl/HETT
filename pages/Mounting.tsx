@@ -68,8 +68,12 @@ const Mounting: React.FC = () => {
                         <FileText className="text-hett-brown" /> PDF Handleidingen
                     </h3>
                     <div className="space-y-4">
-                        <ManualCard title="Montagehandleiding HETT Veranda" version="v2024.1" size="4.2 MB" />
-                        <ManualCard title="Montagehandleiding Glazen Schuifwand" version="v2.0" size="1.8 MB" />
+                        <ManualCard
+                            title="Montagehandleiding HETT Veranda"
+                            version="v2024.1"
+                            size="4.2 MB"
+                            href="/assets/manuals/montagehandleiding-hett-veranda.pdf"
+                        />
                     </div>
                 </div>
 
@@ -78,30 +82,26 @@ const Mounting: React.FC = () => {
                      <h3 className="text-xl font-bold text-hett-dark mb-6 flex items-center gap-2">
                         <Youtube className="text-red-600" /> Instructievideo's
                     </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 group cursor-pointer">
-                            <div className="aspect-video bg-gray-200 relative">
-                                <img src="#" className="w-full h-full object-cover opacity-90" alt="Video thumb" />
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                    <PlayCircle size={48} className="text-white drop-shadow-lg group-hover:scale-110 transition-transform" />
-                                </div>
-                            </div>
-                            <div className="p-4">
-                                <h4 className="font-bold text-hett-dark">Stap 1: Het plaatsen van de staanders</h4>
-                            </div>
-                        </div>
-                        <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 group cursor-pointer">
-                            <div className="aspect-video bg-gray-200 relative">
-                                <img src="#" className="w-full h-full object-cover opacity-90" alt="Video thumb" />
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                    <PlayCircle size={48} className="text-white drop-shadow-lg group-hover:scale-110 transition-transform" />
-                                </div>
-                            </div>
-                            <div className="p-4">
-                                <h4 className="font-bold text-hett-dark">Stap 2: Goot en liggers monteren</h4>
+                    <a
+                        href="https://youtu.be/wA4XeNEzMnA"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="block bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 group"
+                    >
+                        <div className="aspect-video bg-gray-200 relative">
+                            <img
+                                src="https://img.youtube.com/vi/wA4XeNEzMnA/hqdefault.jpg"
+                                className="w-full h-full object-cover opacity-90"
+                                alt="Instructievideo montagehandleiding"
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <PlayCircle size={56} className="text-white drop-shadow-lg group-hover:scale-110 transition-transform" />
                             </div>
                         </div>
-                    </div>
+                        <div className="p-4">
+                            <h4 className="font-bold text-hett-dark">Montagehandleiding HETT Veranda</h4>
+                        </div>
+                    </a>
                 </div>
 
               </div>
@@ -140,8 +140,13 @@ const Mounting: React.FC = () => {
   );
 };
 
-const ManualCard = ({ title, version, size }: { title: string, version: string, size: string }) => (
-    <div className="flex items-center justify-between bg-white p-4 rounded-xl border border-gray-200 hover:border-hett-brown hover:shadow-sm transition-all group cursor-pointer">
+const ManualCard = ({ title, version, size, href }: { title: string, version: string, size: string, href: string }) => (
+    <a
+        href={href}
+        target="_blank"
+        rel="noreferrer"
+        className="flex items-center justify-between bg-white p-4 rounded-xl border border-gray-200 hover:border-hett-brown hover:shadow-sm transition-all group"
+    >
         <div className="flex items-center gap-4">
             <div className="w-10 h-10 bg-red-50 text-red-500 rounded-lg flex items-center justify-center flex-shrink-0">
                 <FileText size={20} />
@@ -156,7 +161,7 @@ const ManualCard = ({ title, version, size }: { title: string, version: string, 
             </div>
         </div>
         <Download size={20} className="text-gray-300 group-hover:text-hett-brown transition-colors" />
-    </div>
+    </a>
 );
 
 const Checkmark = () => <div className="w-5 h-5 rounded-full bg-green-100 text-green-600 flex items-center justify-center flex-shrink-0 text-xs">✓</div>;

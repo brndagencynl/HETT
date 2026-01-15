@@ -50,7 +50,7 @@ const heroItems: HeroItem[] = [
     title: 'Al een Veranda vanaf €699',
     subtitle: 'De beste en voordeligste in de markt voor de doe-het-zelver!',
     ctaText: 'Stel zelf samen',
-    ctaHref: '/verandas',
+    ctaHref: '/categorie/verandas',
     images: {
       avif1920: '/assets/images/homepagina_hero_1_1920.avif',
       webp1920: '/assets/images/homepagina_hero_1_1920.webp',

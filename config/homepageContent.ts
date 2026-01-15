@@ -35,7 +35,7 @@ export const POPULAIRE_VERANDA_KAARTEN: PopulaireVerandaKaart[] = [
     href: '/categorie/verandas', // TODO: Add model deep-link when available, e.g. /categorie/verandas?model=cube
     deliveryLabel: '1-2 weken',
     usps: ['Hoogwaardige kwaliteit', 'Snelle levering', 'Eenvoudige montage'],
-    imageSrc: '/assets/images/home_hero.webp',
+    imageSrc: '/assets/images/cube_render.png',
     imageAlt: 'Cube Veranda',
     prijsVanafCents: 69900,
   },
@@ -47,9 +47,9 @@ export const POPULAIRE_VERANDA_KAARTEN: PopulaireVerandaKaart[] = [
     href: '/categorie/verandas', // TODO: Add model deep-link when available, e.g. /categorie/verandas?model=deluxe
     deliveryLabel: '1-2 weken',
     usps: ['Premium kwaliteit', 'Extra duurzaam', 'Uitgebreide garantie'],
-    imageSrc: '/assets/images/maatwerk_veranda_home.JPG',
+    imageSrc: '/assets/images/deluxe_render.png',
     imageAlt: 'Deluxe Veranda',
-    prijsVanafCents: 89900,
+    prijsVanafCents: 69900,
   },
   {
     key: 'classic',
@@ -59,8 +59,8 @@ export const POPULAIRE_VERANDA_KAARTEN: PopulaireVerandaKaart[] = [
     href: '/categorie/verandas', // TODO: Add model deep-link when available, e.g. /categorie/verandas?model=classic
     deliveryLabel: '1-2 weken',
     usps: ['Tijdloos design', 'Betaalbare luxe', 'Eenvoudige montage'],
-    imageSrc: '/assets/images/home_hero.webp',
+    imageSrc: '/assets/images/classic_render.png',
     imageAlt: 'Classic Veranda',
-    prijsVanafCents: 59900,
+    prijsVanafCents: 69900,
   },
 ];

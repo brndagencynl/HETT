@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 
 const Contact: React.FC = () => {
   const mapsUrl = 'https://www.google.com/maps/search/?api=1&query=Hoppenkuil+17,+5626+DD+Eindhoven';
-  const whatsappUrl = 'https://wa.me/31401234567';
+  const whatsappUrl = 'https://wa.me/31685406033';
 
   const openMaps = () => {
     window.open(mapsUrl, '_blank', 'noopener,noreferrer');
@@ -122,12 +122,6 @@ const Contact: React.FC = () => {
                   <p className="text-gray-600">5626 DD Eindhoven</p>
                 </div>
                 
-                <div className="pt-4 border-t border-gray-100 space-y-2">
-                  <p><span className="font-bold text-hett-dark">KvK-nummer:</span> <span className="text-gray-600">12345678</span></p>
-                  <p><span className="font-bold text-hett-dark">Btw-identificatienummer:</span> <span className="text-gray-600">NL123456789B01</span></p>
-                  <p><span className="font-bold text-hett-dark">RSIN:</span> <span className="text-gray-600">123456789</span></p>
-                  <p><span className="font-bold text-hett-dark">IBAN:</span> <span className="text-gray-600">NL00 RABO 0000 0000 00</span></p>
-                </div>
               </div>
             </div>
           </div>

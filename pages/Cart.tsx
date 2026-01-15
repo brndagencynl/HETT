@@ -399,11 +399,11 @@ const Cart: React.FC = () => {
                         </div>
                         <div className="flex justify-between text-gray-600">
                             <span className="font-medium">Verzendkosten</span>
-                            <span className={`font-bold ${shippingCost === 0 ? 'text-green-600' : ''}`}>
+                            <span className={`font-bold ${shippingCostCents === 0 ? 'text-green-600' : ''}`}>
                               {shippingMode === 'pickup'
                                 ? 'Gratis'
                                 : shippingIsValid
-                                  ? formatShippingPrice(shippingCost)
+                                  ? formatShippingPrice(shippingCostCents)
                                   : '—'}
                             </span>
                         </div>

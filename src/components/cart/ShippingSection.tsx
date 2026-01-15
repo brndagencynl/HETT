@@ -46,6 +46,7 @@ export const ShippingSection: React.FC = () => {
     shippingAddress,
     shippingQuote,
     shippingCost,
+    shippingCostCents,
     shippingIsValid,
     shippingIsCalculating,
     shippingError,
@@ -200,8 +201,8 @@ export const ShippingSection: React.FC = () => {
             <div className="text-xs text-gray-500">Veranda ≤ 300 km gratis • &gt; 300 km € 299,99 • Accessoires € 29,99</div>
           </div>
           {shippingMode === 'delivery' && shippingIsValid && !shippingIsCalculating && (
-            <span className={`font-bold ${shippingCost === 0 ? 'text-green-600' : 'text-gray-900'}`}>
-              {formatShippingPrice(shippingCost)}
+            <span className={`font-bold ${shippingCostCents === 0 ? 'text-green-600' : 'text-gray-900'}`}>
+              {formatShippingPrice(shippingCostCents)}
             </span>
           )}
           {shippingMode === 'delivery' && shippingIsCalculating && (
@@ -398,8 +399,8 @@ export const ShippingSection: React.FC = () => {
                   {/* Price */}
                   <div className="flex justify-between items-center pt-2 border-t border-gray-300">
                     <span className="font-semibold text-gray-700">Verzendkosten</span>
-                    <span className={`text-lg font-black ${shippingCost === 0 ? 'text-green-600' : 'text-[#003878]'}`}>
-                      {formatShippingPrice(shippingCost)}
+                    <span className={`text-lg font-black ${shippingCostCents === 0 ? 'text-green-600' : 'text-[#003878]'}`}>
+                      {formatShippingPrice(shippingCostCents)}
                     </span>
                   </div>
                   {shippingQuote.description && (

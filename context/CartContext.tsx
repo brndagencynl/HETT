@@ -158,6 +158,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 // =============================================================================
 
 const SHIPPING_STORAGE_KEY = 'hett_shipping_v3';
+const CART_STORAGE_KEY = 'hett_cart_v1';
 
 const DEFAULT_ADDRESS: ShippingAddress = {
   street: '',
@@ -189,7 +190,40 @@ const DEFAULT_SHIPPING_STATE: ShippingState = {
 // STORAGE HELPERS
 // =============================================================================
 
-interface StoredShippingState {
+// Cart storage helpers
+function loadCartFromStorage(): CartItem[] {
+  try {
+    const stored = localStorage.getItem(CART_STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored) as CartItem[];
+      // Filter out shipping line items - they should be recalculated
+      return parsed.filter(item => !(item as any).isShippingLine);
+    }
+  } catch (e) {
+    console.warn('Failed to load cart from storage:', e);
+  }
+  return [];
+}
+
+function saveCartToStorage(cart: CartItem[]): void {
+  try {
+    // Filter out shipping line items - they should be recalculated on page load
+    const itemsToStore = cart.filter(item => !(item as any).isShippingLine);
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(itemsToStore));
+  } catch (e) {
+    console.warn('Failed to save cart to storage:', e);
+  }
+}
+
+function clearCartStorage(): void {
+  try {
+    localStorage.removeItem(CART_STORAGE_KEY);
+  } catch (e) {
+    console.warn('Failed to clear cart storage:', e);
+  }
+}
+
+// Shipping storage helpers
   mode: ShippingMode;
   country: ShippingCountry;
   address: ShippingAddress;
@@ -240,13 +274,18 @@ function saveShippingToStorage(state: ShippingState): void {
 // =============================================================================
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // NOTE: Cart is intentionally NOT persisted (no localStorage/sessionStorage)
-  const [cart, setCart] = useState<CartItem[]>([]);
+  // Cart is persisted to localStorage to survive page reloads (e.g., returning from Shopify checkout)
+  const [cart, setCart] = useState<CartItem[]>(() => loadCartFromStorage());
   const [isCartOpen, setIsCartOpen] = useState(false);
   
   // Shipping state - loaded from storage
   const [shipping, setShipping] = useState<ShippingState>(() => loadShippingFromStorage());
   const [shippingQuote, setShippingQuote] = useState<ShippingQuoteResult | null>(null);
+
+  // Persist cart state to storage (excluding shipping line items)
+  useEffect(() => {
+    saveCartToStorage(cart);
+  }, [cart]);
 
   // Persist shipping state to storage
   useEffect(() => {
@@ -1001,6 +1040,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const clearCart = () => {
     setCart([]);
+    clearCartStorage(); // Also clear from localStorage
   };
 
   // Build the full cart with cents for export (includes shipping line)

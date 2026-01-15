@@ -57,17 +57,13 @@ const VerandaPresetCard: React.FC<VerandaPresetCardProps> = ({ card }) => {
         </div>
 
         <div className="mt-auto">
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              window.location.href = card.href;
-            }}
+          <Link
+            to={card.href}
             className="w-full rounded-md py-2 sm:py-3 text-[11px] sm:text-sm font-bold flex items-center justify-center gap-1.5 sm:gap-2 shadow-sm transition-colors bg-hett-dark text-white hover:bg-hett-primary"
           >
             <Settings size={16} />
             {card.ctaLabel}
-          </button>
+          </Link>
           <div className="mt-2 flex items-center gap-1 text-[10px] sm:text-xs text-green-600 font-medium leading-tight">
             <Truck size={14} className="flex-shrink-0" />
             <span>{card.deliveryLabel}</span>

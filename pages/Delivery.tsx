@@ -47,7 +47,7 @@ const Delivery: React.FC = () => {
             <div className="lg:col-span-9">
                 <div className="mb-10">
                     <h1 className="text-3xl md:text-4xl font-black text-hett-dark mb-4">Bezorgen & Afhalen</h1>
-                    <p className="text-gray-500 max-w-2xl">Alles over onze leveringen, transportkosten en wat u kunt verwachten.</p>
+                    <p className="text-gray-500 max-w-2xl">Alles over onze leveringen, transportkosten en wat u kunt verwachten in Nederland, België en Duitsland.</p>
                 </div>
 
                 <div className="bg-white p-8 md:p-12 rounded-lg shadow-soft border border-gray-200">
@@ -66,18 +66,25 @@ const Delivery: React.FC = () => {
                              <h2 className="text-2xl font-black text-hett-dark mb-4">Verzendkosten</h2>
                              <ul className="space-y-3">
                                 <li className="flex justify-between items-center border-b border-gray-100 pb-2">
-                                    <span className="text-gray-600">Nederland</span>
+                                    <span className="text-gray-600">Afhalen in Eindhoven</span>
                                     <span className="font-bold text-green-600">Gratis</span>
                                 </li>
                                 <li className="flex justify-between items-center border-b border-gray-100 pb-2">
-                                    <span className="text-gray-600">Duitsland (standaard)</span>
-                                    <span className="font-bold text-hett-dark">€ 1,00 per kilometer</span>
+                                    <span className="text-gray-600">Veranda (≤ 300 km)</span>
+                                    <span className="font-bold text-green-600">Gratis</span>
+                                </li>
+                                <li className="flex justify-between items-center border-b border-gray-100 pb-2">
+                                    <span className="text-gray-600">Veranda (&gt; 300 km)</span>
+                                    <span className="font-bold text-hett-dark">€ 299,99 vast tarief</span>
                                 </li>
                                 <li className="flex justify-between items-center pb-2">
-                                    <span className="text-gray-600">België (standaard)</span>
-                                    <span className="font-bold text-hett-dark">€ 1,00 per kilometer</span>
+                                    <span className="text-gray-600">Alleen accessoires</span>
+                                    <span className="font-bold text-hett-dark">€ 29,99 vast tarief</span>
                                 </li>
                              </ul>
+                             <p className="mt-4 text-xs text-gray-500">
+                                Bij gecombineerde bestellingen (veranda + accessoires) gelden de verandaregels. Levering op de Waddeneilanden is niet mogelijk.
+                             </p>
                         </div>
                     </div>
 
@@ -86,7 +93,7 @@ const Delivery: React.FC = () => {
                         Levering aan huis
                     </h3>
                     <div className="prose prose-slate max-w-none text-gray-600 text-sm leading-relaxed mb-10">
-                        <p>Onze producten worden geleverd met speciaal transport. Het lossen geschiedt naast de vrachtwagen ('aan de stoeprand').</p>
+                        <p>Onze producten worden geleverd met speciaal transport. Het lossen geschiedt naast de vrachtwagen ('aan de stoeprand'). Afstanden worden berekend vanaf Eindhoven.</p>
                     </div>
 
                     <div className="bg-blue-50 border border-blue-100 p-6 rounded-lg flex items-start gap-4">

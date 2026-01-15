@@ -77,14 +77,11 @@ const Cart: React.FC = () => {
     // Handle Shopify checkout
     const handleProceedToCheckout = async () => {
       // Check if shipping quote is required
-      if (shippingMode === 'delivery' && (shippingCountry === 'BE' || shippingCountry === 'DE') && !shippingIsValid) {
-        // Scroll to shipping section if quote is missing for BE/DE
+      if (shippingMode === 'delivery' && !shippingIsValid) {
+        // Scroll to shipping section if quote is missing
         shippingSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         return;
       }
-      
-      // For NL delivery, shipping is free so we can proceed without quote
-      // For pickup, always allow
       
       // Check if Shopify is configured
       if (!isShopifyConfigured()) {
@@ -133,12 +130,10 @@ const Cart: React.FC = () => {
 
     // Can proceed to checkout?
     // - Pickup: always OK
-    // - Delivery NL: always OK (free shipping)
-    // - Delivery BE/DE: need valid quote
+    // - Delivery: need valid quote
     const canCheckout = 
       !isCheckingOut && 
       (shippingMode === 'pickup' || 
-       shippingCountry === 'NL' || 
        shippingIsValid);
 
     const VAT_RATE = 0.21;
@@ -405,13 +400,11 @@ const Cart: React.FC = () => {
                         <div className="flex justify-between text-gray-600">
                             <span className="font-medium">Verzendkosten</span>
                             <span className={`font-bold ${shippingCost === 0 ? 'text-green-600' : ''}`}>
-                              {shippingMode === 'pickup' 
-                                ? 'Gratis' 
-                                : shippingIsValid && shippingCost > 0
+                              {shippingMode === 'pickup'
+                                ? 'Gratis'
+                                : shippingIsValid
                                   ? formatShippingPrice(shippingCost)
-                                  : shippingCountry === 'NL'
-                                    ? 'Gratis'
-                                    : '—'}
+                                  : '—'}
                             </span>
                         </div>
                     </div>

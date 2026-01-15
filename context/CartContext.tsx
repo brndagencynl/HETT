@@ -246,6 +246,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   
   // Shipping state - loaded from storage
   const [shipping, setShipping] = useState<ShippingState>(() => loadShippingFromStorage());
+  const [shippingQuote, setShippingQuote] = useState<ShippingQuoteResult | null>(null);
 
   // Persist shipping state to storage
   useEffect(() => {
@@ -259,16 +260,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const cartProducts = useMemo(() => getProductsOnly(cart), [cart]);
   const shippingLineItem = useMemo(() => findShippingLine(cart) || null, [cart]);
   
-  // Shipping quote from line item
-  const shippingQuote = useMemo<ShippingQuoteResult | null>(() => {
-    if (!shippingLineItem?.shippingMeta) return null;
-    return {
-      distanceKm: shippingLineItem.shippingMeta.distanceKm,
-      quantityKm: shippingLineItem.shippingMeta.quantityKm,
-      totalCents: shippingLineItem.lineTotalCents || 0,
-      totalEur: fromCents(shippingLineItem.lineTotalCents || 0),
-    };
-  }, [shippingLineItem]);
+  // Shipping quote is stored from the last API calculation
 
   // Normalize maatwerk items for backward compatibility (no mutation)
   // Only process product items, not shipping line
@@ -419,7 +411,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Shipping costs from line item
   const shippingCostCents = shippingLineItem?.lineTotalCents || 0;
   const shippingCost = fromCents(shippingCostCents);
-  const shippingIsValid = shippingLineItem !== null || shipping.mode === 'pickup';
+  const shippingIsValid = shippingLineItem !== null || shippingQuote !== null || shipping.mode === 'pickup';
   
   // Grand total = products + shipping
   const grandTotalCents = addCents(subtotalCents, shippingCostCents);
@@ -437,6 +429,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     // Remove shipping line when switching modes
     setCart(prev => prev.filter(item => !isShippingLineItem(item)));
+    setShippingQuote(null);
   }, [shipping.isLocked]);
 
   const setShippingCountry = useCallback((country: ShippingCountry) => {
@@ -448,6 +441,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }));
     // Remove shipping line when country changes
     setCart(prev => prev.filter(item => !isShippingLineItem(item)));
+    setShippingQuote(null);
   }, [shipping.isLocked]);
   
   const setShippingAddressNew = useCallback((address: ShippingAddress) => {
@@ -459,11 +453,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }));
     // Remove shipping line when address changes
     setCart(prev => prev.filter(item => !isShippingLineItem(item)));
+    setShippingQuote(null);
   }, [shipping.isLocked]);
 
   // Remove shipping line item from cart
   const removeShippingLine = useCallback(() => {
     setCart(prev => prev.filter(item => !isShippingLineItem(item)));
+    setShippingQuote(null);
   }, []);
 
   // Calculate and apply shipping as cart line item (NEW v2 logic)
@@ -473,6 +469,14 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Pickup mode: no shipping line needed
     if (shipping.mode === 'pickup') {
       setCart(prev => prev.filter(item => !isShippingLineItem(item)));
+      setShippingQuote({
+        type: 'pickup',
+        description: 'Gratis afhalen in Eindhoven',
+        distanceKm: 0,
+        quantityKm: 0,
+        totalCents: 0,
+        totalEur: 0,
+      });
       return true;
     }
 
@@ -550,6 +554,17 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         description: result.description,
       });
 
+      // Create quote result for line item
+      const quoteResult: ShippingQuoteResult = {
+        type: result.type,
+        description: result.description,
+        distanceKm: result.km || 0,
+        quantityKm: result.type === 'veranda_flat' || result.type === 'accessories' ? 1 : (result.km || 0),
+        totalCents: result.priceCents,
+        totalEur: result.priceEur,
+      };
+      setShippingQuote(quoteResult);
+
       // Free shipping - no line item needed
       if (result.type === 'free' || result.priceCents === 0) {
         setCart(prev => prev.filter(item => !isShippingLineItem(item)));
@@ -571,14 +586,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }));
         return false;
       }
-
-      // Create quote result for line item
-      const quoteResult: ShippingQuoteResult = {
-        distanceKm: result.km || 0,
-        quantityKm: result.type === 'veranda_flat' ? 1 : (result.type === 'accessories' ? 1 : (result.km || 0)),
-        totalCents: result.priceCents,
-        totalEur: result.priceEur,
-      };
       
       // Create the shipping selection for line item metadata
       const selection = {
@@ -630,6 +637,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const clearShippingQuote = useCallback(() => {
     if (shipping.isLocked) return;
     setCart(prev => prev.filter(item => !isShippingLineItem(item)));
+    setShippingQuote(null);
   }, [shipping.isLocked]);
 
   // Legacy: updateShippingCost - deprecated, does nothing now
@@ -653,6 +661,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }));
     // Remove shipping line when address changes
     setCart(prev => prev.filter(item => !isShippingLineItem(item)));
+    setShippingQuote(null);
   }, [shipping.isLocked]);
 
   // Shipping lock/unlock

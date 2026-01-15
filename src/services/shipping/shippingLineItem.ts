@@ -35,6 +35,8 @@ export interface ShippingSelection {
 }
 
 export interface ShippingQuoteResult {
+  type?: 'free' | 'veranda_flat' | 'accessories' | 'pickup';
+  description?: string;
   distanceKm: number;
   quantityKm: number; // ceil(distanceKm)
   totalCents: number;

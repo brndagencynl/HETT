@@ -105,9 +105,7 @@ export const ShippingSection: React.FC = () => {
   }, [localAddress, isShippingLocked, setShippingAddress, fetchShippingQuote]);
 
   // Check if address is complete enough to calculate
-  // For NL: just need to update the address, no calculation needed
-  // For BE/DE: need postal code at minimum
-  const canCalculate = shippingCountry === 'NL' || localAddress.postalCode.trim().length >= 4;
+  const canCalculate = localAddress.postalCode.trim().length >= 4;
 
   return (
     <Card padding="wide">
@@ -199,7 +197,7 @@ export const ShippingSection: React.FC = () => {
           />
           <div className="flex-1">
             <div className="font-bold text-gray-900">Bezorgen</div>
-            <div className="text-xs text-gray-500">NL gratis • BE/DE € 1,00 per km</div>
+            <div className="text-xs text-gray-500">Veranda ≤ 300 km gratis • &gt; 300 km € 299,99 • Accessoires € 29,99</div>
           </div>
           {shippingMode === 'delivery' && shippingIsValid && !shippingIsCalculating && (
             <span className={`font-bold ${shippingCost === 0 ? 'text-green-600' : 'text-gray-900'}`}>
@@ -255,12 +253,9 @@ export const ShippingSection: React.FC = () => {
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" 
                 />
               </div>
-              {shippingCountry === 'NL' && (
-                <p className="mt-1 text-xs text-green-600 font-medium">✓ Gratis bezorging in Nederland</p>
-              )}
-              {(shippingCountry === 'BE' || shippingCountry === 'DE') && (
-                <p className="mt-1 text-xs text-gray-500">Bezorgkosten: € 1,00 per km vanaf Eindhoven</p>
-              )}
+              <p className="mt-1 text-xs text-gray-500">
+                Veranda ≤ 300 km gratis • &gt; 300 km € 299,99 • Accessoires € 29,99
+              </p>
             </div>
 
             {/* Street */}
@@ -379,18 +374,25 @@ export const ShippingSection: React.FC = () => {
             {shippingIsValid && shippingQuote && !shippingIsCalculating && (
               <div className="p-4 bg-[#eff6ff] rounded-lg border border-gray-200">
                 <div className="space-y-2">
+                  {shippingQuote.type && (
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-gray-600">Type</span>
+                      <span className="font-semibold text-gray-900">
+                        {shippingQuote.type === 'free'
+                          ? 'Gratis bezorging'
+                          : shippingQuote.type === 'accessories'
+                            ? 'Accessoires (vast tarief)'
+                            : shippingQuote.type === 'veranda_flat'
+                              ? 'Veranda (vast tarief)'
+                              : 'Bezorgen'}
+                      </span>
+                    </div>
+                  )}
                   {/* Distance */}
                   {shippingQuote.distanceKm > 0 && (
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-gray-600">Afstand</span>
                       <span className="font-semibold text-gray-900">{shippingQuote.distanceKm.toFixed(1)} km</span>
-                    </div>
-                  )}
-                  {/* Quantity (km units for shipping) */}
-                  {shippingQuote.quantityKm > 0 && (
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="text-gray-600">Eenheden</span>
-                      <span className="font-semibold text-gray-900">{shippingQuote.quantityKm} km</span>
                     </div>
                   )}
                   {/* Price */}
@@ -400,11 +402,8 @@ export const ShippingSection: React.FC = () => {
                       {formatShippingPrice(shippingCost)}
                     </span>
                   </div>
-                  {/* Calculation explanation for BE/DE */}
-                  {shippingCountry !== 'NL' && shippingQuote.quantityKm > 0 && (
-                    <p className="text-xs text-gray-500 pt-1">
-                      {shippingQuote.quantityKm} km × € 1,00 = {formatShippingPrice(shippingCost)}
-                    </p>
+                  {shippingQuote.description && (
+                    <p className="text-xs text-gray-500 pt-1">{shippingQuote.description}</p>
                   )}
                 </div>
               </div>

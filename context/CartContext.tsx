@@ -224,6 +224,7 @@ function clearCartStorage(): void {
 }
 
 // Shipping storage helpers
+interface StoredShippingState {
   mode: ShippingMode;
   country: ShippingCountry;
   address: ShippingAddress;

@@ -4,7 +4,7 @@ import { AnimatePresence } from 'framer-motion';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
-import TawkTo from './src/components/TawkTo';
+import WhatsAppButton from './src/components/WhatsAppButton';
 
 import Configurator from './pages/Configurator';
 import Projects from './pages/Projects';
@@ -173,7 +173,7 @@ const App: React.FC = () => {
     // Removed ShowroomAppointment import
   return (
     <HashRouter>
-      <TawkTo />
+      <WhatsAppButton />
       <div className="flex flex-col min-h-screen bg-[#f6f8fa] font-sans text-hett-primary relative">
         <ScrollToTop />
         <Navbar />

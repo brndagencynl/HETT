@@ -9,6 +9,7 @@ export const NAV_ITEMS: NavItem[] = [
   ...Object.values(CATEGORIES).map(c => ({ label: c.label, path: c.path })),
   { label: 'Maatwerk configurator', path: '/maatwerk-configurator' },
   { label: 'Projecten', path: '/projecten' },
+  { label: 'Montage', path: '/montage-handleiding' },
   { label: 'Contact', path: '/contact' },
 ];
 

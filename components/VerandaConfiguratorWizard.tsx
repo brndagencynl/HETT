@@ -1270,8 +1270,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                         </div>
 
                         {/* ========== MOBILE FOOTER (only <1024px) ========== */}
-                        {/* configurator-cta: shifts left when Tawk.to chat is visible */}
-                        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 configurator-cta">
+                        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40">
                             {/* Mobile: Selection Button */}
                             <div className="px-5 py-3 border-b border-gray-100">
                                 <button

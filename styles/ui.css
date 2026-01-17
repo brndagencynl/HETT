@@ -436,27 +436,3 @@
   text-decoration: underline;
 }
 
-/* ============================================
-   Tawk.to Chat Widget Collision Avoidance
-   ============================================
-   When Tawk.to chat widget is visible (body.tawk-visible),
-   fixed CTAs shift left to prevent overlap.
-   The body class is toggled by Tawk.to's onLoad/onHide callbacks.
-*/
-
-/* Default: no shift */
-.configurator-cta {
-  transition: right 0.25s ease, padding-right 0.25s ease;
-}
-
-/* When Tawk is visible: shift content left to make room for chat bubble */
-body.tawk-visible .configurator-cta {
-  padding-right: 80px; /* room for chat bubble on desktop */
-}
-
-/* Mobile: slightly less padding needed */
-@media (max-width: 768px) {
-  body.tawk-visible .configurator-cta {
-    padding-right: 64px;
-  }
-}

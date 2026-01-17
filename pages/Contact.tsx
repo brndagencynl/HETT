@@ -68,32 +68,9 @@ const Contact: React.FC = () => {
               </a>
             </div>
 
-            {/* Chatten Card */}
-            <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-              <div className="w-12 h-12 bg-hett-dark/10 text-hett-dark flex items-center justify-center rounded-lg mb-4">
-                <MessageCircle size={24} />
-              </div>
-              <h3 className="text-lg font-bold text-hett-dark mb-2">Chatten</h3>
-              <p className="text-gray-600 text-sm mb-4 leading-relaxed">
-                Liever chatten? Klik dan op de link en kijk of we online zijn.
-              </p>
-              <button 
-                onClick={() => {
-                  if (window.Tawk_API?.maximize) {
-                    window.Tawk_API.maximize();
-                  } else {
-                    console.warn('[TawkTo] Chat widget is nog niet geladen. Probeer het later opnieuw.');
-                  }
-                }}
-                className="text-hett-primary font-medium text-sm inline-flex items-center gap-1 hover:gap-2 transition-all"
-              >
-                Open chat gesprek <ArrowRight size={16} />
-              </button>
-            </div>
-
             {/* WhatsApp Card */}
             <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-              <div className="w-12 h-12 bg-hett-dark/10 text-hett-dark flex items-center justify-center rounded-lg mb-4">
+              <div className="w-12 h-12 bg-[#25D366]/10 text-[#25D366] flex items-center justify-center rounded-lg mb-4">
                 <MessageCircle size={24} />
               </div>
               <h3 className="text-lg font-bold text-hett-dark mb-2">WhatsApp</h3>

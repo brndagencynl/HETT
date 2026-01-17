@@ -59,16 +59,16 @@ const Showroom: React.FC = () => {
 
                             <div className="space-y-4 text-sm text-gray-600 leading-relaxed mb-8">
                                 <p>
-                                    <strong className="block text-gray-900 text-base">HETT B.V.</strong>
-                                    Industrieweg 45<br />
-                                    5600 AA Eindhoven
+                                    <strong className="block text-gray-900 text-base">HETT Veranda B.V.</strong>
+                                    Hoppenkuil 17<br />
+                                    5626 DD Eindhoven
                                 </p>
                                 <p>
                                     <span className="block">KVK: 832023291</span>
                                     <span className="block">BTW: NL866121171B01</span>
                                 </p>
                                 <p>
-                                    <a href="mailto:info@hett.nl" className="flex items-center gap-2 hover:text-hett-brown font-medium"><Mail size={16} /> info@hett.nl</a>
+                                    <a href="mailto:info@hettveranda.nl" className="flex items-center gap-2 hover:text-hett-brown font-medium"><Mail size={16} /> info@hettveranda.nl</a>
                                     <a href="tel:+31685406033" className="flex items-center gap-2 hover:text-hett-brown font-medium"><Phone size={16} /> +31 (0)6 85 40 60 33</a>
                                 </p>
                             </div>
@@ -127,7 +127,7 @@ const Showroom: React.FC = () => {
                         {/* Map */}
                         <div className="rounded-2xl overflow-hidden shadow-sm border border-gray-200 h-64 relative bg-gray-200 group">
                             <img
-                                src="https://images.unsplash.com/photo-1577416416421-72e49728cbce?q=80&w=1740&auto=format&fit=crop"
+                                src="/assets/images/homepagina_2.webp"
                                 alt="Kaart"
                                 className="w-full h-full object-cover opacity-80"
                             />

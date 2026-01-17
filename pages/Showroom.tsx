@@ -4,12 +4,8 @@ import { Clock, MapPin, Phone, Mail } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import CalendlyInline from '../src/components/CalendlyInline';
 
-// Calendly URL from environment variable with fallback
-const CALENDLY_URL = import.meta.env.VITE_CALENDLY_URL || 'https://calendly.com/REPLACE-ME';
-
-if (!import.meta.env.VITE_CALENDLY_URL) {
-  console.warn('[Calendly] Missing VITE_CALENDLY_URL environment variable. Using placeholder URL.');
-}
+// Calendly URL for showroom appointments
+const CALENDLY_URL = 'https://calendly.com/hett-info/30min?hide_event_type_details=1&hide_gdpr_banner=1';
 
 const Showroom: React.FC = () => {
     return (

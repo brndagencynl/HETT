@@ -76,7 +76,7 @@ const Footer: React.FC = () => {
                                 <MapPin size={18} className="text-white flex-shrink-0 mt-1" />
                                 <div className="text-sm font-medium">
                                     <strong className="block text-white mb-1 uppercase tracking-tight">HETT Veranda B.V.</strong>
-                                    Hoppenkuil 17, 5626 DC Eindhoven
+                                    Hoppenkuil 17, 5626 DD Eindhoven
                                 </div>
                             </div>
                             <div className="flex flex-col gap-3">

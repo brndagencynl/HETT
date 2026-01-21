@@ -1,6 +1,7 @@
 import React from 'react';
 import { HashRouter, Routes, Route, useLocation, Navigate, useParams } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
+import { useMetaPixel } from './src/hooks/useMetaPixel';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -66,6 +67,12 @@ const ScrollToTop = () => {
   React.useEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname]);
+  return null;
+};
+
+// Meta Pixel SPA tracking component
+const MetaPixelTracker = () => {
+  useMetaPixel();
   return null;
 };
 
@@ -173,6 +180,7 @@ const App: React.FC = () => {
     // Removed ShowroomAppointment import
   return (
     <HashRouter>
+      <MetaPixelTracker />
       <WhatsAppButton />
       <div className="flex flex-col min-h-screen bg-[#f6f8fa] font-sans text-hett-primary relative">
         <ScrollToTop />

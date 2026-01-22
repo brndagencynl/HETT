@@ -1,8 +1,9 @@
-
 import React from 'react';
 import PageHeader from '../components/PageHeader';
 import { FileText, Download, Youtube, Wrench, PlayCircle, Truck, ShieldCheck, CreditCard, Pen } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import MontageStepsSection from '../components/ui/MontageStepsSection';
+import MontagePartnerSection from '../components/ui/MontagePartnerSection';
 
 const Mounting: React.FC = () => {
     const location = useLocation();
@@ -133,6 +134,12 @@ const Mounting: React.FC = () => {
                 </div>
                             </div>
                         </div>
+
+                        {/* Stepper Section */}
+                        <MontageStepsSection />
+
+                        {/* Partner CTA Section */}
+                        <MontagePartnerSection />
                     </div>
                 </div>
       </div>

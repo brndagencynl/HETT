@@ -60,22 +60,69 @@ export const SUPPORTED_LED_WIDTHS = Object.keys(LED_WIDTH_MAPPING).map(Number);
 
 /**
  * Get LED spot count for a given width in cm.
- * Uses EXACT mapping - width must match one of the supported keys.
+ * Uses normalized width mapping - supports both exact standard widths AND
+ * maatwerk custom widths by snapping to nearest supported width.
  * 
- * @param widthCm - Veranda width in centimeters
- * @returns Number of LED spots, or 0 if width doesn't match any key
+ * MAPPING:
+ * 306cm→4, 406cm→6, 506cm→8, 606cm→10, 706cm→12, 806cm→14, 
+ * 906cm→16, 1006cm→18, 1106cm→20, 1206cm→22
+ * 
+ * @param widthCm - Veranda width in centimeters (any value)
+ * @returns Number of LED spots, or 0 if width is out of range
  */
 export function getLedSpotCountForWidthCm(widthCm: number): number {
-  const qty = LED_WIDTH_MAPPING[widthCm] ?? 0;
+  // First try exact match (standard veranda)
+  const exactQty = LED_WIDTH_MAPPING[widthCm];
+  if (exactQty !== undefined) {
+    console.log(`[LED] widthCm=${widthCm} (exact match)`);
+    console.log(`[LED] qty=${exactQty}`);
+    return exactQty;
+  }
   
-  console.log(`[LED] widthCm=${widthCm}`);
+  // For maatwerk/custom widths, normalize to nearest supported width
+  const normalizedWidth = normalizeToLedWidthInternal(widthCm);
+  if (normalizedWidth === null) {
+    console.log(`[LED] widthCm=${widthCm} is out of range (256-1256cm), skipping`);
+    return 0;
+  }
+  
+  const qty = LED_WIDTH_MAPPING[normalizedWidth] ?? 0;
+  
+  console.log(`[LED] widthCm=${widthCm} → normalized to ${normalizedWidth}cm`);
   console.log(`[LED] qty=${qty}`);
   
   if (qty === 0) {
-    console.log(`[LED] No mapping for width ${widthCm}, skipping`);
+    console.log(`[LED] No mapping for normalized width ${normalizedWidth}, skipping`);
   }
   
   return qty;
+}
+
+/**
+ * Internal helper to normalize width to nearest supported LED width.
+ * Rounds to nearest 100cm increment within the supported range.
+ * 
+ * @param widthCm - Raw width in centimeters
+ * @returns Nearest supported width key, or null if out of range
+ */
+function normalizeToLedWidthInternal(widthCm: number): number | null {
+  // Minimum supported is 306, maximum is 1206
+  // Allow some tolerance: 256-1256 range
+  if (widthCm < 256 || widthCm > 1256) return null;
+  
+  // Find nearest supported width
+  let nearest = SUPPORTED_LED_WIDTHS[0];
+  let minDiff = Math.abs(widthCm - nearest);
+  
+  for (const w of SUPPORTED_LED_WIDTHS) {
+    const diff = Math.abs(widthCm - w);
+    if (diff < minDiff) {
+      minDiff = diff;
+      nearest = w;
+    }
+  }
+  
+  return nearest;
 }
 
 /**
@@ -119,27 +166,20 @@ export function getLedQuantity(widthCm: number): number {
 
 /**
  * Normalize width to nearest supported LED width key.
- * Only use this for maatwerk slider values that need snapping.
+ * Use this for maatwerk slider values that need snapping.
+ * 
+ * Examples:
+ * - 706 → 706 (exact match)
+ * - 725 → 706 (nearest)
+ * - 1200 → 1206 (nearest)
+ * - 250 → 306 (clamp to min)
+ * - 1400 → null (out of range)
  * 
  * @param widthCm - Raw width in centimeters
  * @returns Nearest supported width key, or null if out of range
  */
 export function normalizeToLedWidth(widthCm: number): number | null {
-  if (widthCm < 256 || widthCm > 1256) return null; // Too far out of range
-  
-  // Find nearest supported width
-  let nearest = SUPPORTED_LED_WIDTHS[0];
-  let minDiff = Math.abs(widthCm - nearest);
-  
-  for (const w of SUPPORTED_LED_WIDTHS) {
-    const diff = Math.abs(widthCm - w);
-    if (diff < minDiff) {
-      minDiff = diff;
-      nearest = w;
-    }
-  }
-  
-  return nearest;
+  return normalizeToLedWidthInternal(widthCm);
 }
 
 // =============================================================================

@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 
 const Contact: React.FC = () => {
   const mapsUrl = 'https://www.google.com/maps/search/?api=1&query=Hoppenkuil+17,+5626+DD+Eindhoven';
-  const whatsappUrl = 'https://wa.me/31685406033';
+  const whatsappUrl = 'https://wa.me/31622367130';
 
   const openMaps = () => {
     window.open(mapsUrl, '_blank', 'noopener,noreferrer');

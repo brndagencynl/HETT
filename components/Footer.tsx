@@ -6,8 +6,6 @@ import { getFooterColumns, FooterColumn, FALLBACK_FOOTER_COLUMNS } from '../serv
 const Footer: React.FC = () => {
     const [columns, setColumns] = useState<FooterColumn[]>(FALLBACK_FOOTER_COLUMNS);
 
-    const sandwichpanelenUrl = '/products/sandwichpaneel';
-
     useEffect(() => {
         const fetchFooter = async () => {
             try {
@@ -37,10 +35,11 @@ const Footer: React.FC = () => {
                             </h3>
                             <ul className="space-y-3 text-sm font-medium">
                                 {column.links.map((link, linkIndex) => {
-                                    const resolvedUrl =
-                                        link.label === 'Sandwichpanelen' || link.url === '/categorie/sandwichpanelen'
-                                            ? sandwichpanelenUrl
-                                            : link.url;
+                                    if (link.label === 'Sandwichpanelen' || link.url === '/categorie/sandwichpanelen' || link.url === '/sandwichpanelen') {
+                                        return null;
+                                    }
+
+                                    const resolvedUrl = link.url;
                                     
                                     // Only render as Link if URL is valid
                                     if (!resolvedUrl || resolvedUrl === '#') {

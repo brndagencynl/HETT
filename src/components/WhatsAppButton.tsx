@@ -8,7 +8,7 @@
  * - Accessible with aria-label
  */
 
-const WHATSAPP_NUMBER = '31685406033';
+const WHATSAPP_NUMBER = '31622367130';
 const PREFILLED_MESSAGE = 'Hallo, ik heb een vraag over HETT Veranda\'s.';
 
 const WhatsAppButton: React.FC = () => {

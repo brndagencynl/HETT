@@ -232,6 +232,11 @@ const HomeHeroShowcase: React.FC = () => {
 
   const visibleItems = heroItems.filter(item => item.enabled);
   const currentItem = visibleItems[activeIndex] || heroItems[0];
+  const priceMatch = currentItem.title.match(/€\s?\d+/);
+  const priceText = priceMatch?.[0];
+  const priceIndex = priceText ? currentItem.title.indexOf(priceText) : -1;
+  const titleStart = priceIndex >= 0 ? currentItem.title.slice(0, priceIndex).trimEnd() : currentItem.title;
+  const titleEnd = priceIndex >= 0 ? currentItem.title.slice(priceIndex + priceText.length).trimStart() : '';
 
   const handlePrev = () => {
     setActiveIndex((prev) => (prev === 0 ? visibleItems.length - 1 : prev - 1));
@@ -269,7 +274,17 @@ const HomeHeroShowcase: React.FC = () => {
             
             {/* Title */}
             <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-white mb-4 leading-tight">
-              {currentItem.title}
+              {priceText ? (
+                <span className="inline-flex flex-wrap items-baseline gap-x-2 gap-y-2">
+                  <span>{titleStart}</span>
+                  <span className="price-badge inline-block bg-[#FF7A00] text-white font-extrabold rounded-[10px] shadow-[0_6px_16px_rgba(0,0,0,0.15)] px-2.5 py-1 text-[0.9em] sm:px-3.5 sm:py-2 sm:text-[0.95em]">
+                    {priceText}
+                  </span>
+                  {titleEnd ? <span>{titleEnd}</span> : null}
+                </span>
+              ) : (
+                currentItem.title
+              )}
             </h1>
             
             {/* Subtitle */}

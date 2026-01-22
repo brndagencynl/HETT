@@ -34,8 +34,6 @@ import {
 
 import {
     DEFAULT_COLOR,
-    getThumbnailPath,
-    FALLBACK_THUMBNAIL,
 } from '../visual/verandaAssets';
 
 // =============================================================================
@@ -179,12 +177,7 @@ export const VERANDA_OPTIONS_UI = [
         step: 2,
         type: "card",
         required: true,
-        choices: ROOF_TYPE_OPTIONS.map(c => ({
-            ...toUIChoice(c),
-            // Image will be dynamically resolved using getThumbnailPath in the component
-            // based on selected color. Default to ral7016 for initial render.
-            image: getThumbnailPath('daktype', c.id, DEFAULT_COLOR),
-        })),
+        choices: ROOF_TYPE_OPTIONS.map(c => toUIChoice(c)),
     },
     {
         key: "goot",

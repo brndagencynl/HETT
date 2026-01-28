@@ -953,6 +953,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           zijwand_rechts: payload.selections.find(s => s.groupId === 'zijwand_rechts')?.choiceId || 'geen',
           voorzijde: payload.selections.find(s => s.groupId === 'voorzijde')?.choiceId || 'geen',
           verlichting: payload.selections.some(s => s.groupId === 'verlichting'),
+          montage: payload.montage === true,
         },
       },
       configHash: cartId,
@@ -966,6 +967,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       details: [
         { label: 'Afmeting', value: sizeSummary },
         ...payload.selections.map(s => ({ label: s.groupLabel, value: s.choiceLabel })),
+        { label: 'Montage', value: payload.montage ? 'Ja' : 'Nee' },
       ],
     };
 

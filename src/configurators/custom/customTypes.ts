@@ -86,6 +86,8 @@ export interface MaatwerkConfig {
   zijwand_rechts: MaatwerkZijwandValue;
   voorzijde: MaatwerkVoorzijdeValue;
   verlichting: boolean;
+  /** Montage door HETT Veranda (optioneel, vaste prijs €1.200) */
+  montage: boolean;
 
   /** Derived LED info for display/debugging (does not affect base product line price) */
   ledQty?: number;
@@ -121,6 +123,7 @@ export const DEFAULT_MAATWERK_CONFIG: PartialMaatwerkConfig = {
   zijwand_rechts: 'geen',
   voorzijde: 'geen',
   verlichting: false,
+  montage: false,
 };
 
 // =============================================================================
@@ -212,6 +215,8 @@ export interface MaatwerkCartPayload {
   maatwerkSurcharge?: number;
   optionsTotal: number;
   totalPrice: number;
+  /** Montage service selected */
+  montage?: boolean;
   /** User's requested custom dimensions */
   size: MaatwerkSize;
   /** Resolved bucketed width used for Shopify variant mapping */

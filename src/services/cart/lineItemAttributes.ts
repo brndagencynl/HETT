@@ -195,6 +195,8 @@ function buildVerandaMainAttributes(item: CartItem): ShopifyLineAttribute[] {
   
   // Verlichting
   attributes.push({ key: 'Verlichting', value: formatBoolean(config.verlichting) });
+  // Montage
+  attributes.push({ key: 'Montage', value: formatBoolean((config as any).montage) });
   
   // Reference ID
   const refId = generateReferenceId(item);
@@ -260,6 +262,12 @@ function buildMaatwerkMainAttributes(item: CartItem): ShopifyLineAttribute[] {
   attributes.push({ 
     key: 'Verlichting', 
     value: verlichting && verlichting !== 'Geen' && verlichting !== 'geen' ? 'Ja' : 'Nee' 
+  });
+  // Montage
+  const montage = getSelection('montage');
+  attributes.push({
+    key: 'Montage',
+    value: montage ? 'Ja' : 'Nee',
   });
   
   // Reference ID

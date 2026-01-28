@@ -194,6 +194,8 @@ function formatVerandaSummary(item: CartItem): string {
   
   // Verlichting
   parts.push(`Verlichting: ${formatBoolean(config.verlichting)}`);
+  // Montage
+  parts.push(`Montage: ${formatBoolean((config as any).montage)}`);
   
   return parts.join(' • ');
 }
@@ -255,6 +257,8 @@ function formatMaatwerkSummary(item: CartItem): string {
   if (verlichting) {
     parts.push(`Verlichting: ${verlichting}`);
   }
+  const montage = getSelection('montage');
+  parts.push(`Montage: ${montage ? 'Ja' : 'Nee'}`);
   
   return parts.join(' • ');
 }
@@ -339,6 +343,8 @@ function buildVerandaAttributes(item: CartItem): ShopifyLineAttribute[] {
   
   // Verlichting
   lines.push(`Verlichting: ${formatBoolean(config.verlichting)}`);
+  // Montage
+  lines.push(`Montage: ${formatBoolean((config as any).montage)}`);
   
   return [{ key: 'Configuratie', value: lines.join('\n') }];
 }
@@ -393,6 +399,8 @@ function buildMaatwerkAttributes(item: CartItem): ShopifyLineAttribute[] {
   // Verlichting
   const verlichting = getSelection('verlichting');
   lines.push(`Verlichting: ${verlichting ? 'Ja' : 'Nee'}`);
+  const montage = getSelection('montage');
+  lines.push(`Montage: ${montage ? 'Ja' : 'Nee'}`);
   
   return [{ key: 'Configuratie', value: lines.join('\n') }];
 }

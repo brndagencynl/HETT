@@ -2,12 +2,50 @@ import React, { useState, forwardRef, useImperativeHandle, useMemo, useCallback,
 import { X, Check, Info, ChevronLeft, ChevronRight, Truck, ShieldCheck, ArrowRight, Lightbulb, Edit2, Eye, ChevronUp, ShoppingBag, Loader2, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { VERANDA_OPTIONS_UI, DEFAULT_VERANDA_CONFIG, VerandaConfig, COLOR_OPTIONS, DEFAULT_COLOR } from '../src/configurator/schemas/veranda';
-import { calcVerandaPrice } from '../src/configurator/pricing/veranda';
+import { calcVerandaPrice, type VerandaProductSize } from '../src/configurator/pricing/veranda';
+import { getOptionPrice, FRONT_SIDE_OPTIONS, type OptionChoice } from '../src/configurator/pricing/verandapricing';
 import { buildVisualizationLayers, type VisualizationLayer, FALLBACK_IMAGE, type VerandaColorId, getPreloadPaths, preloadImages } from '../src/configurator/visual/verandaAssets';
 import { t } from '../src/utils/i18n';
 import { formatEUR, toCents } from '../src/utils/money';
 // Use shared LED addon service for both standard and maatwerk configurators
 import { getLedTotals, LED_UNIT_PRICE_EUR } from '../src/services/addons/led';
+
+/**
+ * Convert widthCm to the nearest supported VerandaProductSize
+ * This ensures proper pricing for glass sliding walls based on actual product width
+ * 
+ * @param widthCm - Width in cm (e.g., 506, 606, 706)
+ * @returns VerandaProductSize string (e.g., '500x300', '600x300', '700x300')
+ */
+function widthCmToProductSize(widthCm: number): VerandaProductSize {
+    // Map widthCm to the closest supported width
+    // Product handles use 506, 606, 706 etc. which map to 500, 600, 700 sizes
+    let width: 500 | 600 | 700;
+    if (widthCm <= 550) {
+        width = 500;
+    } else if (widthCm <= 650) {
+        width = 600;
+    } else {
+        width = 700;
+    }
+    // Default depth is 300 - the exact depth doesn't affect glass wall pricing
+    // since glass wall pricing is based on width only
+    return `${width}x300` as VerandaProductSize;
+}
+
+/**
+ * Get dynamic price for a front side option based on actual product size
+ * This is needed because glass sliding wall prices vary by width
+ * 
+ * @param choiceId - The option choice ID (e.g., 'glas_schuifwand_helder')
+ * @param productSize - The actual product size
+ * @returns Price in EUR
+ */
+function getDynamicFrontSidePrice(choiceId: string, productSize: VerandaProductSize): number {
+    const option = FRONT_SIDE_OPTIONS.find(opt => opt.id === choiceId);
+    if (!option) return 0;
+    return getOptionPrice(option.pricing, productSize);
+}
 
 const MotionDiv = motion.div as any;
 
@@ -180,8 +218,12 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
     const ledAvailable = ledInfo.qty > 0;
     const ledSelectedTotal = config.verlichting ? ledInfo.total : 0;
 
+    // Convert widthCm to productSize for correct glass wall pricing
+    const productSize = useMemo(() => widthCmToProductSize(widthCm), [widthCm]);
+
     // Price calculation - basePrice comes from Shopify product.price
-    const { total: currentPrice, items: priceItems, basePrice: calcBasePrice } = calcVerandaPrice(basePrice, config as VerandaConfig);
+    // Pass productSize to ensure correct pricing for width-dependent options (e.g., glass sliding walls)
+    const { total: currentPrice, items: priceItems, basePrice: calcBasePrice } = calcVerandaPrice(basePrice, config as VerandaConfig, productSize);
 
     // Display-only totals: base product + options + (optional) LED add-on
     const displayTotal = currentPrice + ledSelectedTotal;
@@ -604,34 +646,42 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
         // Radio/Select selector (for walls, goot, voorzijde) - TEXT-ONLY
         return (
             <div className="space-y-3 max-w-2xl">
-                {optionDef.choices.map((choice: any) => (
-                    <button
-                        key={choice.value}
-                        type="button"
-                        onClick={() => setConfig(prev => ({ ...prev, [optionDef.key]: choice.value }))}
-                        aria-pressed={currentValue === choice.value}
-                        className={`relative w-full text-left p-4 rounded-xl border-2 transition-all cursor-pointer ${
-                            currentValue === choice.value 
-                                ? 'border-[#003878] bg-[#003878]/5 shadow-md ring-2 ring-[#003878]/10' 
-                                : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
-                        }`}
-                    >
-                        {currentValue === choice.value && (
-                            <div className="absolute top-4 right-4 w-6 h-6 bg-[#003878] rounded-full flex items-center justify-center text-white">
-                                <Check size={14} strokeWidth={3} />
-                            </div>
-                        )}
-                        <span className={`block font-bold text-base mb-1 pr-8 ${
-                            currentValue === choice.value ? 'text-gray-900' : 'text-gray-700'
-                        }`}>
-                            {choice.label}
-                        </span>
-                        <span className="block text-sm text-gray-600">{choice.description}</span>
-                        {choice.price > 0 && (
-                            <span className="inline-block mt-2 text-sm text-[#FF7300] font-semibold">+ {formatEUR(toCents(choice.price), 'cents')}</span>
-                        )}
-                    </button>
-                ))}
+                {optionDef.choices.map((choice: any) => {
+                    // For voorzijde (front side) options, calculate dynamic price based on actual product size
+                    // This ensures glass sliding wall prices reflect the actual width
+                    const displayPrice = optionDef.key === 'voorzijde' 
+                        ? getDynamicFrontSidePrice(choice.value, productSize)
+                        : choice.price;
+                    
+                    return (
+                        <button
+                            key={choice.value}
+                            type="button"
+                            onClick={() => setConfig(prev => ({ ...prev, [optionDef.key]: choice.value }))}
+                            aria-pressed={currentValue === choice.value}
+                            className={`relative w-full text-left p-4 rounded-xl border-2 transition-all cursor-pointer ${
+                                currentValue === choice.value 
+                                    ? 'border-[#003878] bg-[#003878]/5 shadow-md ring-2 ring-[#003878]/10' 
+                                    : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
+                            }`}
+                        >
+                            {currentValue === choice.value && (
+                                <div className="absolute top-4 right-4 w-6 h-6 bg-[#003878] rounded-full flex items-center justify-center text-white">
+                                    <Check size={14} strokeWidth={3} />
+                                </div>
+                            )}
+                            <span className={`block font-bold text-base mb-1 pr-8 ${
+                                currentValue === choice.value ? 'text-gray-900' : 'text-gray-700'
+                            }`}>
+                                {choice.label}
+                            </span>
+                            <span className="block text-sm text-gray-600">{choice.description}</span>
+                            {displayPrice > 0 && (
+                                <span className="inline-block mt-2 text-sm text-[#FF7300] font-semibold">+ {formatEUR(toCents(displayPrice), 'cents')}</span>
+                            )}
+                        </button>
+                    );
+                })}
             </div>
         );
     };

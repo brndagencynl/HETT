@@ -127,6 +127,8 @@ export function buildMaatwerkCartPayload(config: MaatwerkConfig): MaatwerkCartPa
     size: config.size, // User's requested custom dimensions
     anchorSizeKey: priceBreakdown.anchor?.anchorSizeKey || `${config.size.width}x${config.size.depth}`,
     selections: priceBreakdown.selections,
+    // Montage toggle stored for downstream cart/checkout
+    montage: config.montage === true,
     priceBreakdown,
     renderPreview: undefined, // Can be added later
   };
@@ -144,7 +146,8 @@ export type MaatwerkStepId =
   | 'zijwand_links' 
   | 'zijwand_rechts' 
   | 'voorzijde' 
-  | 'verlichting' 
+  | 'verlichting'
+  | 'montage'
   | 'overzicht';
 
 export interface MaatwerkStep {
@@ -208,6 +211,12 @@ export const MAATWERK_STEPS: MaatwerkStep[] = [
     required: false,
   },
   {
+    id: 'montage',
+    title: 'Montage',
+    description: 'Laat uw veranda monteren door ons team',
+    required: false,
+  },
+  {
     id: 'overzicht',
     title: 'Overzicht',
     description: 'Controleer uw configuratie en voeg toe aan winkelwagen',
@@ -235,6 +244,7 @@ export function isMaatwerkStepComplete(
     case 'zijwand_rechts':
     case 'voorzijde':
     case 'verlichting':
+    case 'montage':
     case 'overzicht':
       return true; // Optional steps are always "complete"
     default:

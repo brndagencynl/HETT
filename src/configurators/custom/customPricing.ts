@@ -438,6 +438,19 @@ export const MAATWERK_OPTION_GROUPS: MaatwerkOptionGroup[] = [
     required: false,
     choices: MAATWERK_EXTRAS_OPTIONS,
   },
+  {
+    id: 'montage',
+    label: 'Montage',
+    required: false,
+    choices: [
+      {
+        id: 'ja',
+        label: 'Montage door HETT Veranda (vaste prijs)',
+        description: 'Professionele montage, planning in overleg',
+        pricing: { type: 'fixed', price: 1200 },
+      },
+    ],
+  },
 ];
 
 // =============================================================================
@@ -592,6 +605,7 @@ export function calculateMaatwerkPrice(config: PartialMaatwerkConfig): MaatwerkP
     { groupId: 'zijwand_rechts', value: config.zijwand_rechts },
     { groupId: 'voorzijde', value: config.voorzijde },
     { groupId: 'verlichting', value: config.verlichting },
+    { groupId: 'montage', value: config.montage },
   ];
 
   for (const { groupId, value } of optionMappings) {

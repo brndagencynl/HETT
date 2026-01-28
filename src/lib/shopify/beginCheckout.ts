@@ -21,6 +21,7 @@ import {
   hasLedEnabled,
   type LedCartItem,
 } from '../../services/addons/led';
+import { buildMontageCartLine, hasMontageEnabled, isMontageConfigured } from '../../services/montagePricing';
 // Configuration surcharge lines (Route A)
 import {
   buildConfigSurchargeLines,
@@ -294,6 +295,40 @@ export async function beginCheckout(
         }
       } else {
         console.log(`[LED Checkout] no LED items to add`);
+      }
+    }
+
+    // ==========================================================================
+    // MONTAGE LINE (aggregate montage toggle across items)
+    // ==========================================================================
+    console.log('[Montage Checkout] ========== Starting montage aggregation ==========');
+    console.log(`[Montage Checkout] isMontageConfigured()=${isMontageConfigured()}`);
+
+    const montageSourceItems: Array<{ bundleKey: string; configType: 'maatwerk' | 'veranda'; quantity: number }> = [];
+
+    for (let idx = 0; idx < cartItems.length; idx++) {
+      const item = cartItems[idx];
+      if (isShippingLineItem(item)) continue;
+
+      const bundleKey = bundleKeyMap.get(idx) || '';
+      const montageEnabled = hasMontageEnabled({ config: item.config as any, maatwerkPayload: item.maatwerkPayload as any });
+      if (!montageEnabled) continue;
+
+      const configType = item.type === 'custom_veranda' ? 'maatwerk' : (item.config?.category === 'maatwerk_veranda' ? 'maatwerk' : 'veranda');
+      montageSourceItems.push({ bundleKey, configType, quantity: item.quantity });
+    }
+
+    if (montageSourceItems.length > 0) {
+      if (!isMontageConfigured()) {
+        console.warn('[Montage Checkout] montage product is not configured (variant placeholder). Line will be skipped.');
+      } else {
+        const totalQty = montageSourceItems.reduce((sum, s) => sum + (s.quantity || 0), 0);
+        const bundleKeys = montageSourceItems.map(s => s.bundleKey).filter(Boolean);
+        const montageLine = buildMontageCartLine('maatwerk', bundleKeys);
+        if (montageLine) {
+          montageLine.quantity = totalQty > 0 ? totalQty : 1;
+          lines.push(montageLine);
+        }
       }
     }
 

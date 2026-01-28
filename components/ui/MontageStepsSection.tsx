@@ -38,7 +38,7 @@ const STEPS: Step[] = [
   {
     number: 4,
     title: 'Montage op locatie (optioneel)',
-    description: 'Wilt u volledige ontzorging? Dan kunt u montage aanvragen via ons partnerbedrijf OutdoorVeranda.nl. Zij maken een offerte op maat voor uw locatie.',
+    description: 'Wilt u volledige ontzorging? Dan verzorgt HETT Veranda de montage voor een vaste prijs van € 1.200,-. Wij plannen dit in overleg met u in.',
     icon: Wrench,
   },
   {
@@ -51,7 +51,7 @@ const STEPS: Step[] = [
 
 const INFO_BADGES = [
   { icon: CalendarCheck, label: 'Duidelijke planning' },
-  { icon: Users, label: 'Montage via partners' },
+  { icon: Users, label: 'Montage door HETT' },
   { icon: Headphones, label: 'Nazorg & support' },
 ];
 

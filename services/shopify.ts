@@ -852,6 +852,7 @@ export const FALLBACK_FOOTER_COLUMNS: FooterColumn[] = [
       { label: 'Bezorging', url: '/bezorging' },
       { label: 'Montage', url: '/montage-handleiding' },
       { label: 'Garantie', url: '/garantie-en-klachten' },
+      { label: 'Retourbeleid', url: '/retourneren' },
     ],
   },
 ];

@@ -97,7 +97,11 @@ const Footer: React.FC = () => {
                         <p className="text-[10px] text-white">Hoogwaardige Veranda's voor iedereen.</p>
                     </div>
 
-                    <p className="text-[10px] text-white font-medium">© 2025 HETT Veranda B.V. Alle rechten voorbehouden.</p>
+                    <div className="flex items-center gap-3">
+                        <p className="text-[10px] text-white font-medium">© 2025 HETT Veranda B.V. Alle rechten voorbehouden.</p>
+                        <span className="text-white/40">|</span>
+                        <Link to="/algemene-voorwaarden" className="text-[10px] text-white/70 hover:text-white transition-colors">Algemene Voorwaarden</Link>
+                    </div>
                 </div>
             </div>
         </footer>

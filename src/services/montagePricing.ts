@@ -3,7 +3,7 @@
  * =======================
  * 
  * Montage (assembly) service by HETT Veranda.
- * Fixed price €1.200,- (incl. BTW)
+ * Pricing is quote-based (op offerte).
  * 
  * Currently only available for maatwerk veranda configurator.
  * Montage is added as a SEPARATE Shopify cart line when enabled.
@@ -87,7 +87,7 @@ export function buildMontageCartLine(
   // CUSTOMER-FACING attributes only
   const attributes: Array<{ key: string; value: string }> = [
     { key: 'Montage', value: 'Ja' },
-    { key: 'Vaste prijs', value: priceFormatted },
+    { key: 'Prijs', value: 'Op offerte' },
   ];
   
   // INTERNAL bundle grouping (underscore prefix to minimize checkout display)
@@ -112,11 +112,11 @@ export function buildMontageCartLine(
  */
 export function getMontageInfo() {
   return {
-    price: MONTAGE_PRICE_EUR,
-    priceCents: MONTAGE_PRICE_CENTS,
-    priceFormatted: `€ ${MONTAGE_PRICE_EUR.toFixed(2).replace('.', ',')}`,
+    price: 0,
+    priceCents: 0,
+    priceFormatted: 'Op offerte',
     description: 'Montage door HETT Veranda',
-    subtitle: 'Vaste prijs, inclusief BTW',
+    subtitle: 'Prijs op aanvraag',
   };
 }
 

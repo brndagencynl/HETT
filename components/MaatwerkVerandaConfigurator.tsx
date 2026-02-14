@@ -192,7 +192,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
   const ledAvailable = ledInfo.qty > 0;
   const ledSelectedTotal = config.verlichting ? ledInfo.total : 0;
   
-  // Montage pricing (fixed €1.200)
+  // Montage info
   const montageInfo = useMemo(() => getMontageInfo(), []);
   
   // Grand total including LED (montage is already included in priceBreakdown via option pricing)
@@ -822,7 +822,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
   };
 
   // ==========================================================================
-  // MONTAGE TOGGLE (fixed price €1.200)
+  // MONTAGE TOGGLE (op offerte)
   // ==========================================================================
 
   const renderMontageToggle = () => {
@@ -848,9 +848,9 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
             </div>
             <div>
               <span className="font-bold text-gray-900 text-lg block">Montage</span>
-              <span className="text-sm text-gray-600 block">Montage door HETT Veranda (vaste prijs)</span>
+              <span className="text-sm text-gray-600 block">Montage door HETT Veranda</span>
               <span className="block text-sm text-[#FF7300] font-semibold mt-1">
-                + € {montageInfo.price.toFixed(2).replace('.', ',')}
+                Op offerte
               </span>
             </div>
           </div>
@@ -884,7 +884,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
         ? `Ja, ${ledInfo.qty} LED spots (€ ${ledInfo.total.toFixed(2).replace('.', ',')})`
         : `Ja (niet beschikbaar voor ${rawWidth} cm)`)
       : 'Nee';
-    const montageSummaryValue = config.montage ? 'Ja (vaste prijs € 1.200,00)' : 'Nee';
+    const montageSummaryValue = config.montage ? 'Ja (op offerte)' : 'Nee';
     
     const summaryItems = [
       { stepIndex: 0, label: 'Afmetingen', value: config.size ? formatMaatwerkSize(config.size) : '-', key: 'afmetingen' },

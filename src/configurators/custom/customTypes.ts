@@ -86,7 +86,7 @@ export interface MaatwerkConfig {
   zijwand_rechts: MaatwerkZijwandValue;
   voorzijde: MaatwerkVoorzijdeValue;
   verlichting: boolean;
-  /** Montage door HETT Veranda (optioneel, vaste prijs €1.200) */
+  /** Montage door HETT Veranda (optioneel, op offerte) */
   montage: boolean;
 
   /** Derived LED info for display/debugging (does not affect base product line price) */

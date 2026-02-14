@@ -8,77 +8,214 @@ const Terms: React.FC = () => {
       <PageHeader 
         title="Algemene Voorwaarden"
         subtitle="Juridisch"
-        description="Onze leverings- en betalingsvoorwaarden voor zakelijke relaties."
+        description="De algemene voorwaarden van HETT Veranda voor al onze producten en diensten."
         image="https://picsum.photos/1200/800?random=88"
       />
 
       <div className="max-w-[1000px] mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="bg-white p-8 md:p-16 rounded-[32px] shadow-sm border border-gray-100 prose prose-slate max-w-none prose-headings:font-bold prose-headings:text-hett-dark prose-a:text-hett-brown">
-          
-          <h3>Artikel 1. Definities</h3>
-          <p>
-            1.1. In deze algemene voorwaarden wordt verstaan onder:<br/>
-            <strong>HETT:</strong> HETT B.V., gevestigd te Eindhoven, gebruiker van deze algemene voorwaarden.<br/>
-            <strong>Wederpartij:</strong> iedere (rechts)persoon die met HETT een overeenkomst heeft gesloten of wenst te sluiten.<br/>
-            <strong>Overeenkomst:</strong> iedere overeenkomst die tussen HETT en de Wederpartij tot stand komt, elke wijziging of aanvulling daarop, alsmede alle (rechts)handelingen ter voorbereiding en ter uitvoering van die overeenkomst.
-          </p>
+        <div className="bg-white p-8 md:p-16 rounded-[32px] shadow-sm border border-gray-100">
 
-          <h3>Artikel 2. Toepasselijkheid</h3>
-          <p>
-            2.1. Deze voorwaarden zijn van toepassing op alle aanbiedingen, offertes en overeenkomsten tussen HETT en een Wederpartij.<br/>
-            2.2. Afwijkingen van deze voorwaarden zijn slechts bindend indien en voor zover zij schriftelijk zijn bevestigd door HETT.<br/>
-            2.3. Eventuele inkoop- of andere voorwaarden van de Wederpartij zijn niet van toepassing, tenzij deze door HETT uitdrukkelijk en schriftelijk zijn aanvaard.
-          </p>
+          <p className="text-center font-bold text-lg text-hett-dark mb-12">HETT Veranda</p>
 
-          <h3>Artikel 3. Offertes en Aanbiedingen</h3>
-          <p>
-            3.1. Alle offertes en aanbiedingen van HETT zijn vrijblijvend, tenzij in de offerte een termijn voor aanvaarding is gesteld.<br/>
-            3.2. HETT kan niet aan zijn offertes of aanbiedingen worden gehouden indien de Wederpartij redelijkerwijs kan begrijpen dat de offertes of aanbiedingen, dan wel een onderdeel daarvan, een kennelijke vergissing of verschrijving bevatten.<br/>
-            3.3. De in een offerte of aanbieding vermelde prijzen zijn exclusief BTW en andere heffingen van overheidswege, eventuele in het kader van de overeenkomst te maken kosten, daaronder begrepen reis- en verblijf-, verzend- en administratiekosten, tenzij anders aangegeven.
-          </p>
+          {/* Artikel 1 */}
+          <div className="mb-10">
+            <h3 className="text-xl font-black text-hett-dark mb-4 pb-2 border-b border-gray-100">Artikel 1 – Identiteit van de ondernemer</h3>
+            <p className="text-gray-600 leading-relaxed">
+              HETT Veranda<br/>
+              Vestigingsadres: Hoppenkuil 17<br/>
+              KvK-nummer: [KvK invullen]<br/>
+              BTW-nummer: [BTW invullen]<br/>
+              E-mailadres: <a href="mailto:info@hettveranda.nl" className="text-hett-brown hover:underline">info@hettveranda.nl</a><br/>
+              Telefoonnummer:
+            </p>
+          </div>
 
-          <h3>Artikel 4. Levering en Uitvoering</h3>
-          <p>
-            4.1. Is voor de uitvoering van bepaalde werkzaamheden of voor de levering van bepaalde zaken een termijn overeengekomen of opgegeven, dan is dit nimmer een fatale termijn. Bij overschrijding van een termijn dient de Wederpartij HETT derhalve schriftelijk in gebreke te stellen.<br/>
-            4.2. HETT heeft het recht bepaalde werkzaamheden te laten verrichten door derden. De toepasselijkheid van artikel 7:404, 7:407 lid 2 en 7:409 BW wordt uitdrukkelijk uitgesloten.<br/>
-            4.3. Levering geschiedt 'aan de stoeprand' of op een goed bereikbare plaats op de bouwlocatie, ter beoordeling van de chauffeur.
-          </p>
+          {/* Artikel 2 */}
+          <div className="mb-10">
+            <h3 className="text-xl font-black text-hett-dark mb-4 pb-2 border-b border-gray-100">Artikel 2 – Definities</h3>
+            <p className="text-gray-600 leading-relaxed mb-4">
+              In deze algemene voorwaarden wordt verstaan onder:
+            </p>
+            <div className="space-y-2 text-gray-600 leading-relaxed">
+              <p><strong className="text-gray-800">Ondernemer:</strong> HETT Veranda.</p>
+              <p><strong className="text-gray-800">Klant:</strong> de natuurlijke persoon of rechtspersoon die een overeenkomst aangaat met HETT Veranda.</p>
+              <p><strong className="text-gray-800">Overeenkomst:</strong> iedere koop- of montageovereenkomst tussen ondernemer en klant.</p>
+              <p><strong className="text-gray-800">Producten:</strong> veranda's, glazen schuifwanden, sandwichpanelen, glasdaken en aanverwante artikelen.</p>
+              <p><strong className="text-gray-800">Maatwerkproducten:</strong> producten die speciaal volgens specificaties van de klant worden vervaardigd.</p>
+              <p><strong className="text-gray-800">Montagepartner:</strong> externe, erkende partij die in opdracht van ondernemer montagewerkzaamheden uitvoert.</p>
+            </div>
+          </div>
 
-          <h3>Artikel 5. Betaling en Incassokosten</h3>
-          <p>
-            5.1. Betaling dient steeds te geschieden binnen 14 dagen na factuurdatum, op een door HETT aan te geven wijze in de valuta waarin is gefactureerd, tenzij schriftelijk anders door HETT is aangegeven.<br/>
-            5.2. Indien de Wederpartij in gebreke blijft in de tijdige betaling van een factuur, dan is de Wederpartij van rechtswege in verzuim. De Wederpartij is alsdan een rente verschuldigd van 1% per maand, tenzij de wettelijke handelsrente hoger is, in welk geval de wettelijke handelsrente verschuldigd is.<br/>
-            5.3. Indien de Wederpartij in gebreke of in verzuim is in de (tijdige) nakoming van zijn verplichtingen, dan komen alle redelijke kosten ter verkrijging van voldoening buiten rechte voor rekening van de Wederpartij.
-          </p>
+          {/* Artikel 3 */}
+          <div className="mb-10">
+            <h3 className="text-xl font-black text-hett-dark mb-4 pb-2 border-b border-gray-100">Artikel 3 – Toepasselijkheid</h3>
+            <div className="space-y-2 text-gray-600 leading-relaxed">
+              <p>Deze algemene voorwaarden zijn van toepassing op alle offertes, aanbiedingen, overeenkomsten en leveringen van HETT Veranda.</p>
+              <p>Afwijkingen zijn slechts geldig indien schriftelijk bevestigd.</p>
+              <p>Eventuele algemene voorwaarden van de klant worden uitdrukkelijk van de hand gewezen.</p>
+            </div>
+          </div>
 
-          <h3>Artikel 6. Eigendomsvoorbehoud</h3>
-          <p>
-            6.1. Alle door HETT in het kader van de overeenkomst geleverde zaken blijven eigendom van HETT totdat de Wederpartij alle verplichtingen uit de met HETT gesloten overeenkomst(en) deugdelijk is nagekomen.<br/>
-            6.2. Door HETT geleverde zaken, die ingevolge lid 1. onder het eigendomsvoorbehoud vallen, mogen niet worden doorverkocht en mogen nimmer als betaalmiddel worden gebruikt.
-          </p>
+          {/* Artikel 4 */}
+          <div className="mb-10">
+            <h3 className="text-xl font-black text-hett-dark mb-4 pb-2 border-b border-gray-100">Artikel 4 – Offertes en aanbiedingen</h3>
+            <div className="space-y-2 text-gray-600 leading-relaxed">
+              <p>Alle offertes en aanbiedingen zijn vrijblijvend tenzij anders vermeld.</p>
+              <p>Offertes hebben een geldigheidsduur van 14 dagen tenzij anders aangegeven.</p>
+              <p>Kennelijke fouten of vergissingen in offertes of op de website binden de ondernemer niet.</p>
+              <p>Afbeeldingen, renders en visualisaties op de website zijn indicatief en kunnen afwijken van het werkelijke product.</p>
+            </div>
+          </div>
 
-          <h3>Artikel 7. Garantie en Reclame</h3>
-          <p>
-            7.1. De door HETT te leveren zaken voldoen aan de gebruikelijke eisen en normen die daaraan op het moment van levering redelijkerwijs gesteld kunnen worden en waarvoor zij bij normaal gebruik in Nederland zijn bestemd.<br/>
-            7.2. De Wederpartij is gehouden het geleverde te (doen) onderzoeken, onmiddellijk op het moment dat de zaken hem ter beschikking worden gesteld. Daarbij behoort de Wederpartij te onderzoeken of kwaliteit en/of kwantiteit van het geleverde overeenstemt met hetgeen is overeengekomen.<br/>
-            7.3. Eventuele zichtbare gebreken dienen binnen 48 uur na levering schriftelijk aan HETT te worden gemeld.
-          </p>
+          {/* Artikel 5 */}
+          <div className="mb-10">
+            <h3 className="text-xl font-black text-hett-dark mb-4 pb-2 border-b border-gray-100">Artikel 5 – Totstandkoming van de overeenkomst</h3>
+            <div className="space-y-2 text-gray-600 leading-relaxed">
+              <p>De overeenkomst komt tot stand zodra de bestelling schriftelijk of digitaal is bevestigd.</p>
+              <p>Na bestelling neemt HETT Veranda contact op met de klant om levering en/of montage af te stemmen.</p>
+              <p>De ondernemer behoudt zich het recht voor een bestelling te weigeren of aanvullende informatie te verlangen.</p>
+            </div>
+          </div>
 
-          <h3>Artikel 8. Aansprakelijkheid</h3>
-          <p>
-            8.1. Indien HETT aansprakelijk mocht zijn, dan is deze aansprakelijkheid beperkt tot hetgeen in deze bepaling is geregeld.<br/>
-            8.2. HETT is niet aansprakelijk voor schade, van welke aard ook, ontstaan doordat HETT is uitgegaan van door of namens de Wederpartij verstrekte onjuiste en/of onvolledige gegevens.<br/>
-            8.3. De aansprakelijkheid van HETT is in ieder geval steeds beperkt tot het bedrag der uitkering van zijn verzekeraar in voorkomend geval.
-          </p>
+          {/* Artikel 6 */}
+          <div className="mb-10">
+            <h3 className="text-xl font-black text-hett-dark mb-4 pb-2 border-b border-gray-100">Artikel 6 – Prijzen</h3>
+            <div className="space-y-2 text-gray-600 leading-relaxed">
+              <p>Alle prijzen zijn inclusief btw, tenzij anders vermeld.</p>
+              <p>Montageprijzen zijn maatwerk en afhankelijk van locatie, bereikbaarheid en situatie ter plaatse.</p>
+              <p>Indien montage gewenst is, ontvangt de klant een persoonlijke prijsopgave.</p>
+              <p>Eventuele prijsverhogingen door externe factoren (grondstoffen, transport, overmacht) vóór definitieve bevestiging mogen worden doorberekend.</p>
+            </div>
+          </div>
 
-          <h3>Artikel 9. Toepasselijk recht en geschillen</h3>
-          <p>
-            9.1. Op alle rechtsbetrekkingen waarbij HETT partij is, is uitsluitend het Nederlands recht van toepassing, ook indien aan een verbintenis geheel of gedeeltelijk in het buitenland uitvoering wordt gegeven of indien de bij de rechtsbetrekking betrokken partij aldaar woonplaats heeft.<br/>
-            9.2. De rechter in de vestigingsplaats van HETT is bij uitsluiting bevoegd van geschillen kennis te nemen, tenzij de wet dwingend anders voorschrijft.
-          </p>
+          {/* Artikel 7 */}
+          <div className="mb-10">
+            <h3 className="text-xl font-black text-hett-dark mb-4 pb-2 border-b border-gray-100">Artikel 7 – Betaling</h3>
+            <div className="space-y-2 text-gray-600 leading-relaxed">
+              <p>Betaling dient te geschieden volgens de overeengekomen betaalvoorwaarden.</p>
+              <p>Bij niet-tijdige betaling is de klant van rechtswege in verzuim.</p>
+              <p>Eventuele incassokosten en wettelijke rente komen voor rekening van de klant.</p>
+              <p>De ondernemer mag levering opschorten bij openstaande betalingen.</p>
+            </div>
+          </div>
 
-          <div className="mt-12 pt-8 border-t border-gray-100 text-sm text-gray-500">
-            <p>Versie: 1.2 - Laatst gewijzigd op 10 april 2024</p>
+          {/* Artikel 8 */}
+          <div className="mb-10">
+            <h3 className="text-xl font-black text-hett-dark mb-4 pb-2 border-b border-gray-100">Artikel 8 – Levering</h3>
+            <div className="space-y-2 text-gray-600 leading-relaxed">
+              <p>Levertermijnen zijn indicatief en geen fatale termijnen.</p>
+              <p>Levering vindt plaats op het door de klant opgegeven adres.</p>
+              <p>De klant dient zorg te dragen voor een goed bereikbare locatie.</p>
+              <p>Extra kosten door slechte bereikbaarheid of wachttijden zijn voor rekening van de klant.</p>
+              <p>Het risico van beschadiging gaat over op het moment van levering.</p>
+            </div>
+          </div>
+
+          {/* Artikel 9 */}
+          <div className="mb-10">
+            <h3 className="text-xl font-black text-hett-dark mb-4 pb-2 border-b border-gray-100">Artikel 9 – Montage</h3>
+            <div className="space-y-2 text-gray-600 leading-relaxed">
+              <p>HETT Veranda beschikt niet over een interne montageservice.</p>
+              <p>Montage wordt uitgevoerd door erkende externe montagepartners.</p>
+              <p>De montagepartner werkt zelfstandig en is verantwoordelijk voor correcte uitvoering.</p>
+            </div>
+            <p className="text-gray-600 leading-relaxed mt-4 mb-2">De klant dient te zorgen voor:</p>
+            <ul className="list-disc list-inside text-gray-600 leading-relaxed space-y-1 ml-2">
+              <li>Een stabiele en geschikte ondergrond</li>
+              <li>Voldoende werkruimte</li>
+              <li>Vrije toegang tot de montageplaats</li>
+            </ul>
+            <p className="text-gray-600 leading-relaxed mt-4">Eventuele extra werkzaamheden buiten de standaard montage worden apart gefactureerd.</p>
+          </div>
+
+          {/* Artikel 10 */}
+          <div className="mb-10">
+            <h3 className="text-xl font-black text-hett-dark mb-4 pb-2 border-b border-gray-100">Artikel 10 – Maatwerk en herroepingsrecht</h3>
+            <div className="space-y-2 text-gray-600 leading-relaxed">
+              <p>Veranda's worden geproduceerd op maat volgens de wensen van de klant.</p>
+              <p>Conform artikel 6:230p BW is het herroepingsrecht uitgesloten voor maatwerkproducten.</p>
+              <p>Annulering is niet mogelijk nadat productie is gestart.</p>
+              <p>Eventuele wijzigingen na opdracht kunnen meerkosten met zich meebrengen.</p>
+            </div>
+          </div>
+
+          {/* Artikel 11 */}
+          <div className="mb-10">
+            <h3 className="text-xl font-black text-hett-dark mb-4 pb-2 border-b border-gray-100">Artikel 11 – Klachten en gebreken</h3>
+            <div className="space-y-2 text-gray-600 leading-relaxed">
+              <p>De klant dient producten direct bij levering te controleren.</p>
+              <p>Zichtbare gebreken dienen binnen 48 uur schriftelijk gemeld te worden.</p>
+              <p>Verborgen gebreken dienen binnen redelijke termijn na ontdekking gemeld te worden.</p>
+              <p>Onjuiste montage door derden zonder toestemming doet garantie vervallen.</p>
+            </div>
+          </div>
+
+          {/* Artikel 12 */}
+          <div className="mb-10">
+            <h3 className="text-xl font-black text-hett-dark mb-4 pb-2 border-b border-gray-100">Artikel 12 – Garantie</h3>
+            <div className="space-y-2 text-gray-600 leading-relaxed">
+              <p>Op de aluminium constructie geldt een garantie van 10 jaar (tenzij anders vermeld).</p>
+              <p>Glas, polycarbonaat, LED-verlichting en bewegende delen vallen onder fabrieksgarantie.</p>
+            </div>
+            <p className="text-gray-600 leading-relaxed mt-4 mb-2">Garantie vervalt bij:</p>
+            <ul className="list-disc list-inside text-gray-600 leading-relaxed space-y-1 ml-2">
+              <li>Onjuiste montage</li>
+              <li>Onjuist gebruik</li>
+              <li>Eigen aanpassingen</li>
+              <li>Schade door extreme weersomstandigheden</li>
+            </ul>
+          </div>
+
+          {/* Artikel 13 */}
+          <div className="mb-10">
+            <h3 className="text-xl font-black text-hett-dark mb-4 pb-2 border-b border-gray-100">Artikel 13 – Aansprakelijkheid</h3>
+            <div className="space-y-2 text-gray-600 leading-relaxed">
+              <p>De ondernemer is niet aansprakelijk voor indirecte schade of gevolgschade.</p>
+              <p>Aansprakelijkheid is beperkt tot het factuurbedrag van het betreffende product.</p>
+              <p>De ondernemer is niet aansprakelijk voor het ontbreken van benodigde vergunningen.</p>
+              <p>De klant is zelf verantwoordelijk voor het controleren van lokale bouwvoorschriften.</p>
+            </div>
+          </div>
+
+          {/* Artikel 14 */}
+          <div className="mb-10">
+            <h3 className="text-xl font-black text-hett-dark mb-4 pb-2 border-b border-gray-100">Artikel 14 – Overmacht</h3>
+            <div className="space-y-2 text-gray-600 leading-relaxed">
+              <p>In geval van overmacht kan levering worden uitgesteld.</p>
+              <p>Onder overmacht wordt verstaan: stakingen, materiaaltekorten, transportproblemen, weersomstandigheden, pandemieën of andere onvoorziene omstandigheden.</p>
+              <p>In geval van overmacht is geen schadevergoeding verschuldigd.</p>
+            </div>
+          </div>
+
+          {/* Artikel 15 */}
+          <div className="mb-10">
+            <h3 className="text-xl font-black text-hett-dark mb-4 pb-2 border-b border-gray-100">Artikel 15 – Eigendomsvoorbehoud</h3>
+            <div className="space-y-2 text-gray-600 leading-relaxed">
+              <p>Alle geleverde producten blijven eigendom van HETT Veranda totdat volledige betaling heeft plaatsgevonden.</p>
+              <p>De klant mag de producten niet doorverkopen voordat volledige betaling is voldaan.</p>
+            </div>
+          </div>
+
+          {/* Artikel 16 */}
+          <div className="mb-10">
+            <h3 className="text-xl font-black text-hett-dark mb-4 pb-2 border-b border-gray-100">Artikel 16 – Privacy</h3>
+            <div className="space-y-2 text-gray-600 leading-relaxed">
+              <p>Persoonsgegevens worden uitsluitend gebruikt voor orderverwerking en communicatie.</p>
+              <p>Gegevens worden niet verstrekt aan derden, behalve indien noodzakelijk voor uitvoering van de overeenkomst.</p>
+            </div>
+          </div>
+
+          {/* Artikel 17 */}
+          <div className="mb-6">
+            <h3 className="text-xl font-black text-hett-dark mb-4 pb-2 border-b border-gray-100">Artikel 17 – Toepasselijk recht en geschillen</h3>
+            <div className="space-y-2 text-gray-600 leading-relaxed">
+              <p>Op alle overeenkomsten is Nederlands recht van toepassing.</p>
+              <p>Geschillen worden voorgelegd aan de bevoegde rechter in Nederland.</p>
+            </div>
+          </div>
+
+          <div className="mt-12 pt-8 border-t border-gray-100 text-sm text-gray-400">
+            <p>HETT Veranda – Algemene Voorwaarden</p>
           </div>
 
         </div>

@@ -38,7 +38,7 @@ const STEPS: Step[] = [
   {
     number: 4,
     title: 'Montage op locatie (optioneel)',
-    description: 'Wilt u volledige ontzorging? Dan verzorgt HETT Veranda de montage voor een vaste prijs van € 1.200,-. Wij plannen dit in overleg met u in.',
+    description: 'Wilt u volledige ontzorging? Dan verzorgt HETT Veranda de montage. Hiervoor kunt u vrijblijvend een offerte aanvragen.',
     icon: Wrench,
   },
   {

@@ -445,9 +445,9 @@ export const MAATWERK_OPTION_GROUPS: MaatwerkOptionGroup[] = [
     choices: [
       {
         id: 'ja',
-        label: 'Montage door HETT Veranda (vaste prijs)',
-        description: 'Professionele montage, planning in overleg',
-        pricing: { type: 'fixed', price: 1200 },
+        label: 'Montage door HETT Veranda (op offerte)',
+        description: 'Professionele montage, prijs op aanvraag',
+        pricing: { type: 'fixed', price: 0 },
       },
     ],
   },

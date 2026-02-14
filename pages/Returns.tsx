@@ -1,103 +1,271 @@
 
 import React from 'react';
 import PageHeader from '../components/PageHeader';
-import { RefreshCw, XCircle, CheckCircle, Mail } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { ShieldAlert, PackageX, PackageCheck, AlertTriangle, Undo2, Ban, Mail, Camera, Clock, CheckCircle, XCircle } from 'lucide-react';
 
 const Returns: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#f6f8fa] font-sans">
       <PageHeader 
-        title="Retourneren"
+        title="Retourbeleid"
         subtitle="Service"
         description="Informatie over het herroepingsrecht, retourvoorwaarden en uitzonderingen voor maatwerk."
         image="https://picsum.photos/1200/600?random=return"
       />
 
-      <div className="max-w-[1000px] mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        
+      <div className="max-w-[1000px] mx-auto px-4 sm:px-6 lg:px-8 py-20 space-y-8">
+
+        {/* 1. Algemeen */}
         <div className="bg-white p-8 md:p-12 rounded-[32px] shadow-sm border border-gray-100">
-            
-            <div className="bg-yellow-50 border border-yellow-100 p-6 rounded-2xl mb-8">
-                <h3 className="text-lg font-bold text-yellow-800 mb-2">Belangrijk: Maatwerk uitzondering</h3>
-                <p className="text-sm text-yellow-700 leading-relaxed">
-                    Veel producten van HETT (zoals complete veranda's, op maat gezaagde panelen en glazen schuifwanden) worden specifiek voor u op maat geproduceerd. 
-                    Voor deze <strong>maatwerkproducten geldt geen herroepingsrecht</strong>. U kunt deze producten niet retourneren, tenzij er sprake is van een productiefout.
-                </p>
+          <div className="flex items-center gap-4 mb-6">
+            <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center">
+              <ShieldAlert size={28} />
             </div>
-
-            <h2 className="text-2xl font-black text-hett-dark mb-4">Standaard producten retourneren</h2>
-            <p className="text-gray-600 mb-6">
-                Voor standaard voorraadartikelen (zoals losse accessoires, standaard LED-sets, schoonmaakmiddelen) geldt een zichttermijn van 14 dagen.
-            </p>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                <div className="space-y-4">
-                    <h3 className="font-bold text-gray-900 flex items-center gap-2">
-                        <CheckCircle size={20} className="text-green-500" />
-                        Wel retourneren
-                    </h3>
-                    <ul className="list-disc list-inside text-sm text-gray-600 pl-2">
-                        <li>Standaard accessoires (ongebruikt)</li>
-                        <li>LED verlichting sets (in originele doos)</li>
-                        <li>Standaard betonpoeren</li>
-                        <li>Producten in originele, onbeschadigde verpakking</li>
-                    </ul>
-                </div>
-                <div className="space-y-4">
-                    <h3 className="font-bold text-gray-900 flex items-center gap-2">
-                        <XCircle size={20} className="text-red-500" />
-                        Niet retourneren
-                    </h3>
-                    <ul className="list-disc list-inside text-sm text-gray-600 pl-2">
-                        <li>Op maat gezaagde profielen</li>
-                        <li>Complete veranda bouwpakketten (maatwerk)</li>
-                        <li>Speciaal bestelde glasplaten</li>
-                        <li>Producten die reeds gemonteerd zijn geweest</li>
-                        <li>Beschadigde of gebruikte artikelen</li>
-                    </ul>
-                </div>
-            </div>
-
-            <h3 className="text-xl font-bold text-hett-dark mb-4">Retourproces</h3>
-            <ol className="space-y-4 mb-8">
-                <li className="flex gap-4">
-                    <span className="w-8 h-8 rounded-full bg-gray-100 text-gray-600 font-bold flex items-center justify-center flex-shrink-0">1</span>
-                    <div>
-                        <strong className="block text-gray-900">Aanmelden</strong>
-                        <p className="text-sm text-gray-600">Meld uw retour binnen 14 dagen na ontvangst aan via <a href="mailto:retour@hett.nl" className="text-hett-brown underline">retour@hett.nl</a>. Vermeld uw ordernummer en om welke artikelen het gaat.</p>
-                    </div>
-                </li>
-                <li className="flex gap-4">
-                    <span className="w-8 h-8 rounded-full bg-gray-100 text-gray-600 font-bold flex items-center justify-center flex-shrink-0">2</span>
-                    <div>
-                        <strong className="block text-gray-900">Verpakken & Verzenden</strong>
-                        <p className="text-sm text-gray-600">
-                            U bent zelf verantwoordelijk voor het veilig retourneren van de producten. De kosten voor retourzending zijn voor eigen rekening. 
-                            Zorg voor een degelijke verpakking.
-                        </p>
-                    </div>
-                </li>
-                <li className="flex gap-4">
-                    <span className="w-8 h-8 rounded-full bg-gray-100 text-gray-600 font-bold flex items-center justify-center flex-shrink-0">3</span>
-                    <div>
-                        <strong className="block text-gray-900">Terugbetaling</strong>
-                        <p className="text-sm text-gray-600">Na ontvangst en controle van de goederen storten wij het aankoopbedrag binnen 14 dagen terug op uw rekening.</p>
-                    </div>
-                </li>
-            </ol>
-
-            <div className="border-t border-gray-100 pt-8 mt-8">
-                <h4 className="font-bold text-gray-900 mb-2">Retouradres</h4>
-                <address className="not-italic text-gray-600 text-sm">
-                    HETT B.V.<br/>
-                    T.a.v. Retouren<br/>
-                    Industrieweg 45<br/>
-                    5600 AA Eindhoven
-                </address>
-            </div>
-
+            <h2 className="text-2xl font-black text-hett-dark">1. Algemeen</h2>
+          </div>
+          <p className="text-gray-600 leading-relaxed mb-3">
+            Dit retourbeleid is van toepassing op alle aankopen bij HETT Veranda en vormt een aanvulling op onze <Link to="/algemene-voorwaarden" className="text-hett-brown font-semibold hover:underline">algemene voorwaarden</Link>.
+          </p>
+          <p className="text-gray-600 leading-relaxed">
+            Wij leveren voornamelijk maatwerkproducten. Hierdoor gelden afwijkende retourvoorwaarden ten opzichte van standaard webwinkelproducten.
+          </p>
         </div>
+
+        {/* 2. Maatwerkproducten */}
+        <div className="bg-red-50 p-8 md:p-12 rounded-[32px] shadow-sm border border-red-100">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center">
+              <PackageX size={28} />
+            </div>
+            <h2 className="text-2xl font-black text-hett-dark">2. Maatwerkproducten</h2>
+          </div>
+          <p className="text-gray-700 leading-relaxed mb-4">
+            Onze veranda's, glazen schuifwanden, glasdaken en maatwerkconstructies worden speciaal geproduceerd volgens de specificaties van de klant.
+          </p>
+          <div className="bg-white p-5 rounded-2xl border border-red-200 mb-4">
+            <p className="font-bold text-red-700 mb-1">⚠️ Geen herroepingsrecht</p>
+            <p className="text-sm text-red-600">
+              Conform artikel 6:230p BW geldt voor maatwerkproducten geen wettelijk herroepingsrecht.
+            </p>
+          </div>
+          <p className="text-gray-700 font-semibold mb-2">Dit betekent:</p>
+          <ul className="space-y-2">
+            <li className="flex items-start gap-3 text-gray-700 text-sm">
+              <XCircle size={18} className="text-red-500 mt-0.5 flex-shrink-0" />
+              Bestellingen kunnen niet worden geretourneerd nadat productie is gestart.
+            </li>
+            <li className="flex items-start gap-3 text-gray-700 text-sm">
+              <XCircle size={18} className="text-red-500 mt-0.5 flex-shrink-0" />
+              Annulering is niet mogelijk bij maatwerk.
+            </li>
+            <li className="flex items-start gap-3 text-gray-700 text-sm">
+              <XCircle size={18} className="text-red-500 mt-0.5 flex-shrink-0" />
+              Reeds geproduceerde maatwerkproducten kunnen niet worden teruggenomen.
+            </li>
+          </ul>
+        </div>
+
+        {/* 3. Standaardproducten */}
+        <div className="bg-white p-8 md:p-12 rounded-[32px] shadow-sm border border-gray-100">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="w-12 h-12 bg-green-100 text-green-600 rounded-2xl flex items-center justify-center">
+              <PackageCheck size={28} />
+            </div>
+            <h2 className="text-2xl font-black text-hett-dark">3. Standaardproducten</h2>
+          </div>
+          <p className="text-gray-600 leading-relaxed mb-4">
+            Voor standaardproducten (bijvoorbeeld losse accessoires die niet op maat zijn gemaakt) geldt:
+          </p>
+          <ul className="space-y-2">
+            <li className="flex items-start gap-3 text-gray-600 text-sm">
+              <CheckCircle size={18} className="text-green-500 mt-0.5 flex-shrink-0" />
+              De klant heeft het recht om binnen <strong>14 dagen</strong> na ontvangst de aankoop te herroepen.
+            </li>
+            <li className="flex items-start gap-3 text-gray-600 text-sm">
+              <CheckCircle size={18} className="text-green-500 mt-0.5 flex-shrink-0" />
+              Het product dient ongebruikt, onbeschadigd en in originele verpakking te worden geretourneerd.
+            </li>
+            <li className="flex items-start gap-3 text-gray-600 text-sm">
+              <CheckCircle size={18} className="text-green-500 mt-0.5 flex-shrink-0" />
+              De kosten voor retourzending zijn voor rekening van de klant.
+            </li>
+            <li className="flex items-start gap-3 text-gray-600 text-sm">
+              <CheckCircle size={18} className="text-green-500 mt-0.5 flex-shrink-0" />
+              Retouren worden uitsluitend geaccepteerd na voorafgaande schriftelijke melding via e-mail.
+            </li>
+          </ul>
+        </div>
+
+        {/* 4. Voorwaarden & 7. Uitsluitingen — side by side */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* 4. Voorwaarden */}
+          <div className="bg-white p-8 rounded-[32px] shadow-sm border border-gray-100">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center">
+                <CheckCircle size={22} />
+              </div>
+              <h3 className="text-lg font-black text-hett-dark">4. Voorwaarden voor retour</h3>
+            </div>
+            <p className="text-sm text-gray-600 mb-3">Een retour wordt alleen geaccepteerd indien:</p>
+            <ul className="space-y-2">
+              <li className="flex items-start gap-2 text-sm text-gray-600">
+                <CheckCircle size={16} className="text-emerald-500 mt-0.5 flex-shrink-0" />
+                Het product ongebruikt is.
+              </li>
+              <li className="flex items-start gap-2 text-sm text-gray-600">
+                <CheckCircle size={16} className="text-emerald-500 mt-0.5 flex-shrink-0" />
+                Het product niet gemonteerd is geweest.
+              </li>
+              <li className="flex items-start gap-2 text-sm text-gray-600">
+                <CheckCircle size={16} className="text-emerald-500 mt-0.5 flex-shrink-0" />
+                Het product compleet en onbeschadigd is.
+              </li>
+              <li className="flex items-start gap-2 text-sm text-gray-600">
+                <CheckCircle size={16} className="text-emerald-500 mt-0.5 flex-shrink-0" />
+                De originele verpakking aanwezig is.
+              </li>
+            </ul>
+            <p className="text-sm text-gray-500 mt-4 italic">Beschadigde of gebruikte producten worden niet teruggenomen.</p>
+          </div>
+
+          {/* 7. Uitsluitingen */}
+          <div className="bg-white p-8 rounded-[32px] shadow-sm border border-gray-100">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-10 h-10 bg-red-100 text-red-600 rounded-xl flex items-center justify-center">
+                <Ban size={22} />
+              </div>
+              <h3 className="text-lg font-black text-hett-dark">7. Uitsluitingen van retour</h3>
+            </div>
+            <p className="text-sm text-gray-600 mb-3">Retour is uitgesloten voor:</p>
+            <ul className="space-y-2">
+              <li className="flex items-start gap-2 text-sm text-gray-600">
+                <XCircle size={16} className="text-red-500 mt-0.5 flex-shrink-0" />
+                Maatwerkproducten
+              </li>
+              <li className="flex items-start gap-2 text-sm text-gray-600">
+                <XCircle size={16} className="text-red-500 mt-0.5 flex-shrink-0" />
+                Speciaal bestelde onderdelen
+              </li>
+              <li className="flex items-start gap-2 text-sm text-gray-600">
+                <XCircle size={16} className="text-red-500 mt-0.5 flex-shrink-0" />
+                Geopende of gebruikte producten
+              </li>
+              <li className="flex items-start gap-2 text-sm text-gray-600">
+                <XCircle size={16} className="text-red-500 mt-0.5 flex-shrink-0" />
+                Producten die gemonteerd zijn geweest
+              </li>
+              <li className="flex items-start gap-2 text-sm text-gray-600">
+                <XCircle size={16} className="text-red-500 mt-0.5 flex-shrink-0" />
+                Producten beschadigd door onjuist gebruik
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* 5. Schade bij levering */}
+        <div className="bg-white p-8 md:p-12 rounded-[32px] shadow-sm border border-gray-100">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="w-12 h-12 bg-yellow-100 text-yellow-600 rounded-2xl flex items-center justify-center">
+              <AlertTriangle size={28} />
+            </div>
+            <h2 className="text-2xl font-black text-hett-dark">5. Schade bij levering</h2>
+          </div>
+          <p className="text-gray-600 leading-relaxed mb-4">
+            Wij verzoeken klanten om de levering direct bij ontvangst te controleren.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="bg-yellow-50 p-5 rounded-2xl border border-yellow-100 text-center">
+              <Clock size={24} className="text-yellow-600 mx-auto mb-2" />
+              <p className="text-sm font-bold text-gray-800 mb-1">Binnen 48 uur</p>
+              <p className="text-xs text-gray-500">Zichtbare transportschade schriftelijk melden.</p>
+            </div>
+            <div className="bg-yellow-50 p-5 rounded-2xl border border-yellow-100 text-center">
+              <Camera size={24} className="text-yellow-600 mx-auto mb-2" />
+              <p className="text-sm font-bold text-gray-800 mb-1">Foto's maken</p>
+              <p className="text-xs text-gray-500">Duidelijke foto's van de schade en verpakking.</p>
+            </div>
+            <div className="bg-yellow-50 p-5 rounded-2xl border border-yellow-100 text-center">
+              <AlertTriangle size={24} className="text-yellow-600 mx-auto mb-2" />
+              <p className="text-sm font-bold text-gray-800 mb-1">Termijn</p>
+              <p className="text-xs text-gray-500">Latere meldingen kunnen mogelijk niet worden behandeld.</p>
+            </div>
+          </div>
+        </div>
+
+        {/* 6. Terugbetaling */}
+        <div className="bg-white p-8 md:p-12 rounded-[32px] shadow-sm border border-gray-100">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center">
+              <Undo2 size={28} />
+            </div>
+            <h2 className="text-2xl font-black text-hett-dark">6. Terugbetaling</h2>
+          </div>
+          <p className="text-gray-600 leading-relaxed mb-2">Indien een retour wordt goedgekeurd:</p>
+          <ul className="space-y-2">
+            <li className="flex items-start gap-3 text-gray-600 text-sm">
+              <CheckCircle size={18} className="text-indigo-500 mt-0.5 flex-shrink-0" />
+              Terugbetaling vindt plaats binnen <strong>14 dagen</strong> na ontvangst en controle van het product.
+            </li>
+            <li className="flex items-start gap-3 text-gray-600 text-sm">
+              <CheckCircle size={18} className="text-indigo-500 mt-0.5 flex-shrink-0" />
+              Eventuele waardevermindering door gebruik kan in mindering worden gebracht.
+            </li>
+          </ul>
+        </div>
+
+        {/* 8. Contact voor retouraanvraag */}
+        <div className="bg-hett-primary p-8 md:p-12 rounded-[32px] shadow-sm text-white">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center">
+              <Mail size={28} />
+            </div>
+            <h2 className="text-2xl font-black">8. Contact voor retouraanvraag</h2>
+          </div>
+          <p className="text-white/80 leading-relaxed mb-4">
+            Retouraanvragen kunnen worden ingediend via:
+          </p>
+          <a href="mailto:info@hettveranda.nl" className="inline-flex items-center gap-2 bg-white text-hett-primary font-bold px-6 py-3 rounded-xl hover:bg-gray-100 transition-colors mb-6">
+            <Mail size={18} />
+            info@hettveranda.nl
+          </a>
+          <p className="text-white/80 text-sm mb-3">Onder vermelding van:</p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="bg-white/10 p-4 rounded-xl text-center">
+              <p className="text-sm font-semibold">Ordernummer</p>
+            </div>
+            <div className="bg-white/10 p-4 rounded-xl text-center">
+              <p className="text-sm font-semibold">Naam</p>
+            </div>
+            <div className="bg-white/10 p-4 rounded-xl text-center">
+              <p className="text-sm font-semibold">Reden van retour</p>
+            </div>
+            <div className="bg-white/10 p-4 rounded-xl text-center">
+              <p className="text-sm font-semibold">Foto's</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Belangrijk */}
+        <div className="bg-yellow-50 border border-yellow-200 p-8 md:p-10 rounded-[32px]">
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 bg-yellow-200 text-yellow-700 rounded-xl flex items-center justify-center flex-shrink-0">
+              <AlertTriangle size={22} />
+            </div>
+            <div>
+              <h4 className="text-lg font-bold text-yellow-800 mb-2">Belangrijk</h4>
+              <p className="text-sm text-yellow-700 leading-relaxed">
+                HETT Veranda produceert voornamelijk maatwerk veranda's. Wij adviseren klanten daarom goed te controleren of de gekozen afmetingen, opties en specificaties correct zijn voordat de bestelling definitief wordt geplaatst.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer note */}
+        <div className="text-center text-sm text-gray-400 pt-4">
+          <p>HETT Veranda – Retourbeleid</p>
+        </div>
+
       </div>
     </div>
   );

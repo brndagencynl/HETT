@@ -18,8 +18,8 @@
  */
 
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { X, Check, Info, ChevronLeft, ChevronRight, Truck, ShieldCheck, ArrowRight, Lightbulb, Edit2, Eye, ChevronUp, ShoppingBag, Loader2, Ruler, AlertTriangle, Wrench } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { X, Check, Info, ChevronLeft, ChevronRight, Truck, ShieldCheck, ArrowRight, Lightbulb, Edit2, Eye, ChevronUp, ShoppingBag, Loader2, Ruler, AlertTriangle, Wrench, FileText } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { Card } from './ui/card';
@@ -27,6 +27,9 @@ import { Card } from './ui/card';
 import { getLedTotals, LED_UNIT_PRICE_EUR } from '../src/services/addons/led';
 // Use montage pricing service
 import { MONTAGE_PRICE_EUR, getMontageInfo } from '../src/services/montagePricing';
+// Offer draft services (montage → offerte flow)
+import { createMaatwerkOfferDraft } from '../src/services/offers/createOfferDraft';
+import { setOfferDraft } from '../src/services/offers/offerStorage';
 
 // Custom maatwerk types and pricing - completely isolated
 import {
@@ -143,6 +146,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
   layout = 'page',
   onClose,
 }) => {
+  const navigate = useNavigate();
   // STATE - completely isolated, NO localStorage
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [config, setConfig] = useState<PartialMaatwerkConfig>(() => {
@@ -379,6 +383,35 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  /** Montage → Offerte flow: build draft, persist, navigate to /offerte */
+  const handleRequestOffer = () => {
+    const errors = getMaatwerkValidationErrors(config);
+    if (errors.length > 0) {
+      alert(`Configuratie incompleet:\n${errors.join('\n')}`);
+      return;
+    }
+    if (!isMaatwerkConfigComplete(config)) {
+      alert('Vul alle verplichte velden in.');
+      return;
+    }
+
+    // Collect all visualization layer URLs (base + overlays in z-order)
+    const previewLayers = visualLayers.map(l => l.src);
+    const previewImageUrl = previewLayers[0] || '/renders/veranda/fallback.webp';
+
+    const draft = createMaatwerkOfferDraft({
+      config,
+      priceBreakdown,
+      ledSelectedTotal,
+      ledQty: ledInfo.qty,
+      previewImageUrl,
+      previewLayers,
+    });
+
+    setOfferDraft(draft);
+    navigate('/offerte');
   };
 
   // ==========================================================================
@@ -1282,27 +1315,43 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
                             {shopifyVariantError}
                           </div>
                         ) : null}
-                        <button
-                          onClick={mode === 'edit' ? handleSaveEdit : handleAddToCart}
-                          disabled={!agreed || isSubmitting}
-                          className={`px-6 py-3 font-bold rounded-xl text-sm flex items-center gap-2 transition-all ${
-                            agreed && !isSubmitting
-                              ? 'bg-[#FF7300] text-white hover:bg-[#E66600]'
-                              : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                          }`}
-                        >
-                          {isSubmitting ? (
-                            <>
-                              <Loader2 size={18} className="animate-spin" />
-                              {mode === 'edit' ? 'Opslaan...' : 'Toevoegen...'}
-                            </>
-                          ) : (
-                            <>
-                              {mode === 'edit' ? 'Opslaan' : 'Toevoegen aan winkelwagen'}
-                              <ArrowRight size={18} />
-                            </>
-                          )}
-                        </button>
+                        {/* Montage → Offerte flow: different CTA when montage selected */}
+                        {config.montage && mode !== 'edit' ? (
+                          <button
+                            onClick={handleRequestOffer}
+                            disabled={!agreed}
+                            className={`px-6 py-3 font-bold rounded-xl text-sm flex items-center gap-2 transition-all ${
+                              agreed
+                                ? 'bg-[#003878] text-white hover:bg-[#002050] shadow-lg shadow-[#003878]/20'
+                                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                            }`}
+                          >
+                            <FileText size={18} />
+                            Vraag offerte aan
+                          </button>
+                        ) : (
+                          <button
+                            onClick={mode === 'edit' ? handleSaveEdit : handleAddToCart}
+                            disabled={!agreed || isSubmitting}
+                            className={`px-6 py-3 font-bold rounded-xl text-sm flex items-center gap-2 transition-all ${
+                              agreed && !isSubmitting
+                                ? 'bg-[#FF7300] text-white hover:bg-[#E66600]'
+                                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                            }`}
+                          >
+                            {isSubmitting ? (
+                              <>
+                                <Loader2 size={18} className="animate-spin" />
+                                {mode === 'edit' ? 'Opslaan...' : 'Toevoegen...'}
+                              </>
+                            ) : (
+                              <>
+                                {mode === 'edit' ? 'Opslaan' : 'Toevoegen aan winkelwagen'}
+                                <ArrowRight size={18} />
+                              </>
+                            )}
+                          </button>
+                        )}
                       </div>
                     )}
                   </div>

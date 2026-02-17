@@ -41,6 +41,7 @@ import OrderReceived from './pages/OrderReceived';
 import ThankYou from './pages/ThankYou';
 import Search from './pages/Search';
 import Quote from './pages/Quote';
+import Offerte from './pages/Offerte';
 import Wishlist from './pages/Wishlist';
 import CartDrawer from './components/ui/CartDrawer';
 
@@ -125,7 +126,7 @@ const AnimatedRoutes: React.FC = () => {
         <Route path="/order-received" element={<PageTransition><OrderReceived /></PageTransition>} />
         <Route path="/bedankt" element={<PageTransition><ThankYou /></PageTransition>} />
         <Route path="/search" element={<PageTransition><Search /></PageTransition>} />
-        <Route path="/offerte" element={<PageTransition><Quote /></PageTransition>} />
+        <Route path="/offerte" element={<PageTransition><Offerte /></PageTransition>} />
         <Route path="/wishlist" element={<PageTransition><Wishlist /></PageTransition>} />
 
         {/* Maatwerk Configurator */}

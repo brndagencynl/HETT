@@ -59,7 +59,7 @@ export type DaktypeValue = 'poly_helder' | 'poly_opaal';
 export type VoorzijdeValue = 'geen' | 'glas_schuifwand' | 'glas_schuifwand_helder' | 'glas_schuifwand_getint';
 
 /** Side wall options (same for left and right) */
-export type ZijwandValue = 'geen' | 'poly_spie' | 'sandwich_polyspie' | 'sandwich_vol';
+export type ZijwandValue = 'geen' | 'poly_spie' | 'sandwich_polyspie' | 'sandwich_vol' | 'glas_schuifwand';
 
 /** Gutter options */
 export type GootValue = 'classic' | 'cube' | 'deluxe';

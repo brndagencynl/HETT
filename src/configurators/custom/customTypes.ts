@@ -62,7 +62,7 @@ export type MaatwerkDaktypeValue = 'poly_helder' | 'poly_opaal';
 export type MaatwerkVoorzijdeValue = 'geen' | 'glas_schuifwand' | 'glas_schuifwand_helder' | 'glas_schuifwand_getint';
 
 /** Side wall options (same for left and right) */
-export type MaatwerkZijwandValue = 'geen' | 'poly_spie' | 'sandwich_polyspie' | 'sandwich_vol';
+export type MaatwerkZijwandValue = 'geen' | 'poly_spie' | 'sandwich_polyspie' | 'sandwich_vol' | 'glas_schuifwand';
 
 /** Gutter options */
 export type MaatwerkGootValue = 'classic' | 'cube' | 'deluxe';

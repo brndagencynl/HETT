@@ -60,6 +60,7 @@ const ZIJWAND_LABELS: Record<string, string> = {
   sandwich_polyspie: 'Sandwichpaneel + poly spie',
   sandwich_volledig: 'Volledig sandwichpaneel',
   sandwich_vol: 'Volledig sandwichpaneel',
+  glas_schuifwand: 'Glazen schuifwand',
 };
 
 const VOORZIJDE_LABELS: Record<string, string> = {

@@ -86,8 +86,8 @@ export type VerandaConfig = {
   color?: 'ral7016' | 'ral9005' | 'ral9001';
   daktype?: 'poly_helder' | 'poly_opaal' | 'glas';
   goot?: 'deluxe' | 'cube' | 'classic'; // Required
-  zijwand_links?: 'geen' | 'poly_spie' | 'sandwich_poly_spie' | 'sandwich_volledig' | 'sandwich_polyspie' | 'sandwich_vol';
-  zijwand_rechts?: 'geen' | 'poly_spie' | 'sandwich_poly_spie' | 'sandwich_volledig' | 'sandwich_polyspie' | 'sandwich_vol';
+  zijwand_links?: 'geen' | 'poly_spie' | 'sandwich_poly_spie' | 'sandwich_volledig' | 'sandwich_polyspie' | 'sandwich_vol' | 'glas_schuifwand';
+  zijwand_rechts?: 'geen' | 'poly_spie' | 'sandwich_poly_spie' | 'sandwich_volledig' | 'sandwich_polyspie' | 'sandwich_vol' | 'glas_schuifwand';
   voorzijde?: 'geen' | 'glazen_schuifwand' | 'glas_schuifwand' | 'glas_schuifwand_helder' | 'glas_schuifwand_getint';
   verlichting?: boolean;
   extra_verlichting?: boolean;

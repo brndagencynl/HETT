@@ -3,7 +3,7 @@ import { X, Check, Info, ChevronLeft, ChevronRight, Truck, ShieldCheck, ArrowRig
 import { motion, AnimatePresence } from 'framer-motion';
 import { VERANDA_OPTIONS_UI, DEFAULT_VERANDA_CONFIG, VerandaConfig, COLOR_OPTIONS, DEFAULT_COLOR } from '../src/configurator/schemas/veranda';
 import { calcVerandaPrice, type VerandaProductSize } from '../src/configurator/pricing/veranda';
-import { getOptionPrice, FRONT_SIDE_OPTIONS, type OptionChoice } from '../src/configurator/pricing/verandapricing';
+import { getOptionPrice, FRONT_SIDE_OPTIONS, SIDE_WALL_OPTIONS, type OptionChoice } from '../src/configurator/pricing/verandapricing';
 import { buildVisualizationLayers, type VisualizationLayer, FALLBACK_IMAGE, type VerandaColorId, getPreloadPaths, preloadImages } from '../src/configurator/visual/verandaAssets';
 import { t } from '../src/utils/i18n';
 import { formatEUR, toCents } from '../src/utils/money';
@@ -34,15 +34,18 @@ function widthCmToProductSize(widthCm: number): VerandaProductSize {
 }
 
 /**
- * Get dynamic price for a front side option based on actual product size
- * This is needed because glass sliding wall prices vary by width
+ * Get dynamic price for a side/front option based on actual product size.
+ * Needed because glass sliding wall prices vary by width (voorzijde) or depth (zijwanden),
+ * and sandwich/poly options also depend on depth.
  * 
- * @param choiceId - The option choice ID (e.g., 'glas_schuifwand_helder')
+ * @param optionKey - The option group key (e.g., 'voorzijde', 'zijwand_links')
+ * @param choiceId  - The option choice ID (e.g., 'glas_schuifwand_helder', 'glas_schuifwand')
  * @param productSize - The actual product size
  * @returns Price in EUR
  */
-function getDynamicFrontSidePrice(choiceId: string, productSize: VerandaProductSize): number {
-    const option = FRONT_SIDE_OPTIONS.find(opt => opt.id === choiceId);
+function getDynamicSidePrice(optionKey: string, choiceId: string, productSize: VerandaProductSize): number {
+    const options = (optionKey === 'voorzijde') ? FRONT_SIDE_OPTIONS : SIDE_WALL_OPTIONS;
+    const option = options.find(opt => opt.id === choiceId);
     if (!option) return 0;
     return getOptionPrice(option.pricing, productSize);
 }
@@ -659,10 +662,13 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
         return (
             <div className="space-y-3 max-w-2xl">
                 {optionDef.choices.map((choice: any) => {
-                    // For voorzijde (front side) options, calculate dynamic price based on actual product size
-                    // This ensures glass sliding wall prices reflect the actual width
-                    const displayPrice = optionDef.key === 'voorzijde' 
-                        ? getDynamicFrontSidePrice(choice.value, productSize)
+                    // For voorzijde and zijwand options, calculate dynamic price based on actual product size
+                    // This ensures glass sliding wall prices reflect the actual width/depth
+                    const needsDynamicPrice = optionDef.key === 'voorzijde' 
+                        || optionDef.key === 'zijwand_links' 
+                        || optionDef.key === 'zijwand_rechts';
+                    const displayPrice = needsDynamicPrice
+                        ? getDynamicSidePrice(optionDef.key, choice.value, productSize)
                         : choice.price;
                     
                     return (

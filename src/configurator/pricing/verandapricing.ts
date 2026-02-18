@@ -83,6 +83,19 @@ export const POLY_SPIE_PRICE_BY_DEPTH: Record<number, number> = {
   500: 200.00,
 };
 
+/**
+ * Glass sliding wall (zijwand) price table by depth in cm.
+ * Prices per single side wall.
+ */
+export const GLASS_SIDE_WALL_PRICE_BY_DEPTH: Record<number, number> = {
+  250: 599.00,
+  300: 749.00,
+  350: 899.00,
+  400: 999.00,
+  450: 1149.00,
+  500: 1299.00,
+};
+
 /** Option pricing can be fixed OR size-dependent */
 export type OptionPricing = 
   | { type: 'fixed'; price: number }
@@ -91,7 +104,8 @@ export type OptionPricing =
   | { type: 'byGlassWall'; variant: GlassVariant } // Uses glassSlidingWalls.ts price table
   | { type: 'bySandwichDepth' } // Uses SANDWICH_WALL_PRICE_BY_DEPTH table
   | { type: 'bySandwichPolyspieDepth' } // Uses SANDWICH_POLYSPIE_PRICE_BY_DEPTH table
-  | { type: 'byPolySpieDepth' }; // Uses POLY_SPIE_PRICE_BY_DEPTH table
+  | { type: 'byPolySpieDepth' } // Uses POLY_SPIE_PRICE_BY_DEPTH table
+  | { type: 'byGlassSideWall' }; // Glass sliding wall for side walls — uses depth-based pricing
 
 /** Structure for a single option choice */
 export interface OptionChoice {
@@ -268,6 +282,14 @@ export const SIDE_WALL_OPTIONS: OptionChoice[] = [
     description: 'Volledig geïsoleerde wand van sandwichpanelen.',
     pricing: { type: 'bySandwichDepth' },
   },
+  // ── Glazen schuifwand (uitgeschakeld – zet onderstaand blok weer aan om te activeren)
+  // {
+  //   id: 'glas_schuifwand',
+  //   label: 'Glass sliding wall',
+  //   labelNL: 'Glazen schuifwand',
+  //   description: 'Glazen schuifwand over de gehele diepte van de zijkant.',
+  //   pricing: { type: 'byGlassSideWall' },
+  // },
 ] as const;
 
 /**
@@ -489,6 +511,16 @@ export function getOptionPrice(
         return polySpiePrice;
       }
       console.warn('[PolySpie] No price for depth', depthCmPolySpie);
+      return 0;
+    
+    case 'byGlassSideWall':
+      // Glass sliding wall for side walls — price depends on depth
+      const depthCmGlass = getDepthFromSize(size);
+      const glassSidePrice = GLASS_SIDE_WALL_PRICE_BY_DEPTH[depthCmGlass];
+      if (glassSidePrice !== undefined) {
+        return glassSidePrice;
+      }
+      console.warn('[GlassSideWall] No price for depth', depthCmGlass);
       return 0;
     
     default:

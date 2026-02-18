@@ -78,6 +78,19 @@ export const MAATWERK_POLY_SPIE_PRICE_BY_DEPTH: Record<number, number> = {
   500: 200.00,
 };
 
+/**
+ * Glass sliding wall (zijwand) price table by depth in cm.
+ * Prices per single side wall.
+ */
+export const MAATWERK_GLASS_SIDE_WALL_PRICE_BY_DEPTH: Record<number, number> = {
+  250: 599.00,
+  300: 749.00,
+  350: 899.00,
+  400: 999.00,
+  450: 1149.00,
+  500: 1299.00,
+};
+
 /** Option pricing can be fixed, by width range, by depth range, by area, glass wall lookup, or sandwich depth */
 export type MaatwerkOptionPricing =
   | { type: 'fixed'; price: number }
@@ -87,7 +100,8 @@ export type MaatwerkOptionPricing =
   | { type: 'byGlassWall'; variant: GlassVariant }  // Uses glassSlidingWalls.ts price table
   | { type: 'bySandwichDepth' }  // Uses MAATWERK_SANDWICH_WALL_PRICE_BY_DEPTH table
   | { type: 'bySandwichPolyspieDepth' }  // Uses MAATWERK_SANDWICH_POLYSPIE_PRICE_BY_DEPTH table
-  | { type: 'byPolySpieDepth' };  // Uses MAATWERK_POLY_SPIE_PRICE_BY_DEPTH table
+  | { type: 'byPolySpieDepth' }  // Uses MAATWERK_POLY_SPIE_PRICE_BY_DEPTH table
+  | { type: 'byGlassSideWall' };  // Uses MAATWERK_GLASS_SIDE_WALL_PRICE_BY_DEPTH table
 
 export interface MaatwerkOptionChoice {
   id: string;
@@ -358,6 +372,13 @@ export const MAATWERK_SIDEWALL_OPTIONS: MaatwerkOptionChoice[] = [
     description: 'Volledig geïsoleerde wand van sandwichpanelen.',
     pricing: { type: 'bySandwichDepth' },
   },
+  // ── Glazen schuifwand (uitgeschakeld – zet onderstaand blok weer aan om te activeren)
+  // {
+  //   id: 'glas_schuifwand',
+  //   label: 'Glazen schuifwand',
+  //   description: 'Glazen schuifwand over de volledige diepte van de zijkant.',
+  //   pricing: { type: 'byGlassSideWall' },
+  // },
 ];
 
 /**
@@ -545,6 +566,26 @@ export function getMaatwerkOptionPrice(
         return polySpiePrice;
       }
       console.warn('[MaatwerkPolySpie] No price for depth', size.depth);
+      return 0;
+
+    case 'byGlassSideWall':
+      // Use glass side wall price table based on depth
+      const supportedGlassDepths = Object.keys(MAATWERK_GLASS_SIDE_WALL_PRICE_BY_DEPTH).map(Number).sort((a, b) => a - b);
+      let glassDepthKey = supportedGlassDepths[supportedGlassDepths.length - 1]; // Default to max
+      for (const d of supportedGlassDepths) {
+        if (d >= size.depth) {
+          glassDepthKey = d;
+          break;
+        }
+      }
+      const glassSidePrice = MAATWERK_GLASS_SIDE_WALL_PRICE_BY_DEPTH[glassDepthKey];
+      if (glassSidePrice !== undefined) {
+        if (glassDepthKey !== size.depth) {
+          console.log(`[MaatwerkGlassSideWall] depth ${size.depth} snapped to ${glassDepthKey}, price: €${glassSidePrice}`);
+        }
+        return glassSidePrice;
+      }
+      console.warn('[MaatwerkGlassSideWall] No price for depth', size.depth);
       return 0;
     
     default:

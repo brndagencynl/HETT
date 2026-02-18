@@ -2,8 +2,9 @@
  * Offerte Page
  * =============
  * 
- * Displays maatwerk configuration summary and a contact form
+ * Displays configuration summary and a contact form
  * for requesting a montage quote.
+ * Supports both maatwerk and standard package offers.
  */
 
 import React, { useState, useEffect } from 'react';
@@ -93,7 +94,7 @@ const Offerte: React.FC = () => {
       <div className="min-h-screen bg-[#f6f8fa] font-sans">
         <PageHeader
           title="Offerte aanvragen"
-          subtitle="Maatwerk"
+          subtitle="Veranda"
           description="Configureer eerst uw veranda om een offerte aan te vragen."
           image="https://picsum.photos/1200/600?random=offerte"
         />
@@ -102,15 +103,23 @@ const Offerte: React.FC = () => {
             <FileText size={48} className="text-gray-300 mx-auto mb-4" />
             <h2 className="text-xl font-black text-hett-dark mb-2">Geen configuratie gevonden</h2>
             <p className="text-gray-500 text-sm mb-6">
-              U heeft nog geen maatwerk veranda geconfigureerd. Start de configurator om uw veranda samen te stellen.
+              U heeft nog geen veranda geconfigureerd. Start een configurator om uw veranda samen te stellen.
             </p>
-            <Link
-              to="/maatwerk-configurator"
-              className="inline-flex items-center gap-2 bg-[#003878] text-white font-bold px-6 py-3 rounded-xl hover:bg-[#002050] transition-colors"
-            >
-              <ArrowLeft size={18} />
-              Terug naar configurator
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Link
+                to="/categorie/verandas"
+                className="inline-flex items-center gap-2 bg-[#003878] text-white font-bold px-6 py-3 rounded-xl hover:bg-[#002050] transition-colors"
+              >
+                <ArrowLeft size={18} />
+                Standaard veranda's
+              </Link>
+              <Link
+                to="/maatwerk-configurator"
+                className="inline-flex items-center gap-2 bg-white border-2 border-gray-200 text-gray-700 font-bold px-6 py-3 rounded-xl hover:border-gray-300 transition-colors"
+              >
+                Maatwerk configurator
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -118,12 +127,18 @@ const Offerte: React.FC = () => {
   }
 
   // Success state
+  // Derived labels based on draft kind
+  const isMaatwerk = draft.kind === 'maatwerk_offer';
+  const subtitleLabel = isMaatwerk ? 'Maatwerk' : 'Standaard Pakket';
+  const backUrl = isMaatwerk ? '/maatwerk-configurator' : '/categorie/verandas';
+  const backLabel = isMaatwerk ? 'Terug naar configurator' : 'Terug naar veranda\'s';
+
   if (submitted) {
     return (
       <div className="min-h-screen bg-[#f6f8fa] font-sans">
         <PageHeader
           title="Offerte aangevraagd"
-          subtitle="Maatwerk"
+          subtitle={subtitleLabel}
           description="Uw offerte aanvraag is succesvol verstuurd."
           image="https://picsum.photos/1200/600?random=offerte"
         />
@@ -150,7 +165,7 @@ const Offerte: React.FC = () => {
                 Terug naar home
               </Link>
               <Link
-                to="/maatwerk-configurator"
+                to={backUrl}
                 className="inline-flex items-center justify-center gap-2 bg-white border-2 border-gray-200 text-gray-700 font-bold px-6 py-3 rounded-xl hover:border-gray-300 transition-colors"
               >
                 Nieuwe configuratie
@@ -169,7 +184,7 @@ const Offerte: React.FC = () => {
     <div className="min-h-screen bg-[#f6f8fa] font-sans">
       <PageHeader
         title="Offerte aanvragen"
-        subtitle="Maatwerk"
+        subtitle={subtitleLabel}
         description="Controleer uw configuratie en laat uw gegevens achter voor een persoonlijke offerte."
         image="https://picsum.photos/1200/600?random=offerte"
       />
@@ -276,7 +291,7 @@ const Offerte: React.FC = () => {
               </div>
               <div className="p-4 bg-gray-50 text-center">
                 <Link
-                  to="/maatwerk-configurator"
+                  to={backUrl}
                   className="text-sm text-[#003878] font-semibold hover:underline"
                 >
                   ← Configuratie wijzigen

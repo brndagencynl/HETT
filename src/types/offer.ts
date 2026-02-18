@@ -2,10 +2,13 @@
  * Offer Request Types
  * ====================
  * 
- * Shared type for maatwerk offer flow.
+ * Shared types for the offer/quote flow.
+ * Supports both maatwerk and standard package offers.
  * Used by the configurator to create a draft and
  * by the Offerte page to display and submit.
  */
+
+export type OfferKind = 'maatwerk_offer' | 'standard_package';
 
 export interface OfferSelectionLine {
   key: string;
@@ -18,7 +21,7 @@ export interface OfferSelectionLine {
 }
 
 export interface OfferRequestDraft {
-  kind: 'maatwerk_offer';
+  kind: OfferKind;
   createdAt: string;
   product: {
     handle: string;
@@ -40,6 +43,15 @@ export interface OfferRequestDraft {
     currency: 'EUR';
   };
   reference: string;
+  /** Optional flags for the offer */
+  flags?: {
+    montage?: boolean;
+  };
+}
+
+/** Helper: does this draft require the quote/offerte flow? */
+export function shouldUseQuoteFlow(draft: OfferRequestDraft): boolean {
+  return draft.kind === 'maatwerk_offer' || !!draft.flags?.montage;
 }
 
 export interface OfferContactInfo {

@@ -7,11 +7,11 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, Check, Loader2, Settings, Truck, ShieldCheck, Info } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import VerandaConfiguratorWizard, { VerandaConfiguratorWizardRef, VerandaPriceBreakdown } from '../components/VerandaConfiguratorWizard';
-import { VerandaConfig } from '../src/configurator/schemas/veranda';
+import { VerandaConfig, DEFAULT_COLOR } from '../src/configurator/schemas/veranda';
 import { useCart } from '../context/CartContext';
 import { ProductConfig } from '../types';
 import {
@@ -22,9 +22,13 @@ import {
   StandaardVerandaVariant,
 } from '../src/services/standaardVerandaProduct';
 import { formatEUR } from '../src/utils/money';
+import { setOfferDraft } from '../src/services/offers/offerStorage';
+import { createStandardOfferDraft } from '../src/services/offers/createStandardOfferDraft';
+import { buildVisualizationLayers, FALLBACK_IMAGE, type VerandaColorId } from '../src/configurator/visual/verandaAssets';
 
 const VerandaCategoryPage: React.FC = () => {
   const { addToCart } = useCart();
+  const navigate = useNavigate();
   const configuratorRef = useRef<VerandaConfiguratorWizardRef>(null);
 
   // Product data state
@@ -96,7 +100,7 @@ const VerandaCategoryPage: React.FC = () => {
     }
   };
 
-  // Handle configurator submit (add to cart)
+  // Handle configurator submit (add to cart OR offerte flow)
   const handleConfiguratorSubmit = (
     config: VerandaConfig,
     mode: 'order' | 'quote',
@@ -105,6 +109,39 @@ const VerandaCategoryPage: React.FC = () => {
     priceBreakdown: VerandaPriceBreakdown
   ) => {
     if (!selectedVariant || !product) return;
+
+    // ─── Quote / Offerte flow (Montage = Ja) ───
+    if (mode === 'quote') {
+      // Build visualization layers from config for the preview
+      const color = (config.color || DEFAULT_COLOR) as VerandaColorId;
+      const layers = buildVisualizationLayers({
+        color,
+        daktype: config.daktype,
+        goot: config.goot,
+        zijwand_links: config.zijwand_links,
+        zijwand_rechts: config.zijwand_rechts,
+        voorzijde: config.voorzijde,
+        verlichting: config.verlichting,
+      });
+
+      const draft = createStandardOfferDraft({
+        config,
+        productTitle: `${product.title} ${selectedWidth} x ${selectedDepth} cm`,
+        productHandle: product.handle,
+        widthCm: selectedWidth!,
+        depthCm: selectedDepth!,
+        details,
+        priceBreakdown,
+        previewLayers: layers.map((l) => l.src),
+        previewImageUrl: product.imageUrl || FALLBACK_IMAGE,
+      });
+
+      setOfferDraft(draft);
+      navigate('/offerte');
+      return;
+    }
+
+    // ─── Normal add-to-cart flow (Montage = Nee) ───
 
     // Build product object for cart (must satisfy Product type)
     const cartProduct = {

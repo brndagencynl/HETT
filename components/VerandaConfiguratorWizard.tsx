@@ -1,5 +1,5 @@
 import React, { useState, forwardRef, useImperativeHandle, useMemo, useCallback, useEffect } from 'react';
-import { X, Check, Info, ChevronLeft, ChevronRight, Truck, ShieldCheck, ArrowRight, Lightbulb, Edit2, Eye, ChevronUp, ShoppingBag, Loader2, AlertTriangle } from 'lucide-react';
+import { X, Check, Info, ChevronLeft, ChevronRight, Truck, ShieldCheck, ArrowRight, Lightbulb, Edit2, Eye, ChevronUp, ShoppingBag, Loader2, AlertTriangle, Wrench, FileText } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { VERANDA_OPTIONS_UI, DEFAULT_VERANDA_CONFIG, VerandaConfig, COLOR_OPTIONS, DEFAULT_COLOR } from '../src/configurator/schemas/veranda';
 import { calcVerandaPrice, type VerandaProductSize } from '../src/configurator/pricing/veranda';
@@ -83,7 +83,7 @@ interface VerandaConfiguratorWizardProps {
 
 // --- Step Definitions ---
 // Single source of truth for step order
-type StepId = 'color' | 'daktype' | 'goot' | 'zijwand_links' | 'zijwand_rechts' | 'voorzijde' | 'verlichting' | 'overzicht';
+type StepId = 'color' | 'daktype' | 'goot' | 'zijwand_links' | 'zijwand_rechts' | 'voorzijde' | 'verlichting' | 'montage' | 'overzicht';
 
 interface StepDefinition {
     id: StepId;
@@ -104,7 +104,8 @@ interface StepDefinition {
  * 5. zijwand_rechts - Right side wall
  * 6. voorzijde - Front side (glazen schuifwand)
  * 7. verlichting - Extras (LED lighting) - NOT color-specific
- * 8. overzicht - Summary/review
+ * 8. montage - Optional professional installation (Ja/Nee, default Nee)
+ * 9. overzicht - Summary/review
  */
 const STEPS: StepDefinition[] = [
     { 
@@ -155,6 +156,13 @@ const STEPS: StepDefinition[] = [
         description: t('configurator.steps.verlichting.description'),
         optionKey: 'verlichting',
         required: false 
+    },
+    {
+        id: 'montage',
+        title: 'Montage',
+        description: 'Wilt u professionele montage bij uw veranda?',
+        optionKey: 'montage',
+        required: false
     },
     { 
         id: 'overzicht', 
@@ -496,6 +504,10 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
             return renderOverview();
         }
 
+        if (currentStep.id === 'montage') {
+            return renderMontageSelector();
+        }
+
         const optionDef = VERANDA_OPTIONS_UI.find(o => o.key === currentStep.optionKey);
         if (!optionDef) return null;
 
@@ -686,6 +698,79 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
         );
     };
 
+    // --- Montage Selector (Ja / Nee cards) ---
+    const renderMontageSelector = () => {
+        const montageValue = !!config.montage;
+
+        const options = [
+            {
+                value: false,
+                label: 'Nee, zelf monteren',
+                description: 'U monteert de veranda zelf of schakelt een eigen monteur in.',
+                icon: <Wrench size={28} />,
+            },
+            {
+                value: true,
+                label: 'Ja, montage gewenst',
+                description: 'U ontvangt een persoonlijke montage-offerte op basis van uw situatie.',
+                icon: <FileText size={28} />,
+            },
+        ];
+
+        return (
+            <div className="max-w-2xl space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {options.map((opt) => {
+                        const selected = montageValue === opt.value;
+                        return (
+                            <button
+                                key={String(opt.value)}
+                                type="button"
+                                onClick={() => setConfig(prev => ({ ...prev, montage: opt.value }))}
+                                aria-pressed={selected}
+                                className={`relative text-left p-5 rounded-xl border-2 transition-all cursor-pointer min-h-[140px] ${
+                                    selected
+                                        ? 'border-[#003878] bg-[#003878]/5 ring-2 ring-[#003878]/10 shadow-md'
+                                        : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
+                                }`}
+                            >
+                                {selected && (
+                                    <div className="absolute top-4 right-4 w-6 h-6 bg-[#003878] rounded-full flex items-center justify-center text-white">
+                                        <Check size={14} strokeWidth={3} />
+                                    </div>
+                                )}
+                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-3 ${
+                                    selected ? 'bg-[#FF7300] text-white' : 'bg-gray-100 text-gray-400'
+                                }`}>
+                                    {opt.icon}
+                                </div>
+                                <span className="block text-base font-bold text-gray-900 mb-2 pr-8">{opt.label}</span>
+                                <span className="block text-sm text-gray-600 leading-relaxed">{opt.description}</span>
+                            </button>
+                        );
+                    })}
+                </div>
+
+                {montageValue && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-start gap-3">
+                        <Info size={18} className="text-blue-600 mt-0.5 flex-shrink-0" />
+                        <div className="text-sm text-blue-800">
+                            <p className="font-semibold mb-1">Let op: Uw bestelling gaat via een offerte</p>
+                            <p className="text-blue-700">
+                                Wanneer u montage selecteert, wordt uw configuratie niet direct aan de winkelwagen
+                                toegevoegd. In plaats daarvan ontvangt u een persoonlijke offerte inclusief montagekosten.
+                            </p>
+                        </div>
+                    </div>
+                )}
+
+                <p className="text-sm text-gray-500 italic px-2">
+                    Montage is optioneel. De montagekosten worden apart geoffreerd.
+                </p>
+            </div>
+        );
+    };
+
     const renderOverview = () => {
         const ledSummaryValue = config.verlichting
             ? (ledInfo.qty > 0
@@ -702,6 +787,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
             { stepIndex: 4, label: t('configurator.steps.zijwand_rechts.title'), value: getOptionLabel('zijwand_rechts', config.zijwand_rechts), key: 'zijwand_rechts' },
             { stepIndex: 5, label: t('configurator.steps.voorzijde.title'), value: getOptionLabel('voorzijde', config.voorzijde), key: 'voorzijde' },
             { stepIndex: 6, label: t('configurator.steps.verlichting.title'), value: ledSummaryValue, key: 'verlichting' },
+            { stepIndex: 7, label: 'Montage', value: config.montage ? 'Ja (op offerte)' : 'Nee', key: 'montage' },
         ];
 
         return (
@@ -1240,7 +1326,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                                             </button>
                                         ) : (
                                             <button
-                                                onClick={handleAddToCart}
+                                                onClick={config.montage ? handleQuoteRequest : handleAddToCart}
                                                 disabled={!agreed || isSubmitting}
                                                 className={`px-5 py-3 font-bold rounded-xl text-sm flex items-center gap-2 transition-all ${
                                                     agreed && !isSubmitting
@@ -1255,8 +1341,11 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                                                     </>
                                                 ) : (
                                                     <>
-                                                        {mode === 'edit' ? 'Opslaan' : t('configurator.navigation.add')}
-                                                        <ArrowRight size={18} />
+                                                        {config.montage
+                                                            ? 'Vraag offerte aan'
+                                                            : (mode === 'edit' ? 'Opslaan' : t('configurator.navigation.add'))
+                                                        }
+                                                        {config.montage ? <FileText size={18} /> : <ArrowRight size={18} />}
                                                     </>
                                                 )}
                                             </button>
@@ -1332,7 +1421,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                                             </button>
                                         ) : (
                                             <button
-                                                onClick={handleAddToCart}
+                                                onClick={config.montage ? handleQuoteRequest : handleAddToCart}
                                                 disabled={!agreed || isSubmitting}
                                                 className={`px-5 py-3 font-bold rounded-xl text-sm flex items-center gap-2 transition-all ${
                                                     agreed && !isSubmitting
@@ -1347,8 +1436,13 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                                                     </>
                                                 ) : (
                                                     <>
-                                                        <span className="hidden sm:inline">{mode === 'edit' ? 'Opslaan' : t('configurator.navigation.add')}</span>
-                                                        <ArrowRight size={18} />
+                                                        <span className="hidden sm:inline">
+                                                            {config.montage
+                                                                ? 'Vraag offerte aan'
+                                                                : (mode === 'edit' ? 'Opslaan' : t('configurator.navigation.add'))
+                                                            }
+                                                        </span>
+                                                        {config.montage ? <FileText size={18} /> : <ArrowRight size={18} />}
                                                     </>
                                                 )}
                                             </button>

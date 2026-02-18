@@ -78,6 +78,8 @@ export type VerandaConfig = {
     zijwand_rechts: ZijwandValue;
     voorzijde: VoorzijdeValue;
     verlichting: boolean;
+    /** Optional montage — when true the order goes through the offerte flow */
+    montage?: boolean;
     /** Derived LED info for display/debugging (does not affect base product line price) */
     ledQty?: number;
     ledUnitPrice?: number;
@@ -117,6 +119,7 @@ export const DEFAULT_VERANDA_CONFIG: Partial<VerandaConfig> = {
     zijwand_rechts: "geen",
     voorzijde: "geen",
     verlichting: false,
+    montage: false,
 };
 
 // =============================================================================

@@ -1,4 +1,4 @@
-import type { NextApiRequest, NextApiResponse } from "next";
+import type { VercelRequest, VercelResponse } from "@vercel/node";
 import nodemailer from "nodemailer";
 import React from "react";
 import { pdf } from "@react-pdf/renderer";
@@ -9,7 +9,7 @@ function safeNumber(n: any) {
   return Number.isFinite(x) ? x : undefined;
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") return res.status(405).json({ message: "Method not allowed" });
 
   const { offer } = req.body || {};

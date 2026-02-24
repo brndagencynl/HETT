@@ -51,32 +51,71 @@ const Offerte: React.FC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const [submitError, setSubmitError] = useState('');
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate() || !draft) return;
 
     setIsSubmitting(true);
+    setSubmitError('');
 
-    const contact: OfferContactInfo = {
-      naam: naam.trim(),
-      email: email.trim(),
-      telefoon: telefoon.trim(),
-      postcode: postcode.trim(),
-      plaats: plaats.trim(),
-      opmerking: opmerking.trim(),
-    };
+    // Build an absolute preview URL (safest for PDF rendering on the server)
+    const previewUrlAbsolute = draft.previewImageUrl?.startsWith('http')
+      ? draft.previewImageUrl
+      : draft.previewImageUrl
+        ? `${window.location.origin}${draft.previewImageUrl}`
+        : undefined;
 
-    const payload: OfferSubmitPayload = { draft, contact };
+    try {
+      const res = await fetch('/api/offerte', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          offer: {
+            reference: draft.reference,
+            productTitle: draft.product.title,
+            productHandle: draft.product.handle,
+            previewImageUrl: previewUrlAbsolute,
+            contact: {
+              name: naam.trim(),
+              email: email.trim(),
+              phone: telefoon.trim(),
+              postcode: postcode.trim(),
+              city: plaats.trim(),
+            },
+            options: draft.selections.map((s) => ({
+              label: s.label,
+              value: s.valueLabel,
+              price: s.priceMode === 'quote' ? undefined : s.price,
+            })),
+            totals: {
+              base: draft.pricing.base,
+              options: draft.pricing.optionsTotal,
+              shipping: 0,
+              total: draft.pricing.total,
+            },
+            notes: opmerking.trim() || undefined,
+          },
+        }),
+      });
 
-    // Phase 1: local stub — log only
-    console.log('[Offer] submit', payload);
+      const data = await res.json().catch(() => null);
 
-    // Simulate brief delay
-    await new Promise(resolve => setTimeout(resolve, 800));
+      if (!res.ok) {
+        throw new Error(data?.message || `Server fout (${res.status})`);
+      }
 
-    setIsSubmitting(false);
-    setSubmitted(true);
-    clearOfferDraft();
+      console.log('[Offer] submitted successfully, ref:', data?.reference);
+      setIsSubmitting(false);
+      setSubmitted(true);
+      clearOfferDraft();
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Onbekende fout bij verzenden.';
+      console.error('[Offer] submit error:', err);
+      setSubmitError(message);
+      setIsSubmitting(false);
+    }
   };
 
   // Loading
@@ -427,6 +466,12 @@ const Offerte: React.FC = () => {
                     </>
                   )}
                 </button>
+
+                {submitError && (
+                  <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3 text-center">
+                    ⚠️ {submitError}
+                  </div>
+                )}
 
                 <p className="text-xs text-gray-400 text-center">
                   Door dit formulier te versturen gaat u akkoord met onze{' '}

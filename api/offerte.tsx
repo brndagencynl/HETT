@@ -18,13 +18,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const reference = offer.reference || `OFF-${Date.now()}`;
   const createdAt = new Date().toLocaleString("nl-NL");
 
+  // Only include preview image if it's an absolute public URL (localhost won't work on Vercel)
+  const rawImageUrl: string | undefined = offer.previewImageUrl;
+  const safeImageUrl =
+    rawImageUrl && rawImageUrl.startsWith("http") && !rawImageUrl.includes("localhost")
+      ? rawImageUrl
+      : undefined;
+
   const doc = (
     <OfferPdf
       reference={reference}
       createdAt={createdAt}
       productTitle={offer.productTitle || "Offerteaanvraag"}
       productHandle={offer.productHandle}
-      previewImageUrl={offer.previewImageUrl}
+      previewImageUrl={safeImageUrl}
       contact={{
         name: offer.contact.name,
         email: offer.contact.email,
@@ -47,9 +54,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     />
   );
 
-  const pdfBuffer = await pdf(doc).toBuffer();
+  let pdfBuffer: Buffer;
+  try {
+    pdfBuffer = await pdf(doc).toBuffer();
+  } catch (pdfErr: any) {
+    console.error("PDF generation error:", pdfErr);
+    return res.status(500).json({ message: "PDF generatie mislukt", detail: pdfErr?.message });
+  }
 
   const smtpPort = Number(process.env.SMTP_PORT || 587);
+  if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
+    console.error("Missing SMTP env vars", { host: !!process.env.SMTP_HOST, user: !!process.env.SMTP_USER, pass: !!process.env.SMTP_PASS });
+    return res.status(500).json({ message: "E-mail configuratie ontbreekt op de server" });
+  }
+
   const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
     port: smtpPort,
@@ -112,6 +130,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).json({ success: true, reference });
   } catch (e: any) {
     console.error("Offer mail error:", e);
-    return res.status(500).json({ message: "Mail send failed" });
+    return res.status(500).json({ message: "E-mail verzenden mislukt", detail: e?.message });
   }
 }

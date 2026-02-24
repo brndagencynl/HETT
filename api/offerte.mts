@@ -2,7 +2,7 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import nodemailer from "nodemailer";
 import React from "react";
 import { renderToBuffer } from "@react-pdf/renderer";
-import { OfferPdf } from "../src/pdf/OfferPdf";
+import { OfferPdf } from "../src/pdf/OfferPdf.js";
 
 function safeNumber(n: any) {
   const x = Number(n);
@@ -25,38 +25,36 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       ? rawImageUrl
       : undefined;
 
-  const doc = (
-    <OfferPdf
-      reference={reference}
-      createdAt={createdAt}
-      productTitle={offer.productTitle || "Offerteaanvraag"}
-      productHandle={offer.productHandle}
-      previewImageUrl={safeImageUrl}
-      contact={{
-        name: offer.contact.name,
-        email: offer.contact.email,
-        phone: offer.contact.phone,
-        postcode: offer.contact.postcode,
-        city: offer.contact.city
-      }}
-      options={(offer.options || []).map((o: any) => ({
-        label: String(o.label || ""),
-        value: String(o.value || ""),
-        price: safeNumber(o.price)
-      }))}
-      totals={{
-        base: safeNumber(offer.totals?.base),
-        options: safeNumber(offer.totals?.options),
-        shipping: safeNumber(offer.totals?.shipping),
-        total: safeNumber(offer.totals?.total)
-      }}
-      notes={offer.notes}
-    />
-  );
+  const doc = React.createElement(OfferPdf, {
+    reference,
+    createdAt,
+    productTitle: offer.productTitle || "Offerteaanvraag",
+    productHandle: offer.productHandle,
+    previewImageUrl: safeImageUrl,
+    contact: {
+      name: offer.contact.name,
+      email: offer.contact.email,
+      phone: offer.contact.phone,
+      postcode: offer.contact.postcode,
+      city: offer.contact.city
+    },
+    options: (offer.options || []).map((o: any) => ({
+      label: String(o.label || ""),
+      value: String(o.value || ""),
+      price: safeNumber(o.price)
+    })),
+    totals: {
+      base: safeNumber(offer.totals?.base),
+      options: safeNumber(offer.totals?.options),
+      shipping: safeNumber(offer.totals?.shipping),
+      total: safeNumber(offer.totals?.total)
+    },
+    notes: offer.notes
+  });
 
   let pdfBuffer: Buffer;
   try {
-    pdfBuffer = await renderToBuffer(doc);
+    pdfBuffer = await renderToBuffer(doc as any);
   } catch (pdfErr: any) {
     console.error("PDF generation error:", pdfErr);
     return res.status(500).json({ message: "PDF generatie mislukt", detail: pdfErr?.message });

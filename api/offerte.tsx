@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import nodemailer from "nodemailer";
 import React from "react";
-import { pdf } from "@react-pdf/renderer";
+import { renderToBuffer } from "@react-pdf/renderer";
 import { OfferPdf } from "../src/pdf/OfferPdf";
 
 function safeNumber(n: any) {
@@ -56,7 +56,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   let pdfBuffer: Buffer;
   try {
-    pdfBuffer = await pdf(doc).toBuffer();
+    pdfBuffer = await renderToBuffer(doc);
   } catch (pdfErr: any) {
     console.error("PDF generation error:", pdfErr);
     return res.status(500).json({ message: "PDF generatie mislukt", detail: pdfErr?.message });

@@ -60,12 +60,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Only include preview image if it's an absolute public URL
     const rawImageUrl: string | undefined = offer.previewImageUrl;
-    const safeImageUrl =
+    let safeImageUrl: string | undefined =
       rawImageUrl &&
       rawImageUrl.startsWith("http") &&
       !rawImageUrl.includes("localhost")
         ? rawImageUrl
         : undefined;
+
+    // @react-pdf/renderer does NOT support WebP — swap to PNG equivalent
+    if (safeImageUrl && safeImageUrl.includes(".webp")) {
+      safeImageUrl = safeImageUrl.replace(/\.webp/g, ".png");
+    }
+    // Strip cache-bust query params that might confuse the image fetch
+    if (safeImageUrl && safeImageUrl.includes("?")) {
+      safeImageUrl = safeImageUrl.split("?")[0];
+    }
 
     const contact = {
       name: offer.contact.name,

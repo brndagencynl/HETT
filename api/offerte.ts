@@ -58,41 +58,45 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const reference: string = offer.reference || `OFF-${Date.now()}`;
     const createdAt = new Date().toLocaleString("nl-NL");
 
-    // Only include preview image if it's an absolute public URL
-    const rawImageUrl: string | undefined = offer.previewImageUrl;
-    let safeImageUrl: string | undefined =
-      rawImageUrl &&
-      rawImageUrl.startsWith("http") &&
-      !rawImageUrl.includes("localhost")
-        ? rawImageUrl
-        : undefined;
+    // ── Preview image ─────────────────────────────────────────
+    // Prefer the pre-composited data URI sent by the client (most reliable).
+    // Fall back to fetching the URL server-side.
+    let imageDataUri: string | undefined = offer.previewImageDataUri || undefined;
 
-    // @react-pdf/renderer does NOT support WebP — swap to PNG equivalent
-    if (safeImageUrl && safeImageUrl.includes(".webp")) {
-      safeImageUrl = safeImageUrl.replace(/\.webp/g, ".png");
-    }
-    // Strip cache-bust query params that might confuse the image fetch
-    if (safeImageUrl && safeImageUrl.includes("?")) {
-      safeImageUrl = safeImageUrl.split("?")[0];
-    }
+    if (!imageDataUri) {
+      const rawImageUrl: string | undefined = offer.previewImageUrl;
+      let safeImageUrl: string | undefined =
+        rawImageUrl &&
+        rawImageUrl.startsWith("http") &&
+        !rawImageUrl.includes("localhost")
+          ? rawImageUrl
+          : undefined;
 
-    // Pre-fetch image as base64 data URI — react-pdf's own fetch is unreliable
-    let imageDataUri: string | undefined;
-    if (safeImageUrl) {
-      try {
-        console.log("[Offer] Fetching preview image:", safeImageUrl);
-        const imgRes = await fetch(safeImageUrl);
-        if (imgRes.ok) {
-          const buf = Buffer.from(await imgRes.arrayBuffer());
-          const contentType = imgRes.headers.get("content-type") || "image/png";
-          imageDataUri = `data:${contentType};base64,${buf.toString("base64")}`;
-          console.log("[Offer] Image fetched OK, size:", buf.length, "bytes");
-        } else {
-          console.warn("[Offer] Image fetch failed:", imgRes.status, imgRes.statusText);
-        }
-      } catch (imgErr: any) {
-        console.warn("[Offer] Image fetch error:", imgErr?.message);
+      if (safeImageUrl && safeImageUrl.includes(".webp")) {
+        safeImageUrl = safeImageUrl.replace(/\.webp/g, ".png");
       }
+      if (safeImageUrl && safeImageUrl.includes("?")) {
+        safeImageUrl = safeImageUrl.split("?")[0];
+      }
+
+      if (safeImageUrl) {
+        try {
+          console.log("[Offer] Fetching preview image:", safeImageUrl);
+          const imgRes = await fetch(safeImageUrl);
+          if (imgRes.ok) {
+            const buf = Buffer.from(await imgRes.arrayBuffer());
+            const ct = imgRes.headers.get("content-type") || "image/png";
+            imageDataUri = `data:${ct};base64,${buf.toString("base64")}`;
+            console.log("[Offer] Image fetched OK, size:", buf.length, "bytes");
+          } else {
+            console.warn("[Offer] Image fetch failed:", imgRes.status, imgRes.statusText);
+          }
+        } catch (imgErr: any) {
+          console.warn("[Offer] Image fetch error:", imgErr?.message);
+        }
+      }
+    } else {
+      console.log("[Offer] Using client-provided image data URI, length:", imageDataUri.length);
     }
 
     const contact = {
@@ -167,7 +171,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 h(View, { key: String(idx), style: s.row },
                   h(Text, { style: s.label }, o.label),
                   h(Text, { style: s.value },
-                    o.value + (typeof o.price === "number" ? `  (${money(o.price)})` : "")
+                    o.value + (typeof o.price === "number" && o.price > 0 ? `  (${money(o.price)})` : "")
                   )
                 )
               )

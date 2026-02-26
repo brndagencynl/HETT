@@ -53,6 +53,49 @@ const Offerte: React.FC = () => {
 
   const [submitError, setSubmitError] = useState('');
 
+  /**
+   * Composite all preview layers onto a <canvas> and return a PNG data-URI.
+   * Falls back to undefined when anything goes wrong.
+   */
+  const compositeLayersToDataUri = async (
+    layers: string[],
+    fallback?: string,
+  ): Promise<string | undefined> => {
+    const srcs = layers.length > 0 ? layers : fallback ? [fallback] : [];
+    if (srcs.length === 0) return undefined;
+
+    try {
+      // Load all layer images in parallel
+      const imgs = await Promise.all(
+        srcs.map(
+          (src) =>
+            new Promise<HTMLImageElement>((resolve, reject) => {
+              const img = new window.Image();
+              img.crossOrigin = 'anonymous';
+              img.onload = () => resolve(img);
+              img.onerror = reject;
+              // Use .png variant (react-pdf can't handle webp)
+              img.src = src.replace(/\.webp/g, '.png');
+            }),
+        ),
+      );
+
+      // Use the first image's natural size
+      const w = imgs[0].naturalWidth;
+      const h = imgs[0].naturalHeight;
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d')!;
+      for (const img of imgs) ctx.drawImage(img, 0, 0, w, h);
+
+      return canvas.toDataURL('image/png');
+    } catch (err) {
+      console.warn('[Offer] Layer compositing failed:', err);
+      return undefined;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate() || !draft) return;
@@ -60,12 +103,11 @@ const Offerte: React.FC = () => {
     setIsSubmitting(true);
     setSubmitError('');
 
-    // Build an absolute preview URL (safest for PDF rendering on the server)
-    const previewUrlAbsolute = draft.previewImageUrl?.startsWith('http')
-      ? draft.previewImageUrl
-      : draft.previewImageUrl
-        ? `${window.location.origin}${draft.previewImageUrl}`
-        : undefined;
+    // Composite preview layers into a single PNG data URI on the client
+    const previewDataUri = await compositeLayersToDataUri(
+      draft.previewLayers || [],
+      draft.previewImageUrl,
+    );
 
     try {
       const res = await fetch('/api/offerte', {
@@ -76,7 +118,7 @@ const Offerte: React.FC = () => {
             reference: draft.reference,
             productTitle: draft.product.title,
             productHandle: draft.product.handle,
-            previewImageUrl: previewUrlAbsolute,
+            previewImageDataUri: previewDataUri,
             contact: {
               name: naam.trim(),
               email: email.trim(),

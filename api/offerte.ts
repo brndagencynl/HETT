@@ -27,7 +27,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       import("nodemailer"),
       import("react"),
       import("@react-pdf/renderer"),
-      import("../src/pdf/OfferPdf.js")
+      import("./_lib/OfferPdf.js")
     ]);
 
     const { offer } = req.body || {};

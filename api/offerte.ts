@@ -76,6 +76,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       safeImageUrl = safeImageUrl.split("?")[0];
     }
 
+    // Pre-fetch image as base64 data URI — react-pdf's own fetch is unreliable
+    let imageDataUri: string | undefined;
+    if (safeImageUrl) {
+      try {
+        console.log("[Offer] Fetching preview image:", safeImageUrl);
+        const imgRes = await fetch(safeImageUrl);
+        if (imgRes.ok) {
+          const buf = Buffer.from(await imgRes.arrayBuffer());
+          const contentType = imgRes.headers.get("content-type") || "image/png";
+          imageDataUri = `data:${contentType};base64,${buf.toString("base64")}`;
+          console.log("[Offer] Image fetched OK, size:", buf.length, "bytes");
+        } else {
+          console.warn("[Offer] Image fetch failed:", imgRes.status, imgRes.statusText);
+        }
+      } catch (imgErr: any) {
+        console.warn("[Offer] Image fetch error:", imgErr?.message);
+      }
+    }
+
     const contact = {
       name: offer.contact.name,
       email: offer.contact.email,
@@ -133,9 +152,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         h(View, { style: s.section },
           h(Text, { style: s.h2 }, "Product"),
           h(View, { style: s.row }, h(Text, { style: s.label }, "Product"), h(Text, { style: s.value }, productTitle)),
-          safeImageUrl
+          imageDataUri
             ? h(View, { style: s.imgWrap },
-                h(Image, { src: safeImageUrl, style: { width: "100%", height: 220, objectFit: "cover" } })
+                h(Image, { src: imageDataUri, style: { width: "100%", height: 220, objectFit: "cover" } })
               )
             : null
         ),

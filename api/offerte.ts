@@ -239,6 +239,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS
       },
+      connectionTimeout: 8000,  // 8 s – fail fast within Vercel's limit
+      greetingTimeout: 8000,
+      socketTimeout: 10000,
       tls: {
         // Shared-hosting cert is issued to the server hostname
         // (s2.webhost.company) rather than mail.hettveranda.nl

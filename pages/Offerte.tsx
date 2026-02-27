@@ -56,7 +56,9 @@ const Offerte: React.FC = () => {
   const [submitError, setSubmitError] = useState('');
 
   /**
-   * Composite all preview layers onto a <canvas> and return a PNG data-URI.
+   * Composite all preview layers onto a <canvas> and return a JPEG data-URI.
+   * The image is down-scaled to a max width of 800 px and exported as JPEG
+   * (quality 0.75) so the payload stays well under Vercel's ~4.5 MB limit.
    * Falls back to undefined when anything goes wrong.
    */
   const compositeLayersToDataUri = async (
@@ -65,6 +67,9 @@ const Offerte: React.FC = () => {
   ): Promise<string | undefined> => {
     const srcs = layers.length > 0 ? layers : fallback ? [fallback] : [];
     if (srcs.length === 0) return undefined;
+
+    const MAX_WIDTH = 800;
+    const JPEG_QUALITY = 0.75;
 
     try {
       // Load all layer images in parallel
@@ -82,16 +87,20 @@ const Offerte: React.FC = () => {
         ),
       );
 
-      // Use the first image's natural size
-      const w = imgs[0].naturalWidth;
-      const h = imgs[0].naturalHeight;
+      // Down-scale to MAX_WIDTH while keeping aspect ratio
+      const natW = imgs[0].naturalWidth;
+      const natH = imgs[0].naturalHeight;
+      const scale = natW > MAX_WIDTH ? MAX_WIDTH / natW : 1;
+      const w = Math.round(natW * scale);
+      const h = Math.round(natH * scale);
+
       const canvas = document.createElement('canvas');
       canvas.width = w;
       canvas.height = h;
       const ctx = canvas.getContext('2d')!;
       for (const img of imgs) ctx.drawImage(img, 0, 0, w, h);
 
-      return canvas.toDataURL('image/png');
+      return canvas.toDataURL('image/jpeg', JPEG_QUALITY);
     } catch (err) {
       console.warn('[Offer] Layer compositing failed:', err);
       return undefined;

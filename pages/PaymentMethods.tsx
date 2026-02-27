@@ -2,14 +2,16 @@
 import React from 'react';
 import PageHeader from '../components/PageHeader';
 import { CreditCard, ShieldCheck } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const PaymentMethods: React.FC = () => {
+  const { t } = useTranslation();
   return (
     <div className="min-h-screen bg-[#f6f8fa] font-sans">
       <PageHeader 
-        title="Betaalmethoden"
+        title={t('payment.title')}
         subtitle="Service"
-        description="Veilig en vertrouwd betalen. Wij bieden diverse betaalopties voor zowel particuliere als zakelijke klanten."
+        description={t('payment.description')}
         image="https://picsum.photos/1200/600?random=payment"
       />
 
@@ -17,40 +19,40 @@ const PaymentMethods: React.FC = () => {
         <div className="bg-white p-8 md:p-12 rounded-[32px] shadow-sm border border-gray-100">
             
             <p className="text-gray-600 text-lg mb-12 max-w-2xl">
-                Bij HETT vinden we veiligheid belangrijk. Daarom werken wij samen met Mollie, een van de grootste betalingsproviders van Europa, om uw betaling in een beveiligde omgeving te verwerken.
+                {t('payment.intro')}
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 
                 <PaymentCard 
                     title="iDEAL" 
-                    desc="De meest gebruikte betaalmethode in Nederland. U betaalt veilig en snel via de vertrouwde omgeving van uw eigen bank."
-                    badge="Gratis"
+                    desc={t('payment.idealDesc')}
+                    badge={t('common.free')}
                 />
                 <PaymentCard 
                     title="Bancontact" 
-                    desc="Voor onze Belgische klanten. Direct en veilig betalen via uw eigen bankomgeving."
-                    badge="Gratis"
+                    desc={t('payment.bancontactDesc')}
+                    badge={t('common.free')}
                 />
                 <PaymentCard 
                     title="Creditcard" 
-                    desc="Wij accepteren VISA, Mastercard en American Express. Uw aankoop is vaak verzekerd via uw creditcardmaatschappij."
-                    badge="Gratis"
+                    desc={t('payment.creditCardDesc')}
+                    badge={t('common.free')}
                 />
                 <PaymentCard 
-                    title="Klarna Achteraf Betalen" 
-                    desc="Eerst zien, dan betalen. U betaalt de factuur binnen 30 dagen na levering aan Klarna."
+                    title={t('payment.klarna')} 
+                    desc={t('payment.klarnaDesc')}
                     badge="+ € 2,95"
                 />
                 <PaymentCard 
-                    title="Bankoverschrijving" 
-                    desc="U maakt het bedrag handmatig over. Let op: de levering vindt pas plaats nadat de betaling is ontvangen (duurt 1-2 werkdagen langer)."
-                    badge="Gratis"
+                    title={t('payment.bankTransfer')} 
+                    desc={t('payment.bankTransferDesc')}
+                    badge={t('common.free')}
                 />
                 <PaymentCard 
-                    title="Op Rekening (Zakelijk)" 
-                    desc="Voor geregistreerde dealers en vaste zakelijke partners bieden wij de mogelijkheid om op rekening te bestellen."
-                    badge="Op aanvraag"
+                    title={t('payment.onAccount')} 
+                    desc={t('payment.onAccountDesc')}
+                    badge={t('payment.onRequest')}
                 />
 
             </div>
@@ -60,9 +62,9 @@ const PaymentMethods: React.FC = () => {
                     <ShieldCheck size={32} />
                 </div>
                 <div>
-                    <h3 className="font-bold text-green-800 text-lg mb-1">Veilig Betalen Garantie</h3>
+                    <h3 className="font-bold text-green-800 text-lg mb-1">{t('payment.securePayment')}</h3>
                     <p className="text-green-700/80">
-                        Onze website is beveiligd met een SSL-certificaat (het slotje in de browserbalk). Uw bankgegevens worden versleuteld verstuurd en nooit door ons opgeslagen.
+                        {t('payment.securePaymentDesc')}
                     </p>
                 </div>
             </div>

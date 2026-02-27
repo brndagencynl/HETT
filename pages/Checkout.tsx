@@ -6,6 +6,7 @@ import { extractWidthFromHandle, extractWidthFromSize } from '../src/services/ad
 import { useMaatwerkEdit } from '../context/MaatwerkEditContext';
 import { useSandwichpanelenEdit } from '../context/SandwichpanelenEditContext';
 import { Navigate, useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Package, Info, Pencil, AlertTriangle, ShoppingCart, ExternalLink, Loader2 } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import Button from '../components/ui/button';
@@ -30,6 +31,7 @@ type CheckoutForm = {
 };
 
 const Checkout: React.FC = () => {
+  const { t } = useTranslation();
   const { 
     cart, 
     total, 
@@ -75,12 +77,12 @@ const Checkout: React.FC = () => {
       if (result.success && result.checkoutUrl) {
         window.location.href = result.checkoutUrl;
       } else {
-        setCheckoutError(result.error || 'Er is een fout opgetreden bij het afrekenen.');
+        setCheckoutError(result.error || t('checkout.error'));
         setIsRedirecting(false);
       }
     } catch (error) {
       console.error('Failed to redirect to Shopify checkout:', error);
-      setCheckoutError('Er is een onverwachte fout opgetreden.');
+      setCheckoutError(t('checkout.unexpectedError'));
       setIsRedirecting(false);
     }
   };
@@ -92,7 +94,7 @@ const Checkout: React.FC = () => {
   if (cart.length > 0 && !shippingIsValid) {
     return (
       <div className="min-h-screen bg-[#f6f8fa] font-sans">
-        <PageHeader title="Afrekenen" description="Rond uw bestelling veilig af." image="https://picsum.photos/1200/400?random=98" />
+        <PageHeader title={t('checkout.title')} description={t('checkout.description')} image="https://picsum.photos/1200/400?random=98" />
         
         <div className="container py-12 md:py-20">
           <Card padding="wide" className="max-w-lg mx-auto text-center">
@@ -101,16 +103,16 @@ const Checkout: React.FC = () => {
                 <AlertTriangle size={32} className="text-amber-600" />
               </div>
             </div>
-            <h2 className="text-2xl font-black text-[#003878] mb-4">Adresvalidatie vereist</h2>
+            <h2 className="text-2xl font-black text-[#003878] mb-4">{t('checkout.addressRequired')}</h2>
             <p className="text-gray-600 mb-8">
-              Valideer eerst uw bezorgadres in de winkelwagen voordat u kunt afrekenen.
+              {t('checkout.addressRequiredDesc')}
             </p>
             <Link 
               to="/cart" 
               className="btn btn-primary btn-lg inline-flex items-center gap-2"
             >
               <ShoppingCart size={20} />
-              Ga naar winkelmand
+              {t('checkout.goToCart')}
             </Link>
           </Card>
         </div>
@@ -143,13 +145,13 @@ const Checkout: React.FC = () => {
 
     const validate = (): Partial<Record<keyof CheckoutForm, string>> => {
         const next: Partial<Record<keyof CheckoutForm, string>> = {};
-        if (!form.firstName.trim()) next.firstName = 'Vul je naam in.';
-        if (!form.lastName.trim()) next.lastName = 'Vul je achternaam in.';
-        if (!form.email.trim() || !isEmailValid(form.email)) next.email = 'Vul een geldig e-mailadres in.';
-        if (!form.phone.trim()) next.phone = 'Vul je telefoonnummer in.';
-        if (!form.street.trim()) next.street = 'Vul je straat in.';
-        if (!form.postalCode.trim()) next.postalCode = 'Vul je postcode in.';
-        if (!form.city.trim()) next.city = 'Vul je plaats in.';
+        if (!form.firstName.trim()) next.firstName = t('checkout.validation.nameRequired');
+        if (!form.lastName.trim()) next.lastName = t('checkout.validation.lastNameRequired');
+        if (!form.email.trim() || !isEmailValid(form.email)) next.email = t('checkout.validation.emailInvalid');
+        if (!form.phone.trim()) next.phone = t('checkout.validation.phoneRequired');
+        if (!form.street.trim()) next.street = t('checkout.validation.streetRequired');
+        if (!form.postalCode.trim()) next.postalCode = t('checkout.validation.postalCodeRequired');
+        if (!form.city.trim()) next.city = t('checkout.validation.cityRequired');
         return next;
     };
 
@@ -186,7 +188,7 @@ const Checkout: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#f6f8fa] font-sans">
-      <PageHeader title="Afrekenen" description="Rond uw bestelling veilig af." image="https://picsum.photos/1200/400?random=98" />
+      <PageHeader title={t('checkout.title')} description={t('checkout.description')} image="https://picsum.photos/1200/400?random=98" />
       
             <div className="container py-12 md:py-20">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
@@ -194,7 +196,7 @@ const Checkout: React.FC = () => {
             {/* Customer Form */}
             <div className="lg:col-span-2">
                             <Card padding="wide">
-                                <h2 className="text-2xl font-black text-hett-dark mb-6 pb-4 border-b border-gray-100">Klantgegevens</h2>
+                                <h2 className="text-2xl font-black text-hett-dark mb-6 pb-4 border-b border-gray-100">{t('checkout.customerDetails')}</h2>
 
                                 <form
                                     className="space-y-5"
@@ -206,7 +208,7 @@ const Checkout: React.FC = () => {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                         <div>
                                             <Input
-                                                label="Naam"
+                                                label={t('checkout.firstName')}
                                                 value={form.firstName}
                                                 onChange={(e) => setForm((p) => ({ ...p, firstName: e.target.value }))}
                                                 required
@@ -216,7 +218,7 @@ const Checkout: React.FC = () => {
                                         </div>
                                         <div>
                                             <Input
-                                                label="Achternaam"
+                                                label={t('checkout.lastName')}
                                                 value={form.lastName}
                                                 onChange={(e) => setForm((p) => ({ ...p, lastName: e.target.value }))}
                                                 required
@@ -229,7 +231,7 @@ const Checkout: React.FC = () => {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                         <div>
                                             <Input
-                                                label="E-mail"
+                                                label={t('checkout.email')}
                                                 type="email"
                                                 value={form.email}
                                                 onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
@@ -240,7 +242,7 @@ const Checkout: React.FC = () => {
                                         </div>
                                         <div>
                                             <Input
-                                                label="Telefoon"
+                                                label={t('checkout.phone')}
                                                 type="tel"
                                                 value={form.phone}
                                                 onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))}
@@ -253,7 +255,7 @@ const Checkout: React.FC = () => {
 
                                     <div>
                                         <Input
-                                            label="Straat"
+                                            label={t('checkout.street')}
                                             value={form.street}
                                             onChange={(e) => setForm((p) => ({ ...p, street: e.target.value }))}
                                             required
@@ -265,7 +267,7 @@ const Checkout: React.FC = () => {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                         <div>
                                             <Input
-                                                label="Postcode"
+                                                label={t('checkout.postalCode')}
                                                 value={form.postalCode}
                                                 onChange={(e) => setForm((p) => ({ ...p, postalCode: e.target.value }))}
                                                 required
@@ -275,7 +277,7 @@ const Checkout: React.FC = () => {
                                         </div>
                                         <div>
                                             <Input
-                                                label="Plaats"
+                                                label={t('checkout.city')}
                                                 value={form.city}
                                                 onChange={(e) => setForm((p) => ({ ...p, city: e.target.value }))}
                                                 required
@@ -286,13 +288,13 @@ const Checkout: React.FC = () => {
                                     </div>
 
                                     <div>
-                                        <label className="field-label">Opmerkingen</label>
+                                        <label className="field-label">{t('checkout.notes')}</label>
                                         <textarea
                                             className="ui-textarea"
                                             rows={4}
                                             value={form.notes}
                                             onChange={(e) => setForm((p) => ({ ...p, notes: e.target.value }))}
-                                            placeholder="Optioneel"
+                                            placeholder={t('checkout.notesPlaceholder')}
                                         />
                                     </div>
 
@@ -311,11 +313,11 @@ const Checkout: React.FC = () => {
                                               {isRedirecting ? (
                                                 <>
                                                   <Loader2 size={18} className="animate-spin" />
-                                                  Doorsturen...
+                                                  {t('checkout.redirecting')}
                                                 </>
                                               ) : (
                                                 <>
-                                                  Verder naar betalen
+                                                  {t('checkout.payButton')}
                                                   <ExternalLink size={18} />
                                                 </>
                                               )}
@@ -332,7 +334,7 @@ const Checkout: React.FC = () => {
                                             className="w-full"
                                             disabled={isSubmitting}
                                           >
-                                            {isSubmitting ? 'Bezig…' : 'Bestellen'}
+                                            {isSubmitting ? t('checkout.submitting') : t('checkout.orderButton')}
                                           </Button>
                                         )}
                                         
@@ -352,7 +354,7 @@ const Checkout: React.FC = () => {
                                 <Card padding="wide">
                                     <h3 className="text-xl font-black text-hett-dark mb-6 pb-4 border-b border-gray-100 flex items-center gap-2">
                                         <Package size={20} />
-                                        Uw bestelling
+                                        {t('checkout.yourOrder')}
                                     </h3>
 
                                     <div className="space-y-4 mb-6 max-h-[420px] overflow-y-auto pr-2">
@@ -408,8 +410,8 @@ const Checkout: React.FC = () => {
                                                                 606,
                                                                 })}
                                                                 className="relative z-10 text-gray-400 hover:text-hett-primary pointer-events-auto min-w-[36px] min-h-[36px]"
-                                                                title="Bewerken"
-                                                                aria-label="Configuratie bewerken"
+                                                                title={t('common.edit')}
+                                                                aria-label={t('cart.editConfig')}
                                                             >
                                                                 <Pencil size={14} />
                                                             </Button>
@@ -422,8 +424,8 @@ const Checkout: React.FC = () => {
                                                                 size="sm"
                                                                 onClick={() => openMaatwerkEdit({ cartIndex: idx, item })}
                                                                 className="relative z-10 text-gray-400 hover:text-hett-primary pointer-events-auto min-w-[36px] min-h-[36px]"
-                                                                title="Bewerken"
-                                                                aria-label="Maatwerk configuratie bewerken"
+                                                                title={t('common.edit')}
+                                                                aria-label={t('cart.editMaatwerkConfig')}
                                                             >
                                                                 <Pencil size={14} />
                                                             </Button>
@@ -437,8 +439,8 @@ const Checkout: React.FC = () => {
                                                                 size="sm"
                                                                 onClick={() => openSandwichpanelenEdit({ lineId: item.id, item })}
                                                                 className="relative z-10 text-gray-400 hover:text-hett-primary pointer-events-auto min-w-[36px] min-h-[36px]"
-                                                                title="Bewerken"
-                                                                aria-label="Bewerken"
+                                                                title={t('common.edit')}
+                                                                aria-label={t('common.edit')}
                                                             >
                                                                 <Pencil size={14} />
                                                             </Button>
@@ -466,17 +468,17 @@ const Checkout: React.FC = () => {
                                                         </div>
                                                     ) : (
                                                         <div className="text-xs text-gray-500">
-                                                            {item.selectedSize ? <div>Afmeting: {item.selectedSize}</div> : null}
+                                                            {item.selectedSize ? <div>{t('common.dimension')}: {item.selectedSize}</div> : null}
                                                         </div>
                                                     )}
 
                                                     <div className="flex justify-between items-start mt-2">
                                                         <div className="text-xs text-gray-500">
-                                                            <div>Aantal: <span className="font-bold">{item.quantity}</span></div>
-                                                            <div>Per stuk: <span className="font-bold">{formatMoney(unitPrice)}</span></div>
+                                                            <div>{t('common.quantity')}: <span className="font-bold">{item.quantity}</span></div>
+                                                            <div>{t('common.perUnit')}: <span className="font-bold">{formatMoney(unitPrice)}</span></div>
                                                         </div>
                                                         <div className="text-right">
-                                                            <div className="text-xs text-gray-500 font-bold uppercase tracking-wide">Regel</div>
+                                                            <div className="text-xs text-gray-500 font-bold uppercase tracking-wide">{t('checkout.line')}</div>
                                                             <div className="font-black text-hett-dark">{formatMoney(item.totalPrice)}</div>
                                                         </div>
                                                     </div>
@@ -488,26 +490,26 @@ const Checkout: React.FC = () => {
 
                                     <div className="space-y-3 mb-6 pt-4 border-t border-gray-100">
                                         <div className="flex justify-between text-gray-600 text-sm">
-                                            <span className="font-medium">Subtotaal</span>
+                                            <span className="font-medium">{t('common.subtotal')}</span>
                                             <span className="font-bold">{formatMoney(subtotalExVat)}</span>
                                         </div>
                                         <div className="flex justify-between text-gray-600 text-sm">
-                                            <span className="font-medium">BTW (21%)</span>
+                                            <span className="font-medium">{t('common.vat')}</span>
                                             <span className="font-bold">{formatMoney(vatAmount)}</span>
                                         </div>
                                         <div className="flex justify-between text-gray-600 text-sm">
                                             <span className="font-medium flex items-center gap-2">
                                               {shippingMode === 'pickup' 
-                                                ? 'Afhalen in Eindhoven' 
+                                                ? t('checkout.pickupEindhoven') 
                                                 : shippingAddress.city 
-                                                  ? `Bezorgen naar ${shippingAddress.city}`
-                                                  : `Bezorgen naar ${COUNTRY_LABELS[shippingCountry] || shippingCountry}`
+                                                  ? `${t('checkout.deliverTo')} ${shippingAddress.city}`
+                                                  : `${t('checkout.deliverTo')} ${COUNTRY_LABELS[shippingCountry] || shippingCountry}`
                                               }
                                               <Link 
                                                 to="/cart?editShipping=1" 
                                                 className="text-xs text-[#003878] hover:underline font-semibold"
                                               >
-                                                Wijzigen
+                                                {t('checkout.change')}
                                               </Link>
                                             </span>
                                             <span className={`font-bold ${shippingCost === 0 ? 'text-green-600' : ''}`}>
@@ -518,10 +520,10 @@ const Checkout: React.FC = () => {
 
                                     <div className="pt-4 border-t-2 border-gray-200">
                                         <div className="flex justify-between items-center">
-                                            <span className="text-lg font-bold text-gray-700">Totaal</span>
+                                            <span className="text-lg font-bold text-gray-700">{t('common.total')}</span>
                                             <span className="text-2xl font-black text-hett-dark">{formatMoney(totalInclVat)}</span>
                                         </div>
-                                        <p className="text-xs text-gray-500 mt-2">Totaal (incl. BTW en verzending)</p>
+                                        <p className="text-xs text-gray-500 mt-2">{t('checkout.totalNote')}</p>
                                     </div>
                                 </Card>
                             </div>

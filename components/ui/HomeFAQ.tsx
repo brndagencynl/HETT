@@ -1,15 +1,20 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronDown, ChevronUp, MessageCircle } from 'lucide-react';
-import { FaqItem, FALLBACK_FAQ } from '../../services/shopify';
+import { useTranslation } from 'react-i18next';
 
 interface HomeFAQProps {
-    items?: FaqItem[];
+    items?: unknown[];
 }
 
-const HomeFAQ: React.FC<HomeFAQProps> = ({ items }) => {
-    // Use provided items or fallback
-    const faqs = items && items.length > 0 ? items : FALLBACK_FAQ;
+const FAQ_COUNT = 5;
+
+const HomeFAQ: React.FC<HomeFAQProps> = () => {
+    const { t } = useTranslation();
+    const faqs = Array.from({ length: FAQ_COUNT }, (_, i) => ({
+        question: t(`home.faq.items.${i}.question`),
+        answer: t(`home.faq.items.${i}.answer`),
+    }));
     const [openIndex, setOpenIndex] = useState<number | null>(0);
 
     const toggle = (index: number) => {
@@ -26,19 +31,19 @@ const HomeFAQ: React.FC<HomeFAQProps> = ({ items }) => {
                         <div className="sticky top-32">
                             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-hett-secondary/10 text-hett-secondary text-xs font-bold uppercase tracking-wider mb-4 border border-hett-secondary/20">
                                 <MessageCircle size={14} />
-                                <span>Ondersteuning</span>
+                                <span>{t('home.faq.badge')}</span>
                             </div>
                             <h2 className="text-3xl md:text-4xl font-black text-hett-dark mb-6 leading-tight">
-                                Veelgestelde <br className="hidden md:block" /> vragen
+                                {t('home.faq.title')}
                             </h2>
                             <p className="text-gray-600 font-medium mb-8 leading-relaxed">
-                                Heeft u een vraag over onze producten of service? Hieronder vindt u de meestgestelde vragen van onze klanten.
+                                {t('home.faq.description')}
                             </p>
                             <Link
                                 to="/veelgestelde-vragen"
                                 className="btn-primary px-8 py-3.5 text-sm uppercase tracking-wider"
                             >
-                                Bekijk alle vragen
+                                {t('home.faq.viewAll')}
                             </Link>
                         </div>
                     </div>

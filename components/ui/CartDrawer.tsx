@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { X, ShoppingBag, Trash2, ArrowRight, ShieldCheck, Pencil, Info, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../../context/CartContext';
+import { useTranslation } from 'react-i18next';
 import { useVerandaEdit } from '../../context/VerandaEditContext';
 import { useMaatwerkEdit } from '../../context/MaatwerkEditContext';
 import { useSandwichpanelenEdit } from '../../context/SandwichpanelenEditContext';
@@ -18,6 +19,7 @@ import { InlineSurchargeBreakdown, useConfigSurchargePreview } from '../../src/c
 const MotionDiv = motion.div as any;
 
 const CartDrawer: React.FC = () => {
+    const { t } = useTranslation();
     const { isCartOpen, closeCart, cart, cartProducts, ledLineItem, removeFromCart, totalCents, subtotalCents, grandTotalCents, shippingCostCents, shippingMode, shippingIsValid } = useCart();
     const { openEditConfigurator } = useVerandaEdit();
     const { openMaatwerkEdit } = useMaatwerkEdit();
@@ -75,7 +77,7 @@ const CartDrawer: React.FC = () => {
                         <div className="flex items-center justify-between p-6 bg-white border-b border-gray-100">
                             <div className="flex items-center gap-3">
                                 <ShoppingBag className="text-hett-primary" />
-                                <h2 className="text-xl font-black text-hett-dark">Winkelwagen</h2>
+                                <h2 className="text-xl font-black text-hett-dark">{t('cart.title')}</h2>
                                 <span className="bg-hett-light text-hett-primary text-xs font-bold px-2 py-1 rounded-full">{cartProducts.length} items</span>
                             </div>
                             <button onClick={closeCart} className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-500">
@@ -88,12 +90,12 @@ const CartDrawer: React.FC = () => {
                             {cartProducts.length === 0 ? (
                                 <div className="h-full flex flex-col items-center justify-center text-center opacity-60">
                                     <ShoppingBag size={64} className="mb-4 text-gray-300" />
-                                    <p className="text-lg font-bold text-gray-600 mb-6">Je winkelwagen is momenteel leeg!</p>
+                                    <p className="text-lg font-bold text-gray-600 mb-6">{t('cart.emptyDrawer')}</p>
                                     <button
                                         onClick={() => { closeCart(); navigate('/shop'); }}
                                         className="bg-hett-primary text-white px-8 py-3 rounded-lg font-bold hover:bg-hett-dark transition-colors"
                                     >
-                                        Begin met winkelen
+                                        {t('common.startShopping')}
                                     </button>
                                 </div>
                             ) : (
@@ -249,7 +251,7 @@ const CartDrawer: React.FC = () => {
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <h3 className="font-bold text-hett-dark text-sm truncate">{ledLineItem.title}</h3>
-                                        <p className="text-xs text-gray-500 mt-0.5">Automatisch berekend op basis van breedte</p>
+                                        <p className="text-xs text-gray-500 mt-0.5">{t('cart.autoCalculatedWidth')}</p>
                                         <div className="flex items-center justify-between mt-2">
                                             <div className="flex items-center gap-2 text-xs font-bold text-amber-700 bg-amber-100/50 px-2 py-1 rounded">
                                                 <span>Aantal: {ledLineItem.quantity} spots</span>
@@ -265,7 +267,7 @@ const CartDrawer: React.FC = () => {
                         {cartProducts.length > 0 && (
                             <div className="p-6 bg-white border-t border-gray-100 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
                                 <div className="flex justify-between items-end mb-6">
-                                    <span className="text-gray-500 font-bold text-sm">Subtotaal (incl. BTW)</span>
+                                    <span className="text-gray-500 font-bold text-sm">{t('cart.subtotalInclVat')}</span>
                                     <span className="text-3xl font-black text-hett-dark">{formatEUR(subtotalCents, 'cents')}</span>
                                 </div>
                                 <div className="space-y-3">
@@ -273,13 +275,13 @@ const CartDrawer: React.FC = () => {
                                         onClick={handleCheckout}
                                         className="w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 shadow-lg transition-colors bg-hett-primary text-white hover:bg-hett-dark shadow-hett-primary/20"
                                     >
-                                        Afrekenen <ArrowRight size={20} />
+                                        {t('cart.checkout')} <ArrowRight size={20} />
                                     </button>
                                     <button
                                         onClick={closeCart}
                                         className="w-full py-3 bg-white border-2 border-gray-100 text-gray-600 rounded-xl font-bold hover:border-gray-300 hover:text-gray-800 transition-colors"
                                     >
-                                        Verder winkelen
+                                        {t('common.continueShopping')}
                                     </button>
                                 </div>
                             </div>

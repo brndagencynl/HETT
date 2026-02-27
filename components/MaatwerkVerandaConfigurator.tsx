@@ -21,6 +21,7 @@ import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { X, Check, Info, ChevronLeft, ChevronRight, Truck, ShieldCheck, ArrowRight, Lightbulb, Edit2, Eye, ChevronUp, ShoppingBag, Loader2, Ruler, AlertTriangle, Wrench, FileText } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 import { Card } from './ui/card';
 // Use shared LED addon service for both standard and maatwerk configurators
@@ -147,6 +148,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
   onClose,
 }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   // STATE - completely isolated, NO localStorage
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [config, setConfig] = useState<PartialMaatwerkConfig>(() => {
@@ -622,17 +624,17 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
             <Ruler size={18} className="text-white" />
           </div>
           <div className="min-w-0">
-            <div className="text-xs text-gray-500">Geselecteerde afmeting</div>
+            <div className="text-xs text-gray-500">{t('common.dimension')}</div>
             <div className="font-black text-[#003878] text-base leading-tight">
               {currentSize.width} × {currentSize.depth} cm
             </div>
             <div className="text-[11px] text-gray-500">{areaM2.toFixed(2)} m²</div>
           </div>
           <div className="ml-auto text-right flex-shrink-0">
-            <div className="text-xs text-gray-500">Basisprijs</div>
+            <div className="text-xs text-gray-500">{t('maatwerk.basePrice')}</div>
             <div className="font-black text-[#003878] text-base leading-tight">{formatMaatwerkPrice(priceBreakdown.basePrice)}</div>
             {priceBreakdown.anchor && (
-              <div className="text-[11px] text-gray-500">incl. {formatMaatwerkPrice(priceBreakdown.anchor.customFee)} maatwerk toeslag</div>
+              <div className="text-[11px] text-gray-500">{t('maatwerk.inclCustomSurcharge', { amount: formatMaatwerkPrice(priceBreakdown.anchor.customFee) })}</div>
             )}
           </div>
         </Card>
@@ -640,7 +642,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
         <Card padding="tight" className="bg-amber-50 border border-amber-200 flex items-start gap-2.5">
           <Info size={16} className="text-amber-600 mt-0.5 flex-shrink-0" />
           <div className="text-sm text-amber-800 leading-snug">
-            <strong>Maatwerk:</strong> Kies elke maat tot op de centimeter. De prijs wordt automatisch berekend op basis van de gekozen afmetingen, plus € 364,99 maatwerk toeslag.
+            <strong>{t('maatwerk.infoTitle')}</strong> {t('maatwerk.infoDescription')}
           </div>
         </Card>
       </div>
@@ -811,7 +813,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
               {ledAvailable ? (
                 <>
                   <span className="text-sm text-gray-600">
-                    Voeg {ledInfo.qty} LED spots toe (€ {LED_UNIT_PRICE_EUR.toFixed(2).replace('.', ',')} per stuk)
+                    {t('configuratorWizard.ledAddSpots', { qty: ledInfo.qty, price: LED_UNIT_PRICE_EUR.toFixed(2).replace('.', ',') })}
                   </span>
                   <span className="block text-sm text-[#FF7300] font-semibold mt-1">
                     + € {ledInfo.total.toFixed(2).replace('.', ',')}
@@ -821,8 +823,8 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
                 <span className="text-sm text-amber-600 flex items-center gap-1 mt-1">
                   <AlertTriangle size={14} />
                   {rawWidth > 0 
-                    ? 'LED is voor deze breedte niet beschikbaar. (+ € 0,00)'
-                    : 'Selecteer eerst afmetingen om LED prijs te berekenen.'
+                    ? t('configuratorWizard.ledNotAvailable')
+                    : t('maatwerk.ledSelectFirst')
                   }
                 </span>
               )}
@@ -844,11 +846,11 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
         {currentValue && !ledAvailable && (
           <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-center gap-2 text-amber-700 text-sm">
             <AlertTriangle size={16} />
-            LED is voor deze breedte niet beschikbaar en wordt niet toegevoegd.
+            {t('configuratorWizard.ledNotAvailableWarning')}
           </div>
         )}
         <p className="mt-4 text-sm text-gray-500 italic px-2">
-          Deze stap is optioneel.
+          {t('configuratorWizard.optionalStep')}
         </p>
       </div>
     );
@@ -880,10 +882,10 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
               <Wrench size={28} />
             </div>
             <div>
-              <span className="font-bold text-gray-900 text-lg block">Montage</span>
-              <span className="text-sm text-gray-600 block">Montage door HETT Veranda</span>
+              <span className="font-bold text-gray-900 text-lg block">{t('configuratorWizard.montageTitle')}</span>
+              <span className="text-sm text-gray-600 block">{t('maatwerk.montageByHett')}</span>
               <span className="block text-sm text-[#FF7300] font-semibold mt-1">
-                Op offerte
+                {t('maatwerk.onQuote')}
               </span>
             </div>
           </div>
@@ -900,7 +902,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
           </label>
         </div>
         <p className="mt-4 text-sm text-gray-500 italic px-2">
-          Deze stap is optioneel.
+          {t('configuratorWizard.optionalStep')}
         </p>
       </div>
     );
@@ -914,21 +916,21 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
     const rawWidth = rawWidthForLed;
     const ledSummaryValue = config.verlichting
       ? (ledInfo.qty > 0
-        ? `Ja, ${ledInfo.qty} LED spots (€ ${ledInfo.total.toFixed(2).replace('.', ',')})`
-        : `Ja (niet beschikbaar voor ${rawWidth} cm)`)
-      : 'Nee';
-    const montageSummaryValue = config.montage ? 'Ja (op offerte)' : 'Nee';
+        ? t('configuratorWizard.yesSpots', { qty: ledInfo.qty }) + ` (€ ${ledInfo.total.toFixed(2).replace('.', ',')})`
+        : t('configuratorWizard.ledNotAvailableFor', { width: rawWidth }))
+      : t('configurator.selection.no');
+    const montageSummaryValue = config.montage ? t('configuratorWizard.montageOnQuote') : t('configurator.selection.no');
     
     const summaryItems = [
-      { stepIndex: 0, label: 'Afmetingen', value: config.size ? formatMaatwerkSize(config.size) : '-', key: 'afmetingen' },
-      { stepIndex: 1, label: 'Kleur profiel', value: getMaatwerkOptionLabel('color', config.color), key: 'color' },
-      { stepIndex: 2, label: 'Daktype', value: getMaatwerkOptionLabel('daktype', config.daktype), key: 'daktype' },
-      { stepIndex: 3, label: 'Goot optie', value: getMaatwerkOptionLabel('goot', config.goot), key: 'goot' },
-      { stepIndex: 4, label: 'Zijwand links', value: getMaatwerkOptionLabel('zijwand_links', config.zijwand_links), key: 'zijwand_links' },
-      { stepIndex: 5, label: 'Zijwand rechts', value: getMaatwerkOptionLabel('zijwand_rechts', config.zijwand_rechts), key: 'zijwand_rechts' },
-      { stepIndex: 6, label: 'Voorzijde', value: getMaatwerkOptionLabel('voorzijde', config.voorzijde), key: 'voorzijde' },
-      { stepIndex: 7, label: "Extra's", value: ledSummaryValue, key: 'verlichting' },
-      { stepIndex: 8, label: 'Montage', value: montageSummaryValue, key: 'montage' },
+      { stepIndex: 0, label: t('common.dimension'), value: config.size ? formatMaatwerkSize(config.size) : '-', key: 'afmetingen' },
+      { stepIndex: 1, label: t('configurator.steps.color.title'), value: getMaatwerkOptionLabel('color', config.color), key: 'color' },
+      { stepIndex: 2, label: t('configurator.steps.daktype.title'), value: getMaatwerkOptionLabel('daktype', config.daktype), key: 'daktype' },
+      { stepIndex: 3, label: t('maatwerk.gootOptie'), value: getMaatwerkOptionLabel('goot', config.goot), key: 'goot' },
+      { stepIndex: 4, label: t('configurator.steps.zijwand_links.title'), value: getMaatwerkOptionLabel('zijwand_links', config.zijwand_links), key: 'zijwand_links' },
+      { stepIndex: 5, label: t('configurator.steps.zijwand_rechts.title'), value: getMaatwerkOptionLabel('zijwand_rechts', config.zijwand_rechts), key: 'zijwand_rechts' },
+      { stepIndex: 6, label: t('configurator.steps.voorzijde.title'), value: getMaatwerkOptionLabel('voorzijde', config.voorzijde), key: 'voorzijde' },
+      { stepIndex: 7, label: t('configurator.steps.verlichting.title'), value: ledSummaryValue, key: 'verlichting' },
+      { stepIndex: 8, label: t('configuratorWizard.montageTitle'), value: montageSummaryValue, key: 'montage' },
     ];
 
     return (
@@ -939,8 +941,8 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
             <Check size={20} />
           </div>
           <div>
-            <h4 className="font-bold text-green-800 text-lg">Configuratie compleet!</h4>
-            <p className="text-sm text-green-700">Controleer uw selecties en voeg toe aan de winkelwagen.</p>
+            <h4 className="font-bold text-green-800 text-lg">{t('maatwerk.configComplete')}</h4>
+            <p className="text-sm text-green-700">{t('maatwerk.reviewSelections')}</p>
           </div>
         </div>
 
@@ -984,7 +986,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
               </div>
             )}
             <div className="border-t-2 border-gray-300 pt-3 mt-3 flex justify-between items-center">
-              <span className="font-bold text-gray-900 text-base">Totaal incl. BTW</span>
+              <span className="font-bold text-gray-900 text-base">{t('configurator.overview.totalInclVat')}</span>
               <span className="font-black text-2xl text-[#003878]">{formatMaatwerkPrice(displayGrandTotal)}</span>
             </div>
           </div>
@@ -999,15 +1001,15 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
             className="mt-1 w-5 h-5 rounded border-gray-300 text-[#003878] focus:ring-[#003878] cursor-pointer"
           />
           <span className="text-sm text-gray-700">
-            Ik ga akkoord met de{' '}
+            {t('maatwerk.agreementText')}{' '}
             <Link to="/algemene-voorwaarden" className="text-[#003878] underline hover:no-underline" target="_blank" rel="noopener noreferrer">
-              algemene voorwaarden
+              {t('maatwerk.termsLink')}
             </Link>{' '}
-            en heb de{' '}
+            {t('maatwerk.andRead')}{' '}
             <Link to="/privacy" className="text-[#003878] underline hover:no-underline" target="_blank" rel="noopener noreferrer">
-              privacyverklaring
+              {t('maatwerk.privacyLink')}
             </Link>{' '}
-            gelezen.
+            {t('maatwerk.read')}
           </span>
         </label>
       </div>
@@ -1099,7 +1101,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
           ) : (
             <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
               <Eye size={40} className="text-gray-300 mb-3" />
-              <p className="text-sm text-gray-400 font-medium">Preview wordt geladen...</p>
+              <p className="text-sm text-gray-400 font-medium">{t('configurator.visualization.previewPlaceholder')}</p>
             </div>
           )}
           
@@ -1181,17 +1183,17 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
             <div className="flex items-start justify-between gap-6 mb-6">
             <div className="min-w-0">
               <div className="flex items-center justify-between gap-3">
-                <h1 className="text-2xl md:text-3xl font-black text-hett-primary">Maatwerk configurator</h1>
+                <h1 className="text-2xl md:text-3xl font-black text-hett-primary">{t('nav.maatwerkConfigurator')}</h1>
                 {onClose && (
                   <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full">
                     <X size={20} />
                   </button>
                 )}
               </div>
-              <p className="text-sm text-hett-muted mt-1">Configureer uw veranda op maat</p>
+              <p className="text-sm text-hett-muted mt-1">{t('maatwerk.configureCustom')}</p>
             </div>
             <div className="hidden sm:block text-right flex-shrink-0">
-              <div className="text-xs text-hett-muted uppercase tracking-wide">Totaal incl. BTW</div>
+              <div className="text-xs text-hett-muted uppercase tracking-wide">{t('configurator.overview.totalInclVat')}</div>
               <div className="text-2xl font-black text-hett-primary">{formatMaatwerkPrice(displayGrandTotal)}</div>
             </div>
           </div>
@@ -1207,13 +1209,13 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
                     onClick={() => setIsMobilePreviewOpen((v) => !v)}
                     className="flex items-center gap-2 text-sm font-bold text-gray-800"
                   >
-                    Preview
+                    {t('maatwerk.preview')}
                     <ChevronUp
                       size={16}
                       className={`transition-transform ${isMobilePreviewOpen ? 'rotate-180' : 'rotate-0'}`}
                     />
                   </button>
-                  <div className="text-xs text-gray-500">Stap {currentStepIndex + 1}/{MAATWERK_STEPS.length}</div>
+                  <div className="text-xs text-gray-500">{t('maatwerk.stepOf', { current: currentStepIndex + 1, total: MAATWERK_STEPS.length })}</div>
                 </div>
 
                 <div className={`${isMobilePreviewOpen ? 'block' : 'hidden'} lg:block`}>
@@ -1224,13 +1226,13 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
               <div className="flex flex-wrap gap-2">
                 {selectedSize && (
                   <Chip>
-                    <span className="text-gray-500">Afmeting</span>
+                    <span className="text-gray-500">{t('maatwerk.dimension')}</span>
                     <span className="text-gray-900">{selectedSize.width} × {selectedSize.depth} cm</span>
                   </Chip>
                 )}
                 {selectedColor && (
                   <Chip>
-                    <span className="text-gray-500">Kleur</span>
+                    <span className="text-gray-500">{t('maatwerk.color')}</span>
                     <span className="text-gray-900">{selectedColor.label}</span>
                   </Chip>
                 )}
@@ -1327,7 +1329,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
                             }`}
                           >
                             <FileText size={18} />
-                            Vraag offerte aan
+                            {t('maatwerk.requestQuote')}
                           </button>
                         ) : (
                           <button
@@ -1342,11 +1344,11 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
                             {isSubmitting ? (
                               <>
                                 <Loader2 size={18} className="animate-spin" />
-                                {mode === 'edit' ? 'Opslaan...' : 'Toevoegen...'}
+                                {mode === 'edit' ? t('configuratorWizard.saving') : t('maatwerk.addingToCart')}
                               </>
                             ) : (
                               <>
-                                {mode === 'edit' ? 'Opslaan' : 'Toevoegen aan winkelwagen'}
+                                {mode === 'edit' ? t('configuratorWizard.saveLabel') : t('configuratorWizard.addToCart')}
                                 <ArrowRight size={18} />
                               </>
                             )}
@@ -1358,10 +1360,10 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
 
                   <div className="flex items-center gap-4 mt-3 text-xs text-gray-500">
                     <span className="flex items-center gap-1.5">
-                      <Truck size={12} /> Levering 5-10 werkdagen
+                      <Truck size={12} /> {t('maatwerk.delivery5to10')}
                     </span>
                     <span className="flex items-center gap-1.5">
-                      <ShieldCheck size={12} /> 5 jaar garantie
+                      <ShieldCheck size={12} /> {t('maatwerk.warranty5year')}
                     </span>
                   </div>
                 </Card>

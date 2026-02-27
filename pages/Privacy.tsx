@@ -2,13 +2,15 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import PageHeader from '../components/PageHeader';
+import { useTranslation } from 'react-i18next';
 
 const Privacy: React.FC = () => {
+  const { t } = useTranslation();
   return (
     <div className="min-h-screen bg-[#f6f8fa] font-sans">
       <PageHeader 
-        title="Privacybeleid"
-        subtitle="Juridisch"
+        title={t('privacy.title')}
+        subtitle={t('privacy.subtitle')}
         description="Wij hechten veel waarde aan de bescherming van uw persoonsgegevens. Hier leest u hoe wij daarmee omgaan."
         image="https://picsum.photos/1200/800?random=89"
       />

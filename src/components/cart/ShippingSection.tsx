@@ -14,6 +14,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { MapPin, Truck, Check, AlertCircle, Loader2, Lock, ChevronDown } from 'lucide-react';
 import { Card } from '../../../components/ui/card';
 import { useCart, type ShippingMode, type ShippingCountry, type ShippingAddress } from '../../../context/CartContext';
@@ -40,6 +41,7 @@ const COUNTRY_LABELS: Record<ShippingCountry, string> = {
 // =============================================================================
 
 export const ShippingSection: React.FC = () => {
+  const { t } = useTranslation();
   const {
     shippingMode,
     shippingCountry,
@@ -111,14 +113,14 @@ export const ShippingSection: React.FC = () => {
   return (
     <Card padding="wide">
       <h3 className="text-lg font-black text-[#003878] mb-4 pb-3 border-b border-gray-100">
-        Afhalen of bezorgen
+        {t('shipping.pickupOrDelivery')}
       </h3>
 
       {/* Lock Banner */}
       {isShippingLocked && (
         <div className="flex items-center gap-2 p-3 mb-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-800">
           <Lock size={16} className="flex-shrink-0" />
-          <span className="text-sm">Bezorgmethode is vergrendeld tijdens het afrekenen.</span>
+          <span className="text-sm">{t('shipping.methodLocked')}</span>
         </div>
       )}
 
@@ -158,10 +160,10 @@ export const ShippingSection: React.FC = () => {
             className={shippingMode === 'pickup' ? 'text-[#003878]' : 'text-gray-400'}
           />
           <div className="flex-1">
-            <div className="font-bold text-gray-900">Afhalen</div>
-            <div className="text-xs text-gray-500">Hoppenkuil 17, 5626DD Eindhoven</div>
+            <div className="font-bold text-gray-900">{t('shipping.pickup')}</div>
+            <div className="text-xs text-gray-500">{t('shipping.pickupAddress')}</div>
           </div>
-          <span className="font-bold text-green-600">Gratis</span>
+          <span className="font-bold text-green-600">{t('common.free')}</span>
         </label>
 
         {/* Delivery Option */}
@@ -197,8 +199,8 @@ export const ShippingSection: React.FC = () => {
             className={shippingMode === 'delivery' ? 'text-[#003878]' : 'text-gray-400'}
           />
           <div className="flex-1">
-            <div className="font-bold text-gray-900">Bezorgen</div>
-            <div className="text-xs text-gray-500">Veranda ≤ 300 km gratis • &gt; 300 km € 299,99 • Accessoires € 29,99</div>
+            <div className="font-bold text-gray-900">{t('shipping.deliver')}</div>
+            <div className="text-xs text-gray-500">{t('shipping.deliverDesc')}</div>
           </div>
           {shippingMode === 'delivery' && shippingIsValid && !shippingIsCalculating && (
             <span className={`font-bold ${shippingCostCents === 0 ? 'text-green-600' : 'text-gray-900'}`}>
@@ -216,10 +218,10 @@ export const ShippingSection: React.FC = () => {
         <div className="mt-4 pt-4 border-t border-gray-100">
           <div className="flex items-center gap-2 text-green-600 text-sm font-medium">
             <Check size={16} />
-            <span>Afhalen in Eindhoven (gratis)</span>
+            <span>{t('shipping.pickupFree')}</span>
           </div>
           <p className="mt-1 text-xs text-gray-500">
-            U ontvangt een e-mail zodra uw bestelling klaar staat voor ophalen.
+            {t('shipping.pickupNotice')}
           </p>
         </div>
       )}
@@ -232,7 +234,7 @@ export const ShippingSection: React.FC = () => {
             {/* Country Dropdown */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                Land *
+                {t('shipping.country')}
               </label>
               <div className="relative">
                 <select
@@ -255,14 +257,14 @@ export const ShippingSection: React.FC = () => {
                 />
               </div>
               <p className="mt-1 text-xs text-gray-500">
-                Veranda ≤ 300 km gratis • &gt; 300 km € 299,99 • Accessoires € 29,99
+                {t('shipping.deliverDesc')}
               </p>
             </div>
 
             {/* Street */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                Straat
+                {t('shipping.street')}
               </label>
               <input
                 type="text"
@@ -280,7 +282,7 @@ export const ShippingSection: React.FC = () => {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                  Huisnummer
+                  {t('shipping.houseNumber')}
                 </label>
                 <input
                   type="text"
@@ -295,7 +297,7 @@ export const ShippingSection: React.FC = () => {
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                  Postcode *
+                  {t('shipping.postalCode')}
                 </label>
                 <input
                   type="text"
@@ -313,7 +315,7 @@ export const ShippingSection: React.FC = () => {
             {/* City */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                Plaats *
+                {t('shipping.city')}
               </label>
               <input
                 type="text"
@@ -345,18 +347,18 @@ export const ShippingSection: React.FC = () => {
               {shippingIsCalculating && (
                 <>
                   <Loader2 size={18} className="animate-spin" />
-                  Verzendkosten berekenen...
+                  {t('shipping.calculating')}
                 </>
               )}
               {shippingIsValid && !shippingIsCalculating && (
                 <>
                   <Check size={18} />
-                  Verzendkosten berekend
+                  {t('shipping.calculated')}
                 </>
               )}
               {!shippingIsValid && !shippingIsCalculating && (
                 <>
-                  Bereken verzendkosten
+                  {t('shipping.calculate')}
                 </>
               )}
             </button>
@@ -380,25 +382,25 @@ export const ShippingSection: React.FC = () => {
                       <span className="text-gray-600">Type</span>
                       <span className="font-semibold text-gray-900">
                         {shippingQuote.type === 'free'
-                          ? 'Gratis bezorging'
+                          ? t('shipping.freeDelivery')
                           : shippingQuote.type === 'accessories'
-                            ? 'Accessoires (vast tarief)'
+                            ? t('shipping.accessoriesRate')
                             : shippingQuote.type === 'veranda_flat'
-                              ? 'Veranda (vast tarief)'
-                              : 'Bezorgen'}
+                              ? t('shipping.verandaRate')
+                              : t('shipping.deliverLabel')}
                       </span>
                     </div>
                   )}
                   {/* Distance */}
                   {shippingQuote.distanceKm > 0 && (
                     <div className="flex justify-between items-center text-sm">
-                      <span className="text-gray-600">Afstand</span>
+                      <span className="text-gray-600">{t('shipping.distance')}</span>
                       <span className="font-semibold text-gray-900">{shippingQuote.distanceKm.toFixed(1)} km</span>
                     </div>
                   )}
                   {/* Price */}
                   <div className="flex justify-between items-center pt-2 border-t border-gray-300">
-                    <span className="font-semibold text-gray-700">Verzendkosten</span>
+                    <span className="font-semibold text-gray-700">{t('shipping.shippingCosts')}</span>
                     <span className={`text-lg font-black ${shippingCostCents === 0 ? 'text-green-600' : 'text-[#003878]'}`}>
                       {formatShippingPrice(shippingCostCents)}
                     </span>
@@ -413,7 +415,7 @@ export const ShippingSection: React.FC = () => {
             {/* Help Text */}
             {!shippingIsValid && !shippingError && (
               <p className="text-xs text-gray-400">
-                Vul uw adres in en klik op "Bereken verzendkosten" om de bezorgkosten te zien.
+                {t('shipping.enterAddress')}
               </p>
             )}
           </div>

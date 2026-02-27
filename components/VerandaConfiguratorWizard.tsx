@@ -5,7 +5,7 @@ import { VERANDA_OPTIONS_UI, DEFAULT_VERANDA_CONFIG, VerandaConfig, COLOR_OPTION
 import { calcVerandaPrice, type VerandaProductSize } from '../src/configurator/pricing/veranda';
 import { getOptionPrice, FRONT_SIDE_OPTIONS, SIDE_WALL_OPTIONS, type OptionChoice } from '../src/configurator/pricing/verandapricing';
 import { buildVisualizationLayers, type VisualizationLayer, FALLBACK_IMAGE, type VerandaColorId, getPreloadPaths, preloadImages } from '../src/configurator/visual/verandaAssets';
-import { t } from '../src/utils/i18n';
+import { useTranslation } from 'react-i18next';
 import { formatEUR, toCents } from '../src/utils/money';
 // Use shared LED addon service for both standard and maatwerk configurators
 import { getLedTotals, LED_UNIT_PRICE_EUR } from '../src/services/addons/led';
@@ -110,7 +110,7 @@ interface StepDefinition {
  * 8. montage - Optional professional installation (Ja/Nee, default Nee)
  * 9. overzicht - Summary/review
  */
-const STEPS: StepDefinition[] = [
+const buildSteps = (t: (key: string) => string): StepDefinition[] => [
     { 
         id: 'color', 
         title: t('configurator.steps.color.title'), 
@@ -162,8 +162,8 @@ const STEPS: StepDefinition[] = [
     },
     {
         id: 'montage',
-        title: 'Montage',
-        description: 'Wilt u professionele montage bij uw veranda?',
+        title: t('configuratorWizard.montageTitle'),
+        description: t('configuratorWizard.montageDesc'),
         optionKey: 'montage',
         required: false
     },
@@ -215,6 +215,9 @@ const SafeImage = ({ src, alt, className }: { src: string; alt: string; classNam
 const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, VerandaConfiguratorWizardProps>(
     ({ productTitle = "HETT Premium Veranda", basePrice = 1250, widthCm = 606, onSubmit, mode = 'new', showResetMessage = false, onCancel }, ref) => {
     
+    const { t } = useTranslation();
+    const STEPS = useMemo(() => buildSteps(t), [t]);
+
     const [isOpen, setIsOpen] = useState(false);
     const [currentStepIndex, setCurrentStepIndex] = useState(0);
     const [config, setConfig] = useState<Partial<VerandaConfig>>(DEFAULT_VERANDA_CONFIG);
@@ -449,13 +452,13 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                     if (ledInfo.qty > 0) {
                         return {
                             label: VERANDA_OPTIONS_UI.find(f => f.key === key)?.label || key,
-                            value: `Ja, ${ledInfo.qty} LED spots (€ ${ledInfo.total.toFixed(2).replace('.', ',')})`,
+                            value: t('configuratorWizard.ledYesSpots', { qty: ledInfo.qty, price: ledInfo.total.toFixed(2).replace('.', ',') }),
                         };
                     }
 
                     return {
                         label: VERANDA_OPTIONS_UI.find(f => f.key === key)?.label || key,
-                        value: `Ja (niet beschikbaar voor ${widthCm} cm)`,
+                        value: t('configuratorWizard.ledNotAvailableFor', { width: widthCm }),
                     };
                 }
 
@@ -474,7 +477,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                         {
                             label: ledInfo.qty > 0
                                 ? `LED spots (${ledInfo.qty}x € ${ledInfo.unitPrice.toFixed(2).replace('.', ',')})`
-                                : 'LED spots (niet beschikbaar)',
+                                : t('configuratorWizard.ledNotAvailableLabel'),
                             amount: ledSelectedTotal,
                         },
                       ]
@@ -612,11 +615,11 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                                 <Lightbulb size={28} fill={currentValue ? "currentColor" : "none"} />
                             </div>
                             <div>
-                                <span className="font-bold text-gray-900 text-lg block">LED verlichting</span>
+                                <span className="font-bold text-gray-900 text-lg block">{t('configuratorWizard.ledLighting')}</span>
                                 {ledAvailable ? (
                                     <>
                                         <span className="text-sm text-gray-600">
-                                            Voeg {ledInfo.qty} LED spots toe (€ {LED_UNIT_PRICE_EUR.toFixed(2).replace('.', ',')} per stuk)
+                                            {t('configuratorWizard.ledAddSpots', { qty: ledInfo.qty, price: LED_UNIT_PRICE_EUR.toFixed(2).replace('.', ',') })}
                                         </span>
                                         <span className="block text-sm text-[#FF7300] font-semibold mt-1">
                                             + € {ledInfo.total.toFixed(2).replace('.', ',')}
@@ -625,7 +628,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                                 ) : (
                                     <span className="text-sm text-amber-600 flex items-center gap-1 mt-1">
                                         <AlertTriangle size={14} />
-                                        LED is voor deze breedte niet beschikbaar. (+ € 0,00)
+                                        {t('configuratorWizard.ledNotAvailable')}
                                     </span>
                                 )}
                             </div>
@@ -646,7 +649,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                     {currentValue && !ledAvailable && (
                         <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-center gap-2 text-amber-700 text-sm">
                             <AlertTriangle size={16} />
-                            LED is voor deze breedte niet beschikbaar en wordt niet toegevoegd.
+                            {t('configuratorWizard.ledNotAvailableWarning')}
                         </div>
                     )}
                     {!currentStep.required && (
@@ -711,14 +714,14 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
         const options = [
             {
                 value: false,
-                label: 'Nee, zelf monteren',
-                description: 'U monteert de veranda zelf of schakelt een eigen monteur in.',
+                label: t('configuratorWizard.montageNo'),
+                description: t('configuratorWizard.montageNoDesc'),
                 icon: <Wrench size={28} />,
             },
             {
                 value: true,
-                label: 'Ja, montage gewenst',
-                description: 'U ontvangt een persoonlijke montage-offerte op basis van uw situatie.',
+                label: t('configuratorWizard.montageYes'),
+                description: t('configuratorWizard.montageYesDesc'),
                 icon: <FileText size={28} />,
             },
         ];
@@ -761,17 +764,16 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                     <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-start gap-3">
                         <Info size={18} className="text-blue-600 mt-0.5 flex-shrink-0" />
                         <div className="text-sm text-blue-800">
-                            <p className="font-semibold mb-1">Let op: Uw bestelling gaat via een offerte</p>
+                            <p className="font-semibold mb-1">{t('configuratorWizard.montageNotice')}</p>
                             <p className="text-blue-700">
-                                Wanneer u montage selecteert, wordt uw configuratie niet direct aan de winkelwagen
-                                toegevoegd. In plaats daarvan ontvangt u een persoonlijke offerte inclusief montagekosten.
+                                {t('configuratorWizard.montageNoticeText')}
                             </p>
                         </div>
                     </div>
                 )}
 
                 <p className="text-sm text-gray-500 italic px-2">
-                    Montage is optioneel. De montagekosten worden apart geoffreerd.
+                    {t('configuratorWizard.montageOptionalNote')}
                 </p>
             </div>
         );
@@ -780,8 +782,8 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
     const renderOverview = () => {
         const ledSummaryValue = config.verlichting
             ? (ledInfo.qty > 0
-                ? `Ja, ${ledInfo.qty} LED spots (€ ${ledInfo.total.toFixed(2).replace('.', ',')})`
-                : `Ja (niet beschikbaar voor ${widthCm} cm)`)
+                ? t('configuratorWizard.ledYesSpots', { qty: ledInfo.qty, price: ledInfo.total.toFixed(2).replace('.', ',') })
+                : t('configuratorWizard.ledNotAvailableFor', { width: widthCm }))
             : t('configurator.selection.no');
         
         // Summary items in exact step order
@@ -793,7 +795,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
             { stepIndex: 4, label: t('configurator.steps.zijwand_rechts.title'), value: getOptionLabel('zijwand_rechts', config.zijwand_rechts), key: 'zijwand_rechts' },
             { stepIndex: 5, label: t('configurator.steps.voorzijde.title'), value: getOptionLabel('voorzijde', config.voorzijde), key: 'voorzijde' },
             { stepIndex: 6, label: t('configurator.steps.verlichting.title'), value: ledSummaryValue, key: 'verlichting' },
-            { stepIndex: 7, label: 'Montage', value: config.montage ? 'Ja (op offerte)' : 'Nee', key: 'montage' },
+            { stepIndex: 7, label: t('configuratorWizard.montageTitle'), value: config.montage ? t('configuratorWizard.montageOnQuote') : t('configurator.selection.no'), key: 'montage' },
         ];
 
         return (
@@ -805,8 +807,8 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                             <Info size={20} />
                         </div>
                         <div>
-                            <h4 className="font-bold text-amber-800 text-lg">Configuratie hersteld</h4>
-                            <p className="text-sm text-amber-700">De vorige configuratie was onvolledig. Standaardwaarden zijn ingesteld.</p>
+                            <h4 className="font-bold text-amber-800 text-lg">{t('configuratorWizard.configRestoredTitle')}</h4>
+                            <p className="text-sm text-amber-700">{t('configuratorWizard.configRestoredDesc')}</p>
                         </div>
                     </div>
                 )}
@@ -962,7 +964,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
             label: t('configurator.steps.verlichting.title'),
             value: config.verlichting !== undefined 
                 ? (config.verlichting 
-                    ? `Ja, ${getLedTotals(widthCm).qty} spots`
+                    ? t('configuratorWizard.yesSpots', { qty: getLedTotals(widthCm).qty })
                     : t('configurator.selection.no'))
                 : null,
             stepIndex: 6,
@@ -1343,13 +1345,13 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                                                 {isSubmitting ? (
                                                     <>
                                                         <Loader2 size={18} className="animate-spin" />
-                                                        {mode === 'edit' ? 'Opslaan...' : t('configurator.navigation.adding')}
+                                                        {mode === 'edit' ? t('configuratorWizard.saving') : t('configurator.navigation.adding')}
                                                     </>
                                                 ) : (
                                                     <>
                                                         {config.montage
-                                                            ? 'Vraag offerte aan'
-                                                            : (mode === 'edit' ? 'Opslaan' : t('configurator.navigation.add'))
+                                                            ? t('configuratorWizard.requestQuote')
+                                                            : (mode === 'edit' ? t('configuratorWizard.saveLabel') : t('configurator.navigation.add'))
                                                         }
                                                         {config.montage ? <FileText size={18} /> : <ArrowRight size={18} />}
                                                     </>
@@ -1438,14 +1440,14 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                                                 {isSubmitting ? (
                                                     <>
                                                         <Loader2 size={18} className="animate-spin" />
-                                                        <span className="hidden sm:inline">{mode === 'edit' ? 'Opslaan...' : t('configurator.navigation.adding')}</span>
+                                                        <span className="hidden sm:inline">{mode === 'edit' ? t('configuratorWizard.saving') : t('configurator.navigation.adding')}</span>
                                                     </>
                                                 ) : (
                                                     <>
                                                         <span className="hidden sm:inline">
                                                             {config.montage
-                                                                ? 'Vraag offerte aan'
-                                                                : (mode === 'edit' ? 'Opslaan' : t('configurator.navigation.add'))
+                                                                ? t('configuratorWizard.requestQuote')
+                                                                : (mode === 'edit' ? t('configuratorWizard.saveLabel') : t('configurator.navigation.add'))
                                                             }
                                                         </span>
                                                         {config.montage ? <FileText size={18} /> : <ArrowRight size={18} />}

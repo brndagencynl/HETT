@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { CATEGORIES } from '../constants';
 import { Filter, Loader2 } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
@@ -8,6 +9,7 @@ import { getAllProducts } from '../src/lib/shopify';
 import ProductCard from '../components/ui/ProductCard';
 
 const Shop: React.FC = () => {
+    const { t } = useTranslation();
     // Shopify products state
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
@@ -30,9 +32,9 @@ const Shop: React.FC = () => {
     return (
         <div className="min-h-screen bg-[#f6f8fa] font-sans">
             <PageHeader
-                title="Webshop"
-                subtitle="Catalogus"
-                description="Bekijk ons volledige assortiment veranda's, glazen schuifwanden en accessoires."
+                title={t('shop.title')}
+                subtitle={t('shop.subtitle')}
+                description={t('shop.description')}
                 image="https://picsum.photos/1200/400?random=shop"
             />
 
@@ -44,13 +46,13 @@ const Shop: React.FC = () => {
                         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 sticky top-32">
                             <div className="flex items-center gap-2 mb-6">
                                 <Filter size={20} className="text-hett-brown" />
-                                <h3 className="font-bold text-hett-dark">Filters</h3>
+                                <h3 className="font-bold text-hett-dark">{t('shop.filters')}</h3>
                             </div>
 
 
                             <div className="space-y-6">
                                 <div>
-                                    <h4 className="text-sm font-bold mb-3">Categorie</h4>
+                                    <h4 className="text-sm font-bold mb-3">{t('shop.category')}</h4>
                                     <ul className="space-y-2 text-sm text-gray-600">
                                         {Object.values(CATEGORIES).map(c => (
                                             <li key={c.path}>
@@ -67,23 +69,23 @@ const Shop: React.FC = () => {
                     <div className="lg:col-span-3">
                         <div className="flex items-center justify-between mb-8">
                             <div className="text-sm text-gray-500 font-bold">
-                                {loading ? '...' : products.length} Producten
+                                {loading ? '...' : products.length} {t('shop.productsCount')}
                             </div>
                             <select className="bg-white border border-gray-200 rounded-md px-4 py-2 text-sm font-bold outline-none">
-                                <option>Sorteer op: Populair</option>
-                                <option>Prijs: Laag - Hoog</option>
-                                <option>Prijs: Hoog - Laag</option>
+                                <option>{t('shop.sortPopular')}</option>
+                                <option>{t('shop.sortPriceLow')}</option>
+                                <option>{t('shop.sortPriceHigh')}</option>
                             </select>
                         </div>
 
                         {loading ? (
                             <div className="flex items-center justify-center py-20">
                                 <Loader2 className="w-8 h-8 animate-spin text-hett-secondary" />
-                                <span className="ml-3 text-hett-muted font-medium">Producten laden...</span>
+                                <span className="ml-3 text-hett-muted font-medium">{t('shop.loading')}</span>
                             </div>
                         ) : products.length === 0 ? (
                             <div className="text-center py-20 bg-white rounded-xl">
-                                <p className="text-hett-muted font-medium">Geen producten gevonden</p>
+                                <p className="text-hett-muted font-medium">{t('shop.noProducts')}</p>
                             </div>
                         ) : (
                             <div className="grid grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-6">

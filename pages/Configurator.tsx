@@ -3,8 +3,11 @@ import React, { useState, useEffect } from 'react';
 import { Check, Calculator, RefreshCw, Plus, Minus, Box, Building2, User, Phone, Mail, MapPin, Globe } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const Configurator: React.FC = () => {
+  const { t } = useTranslation();
+
   // Configuration State
   const [length, setLength] = useState<number>(2500);
   const [quantity, setQuantity] = useState<number>(1);
@@ -87,7 +90,7 @@ const Configurator: React.FC = () => {
     console.log('GEGEVENS:', form);
     console.log('CONFIGURATIE:', configData);
     
-    alert('Bedankt! Uw aanvraag is verstuurd.');
+    alert(t('configuratorPage.thankYou'));
   };
 
   return (
@@ -95,9 +98,9 @@ const Configurator: React.FC = () => {
       
       {/* Header */}
       <PageHeader 
-        title="Offerte Aanvragen"
+        title={t('configuratorPage.title')}
         subtitle="Configurator"
-        description="Stel uw order samen en vul uw gegevens in. U ontvangt binnen 24 uur een scherpe offerte op maat."
+        description={t('configuratorPage.description')}
         image="https://picsum.photos/1200/800?random=8"
       />
 
@@ -108,15 +111,15 @@ const Configurator: React.FC = () => {
             
             {/* LEFT COLUMN: Configuration */}
             <div className="space-y-8">
-                <h2 className="text-2xl font-black text-hett-dark mb-6">1. Configuratie</h2>
+                <h2 className="text-2xl font-black text-hett-dark mb-6">{t('configuratorPage.step1')}</h2>
 
                 {/* Product Selection */}
                 <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
-                    <h3 className="text-lg font-bold text-hett-dark mb-4">Product</h3>
+                    <h3 className="text-lg font-bold text-hett-dark mb-4">{t('configuratorPage.product')}</h3>
                     <div className="p-5 rounded-lg border-2 border-hett-brown bg-orange-50/50 flex items-center justify-between">
                         <div>
                             <span className="font-bold text-hett-dark capitalize text-lg block">{PRODUCT_NAME}</span>
-                            <span className="text-sm text-gray-500">Hoogwaardig steenwol sandwichpaneel</span>
+                            <span className="text-sm text-gray-500">{t('configuratorPage.sandwichDesc')}</span>
                         </div>
                         <Check size={24} className="text-hett-brown" />
                     </div>
@@ -124,20 +127,20 @@ const Configurator: React.FC = () => {
 
                 {/* Dimensions & Quantity */}
                 <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
-                    <h3 className="text-lg font-bold text-hett-dark mb-6">Afmetingen & Aantal</h3>
+                    <h3 className="text-lg font-bold text-hett-dark mb-6">{t('configuratorPage.dimensionsAndQuantity')}</h3>
                     
                     <div className="space-y-6">
                         {/* Width */}
                         <div>
-                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Werkende Breedte</label>
+                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{t('configuratorPage.workingWidth')}</label>
                             <div className="w-full p-4 bg-gray-50 border border-gray-200 rounded-lg text-gray-500 font-bold">
-                                {FIXED_WIDTH} mm (Standaard)
+                                {FIXED_WIDTH} mm {t('configuratorPage.standard')}
                             </div>
                         </div>
 
                         {/* Length Selection */}
                         <div>
-                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Kies Lengte (mm)</label>
+                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{t('configuratorPage.chooseLength')}</label>
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                                 {lengthOptions.map((opt) => (
                                     <button
@@ -158,7 +161,7 @@ const Configurator: React.FC = () => {
 
                         {/* Quantity */}
                         <div>
-                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Aantal Panelen</label>
+                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{t('configuratorPage.panelQuantity')}</label>
                             <div className="inline-flex items-center bg-gray-50 rounded-lg p-1 border border-gray-200 w-full sm:w-auto">
                                 <button 
                                     type="button"
@@ -185,7 +188,7 @@ const Configurator: React.FC = () => {
 
                 {/* Color */}
                 <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
-                    <h3 className="text-lg font-bold text-hett-dark mb-6">Kleur</h3>
+                    <h3 className="text-lg font-bold text-hett-dark mb-6">{t('configuratorPage.color')}</h3>
                     <div className="grid grid-cols-3 gap-4">
                         {colors.map((c) => (
                         <button
@@ -217,15 +220,15 @@ const Configurator: React.FC = () => {
 
                 {/* Extras */}
                 <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
-                    <h3 className="text-lg font-bold text-hett-dark mb-6">Extra's</h3>
+                    <h3 className="text-lg font-bold text-hett-dark mb-6">{t('configuratorPage.extras')}</h3>
                     <div className="flex items-center justify-between p-4 border border-gray-100 rounded-lg bg-gray-50">
                         <div className="flex items-center gap-4">
                             <div className="w-10 h-10 bg-white rounded-md flex items-center justify-center text-hett-dark shadow-sm">
                                 <Box size={20} />
                             </div>
                             <div>
-                                <h4 className="font-bold text-sm text-hett-dark">U-Profielen</h4>
-                                <p className="text-xs text-gray-500">Per meter</p>
+                                <h4 className="font-bold text-sm text-hett-dark">{t('configuratorPage.uProfiles')}</h4>
+                                <p className="text-xs text-gray-500">{t('configuratorPage.perMeter')}</p>
                             </div>
                         </div>
                         
@@ -255,37 +258,37 @@ const Configurator: React.FC = () => {
 
             {/* RIGHT COLUMN: Contact Information */}
             <div className="space-y-8">
-                <h2 className="text-2xl font-black text-hett-dark mb-6">2. Gegevens</h2>
+                <h2 className="text-2xl font-black text-hett-dark mb-6">{t('configuratorPage.step2')}</h2>
                 
                 <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 h-full">
                     <div className="space-y-8">
                         
                         {/* Bedrijfsgegevens */}
                         <div>
-                            <h3 className="text-sm font-bold text-hett-dark uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">Bedrijfsgegevens</h3>
+                            <h3 className="text-sm font-bold text-hett-dark uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">{t('configuratorPage.companyDetails')}</h3>
                             <div className="grid grid-cols-1 gap-4">
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-500 mb-1">Bedrijfsnaam</label>
+                                    <label className="block text-xs font-bold text-gray-500 mb-1">{t('configuratorPage.companyName')}</label>
                                     <div className="relative">
                                         <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                                        <input type="text" name="companyName" value={form.companyName} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm" placeholder="Optioneel" />
+                                        <input type="text" name="companyName" value={form.companyName} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm" placeholder={t('configuratorPage.optional')} />
                                     </div>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-xs font-bold text-gray-500 mb-1">KvK Nummer</label>
-                                        <input type="text" name="kvk" value={form.kvk} onChange={handleInputChange} className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm" placeholder="KvK" />
+                                        <label className="block text-xs font-bold text-gray-500 mb-1">{t('configuratorPage.kvkNumber')}</label>
+                                        <input type="text" name="kvk" value={form.kvk} onChange={handleInputChange} className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm" placeholder={t('configuratorPage.kvkPlaceholder')} />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-gray-500 mb-1">BTW Nummer</label>
-                                        <input type="text" name="btw" value={form.btw} onChange={handleInputChange} className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm" placeholder="BTW" />
+                                        <label className="block text-xs font-bold text-gray-500 mb-1">{t('configuratorPage.vatNumber')}</label>
+                                        <input type="text" name="btw" value={form.btw} onChange={handleInputChange} className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm" placeholder={t('configuratorPage.btwPlaceholder')} />
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-500 mb-1">Website</label>
+                                    <label className="block text-xs font-bold text-gray-500 mb-1">{t('configuratorPage.website')}</label>
                                     <div className="relative">
                                         <Globe className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                                        <input type="text" name="website" value={form.website} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm" placeholder="www.uwbedrijf.nl" />
+                                        <input type="text" name="website" value={form.website} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm" placeholder={t('configuratorPage.websitePlaceholder')} />
                                     </div>
                                 </div>
                             </div>
@@ -293,30 +296,30 @@ const Configurator: React.FC = () => {
 
                         {/* Contactpersoon */}
                         <div>
-                            <h3 className="text-sm font-bold text-hett-dark uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">Contactpersoon</h3>
+                            <h3 className="text-sm font-bold text-hett-dark uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">{t('configuratorPage.contactPerson')}</h3>
                             <div className="grid grid-cols-2 gap-4 mb-4">
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-500 mb-1">Voornaam <span className="text-red-500">*</span></label>
-                                    <input type="text" name="firstName" value={form.firstName} onChange={handleInputChange} className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm" placeholder="Voornaam" required />
+                                    <label className="block text-xs font-bold text-gray-500 mb-1">{t('configuratorPage.firstName')} <span className="text-red-500">*</span></label>
+                                    <input type="text" name="firstName" value={form.firstName} onChange={handleInputChange} className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm" placeholder={t('configuratorPage.firstName')} required />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-500 mb-1">Achternaam <span className="text-red-500">*</span></label>
-                                    <input type="text" name="lastName" value={form.lastName} onChange={handleInputChange} className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm" placeholder="Achternaam" required />
+                                    <label className="block text-xs font-bold text-gray-500 mb-1">{t('configuratorPage.lastName')} <span className="text-red-500">*</span></label>
+                                    <input type="text" name="lastName" value={form.lastName} onChange={handleInputChange} className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm" placeholder={t('configuratorPage.lastName')} required />
                                 </div>
                             </div>
                             <div className="grid grid-cols-1 gap-4">
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-500 mb-1">Telefoon <span className="text-red-500">*</span></label>
+                                    <label className="block text-xs font-bold text-gray-500 mb-1">{t('configuratorPage.phone')} <span className="text-red-500">*</span></label>
                                     <div className="relative">
                                         <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                                        <input type="tel" name="phone" value={form.phone} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm" placeholder="06 12345678" required />
+                                        <input type="tel" name="phone" value={form.phone} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm" placeholder={t('configuratorPage.phonePlaceholder')} required />
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-500 mb-1">E-mailadres <span className="text-red-500">*</span></label>
+                                    <label className="block text-xs font-bold text-gray-500 mb-1">{t('configuratorPage.email')} <span className="text-red-500">*</span></label>
                                     <div className="relative">
                                         <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                                        <input type="email" name="email" value={form.email} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm" placeholder="naam@bedrijf.nl" required />
+                                        <input type="email" name="email" value={form.email} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm" placeholder={t('configuratorPage.emailPlaceholder')} required />
                                     </div>
                                 </div>
                             </div>
@@ -324,33 +327,33 @@ const Configurator: React.FC = () => {
 
                         {/* Adres */}
                         <div>
-                            <h3 className="text-sm font-bold text-hett-dark uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">Adres</h3>
+                            <h3 className="text-sm font-bold text-hett-dark uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">{t('configuratorPage.address')}</h3>
                             <div className="space-y-4">
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-500 mb-1">Straat + Huisnummer <span className="text-red-500">*</span></label>
+                                    <label className="block text-xs font-bold text-gray-500 mb-1">{t('configuratorPage.streetNumber')} <span className="text-red-500">*</span></label>
                                     <div className="relative">
                                         <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                                        <input type="text" name="address" value={form.address} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm" placeholder="Straatnaam 123" required />
+                                        <input type="text" name="address" value={form.address} onChange={handleInputChange} className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm" placeholder={t('configuratorPage.streetPlaceholder')} required />
                                     </div>
                                 </div>
                                 <div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-xs font-bold text-gray-500 mb-1">Postcode <span className="text-red-500">*</span></label>
-                                            <input type="text" name="zip" value={form.zip} onChange={handleInputChange} className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm" placeholder="1234 AB" required />
+                                            <label className="block text-xs font-bold text-gray-500 mb-1">{t('configuratorPage.postalCode')} <span className="text-red-500">*</span></label>
+                                            <input type="text" name="zip" value={form.zip} onChange={handleInputChange} className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm" placeholder={t('configuratorPage.postalCodePlaceholder')} required />
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-bold text-gray-500 mb-1">Plaats <span className="text-red-500">*</span></label>
-                                            <input type="text" name="city" value={form.city} onChange={handleInputChange} className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm" placeholder="Plaats" required />
+                                            <label className="block text-xs font-bold text-gray-500 mb-1">{t('configuratorPage.city')} <span className="text-red-500">*</span></label>
+                                            <input type="text" name="city" value={form.city} onChange={handleInputChange} className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm" placeholder={t('configuratorPage.city')} required />
                                         </div>
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-500 mb-1">Land</label>
+                                    <label className="block text-xs font-bold text-gray-500 mb-1">{t('configuratorPage.country')}</label>
                                     <select name="country" value={form.country} onChange={handleInputChange} className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-hett-brown outline-none bg-gray-50 hover:bg-white text-sm appearance-none">
-                                        <option>Nederland</option>
-                                        <option>België</option>
-                                        <option>Duitsland</option>
+                                        <option value="Nederland">{t('configuratorPage.countries.nl')}</option>
+                                        <option value="België">{t('configuratorPage.countries.be')}</option>
+                                        <option value="Duitsland">{t('configuratorPage.countries.de')}</option>
                                     </select>
                                 </div>
                             </div>
@@ -367,23 +370,23 @@ const Configurator: React.FC = () => {
                 {/* Abstract decorative circles */}
                 <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-3xl pointer-events-none -translate-y-1/2 translate-x-1/2"></div>
                 
-                <h2 className="text-3xl font-black mb-8 relative z-10">Uw Aanvraag</h2>
+                <h2 className="text-3xl font-black mb-8 relative z-10">{t('configuratorPage.yourRequest')}</h2>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8 relative z-10 text-sm">
                     <div>
-                        <span className="block text-gray-400 uppercase tracking-wider text-xs mb-1">Product</span>
+                        <span className="block text-gray-400 uppercase tracking-wider text-xs mb-1">{t('configuratorPage.product')}</span>
                         <strong className="text-lg block">{PRODUCT_NAME}</strong>
                         <span className="text-gray-400">{color.name}</span>
                     </div>
                     <div>
-                        <span className="block text-gray-400 uppercase tracking-wider text-xs mb-1">Afmeting</span>
+                        <span className="block text-gray-400 uppercase tracking-wider text-xs mb-1">{t('configuratorPage.dimension')}</span>
                         <strong className="text-lg block">{quantity}x {length}mm</strong>
-                        <span className="text-gray-400">Breedte: {FIXED_WIDTH}mm</span>
+                        <span className="text-gray-400">{t('configuratorPage.widthLabel')} {FIXED_WIDTH}mm</span>
                     </div>
                     <div>
-                        <span className="block text-gray-400 uppercase tracking-wider text-xs mb-1">Totalen</span>
+                        <span className="block text-gray-400 uppercase tracking-wider text-xs mb-1">{t('configuratorPage.totals')}</span>
                         <strong className="text-lg block">{((FIXED_WIDTH * length * quantity) / 1000000).toFixed(2)} m²</strong>
-                        <span className="text-gray-400">{uProfileCount > 0 ? `${uProfileCount}m U-profiel` : 'Geen extra\'s'}</span>
+                        <span className="text-gray-400">{uProfileCount > 0 ? t('configuratorPage.uProfileSummary', { count: uProfileCount }) : t('configuratorPage.noExtras')}</span>
                     </div>
                     <div className="flex flex-col justify-end">
                         <button 
@@ -394,19 +397,19 @@ const Configurator: React.FC = () => {
                             }`}
                         >
                             <Calculator size={20} />
-                            Offerte Aanvragen
+                            {t('configuratorPage.submitQuote')}
                         </button>
                         {!isFormValid && (
-                            <span className="text-xs text-red-300 mt-2 text-center block">Vul alle verplichte velden in</span>
+                            <span className="text-xs text-red-300 mt-2 text-center block">{t('configuratorPage.fillRequired')}</span>
                         )}
                     </div>
                 </div>
                 
                 <div className="border-t border-white/10 pt-6 flex flex-col md:flex-row justify-between items-center text-xs text-gray-500 relative z-10">
-                    <p>Geen betalingsverplichting • U ontvangt binnen 24u een offerte</p>
+                    <p>{t('configuratorPage.noPaymentObligation')}</p>
                     <div className="flex gap-4 mt-4 md:mt-0">
-                        <span className="flex items-center gap-1"><Check size={14} className="text-green-500" /> Veilig verzonden</span>
-                        <span className="flex items-center gap-1"><Check size={14} className="text-green-500" /> Privacy gewaarborgd</span>
+                        <span className="flex items-center gap-1"><Check size={14} className="text-green-500" /> {t('configuratorPage.secureSend')}</span>
+                        <span className="flex items-center gap-1"><Check size={14} className="text-green-500" /> {t('configuratorPage.privacyGuaranteed')}</span>
                     </div>
                 </div>
             </div>

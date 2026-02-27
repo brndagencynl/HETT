@@ -4,6 +4,7 @@ import { Product } from '../types';
 import { useCart } from '../context/CartContext';
 import { ShoppingBag, Check, Minus, Plus } from 'lucide-react';
 import { formatEUR, mulCents, toCents } from '../src/utils/money';
+import { useTranslation } from 'react-i18next';
 
 interface ProductConfiguratorProps {
   product: Product;
@@ -11,6 +12,7 @@ interface ProductConfiguratorProps {
 
 const ProductConfigurator: React.FC<ProductConfiguratorProps> = ({ product }) => {
   const { addToCart } = useCart();
+  const { t } = useTranslation();
   const [quantity, setQuantity] = useState(1);
   
   // Initialize state with first option if available
@@ -30,14 +32,14 @@ const ProductConfigurator: React.FC<ProductConfiguratorProps> = ({ product }) =>
 
   return (
     <div className="bg-white p-8 rounded-[32px] shadow-lg border border-gray-100 sticky top-32">
-        <h3 className="text-2xl font-black text-hett-dark mb-6">Samenstellen</h3>
+        <h3 className="text-2xl font-black text-hett-dark mb-6">{t('configurator.title')}</h3>
 
         {/* Price Display */}
         <div className="flex items-end gap-2 mb-8 pb-8 border-b border-gray-100">
                         <span className="text-4xl font-black text-hett-dark">
                             {formatEUR(mulCents(product.priceCents ?? toCents(product.price), quantity), 'cents')}
                         </span>
-            <span className="text-gray-400 font-medium mb-2">Excl. montage</span>
+            <span className="text-gray-400 font-medium mb-2">{t('configurator.exclAssembly')}</span>
         </div>
 
         <div className="space-y-6 mb-8">
@@ -45,7 +47,7 @@ const ProductConfigurator: React.FC<ProductConfiguratorProps> = ({ product }) =>
             {/* Dimensions */}
             {product.options?.sizes && (
                 <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Afmeting</label>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">{t('configurator.dimension')}</label>
                     <select 
                         value={selectedSize}
                         onChange={(e) => setSelectedSize(e.target.value)}
@@ -61,7 +63,7 @@ const ProductConfigurator: React.FC<ProductConfiguratorProps> = ({ product }) =>
             {/* Colors */}
             {product.options?.colors && (
                 <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Kleur Profielen</label>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">{t('configurator.colorProfiles')}</label>
                     <div className="grid grid-cols-3 gap-3">
                         {product.options.colors.map(color => (
                             <button
@@ -83,7 +85,7 @@ const ProductConfigurator: React.FC<ProductConfiguratorProps> = ({ product }) =>
             {/* Roof Type */}
             {product.options?.roofTypes && (
                 <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Dakbedekking</label>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">{t('configurator.roofType')}</label>
                     <div className="space-y-2">
                         {product.options.roofTypes.map(roof => (
                             <button
@@ -105,7 +107,7 @@ const ProductConfigurator: React.FC<ProductConfiguratorProps> = ({ product }) =>
 
             {/* Quantity */}
             <div>
-                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Aantal</label>
+                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">{t('common.quantity')}</label>
                  <div className="flex items-center gap-4">
                     <div className="inline-flex items-center bg-gray-50 rounded-xl p-1 border border-gray-200">
                         <button 
@@ -134,12 +136,12 @@ const ProductConfigurator: React.FC<ProductConfiguratorProps> = ({ product }) =>
             className="w-full bg-hett-dark text-white font-black uppercase tracking-wide py-5 rounded-2xl flex items-center justify-center gap-3 shadow-lg hover:bg-hett-brown transition-all transform hover:-translate-y-1"
         >
             <ShoppingBag size={20} />
-            In winkelwagen
+            {t('configurator.addToCart')}
         </button>
         
         <div className="mt-6 text-center">
             <p className="text-xs text-gray-400">
-                Levertijd 1-2 weken • Gratis verzending vanaf € 2.500,00
+                {t('configurator.deliveryNote')}
             </p>
         </div>
     </div>

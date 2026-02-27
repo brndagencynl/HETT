@@ -4,23 +4,25 @@ import { FileText, Download, Youtube, Wrench, PlayCircle, Truck, ShieldCheck, Cr
 import { Link, useLocation } from 'react-router-dom';
 import MontageStepsSection from '../components/ui/MontageStepsSection';
 import MontagePartnerSection from '../components/ui/MontagePartnerSection';
+import { useTranslation } from 'react-i18next';
 
 const Mounting: React.FC = () => {
+    const { t } = useTranslation();
     const location = useLocation();
 
     const navItems = [
-        { id: 'bezorgen', title: 'Bezorgen & Afhalen', icon: Truck, path: '/bezorging' },
-        { id: 'garantie', title: 'Garantie & Service', icon: ShieldCheck, path: '/garantie-en-klachten' },
-        { id: 'betalen', title: 'Bestellen & Betalen', icon: CreditCard, path: '/betaalmethoden' },
+        { id: 'bezorgen', title: t('mounting.tabs.delivery'), icon: Truck, path: '/bezorging' },
+        { id: 'garantie', title: t('mounting.tabs.warranty'), icon: ShieldCheck, path: '/garantie-en-klachten' },
+        { id: 'betalen', title: t('mounting.tabs.ordering'), icon: CreditCard, path: '/betaalmethoden' },
         { id: 'montage', title: 'Product & Montage', icon: Pen, path: '/montage-handleiding' },
     ];
     
   return (
     <div className="min-h-screen bg-[#f6f8fa] font-sans">
       <PageHeader 
-        title="Montage Handleidingen"
+        title={t('mounting.title')}
         subtitle="Support"
-        description="Stap-voor-stap instructies en video's om uw HETT product vakkundig te monteren."
+        description={t('mounting.description')}
         image="https://picsum.photos/1200/600?random=mounting"
       />
 
@@ -29,7 +31,7 @@ const Mounting: React.FC = () => {
                     {/* Sidebar (Categorieën) */}
                     <aside className="lg:col-span-3">
                         <div className="sticky top-48">
-                            <h3 className="sidebar-nav-title uppercase tracking-tight">Categorieën</h3>
+                            <h3 className="sidebar-nav-title uppercase tracking-tight">{t('mounting.categories')}</h3>
                             <nav className="flex flex-col gap-1">
                                 {navItems.map((item) => {
                                     const Icon = item.icon;
@@ -57,20 +59,20 @@ const Mounting: React.FC = () => {
                 
                 {/* Intro */}
                 <div>
-                    <h2 className="text-3xl font-black text-hett-dark mb-4">Zelf aan de slag</h2>
+                    <h2 className="text-3xl font-black text-hett-dark mb-4">{t('mounting.diyTitle')}</h2>
                     <p className="text-gray-600 leading-relaxed text-lg">
-                        Al onze producten zijn ontwikkeld als slim bouwpakket. Met een beetje technische kennis en de juiste gereedschappen kunt u uw veranda of schuifwand zelf monteren. Hieronder vindt u de officiële handleidingen.
+                        {t('mounting.diyDesc')}
                     </p>
                 </div>
 
                 {/* Manuals List */}
                 <div>
                     <h3 className="text-xl font-bold text-hett-dark mb-6 flex items-center gap-2">
-                        <FileText className="text-hett-brown" /> PDF Handleidingen
+                        <FileText className="text-hett-brown" /> {t('mounting.pdfGuides')}
                     </h3>
                     <div className="space-y-4">
                         <ManualCard
-                            title="Montagehandleiding HETT Veranda"
+                            title={t('mounting.guideTitle')}
                             version="v2024.1"
                             size="4.2 MB"
                             href="/assets/manuals/montagehandleiding-hett-veranda.pdf"
@@ -100,7 +102,7 @@ const Mounting: React.FC = () => {
                             </div>
                         </div>
                         <div className="p-4">
-                            <h4 className="font-bold text-hett-dark">Montagehandleiding HETT Veranda</h4>
+                            <h4 className="font-bold text-hett-dark">{t('mounting.guideTitle')}</h4>
                         </div>
                     </a>
                 </div>
@@ -111,24 +113,24 @@ const Mounting: React.FC = () => {
               <div>
                 <div className="bg-white p-6 rounded-[24px] shadow-sm border border-gray-100 sticky top-32">
                     <h3 className="font-bold text-hett-dark text-lg mb-4 flex items-center gap-2">
-                        <Wrench size={20} /> Benodigd Gereedschap
+                        <Wrench size={20} /> {t('mounting.tools')}
                     </h3>
-                    <p className="text-sm text-gray-500 mb-4">Zorg dat u deze gereedschappen in huis heeft voordat u begint:</p>
+                    <p className="text-sm text-gray-500 mb-4">{t('mounting.toolsDesc')}</p>
                     <ul className="space-y-3 text-sm text-gray-600">
-                        <li className="flex gap-2"><Checkmark /> Accuboormachine</li>
-                        <li className="flex gap-2"><Checkmark /> Waterpas (min. 1 meter)</li>
-                        <li className="flex gap-2"><Checkmark /> Rolmaat</li>
-                        <li className="flex gap-2"><Checkmark /> Ladder / Trap</li>
-                        <li className="flex gap-2"><Checkmark /> Kitpistool</li>
-                        <li className="flex gap-2"><Checkmark /> Ring-steeksleutels (10, 13, 17)</li>
-                        <li className="flex gap-2"><Checkmark /> Gatenzaag (voor spots)</li>
+                        <li className="flex gap-2"><Checkmark /> {t('mounting.toolsList.drill')}</li>
+                        <li className="flex gap-2"><Checkmark /> {t('mounting.toolsList.level')}</li>
+                        <li className="flex gap-2"><Checkmark /> {t('mounting.toolsList.tape')}</li>
+                        <li className="flex gap-2"><Checkmark /> {t('mounting.toolsList.ladder')}</li>
+                        <li className="flex gap-2"><Checkmark /> {t('mounting.toolsList.caulk')}</li>
+                        <li className="flex gap-2"><Checkmark /> {t('mounting.toolsList.wrenches')}</li>
+                        <li className="flex gap-2"><Checkmark /> {t('mounting.toolsList.holeSaw')}</li>
                     </ul>
 
                     <div className="mt-8 pt-6 border-t border-gray-100">
                         <h4 className="font-bold text-hett-dark text-sm mb-2">Hulp nodig tijdens montage?</h4>
-                        <p className="text-xs text-gray-500 mb-4">Onze technische dienst is bereikbaar voor korte vragen.</p>
+                        <p className="text-xs text-gray-500 mb-4">{t('mounting.supportNote')}</p>
                         <a href="tel:+31685406033" className="block w-full text-center bg-gray-50 text-hett-dark font-bold py-3 rounded-xl hover:bg-gray-100 transition-colors text-sm">
-                            Bel +31 (0)6 85 40 60 33
+                            {t('mounting.callSupport')}
                         </a>
                     </div>
                 </div>

@@ -3,23 +3,25 @@ import React from 'react';
 import PageHeader from '../components/PageHeader';
 import { ShieldCheck, AlertTriangle, Truck, CreditCard, Pen } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const Warranty: React.FC = () => {
     const location = useLocation();
+    const { t } = useTranslation();
 
     const navItems = [
-        { id: 'bezorgen', title: 'Bezorgen & Afhalen', icon: Truck, path: '/bezorging' },
-        { id: 'garantie', title: 'Garantie & Service', icon: ShieldCheck, path: '/garantie-en-klachten' },
-        { id: 'betalen', title: 'Bestellen & Betalen', icon: CreditCard, path: '/betaalmethoden' },
+        { id: 'bezorgen', title: t('delivery.tabs.delivery'), icon: Truck, path: '/bezorging' },
+        { id: 'garantie', title: t('delivery.tabs.warranty'), icon: ShieldCheck, path: '/garantie-en-klachten' },
+        { id: 'betalen', title: t('delivery.tabs.payment'), icon: CreditCard, path: '/betaalmethoden' },
         { id: 'montage', title: 'Product & Montage', icon: Pen, path: '/montage-handleiding' },
     ];
 
   return (
     <div className="min-h-screen bg-[#f6f8fa] font-sans">
       <PageHeader 
-        title="Garantie & Klachten"
-        subtitle="Service"
-        description="Wij staan achter de kwaliteit van onze producten. Lees hier alles over onze garantievoorwaarden en klachtenprocedure."
+        title={t('warranty.title')}
+        subtitle={t('warranty.subtitle')}
+        description={t('warranty.description')}
         image="https://picsum.photos/1200/600?random=warranty"
       />
 
@@ -58,7 +60,7 @@ const Warranty: React.FC = () => {
                 <div className="w-12 h-12 bg-green-100 text-green-600 rounded-2xl flex items-center justify-center">
                     <ShieldCheck size={28} />
                 </div>
-                <h2 className="text-3xl font-black text-hett-dark">Garantie</h2>
+                <h2 className="text-3xl font-black text-hett-dark">{t('warranty.guarantee')}</h2>
             </div>
 
             <p className="text-gray-600 text-lg mb-8">
@@ -67,14 +69,14 @@ const Warranty: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                 <div className="border border-gray-100 p-6 rounded-2xl bg-gray-50">
-                    <h3 className="font-bold text-hett-dark text-xl mb-2">5 Jaar Garantie</h3>
+                    <h3 className="font-bold text-hett-dark text-xl mb-2">{t('warranty.fiveYear')}</h3>
                     <p className="text-sm text-gray-500 mb-4">Op aluminium profielen & coating</p>
                     <p className="text-gray-600 text-sm">
                         Wij garanderen dat de aluminium profielen niet zullen doorroesten en dat de poedercoating niet zal afbladderen of overmatig verkleuren onder normale weersomstandigheden.
                     </p>
                 </div>
                 <div className="border border-gray-100 p-6 rounded-2xl bg-gray-50">
-                    <h3 className="font-bold text-hett-dark text-xl mb-2">5 Jaar Garantie</h3>
+                    <h3 className="font-bold text-hett-dark text-xl mb-2">{t('warranty.fiveYear')}</h3>
                     <p className="text-sm text-gray-500 mb-4">Op bewegende delen & panelen</p>
                     <p className="text-gray-600 text-sm">
                         Garantie op de werking van wielen in schuifwanden, scharnieren en de thermische eigenschappen van polycarbonaat- en sandwichpanelen.
@@ -83,7 +85,7 @@ const Warranty: React.FC = () => {
             </div>
 
             <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100">
-                <h4 className="font-bold text-blue-900 mb-2">Uitsluitingen</h4>
+                <h4 className="font-bold text-blue-900 mb-2">{t('warranty.exclusions')}</h4>
                 <ul className="list-disc list-inside text-sm text-blue-800/80 space-y-1">
                     <li>Schade door storm, hagel of andere extreme weersomstandigheden (vaak gedekt door uw opstalverzekering).</li>
                     <li>Schade ontstaan door onjuiste montage die niet conform de handleiding is uitgevoerd.</li>
@@ -99,14 +101,14 @@ const Warranty: React.FC = () => {
                 <div className="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center">
                     <AlertTriangle size={28} />
                 </div>
-                <h2 className="text-3xl font-black text-hett-dark">Klachtenprocedure</h2>
+                <h2 className="text-3xl font-black text-hett-dark">{t('warranty.complaints')}</h2>
             </div>
 
             <p className="text-gray-600 mb-6">
                 Heeft u een klacht over een product of onze dienstverlening? Dat vinden wij heel vervelend en we lossen het graag samen met u op.
             </p>
 
-            <h3 className="font-bold text-hett-dark text-lg mb-4">Stappenplan</h3>
+            <h3 className="font-bold text-hett-dark text-lg mb-4">{t('warranty.stepPlan')}</h3>
             <ol className="space-y-4 mb-8 relative border-l-2 border-gray-100 ml-3 pl-8">
                 <li className="relative">
                     <span className="absolute -left-[39px] top-0 w-6 h-6 bg-hett-brown text-white text-xs font-bold rounded-full flex items-center justify-center">1</span>
@@ -133,7 +135,7 @@ const Warranty: React.FC = () => {
                     </p>
                 </div>
                 <Link to="/contact" className="bg-hett-dark text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-hett-brown transition-colors">
-                    Neem contact op
+                    {t('warranty.contactCta')}
                 </Link>
             </div>
         </div>

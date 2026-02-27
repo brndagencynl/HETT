@@ -1,58 +1,60 @@
 
 import React, { useState } from 'react';
 import { Users, Globe, Award, Leaf, Ruler, ShieldCheck, HeartHandshake, Wrench } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import PageHeader from '../components/PageHeader';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const WHY_ITEMS = [
-    {
-        id: 'buitenleven',
-        title: "Altijd binnen, het hele jaar buiten!",
-        text: "Met een HETT veranda geniet u vier seizoenen lang van uw tuin. Beschut tegen regen en wind, maar met het volledige buitengevoel creëert u een verlengstuk van uw woonkamer.",
-        image: "/assets/images/waarom_1.JPG",
-        icon: Leaf
-    },
-    {
-        id: 'maatwerk',
-        title: "Maatwerk voor elke tuin",
-        text: "Geen tuin is hetzelfde. Daarom leveren wij al onze systemen op de millimeter nauwkeurig. Of het nu gaat om een schuine gevel, een specifieke diepte of een bijzondere kleur; wij realiseren het.",
-        image: "/assets/images/waarom_2.JPG",
-        icon: Ruler
-    },
-    {
-        id: 'garantie',
-        title: "10 jaar garantie op alle veranda's",
-        text: "Wij geven op al onze veranda's 10 jaar garantie op het materiaal, de constructie en de coating. Hiermee koopt u een echt kwaliteitsproduct met jarenlang zorgeloos plezier. Tevens voldoen wij aan de strengste normen.",
-        image: "/assets/images/waarom_3.JPG",
-        icon: ShieldCheck
-    },
-    {
-        id: 'service',
-        title: "Klantgerichte service en transparantie",
-        text: "Van eerlijk advies in de showroom tot heldere communicatie over de levering. Wij houden van korte lijnen en afspraak is afspraak. Geen verrassingen achteraf.",
-        image: "/assets/images/waarom_4.JPG",
-        icon: HeartHandshake
-    },
-    {
-        id: 'montage',
-        title: "Eenvoudige montage",
-        text: "Onze systemen zijn ontworpen als slimme bouwpakketten voor de handige doe-het-zelver of professional. Met onze uitgebreide handleidingen en video's kunt u direct aan de slag.",
-        image: "/assets/images/waarom_5.JPG",
-        icon: Wrench
-    }
-];
-
 const About: React.FC = () => {
+    const { t } = useTranslation();
     const [activeTab, setActiveTab] = useState(2); // Start with Warranty active (index 2)
+
+    const WHY_ITEMS = [
+        {
+            id: 'buitenleven',
+            title: t('about.whyItems.outdoor.title'),
+            text: t('about.whyItems.outdoor.description'),
+            image: "/assets/images/waarom_1.JPG",
+            icon: Leaf
+        },
+        {
+            id: 'maatwerk',
+            title: t('about.whyItems.custom.title'),
+            text: t('about.whyItems.custom.description'),
+            image: "/assets/images/waarom_2.JPG",
+            icon: Ruler
+        },
+        {
+            id: 'garantie',
+            title: t('about.whyItems.warranty.title'),
+            text: t('about.whyItems.warranty.description'),
+            image: "/assets/images/waarom_3.JPG",
+            icon: ShieldCheck
+        },
+        {
+            id: 'service',
+            title: t('about.whyItems.service.title'),
+            text: t('about.whyItems.service.description'),
+            image: "/assets/images/waarom_4.JPG",
+            icon: HeartHandshake
+        },
+        {
+            id: 'montage',
+            title: t('about.whyItems.assembly.title'),
+            text: t('about.whyItems.assembly.description'),
+            image: "/assets/images/waarom_5.JPG",
+            icon: Wrench
+        }
+    ];
 
     return (
         <div className="min-h-screen bg-white font-sans">
 
             {/* Hero / Header */}
             <PageHeader
-                title="De standaard in Verandabouw"
-                subtitle="Over HETT"
-                description="Wij leveren niet zomaar veranda's; wij leveren de basis voor hoogwaardige buitenruimtes. Ontdek ons verhaal en onze missie."
+                title={t('about.title')}
+                subtitle={t('about.subtitle')}
+                description={t('about.description')}
                 image="/assets/images/hero_veranda.webp"
             />
 
@@ -62,15 +64,11 @@ const About: React.FC = () => {
                 {/* Intro Section */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-32">
                     <div>
-                        <span className="text-hett-brown font-bold uppercase tracking-widest text-sm mb-2 block">ONS VERHAAL</span>
-                        <h2 className="text-3xl md:text-4xl font-black text-hett-dark mb-6">Gedreven door kwaliteit en maatwerk</h2>
+                        <span className="text-hett-brown font-bold uppercase tracking-widest text-sm mb-2 block">{t('about.storyBadge')}</span>
+                        <h2 className="text-3xl md:text-4xl font-black text-hett-dark mb-6">{t('about.storyTitle')}</h2>
                         <div className="prose prose-lg text-gray-600 leading-relaxed">
-                            <p>
-                                Bij HETT Veranda draait alles om één ding: een veranda die klopt. In uitstraling, in afwerking en in gebruiksgemak. We combineren strakke aluminium profielen met slimme oplossingen voor dak, goot en wanden—zodat je buitenruimte aanvoelt als een volwaardige uitbreiding van je woning.
-                            </p>
-                            <p>
-                                Of je nu kiest voor een standaard veranda of een maatwerk samenstelling: je ziet direct wat je krijgt en wat het kost. Transparant, overzichtelijk en gemaakt om jarenlang van te genieten.
-                            </p>
+                            <p>{t('about.storyParagraph1')}</p>
+                            <p>{t('about.storyParagraph2')}</p>
                         </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
@@ -81,7 +79,7 @@ const About: React.FC = () => {
 
                 {/* WAAROM HETT Section (Interactive Tabs) */}
                 <div className="mb-32">
-                    <h2 className="text-3xl md:text-4xl font-black text-hett-dark text-center mb-12">Waarom HETT?</h2>
+                    <h2 className="text-3xl md:text-4xl font-black text-hett-dark text-center mb-12">{t('about.whyTitle')}</h2>
                     <div className="bg-white rounded-[32px] overflow-hidden">
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
 

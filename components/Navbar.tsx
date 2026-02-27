@@ -3,13 +3,28 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Menu, X, ShoppingCart, Search as SearchIcon, Check, Star, User, Heart, ChevronRight, Loader2 } from 'lucide-react';
 import { NAV_ITEMS } from '../constants';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
+import LangSwitch from './ui/LangSwitch';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { searchProducts } from '../src/lib/shopify';
 import type { Product } from '../types';
 
 const Navbar: React.FC = () => {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
+
+  // Map nav item paths to i18n keys
+  const navLabelMap: Record<string, string> = {
+    '/categorie/verandas': t('nav.verandas'),
+    '/categorie/accessoires': t('nav.accessoires'),
+    '/maatwerk-configurator': t('nav.maatwerkConfigurator'),
+    '/projecten': t('nav.projecten'),
+    '/showroom': t('nav.showroom'),
+    '/montage-handleiding': t('nav.montage'),
+    '/contact': t('nav.contact'),
+  };
+  const getNavLabel = (item: { label: string; path: string }) => navLabelMap[item.path] || item.label;
   const [searchQuery, setSearchQuery] = useState('');
   const [isScrolled, setIsScrolled] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -53,7 +68,7 @@ const Navbar: React.FC = () => {
       } catch (err) {
         if (currentRequestId !== requestIdRef.current) return;
         console.error('[Search] error', err);
-        setSuggestError('Zoeken mislukt');
+        setSuggestError(t('nav.searchFailed'));
         setSuggestResults([]);
       } finally {
         if (currentRequestId === requestIdRef.current) {
@@ -175,7 +190,7 @@ const Navbar: React.FC = () => {
                 type="text" 
                 value={searchQuery} 
                 onChange={(e) => setSearchQuery(e.target.value)} 
-                placeholder="Zoeken" 
+                placeholder={t('nav.search')} 
                 className="w-full bg-gray-100 py-2.5 pl-10 pr-4 rounded-md outline-none text-sm" 
               />
               {/* Mobile Autosuggest Dropdown */}
@@ -184,14 +199,14 @@ const Navbar: React.FC = () => {
                   {suggestLoading && (
                     <div className="flex items-center justify-center gap-2 py-4 text-gray-500 text-sm">
                       <Loader2 size={16} className="animate-spin" />
-                      <span>Zoeken...</span>
+                      <span>{t('nav.searching')}</span>
                     </div>
                   )}
                   {!suggestLoading && suggestError && (
                     <div className="py-4 px-4 text-center text-red-500 text-sm">{suggestError}</div>
                   )}
                   {!suggestLoading && !suggestError && suggestResults.length === 0 && (
-                    <div className="py-4 px-4 text-center text-gray-500 text-sm">Geen resultaten</div>
+                    <div className="py-4 px-4 text-center text-gray-500 text-sm">{t('nav.noResults')}</div>
                   )}
                   {!suggestLoading && !suggestError && suggestResults.length > 0 && (
                     <ul>
@@ -226,13 +241,16 @@ const Navbar: React.FC = () => {
         <div className={`hidden md:block bg-hett-primary text-white text-[11px] font-bold ${isScrolled ? 'h-0 py-0 overflow-hidden' : 'h-auto py-1.5'}`}>
           <div className="max-w-[1400px] mx-auto px-6 flex justify-between items-center">
             <div className="flex gap-6 uppercase tracking-wider">
-              <span className="flex items-center gap-1.5"><Check size={12} className="text-hett-brown" strokeWidth={4} /> Sinds 2016</span>
-              <span className="flex items-center gap-1.5"><Check size={12} className="text-hett-brown" strokeWidth={4} /> Persoonlijk advies</span>
-              <span className="flex items-center gap-1.5"><Check size={12} className="text-hett-brown" strokeWidth={4} /> Snelle levering</span>
+              <span className="flex items-center gap-1.5"><Check size={12} className="text-hett-brown" strokeWidth={4} /> {t('nav.since')}</span>
+              <span className="flex items-center gap-1.5"><Check size={12} className="text-hett-brown" strokeWidth={4} /> {t('nav.personalAdvice')}</span>
+              <span className="flex items-center gap-1.5"><Check size={12} className="text-hett-brown" strokeWidth={4} /> {t('nav.fastDelivery')}</span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="flex text-yellow-400"><Star size={10} fill="currentColor" /><Star size={10} fill="currentColor" /><Star size={10} fill="currentColor" /><Star size={10} fill="currentColor" /><Star size={10} fill="currentColor" /></div>
-              <span>Gebasseerd op 43 reviews</span>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <div className="flex text-yellow-400"><Star size={10} fill="currentColor" /><Star size={10} fill="currentColor" /><Star size={10} fill="currentColor" /><Star size={10} fill="currentColor" /><Star size={10} fill="currentColor" /></div>
+                <span>{t('nav.basedOnReviews', { count: 43 })}</span>
+              </div>
+              <LangSwitch />
             </div>
           </div>
         </div>
@@ -247,7 +265,7 @@ const Navbar: React.FC = () => {
                 type="text" 
                 value={searchQuery} 
                 onChange={(e) => setSearchQuery(e.target.value)} 
-                placeholder="Waar ben je naar op zoek?" 
+                placeholder={t('nav.searchPlaceholder')} 
                 className="w-full pl-5 pr-12 py-2.5 border border-gray-200 bg-gray-50 rounded-md text-sm outline-none focus:border-hett-primary focus:bg-white" 
               />
               <button type="submit" className="absolute right-1 top-1/2 -translate-y-1/2 p-2 bg-hett-primary text-white rounded-md"><SearchIcon size={16} /></button>
@@ -258,14 +276,14 @@ const Navbar: React.FC = () => {
                   {suggestLoading && (
                     <div className="flex items-center justify-center gap-2 py-4 text-gray-500 text-sm">
                       <Loader2 size={16} className="animate-spin" />
-                      <span>Zoeken...</span>
+                      <span>{t('nav.searching')}</span>
                     </div>
                   )}
                   {!suggestLoading && suggestError && (
                     <div className="py-4 px-4 text-center text-red-500 text-sm">{suggestError}</div>
                   )}
                   {!suggestLoading && !suggestError && suggestResults.length === 0 && (
-                    <div className="py-4 px-4 text-center text-gray-500 text-sm">Geen resultaten</div>
+                    <div className="py-4 px-4 text-center text-gray-500 text-sm">{t('nav.noResults')}</div>
                   )}
                   {!suggestLoading && !suggestError && suggestResults.length > 0 && (
                     <ul>
@@ -297,16 +315,16 @@ const Navbar: React.FC = () => {
             <div className="flex items-center gap-6">
               <Link to="/my-account" className="flex flex-col items-center group">
                 <User size={22} className="text-gray-500 group-hover:text-hett-primary transition-colors" />
-                <span className="text-[10px] font-bold text-gray-500 mt-1 uppercase">Account</span>
+                <span className="text-[10px] font-bold text-gray-500 mt-1 uppercase">{t('nav.account')}</span>
               </Link>
               <Link to="/wishlist" className="flex flex-col items-center group relative">
                 <Heart size={22} className="text-gray-500 group-hover:text-hett-primary transition-colors" />
-                <span className="text-[10px] font-bold text-gray-500 mt-1 uppercase">Favorieten</span>
+                <span className="text-[10px] font-bold text-gray-500 mt-1 uppercase">{t('nav.favorieten')}</span>
                 {wishlistCount > 0 && <span className="absolute -top-1 -right-1 w-4 h-4 bg-hett-brown text-white text-[9px] font-bold flex items-center justify-center rounded-full">{wishlistCount}</span>}
               </Link>
               <button onClick={openCart} className="flex flex-col items-center group relative">
                 <ShoppingCart size={22} className="text-gray-500 group-hover:text-hett-primary transition-colors" />
-                <span className="text-[10px] font-bold text-gray-500 mt-1 uppercase">Mandje</span>
+                <span className="text-[10px] font-bold text-gray-500 mt-1 uppercase">{t('nav.mandje')}</span>
                 {itemCount > 0 && <span className="absolute -top-1 -right-1 w-4 h-4 bg-hett-brown text-white text-[9px] font-bold flex items-center justify-center rounded-full">{itemCount}</span>}
               </button>
             </div>
@@ -319,7 +337,7 @@ const Navbar: React.FC = () => {
             <ul className="flex items-center gap-1 text-[13px] font-bold text-gray-600 h-full">
               {NAV_ITEMS.map((item) => (
                 <li key={item.path} className="h-full flex items-center">
-                  <Link to={item.path} className="px-4 hover:text-hett-primary transition-colors">{item.label}</Link>
+                  <Link to={item.path} className="px-4 hover:text-hett-primary transition-colors">{getNavLabel(item)}</Link>
                 </li>
               ))}
             </ul>
@@ -356,7 +374,7 @@ const Navbar: React.FC = () => {
                 <nav className="flex flex-col">
                   {NAV_ITEMS.map((item) => (
                     <Link key={item.path} to={item.path} onClick={() => setIsOpen(false)} className="flex items-center justify-between px-6 py-4 border-b border-gray-50 text-hett-dark font-bold text-lg">
-                      <span>{item.label}</span>
+                      <span>{getNavLabel(item)}</span>
                       <ChevronRight size={20} className="text-gray-300" />
                     </Link>
                   ))}
@@ -364,7 +382,7 @@ const Navbar: React.FC = () => {
               </div>
 
               <div className="p-6 border-t border-gray-100 bg-gray-50">
-                <p className="text-xs text-gray-400 font-medium mb-4">Hulp nodig? Bel ons direct:</p>
+                <p className="text-xs text-gray-400 font-medium mb-4">{t('nav.needHelp')}</p>
                 <a href="tel:+31685406033" className="flex items-center gap-3 text-hett-dark font-bold text-lg">
                   <Star size={20} className="text-hett-secondary" fill="currentColor" />
                   +31 (0)6 85 40 60 33

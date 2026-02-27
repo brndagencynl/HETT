@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { CheckCircle, Heart, Settings, ShoppingCart, Truck } from 'lucide-react';
 import { Product, CategorySlug } from '../../types';
 import { useCart } from '../../context/CartContext';
@@ -30,6 +31,7 @@ interface ProductCardProps {
 const CONFIG_REQUIRED_CATEGORIES: CategorySlug[] = ['verandas', 'sandwichpanelen'];
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'grid' }) => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const { addToCart } = useCart();
 
@@ -75,7 +77,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'grid' })
 
         // Check for variant ID before attempting add
         if (!product.shopifyVariantId) {
-            const errorMsg = 'Dit product heeft geen beschikbare variant in Shopify.';
+            const errorMsg = t('shop.noVariantError');
             console.error('[ProductCard] No variant ID:', product.id);
             setError(errorMsg);
             setTimeout(() => setError(null), 3000);
@@ -94,7 +96,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'grid' })
             console.log('[ProductCard] addToCart called successfully');
         } catch (err) {
             console.error('[ProductCard] addToCart error:', err);
-            setError('Kon niet toevoegen aan winkelwagen');
+            setError(t('shop.addToCartError'));
             setTimeout(() => setError(null), 3000);
         } finally {
             setIsAdding(false);
@@ -119,7 +121,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'grid' })
                 <button
                     onClick={handleWishlistClick}
                     className="text-gray-300 hover:text-red-500 transition-colors p-1 bg-white/80 backdrop-blur-sm rounded-bl-lg"
-                    title="Aan verlanglijst toevoegen"
+                    title={t('wishlist.add')}
                 >
                     <Heart size={18} />
                 </button>
@@ -134,7 +136,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'grid' })
                 />
                 {product.isBestseller && (
                     <div className="absolute top-2 left-2 bg-hett-secondary text-white text-[8px] sm:text-[10px] font-black px-2 py-0.5 rounded shadow-sm uppercase z-10">
-                        Populair
+                        {t('common.popular')}
                     </div>
                 )}
             </div>
@@ -169,7 +171,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'grid' })
                 <div className="mb-3 sm:mb-4">
                     <div className="text-base sm:text-2xl font-black text-hett-dark leading-none">
                         {requiresConfiguration ? (
-                            <>{formatEUR(product.priceCents, 'cents')} <span className="text-xs font-medium text-gray-500">vanaf</span></>
+                            <>{formatEUR(product.priceCents, 'cents')} <span className="text-xs font-medium text-gray-500">{t('shop.from')}</span></>
                         ) : (
                             <>{formatEUR(product.priceCents, 'cents')}</>
                         )}
@@ -197,7 +199,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'grid' })
                                 className="w-full rounded-md py-2 sm:py-3 text-[11px] sm:text-sm font-bold flex items-center justify-center gap-1.5 sm:gap-2 shadow-sm transition-colors bg-hett-dark text-white hover:bg-hett-primary"
                             >
                                 <Settings size={16} />
-                                Stel samen
+                                {t('common.configure')}
                             </button>
                             <div className="mt-2 flex items-center gap-1 text-[10px] sm:text-xs text-green-600 font-medium leading-tight">
                                 <Truck size={14} className="flex-shrink-0" />
@@ -231,7 +233,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'grid' })
                                     }`}
                                 >
                                     <ShoppingCart size={16} />
-                                    {isAdding ? 'Toevoegen...' : 'In winkelwagen'}
+                                    {isAdding ? t('shop.adding') : t('shop.addToCart')}
                                 </button>
                             </div>
                             <div className="mt-2 flex items-center gap-1 text-[10px] sm:text-xs text-green-600 font-medium leading-tight">

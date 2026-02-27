@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useWishlist } from '../context/WishlistContext';
 import { useCart } from '../context/CartContext';
 import PageHeader from '../components/PageHeader';
@@ -9,6 +10,7 @@ import { isConfigOnly } from '../utils/productRules';
 import { formatEUR, toCents } from '../src/utils/money';
 
 const Wishlist: React.FC = () => {
+    const { t } = useTranslation();
     const { wishlist, removeFromWishlist } = useWishlist();
     const { addToCart } = useCart();
 
@@ -25,9 +27,9 @@ const Wishlist: React.FC = () => {
     return (
         <div className="min-h-screen bg-[#f6f8fa] font-sans">
             <PageHeader
-                title="Mijn Favorieten"
-                subtitle="Wishlist"
-                description="Bewaar je favoriete items voor later."
+                title={t('wishlist.title')}
+                subtitle={t('wishlist.subtitle')}
+                description={t('wishlist.description')}
                 image="https://images.unsplash.com/photo-1513161455079-7dc1bad1563f?q=80&w=1788&auto=format&fit=crop"
             />
 
@@ -37,12 +39,12 @@ const Wishlist: React.FC = () => {
                         <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6 text-gray-400">
                             <Heart size={32} />
                         </div>
-                        <h2 className="text-2xl font-bold text-hett-dark mb-4">Je verlanglijstje is nog leeg</h2>
+                        <h2 className="text-2xl font-bold text-hett-dark mb-4">{t('wishlist.empty')}</h2>
                         <p className="text-gray-500 mb-8">
-                            Sla je favoriete items op om ze later makkelijk terug te vinden.
+                            {t('wishlist.emptySubtitle')}
                         </p>
                         <Link to="/shop" className="inline-block bg-hett-dark text-white px-8 py-4 rounded-lg font-bold hover:bg-hett-brown transition-colors">
-                            Bekijk onze producten
+                            {t('common.viewProducts')}
                         </Link>
                     </div>
                 ) : (
@@ -66,27 +68,27 @@ const Wishlist: React.FC = () => {
                                     </Link>
 
                                     <div className="flex items-center gap-2 text-green-600 text-xs font-bold mb-4">
-                                        <Check size={14} strokeWidth={3} /> Op voorraad
+                                        <Check size={14} strokeWidth={3} /> {t('common.inStock')}
                                     </div>
 
                                     <div className="mt-auto pt-4 border-t border-gray-50 flex items-center justify-between gap-4">
                                         <div className="flex flex-col">
                                             <span className="font-black text-xl text-hett-dark">{formatEUR(product.priceCents ?? toCents(product.price), 'cents')}</span>
-                                            <span className="text-[10px] text-gray-400 font-medium">incl. BTW</span>
+                                            <span className="text-[10px] text-gray-400 font-medium">{t('common.inclVat')}</span>
                                         </div>
                                         {isConfigOnly(product) ? (
                                             <Link
                                                 to={`/products/${product.id}`}
                                                 className="bg-hett-dark text-white p-3 rounded-lg hover:bg-hett-brown transition-colors flex items-center gap-2 text-sm font-bold flex-grow justify-center"
                                             >
-                                                <PenTool size={18} /> Stel samen
+                                                <PenTool size={18} /> {t('common.configure')}
                                             </Link>
                                         ) : (
                                             <button
                                                 onClick={() => handleAddToCart(product)}
                                                 className="bg-hett-primary text-white p-3 rounded-lg hover:bg-hett-brown transition-colors flex items-center gap-2 text-sm font-bold flex-grow justify-center"
                                             >
-                                                <ShoppingCart size={18} /> In winkelwagen
+                                                <ShoppingCart size={18} /> {t('wishlist.addToCart')}
                                             </button>
                                         )}
                                     </div>

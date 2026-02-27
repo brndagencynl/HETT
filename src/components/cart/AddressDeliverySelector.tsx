@@ -14,6 +14,7 @@
  */
 
 import React, { useState, useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { MapPin, Truck, Check, AlertCircle, Loader2, Lock, ChevronDown } from 'lucide-react';
 import { Card } from '../../../components/ui/card';
 import {
@@ -67,6 +68,7 @@ export const AddressDeliverySelector: React.FC<AddressDeliverySelectorProps> = (
   onAddressChange,
   onShippingCostChange,
 }) => {
+  const { t } = useTranslation();
   // Local form state
   const [localAddress, setLocalAddress] = useState<AddressInput>({
     street: address.street || '',
@@ -160,7 +162,7 @@ export const AddressDeliverySelector: React.FC<AddressDeliverySelectorProps> = (
     
     // Check if all fields are filled
     if (!isAddressComplete(localAddress)) {
-      setValidationMessages(['Vul alle adresvelden in.']);
+      setValidationMessages([t('shipping.fillAllFields')]);
       setValidationStatus('invalid');
       return;
     }
@@ -178,7 +180,7 @@ export const AddressDeliverySelector: React.FC<AddressDeliverySelectorProps> = (
         if (!isDeliveryAvailable(countryCode)) {
           setValidationStatus('invalid');
           setValidationMessages([
-            'Bezorging is niet beschikbaar in dit land.',
+            t('shipping.countryNotAvailable'),
             'Kies "Afhalen" of selecteer een ander land (NL/BE/DE).'
           ]);
           onShippingCostChange(0, false);
@@ -229,7 +231,7 @@ export const AddressDeliverySelector: React.FC<AddressDeliverySelectorProps> = (
           setValidationStatus('valid');
           setValidationMessages([
             'Adres is geldig.',
-            `Kon bezorgkosten niet berekenen: ${shippingResult.error}`,
+            `${t('shipping.calculateError')}: ${shippingResult.error}`,
           ]);
           
           // Update parent with validated address but no shipping cost
@@ -255,7 +257,7 @@ export const AddressDeliverySelector: React.FC<AddressDeliverySelectorProps> = (
       }
     } catch (error) {
       setValidationStatus('invalid');
-      setValidationMessages(['Er is een fout opgetreden. Probeer het opnieuw.']);
+      setValidationMessages([t('shipping.genericError')]);
       onShippingCostChange(0, false);
     }
   }, [localAddress, isLocked, onAddressChange, onShippingCostChange, calculateDistanceBasedShipping]);
@@ -273,7 +275,7 @@ export const AddressDeliverySelector: React.FC<AddressDeliverySelectorProps> = (
       {isLocked && (
         <div className="flex items-center gap-2 p-3 mb-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-800">
           <Lock size={16} className="flex-shrink-0" />
-          <span className="text-sm">Bezorgmethode is vergrendeld tijdens het afrekenen.</span>
+          <span className="text-sm">{t('shipping.methodLocked')}</span>
         </div>
       )}
 
@@ -313,10 +315,10 @@ export const AddressDeliverySelector: React.FC<AddressDeliverySelectorProps> = (
             className={method === 'pickup' ? 'text-[#003878]' : 'text-gray-400'}
           />
           <div className="flex-1">
-            <div className="font-bold text-gray-900">Afhalen in Eindhoven</div>
-            <div className="text-xs text-gray-500">Op ons magazijn ophalen</div>
+            <div className="font-bold text-gray-900">{t('shipping.pickupInEindhoven')}</div>
+            <div className="text-xs text-gray-500">{t('shipping.pickupAtWarehouse')}</div>
           </div>
-          <span className="font-bold text-green-600">Gratis</span>
+          <span className="font-bold text-green-600">{t('common.free')}</span>
         </label>
 
         {/* Delivery Option */}
@@ -352,7 +354,7 @@ export const AddressDeliverySelector: React.FC<AddressDeliverySelectorProps> = (
             className={method === 'delivery' ? 'text-[#003878]' : 'text-gray-400'}
           />
           <div className="flex-1">
-            <div className="font-bold text-gray-900">Bezorgen</div>
+            <div className="font-bold text-gray-900">{t('shipping.deliver')}</div>
             <div className="text-xs text-gray-500">NL gratis, BE/DE € 1,- per km</div>
           </div>
           {method === 'delivery' && validationStatus === 'valid' && !isCalculatingShipping && (
@@ -371,10 +373,10 @@ export const AddressDeliverySelector: React.FC<AddressDeliverySelectorProps> = (
         <div className="mt-4 pt-4 border-t border-gray-100">
           <div className="flex items-center gap-2 text-green-600 text-sm font-medium">
             <Check size={16} />
-            <span>Afhalen in Eindhoven (gratis)</span>
+            <span>{t('shipping.pickupFree')}</span>
           </div>
           <p className="mt-1 text-xs text-gray-500">
-            U ontvangt een e-mail zodra uw bestelling klaar staat
+            {t('shipping.pickupNotice')}
           </p>
         </div>
       )}
@@ -387,7 +389,7 @@ export const AddressDeliverySelector: React.FC<AddressDeliverySelectorProps> = (
             {/* Street + House Number */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                Straat en huisnummer *
+                {t('shipping.streetAndNumber')}
               </label>
               <input
                 type="text"
@@ -405,7 +407,7 @@ export const AddressDeliverySelector: React.FC<AddressDeliverySelectorProps> = (
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                  Postcode *
+                  {t('shipping.postalCode')}
                 </label>
                 <input
                   type="text"
@@ -420,7 +422,7 @@ export const AddressDeliverySelector: React.FC<AddressDeliverySelectorProps> = (
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                  Plaats *
+                  {t('shipping.city')}
                 </label>
                 <input
                   type="text"
@@ -438,7 +440,7 @@ export const AddressDeliverySelector: React.FC<AddressDeliverySelectorProps> = (
             {/* Country Dropdown */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                Land *
+                {t('shipping.country')}
               </label>
               <div className="relative">
                 <select
@@ -480,18 +482,18 @@ export const AddressDeliverySelector: React.FC<AddressDeliverySelectorProps> = (
               {(validationStatus === 'validating' || isCalculatingShipping) && (
                 <>
                   <Loader2 size={18} className="animate-spin" />
-                  {isCalculatingShipping ? 'Bezorgkosten berekenen...' : 'Adres valideren...'}
+                  {isCalculatingShipping ? t('shipping.calculating') : 'Adres valideren...'}
                 </>
               )}
               {validationStatus === 'valid' && !isCalculatingShipping && (
                 <>
                   <Check size={18} />
-                  Adres gevalideerd
+                  {t('shipping.calculated')}
                 </>
               )}
               {(validationStatus === 'idle' || validationStatus === 'invalid') && !isCalculatingShipping && (
                 <>
-                  Adres valideren
+                  {t('shipping.calculate')}
                 </>
               )}
             </button>
@@ -528,7 +530,7 @@ export const AddressDeliverySelector: React.FC<AddressDeliverySelectorProps> = (
               <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
                 <div className="flex justify-between items-center">
                   <div className="text-sm text-gray-600">
-                    <span>Bezorgkosten ({COUNTRY_LABELS[localAddress.country]})</span>
+                    <span>{t('shipping.shippingCostsLabel')} ({COUNTRY_LABELS[localAddress.country]})</span>
                     {distanceKm !== null && distanceKm > 0 && (
                       <span className="block text-xs text-gray-400 mt-0.5">
                         {distanceKm} km × €1,- = {formatShippingCost(shippingCost)}
@@ -545,7 +547,7 @@ export const AddressDeliverySelector: React.FC<AddressDeliverySelectorProps> = (
             {/* Help Text */}
             {validationStatus !== 'valid' && hasInteracted && (
               <p className="text-xs text-gray-400">
-                Valideer uw adres om de bezorgkosten te berekenen en door te gaan naar afrekenen.
+                {t('shipping.validateAddress')}
               </p>
             )}
           </div>

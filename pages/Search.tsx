@@ -1,12 +1,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import PageHeader from '../components/PageHeader';
 import { Search as SearchIcon, Check, Loader2 } from 'lucide-react';
 import { searchProducts } from '../src/lib/shopify';
 import { Product } from '../types';
 
 const Search: React.FC = () => {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const query = searchParams.get('q') || '';
 
@@ -39,9 +41,9 @@ const Search: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#f6f8fa] font-sans">
       <PageHeader 
-        title={`Zoekresultaten voor "${query}"`}
-        subtitle="Zoeken"
-        description={`${results.length} resultaten gevonden`}
+        title={`${t('search.resultsFor')} "${query}"`}
+        subtitle={t('search.title')}
+        description={`${results.length} ${t('search.resultsCount')}`}
         image="https://picsum.photos/1200/400?random=search"
       />
 
@@ -49,7 +51,7 @@ const Search: React.FC = () => {
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <Loader2 className="w-8 h-8 animate-spin text-hett-secondary" />
-            <span className="ml-3 text-hett-muted font-medium">Zoeken...</span>
+            <span className="ml-3 text-hett-muted font-medium">{t('search.searching')}</span>
           </div>
         ) : results.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -83,19 +85,19 @@ const Search: React.FC = () => {
                         </div>
 
                         <div className="flex items-center gap-2 text-[#5d734e] text-xs font-medium mb-6">
-                            <Check size={14} strokeWidth={3} /> Op voorraad
+                            <Check size={14} strokeWidth={3} /> {t('common.inStock')}
                         </div>
 
                         <div className="mt-auto flex items-end justify-between">
                             <div className="flex flex-col">
                                 <span className="text-[#1a1a1a] font-bold text-xl leading-none">{product.price}</span>
-                                <span className="text-gray-500 text-[10px] mt-1">incl. BTW</span>
+                                <span className="text-gray-500 text-[10px] mt-1">{t('common.inclVat')}</span>
                             </div>
                             <Link 
                                 to={`/products/${product.id}`}
                                 className="bg-[#293133] text-white text-xs font-medium px-5 py-2.5 rounded-full hover:bg-[#1a1a1a] transition-colors"
                             >
-                                Stel samen
+                                {t('common.configure')}
                             </Link>
                         </div>
                     </div>
@@ -107,13 +109,13 @@ const Search: React.FC = () => {
             <div className="w-20 h-20 bg-gray-100 text-gray-400 rounded-full flex items-center justify-center mx-auto mb-6">
                 <SearchIcon size={32} />
             </div>
-            <h2 className="text-2xl font-bold text-hett-dark mb-2">Geen resultaten gevonden</h2>
+            <h2 className="text-2xl font-bold text-hett-dark mb-2">{t('search.noResults')}</h2>
             <p className="text-gray-500 mb-8">
-                We konden geen producten vinden die overeenkomen met "{query}".
-                <br />Probeer een andere zoekterm of bekijk onze categorieën.
+                {t('search.noResultsFor')} "{query}".
+                <br />{t('search.suggestion')}
             </p>
             <Link to="/shop" className="inline-block bg-hett-dark text-white px-8 py-4 rounded-full font-bold hover:bg-hett-brown transition-colors">
-                Bekijk alle producten
+                {t('search.viewAll')}
             </Link>
           </div>
         )}

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { PROJECTS, NEWS_ITEMS } from '../constants';
 
 interface Breadcrumb {
@@ -9,6 +10,7 @@ interface Breadcrumb {
 }
 
 const PageHeader: React.FC<any> = () => {
+  const { t } = useTranslation();
   const { pathname } = useLocation();
   const params = useParams();
 
@@ -17,7 +19,7 @@ const PageHeader: React.FC<any> = () => {
   if (pathname === '/') return null;
 
   const generateBreadcrumbs = (): Breadcrumb[] => {
-    const crumbs: Breadcrumb[] = [{ label: 'Thuis', path: '/' }];
+    const crumbs: Breadcrumb[] = [{ label: t('nav.home'), path: '/' }];
     const segments = pathname.split('/').filter(Boolean);
 
     let currentPath = '';
@@ -32,37 +34,37 @@ const PageHeader: React.FC<any> = () => {
       if (segment === 'products') return; // Skip "products" segment
       
       if (pathname.includes('/categorie/') && index === segments.length - 1) {
-          crumbs.push({ label: 'Categorieën', path: '/shop' });
+          crumbs.push({ label: t('nav.categories'), path: '/shop' });
           label = segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ');
       } else if (pathname.includes('/products/') && isLast) {
           // For product pages, prettify the handle for breadcrumb display
           // e.g., "sandwichpaneel" -> "Sandwichpaneel"
           label = segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ');
       } else if (pathname.includes('/projecten/') && isLast) {
-          crumbs.push({ label: 'Projecten', path: '/projecten' });
+          crumbs.push({ label: t('nav.projects'), path: '/projecten' });
           const project = PROJECTS.find(p => p.id === segment);
           label = project ? project.title : segment;
       } else if (pathname.includes('/nieuws/') && isLast) {
-          crumbs.push({ label: 'Nieuws', path: '/blogs' });
+          crumbs.push({ label: t('nav.news'), path: '/blogs' });
           const news = NEWS_ITEMS.find(n => n.id === segment);
           label = news ? news.title : segment;
       } else {
           // General mapping
           const mapping: Record<string, string> = {
-            'shop': 'Shop',
-            'cart': 'Winkelwagen',
-            'checkout': 'Afrekenen',
-            'my-account': 'Mijn Account',
-            'wishlist': 'Favorieten',
-            'projecten': 'Projecten',
-            'contact': 'Contact',
-            'over-ons': 'Over ons',
-            'veelgestelde-vragen': 'Veelgestelde vragen',
-            'blogs': 'Nieuws',
-            'showroom': 'Showroom',
-            'offerte': 'Offerte aanvragen',
-            'bezorging': 'Bezorging',
-            'montage-handleiding': 'Montage'
+            'shop': t('shop.title'),
+            'cart': t('cart.title'),
+            'checkout': t('checkout.title'),
+            'my-account': t('nav.myAccount'),
+            'wishlist': t('nav.favorites'),
+            'projecten': t('nav.projects'),
+            'contact': t('nav.contact'),
+            'over-ons': t('about.subtitle'),
+            'veelgestelde-vragen': t('faq.title'),
+            'blogs': t('nav.news'),
+            'showroom': t('nav.showroom'),
+            'offerte': t('offerte.title'),
+            'bezorging': t('delivery.title'),
+            'montage-handleiding': t('nav.montage')
           };
           label = mapping[segment] || segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ');
       }

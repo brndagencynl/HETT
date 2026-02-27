@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { CheckCircle, FileText, Download, ArrowLeft, Box, Image as ImageIcon, ShieldCheck, Truck, Loader2 } from 'lucide-react';
 import Panel3D from '../components/Panel3D';
 import { getProductByHandle } from '../src/lib/shopify';
@@ -9,6 +10,7 @@ import { formatEUR, toCents } from '../src/utils/money';
 import ProductUSPs from '../src/components/ui/ProductUSPs';
 
 const ProductDetail: React.FC = () => {
+    const { t } = useTranslation();
     const { handle } = useParams<{ handle: string }>();
     
     // Shopify product state
@@ -57,7 +59,7 @@ const ProductDetail: React.FC = () => {
             <div className="min-h-screen bg-white flex items-center justify-center">
                 <div className="text-center">
                     <Loader2 className="w-12 h-12 animate-spin text-hett-secondary mx-auto mb-4" />
-                    <p className="text-hett-muted font-bold">Product laden...</p>
+                    <p className="text-hett-muted font-bold">{t('common.loading')}</p>
                 </div>
             </div>
         );
@@ -71,7 +73,7 @@ const ProductDetail: React.FC = () => {
                     <h2 className="text-2xl font-black text-hett-dark mb-4">Product niet gevonden</h2>
                     <p className="text-hett-muted mb-8">{error || 'Het opgevraagde product bestaat niet of is niet meer beschikbaar.'}</p>
                     <Link to="/shop" className="btn-primary inline-flex items-center gap-2">
-                        <ArrowLeft size={16} /> Terug naar shop
+                        <ArrowLeft size={16} /> {t('common.continueShopping')}
                     </Link>
                 </div>
             </div>
@@ -160,14 +162,14 @@ const ProductDetail: React.FC = () => {
                         <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
                             <div className="flex items-baseline gap-2 mb-6">
                                 <span className="text-4xl font-black text-hett-dark">{formatEUR(product.priceCents ?? toCents(product.price), 'cents')}</span>
-                                <span className="text-sm text-gray-500 font-bold uppercase">Incl. BTW</span>
+                                <span className="text-sm text-gray-500 font-bold uppercase">{t('common.inclVat')}</span>
                             </div>
                             <ProductUSPs items={product.usps ?? []} />
                             <Link to="/contact" className="block w-full text-center bg-hett-dark text-white font-bold py-4 rounded-xl hover:opacity-90 transition-all shadow-lg shadow-blue-900/10">
-                                Offerte Aanvragen
+                                {t('offerte.title')}
                             </Link>
                             <div className="mt-4 flex items-center justify-center gap-4 text-xs font-bold text-gray-500">
-                                <span className="flex items-center gap-1"><ShieldCheck size={14} className="text-green-600" /> 5 Jaar Garantie</span>
+                                <span className="flex items-center gap-1"><ShieldCheck size={14} className="text-green-600" /> {t('warranty.fiveYear')}</span>
                                 <span className="flex items-center gap-1"><Truck size={14} className="text-green-600" /> Gratis bezorgd</span>
                             </div>
                         </div>

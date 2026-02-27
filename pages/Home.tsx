@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Check, Star, Wrench, Truck, Package, Award } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Post } from '../types';
 import { content } from '../services/content';
 import {
@@ -34,7 +35,16 @@ const iconMap: Record<string, LucideIcon> = {
     Check,
 };
 
+// Maps USP iconName to i18n key suffix
+const USP_KEY_MAP: Record<string, string> = {
+    Wrench: 'selfAssembly',
+    Truck: 'fastDelivery',
+    Package: 'freeDelivery',
+    Award: 'germanQuality',
+};
+
 const Home: React.FC = () => {
+    const { t } = useTranslation();
     // Shopify content state
     const [hero, setHero] = useState<HomepageHero>(FALLBACK_HERO);
     const [usps, setUsps] = useState<HomepageUsp[]>(FALLBACK_USPS);
@@ -93,7 +103,7 @@ const Home: React.FC = () => {
                                 <div key={i} className="flex items-center gap-3 flex-shrink-0 snap-center">
                                     <IconComponent size={18} className="text-hett-secondary" strokeWidth={4} />
                                     <span className="text-hett-dark font-bold text-sm whitespace-nowrap uppercase tracking-tight">
-                                        {usp.text}
+                                        {t(`home.usps.${USP_KEY_MAP[usp.iconName] || usp.iconName}`)}
                                     </span>
                                 </div>
                             );
@@ -106,12 +116,12 @@ const Home: React.FC = () => {
             //<div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pt-10 mb-20">
                 {/* Header - same style as Inspiratie section */}
                 <div className="flex items-center justify-between mb-8">
-                    <h2 className="text-2xl md:text-3xl font-black text-hett-dark">Populaire keuzes</h2>
+                    <h2 className="text-2xl md:text-3xl font-black text-hett-dark">{t('home.popularChoices')}</h2>
                     <Link
                         to="/categorie/verandas"
                         className="px-4 py-2 border border-gray-300 rounded-full text-sm font-bold text-hett-dark hover:bg-gray-50 transition-colors"
                     >
-                        Bekijk alle veranda's
+                        {t('home.viewAllVerandas')}
                     </Link>
                 </div>
 

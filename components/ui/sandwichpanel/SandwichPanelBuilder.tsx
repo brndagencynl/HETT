@@ -10,6 +10,7 @@ import {
     calculateSandwichpanelenPricing,
 } from '../../../src/pricing/sandwichpanelen';
 import { formatEUR, toCents } from '../../../src/utils/money';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     product: Product;
@@ -21,6 +22,7 @@ const SandwichPanelBuilder: React.FC<Props> = ({ product, basePrice, onAddToCart
     const [config, setConfig] = useState<SandwichpanelenConfig>({ ...DEFAULT_SANDWICHPANEL_CONFIG });
     const [quantity, setQuantity] = useState(1);
     const [touched, setTouched] = useState(false);
+    const { t } = useTranslation();
 
     useEffect(() => {
         setConfig({ ...DEFAULT_SANDWICHPANEL_CONFIG });
@@ -41,17 +43,17 @@ const SandwichPanelBuilder: React.FC<Props> = ({ product, basePrice, onAddToCart
 
         const selectedColor = SANDWICH_COLOR_OPTIONS.find(c => c.id === config.color);
         const details = [
-            { label: 'Breedte', value: `${SANDWICH_WORKING_WIDTH_MM} mm` },
-            { label: 'Lengte', value: `${config.lengthMm} mm` },
-            { label: 'Kleur', value: selectedColor?.label || String(config.color) },
-            ...(config.extras.uProfiles.enabled ? [{ label: 'U-profielen', value: `${config.extras.uProfiles.meters} m` }] : []),
+            { label: t('sandwichBuilder.width'), value: `${SANDWICH_WORKING_WIDTH_MM} mm` },
+            { label: t('sandwichBuilder.length'), value: `${config.lengthMm} mm` },
+            { label: t('sandwichBuilder.color'), value: selectedColor?.label || String(config.color) },
+            ...(config.extras.uProfiles.enabled ? [{ label: t('sandwichBuilder.uProfiles'), value: `${config.extras.uProfiles.meters} m` }] : []),
         ];
 
         const displayConfigSummary = [
-            `Breedte: ${SANDWICH_WORKING_WIDTH_MM} mm`,
-            `Lengte: ${config.lengthMm} mm`,
-            `Kleur: ${selectedColor?.label || String(config.color)}`,
-            ...(config.extras.uProfiles.enabled ? [`U-profielen: ${config.extras.uProfiles.meters} m`] : []),
+            `${t('sandwichBuilder.width')}: ${SANDWICH_WORKING_WIDTH_MM} mm`,
+            `${t('sandwichBuilder.length')}: ${config.lengthMm} mm`,
+            `${t('sandwichBuilder.color')}: ${selectedColor?.label || String(config.color)}`,
+            ...(config.extras.uProfiles.enabled ? [`${t('sandwichBuilder.uProfiles')}: ${config.extras.uProfiles.meters} m`] : []),
         ].join(' • ');
 
         // Strict ProductConfig structure
@@ -72,7 +74,7 @@ const SandwichPanelBuilder: React.FC<Props> = ({ product, basePrice, onAddToCart
 
         const unitTotal = pricing.total;
         const breakdownItems = pricing.breakdown.map((row) => ({
-            groupLabel: 'Extra opties',
+            groupLabel: t('sandwichBuilder.extraOptions'),
             choiceLabel: row.label,
             price: row.amount,
         }));
@@ -109,15 +111,15 @@ const SandwichPanelBuilder: React.FC<Props> = ({ product, basePrice, onAddToCart
     return (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div className="bg-gray-50 border-b border-gray-100 p-6">
-                <h2 className="text-xl font-black text-hett-dark">Stel samen</h2>
-                <p className="text-sm text-gray-500">Kies uw opties en afmetingen.</p>
+                <h2 className="text-xl font-black text-hett-dark">{t('common.configure')}</h2>
+                <p className="text-sm text-gray-500">{t('sandwichBuilder.chooseOptions')}</p>
             </div>
 
             <div className="p-6 space-y-8">
                 {/* 1) Werkende breedte (locked) */}
                 <div className="space-y-3">
                     <div className="flex justify-between">
-                        <label className="text-sm font-bold text-hett-dark uppercase tracking-wide">Werkende breedte</label>
+                        <label className="text-sm font-bold text-hett-dark uppercase tracking-wide">{t('configuratorPage.workingWidth')}</label>
                     </div>
                     <div className="relative">
                         <select
@@ -126,7 +128,7 @@ const SandwichPanelBuilder: React.FC<Props> = ({ product, basePrice, onAddToCart
                             value={String(SANDWICH_WORKING_WIDTH_MM)}
                             onChange={() => undefined}
                         >
-                            <option value={String(SANDWICH_WORKING_WIDTH_MM)}>{SANDWICH_WORKING_WIDTH_MM} mm (standaard)</option>
+                            <option value={String(SANDWICH_WORKING_WIDTH_MM)}>{SANDWICH_WORKING_WIDTH_MM} mm {t('sandwichBuilder.standard')}</option>
                         </select>
                     </div>
                 </div>
@@ -135,10 +137,10 @@ const SandwichPanelBuilder: React.FC<Props> = ({ product, basePrice, onAddToCart
                 <div className="space-y-3">
                     <div className="flex justify-between">
                         <label className="text-sm font-bold text-hett-dark uppercase tracking-wide">
-                            Lengte (mm) <span className="text-red-500">*</span>
+                            {t('sandwichBuilder.lengthLabel')} <span className="text-red-500">*</span>
                         </label>
                         {touched && !isLengthValid && (
-                            <span className="text-xs text-red-500 font-bold animate-pulse">Verplicht veld</span>
+                            <span className="text-xs text-red-500 font-bold animate-pulse">{t('sandwichBuilder.requiredField')}</span>
                         )}
                     </div>
                     <div className="relative">
@@ -150,7 +152,7 @@ const SandwichPanelBuilder: React.FC<Props> = ({ product, basePrice, onAddToCart
                                 setTouched(true);
                             }}
                         >
-                            <option value="" disabled>Maak een keuze...</option>
+                            <option value="" disabled>{t('sandwichBuilder.selectPlaceholder')}</option>
                             {SANDWICH_LENGTH_MM_OPTIONS.map((mm) => (
                                 <option key={mm} value={String(mm)}>{mm}</option>
                             ))}
@@ -162,10 +164,10 @@ const SandwichPanelBuilder: React.FC<Props> = ({ product, basePrice, onAddToCart
                 <div className="space-y-3">
                     <div className="flex justify-between">
                         <label className="text-sm font-bold text-hett-dark uppercase tracking-wide">
-                            Kleur <span className="text-red-500">*</span>
+                            {t('common.color')} <span className="text-red-500">*</span>
                         </label>
                         {touched && !isColorValid && (
-                            <span className="text-xs text-red-500 font-bold animate-pulse">Verplicht veld</span>
+                            <span className="text-xs text-red-500 font-bold animate-pulse">{t('sandwichBuilder.requiredField')}</span>
                         )}
                     </div>
                     <div className="flex gap-3">
@@ -197,7 +199,7 @@ const SandwichPanelBuilder: React.FC<Props> = ({ product, basePrice, onAddToCart
                 {/* 4) Extra opties */}
                 <div className="space-y-3">
                     <div className="flex justify-between">
-                        <label className="text-sm font-bold text-hett-dark uppercase tracking-wide">Extra opties</label>
+                        <label className="text-sm font-bold text-hett-dark uppercase tracking-wide">{t('sandwichBuilder.extraOptions')}</label>
                     </div>
 
                     <div
@@ -221,9 +223,9 @@ const SandwichPanelBuilder: React.FC<Props> = ({ product, basePrice, onAddToCart
                     >
                         <div className="flex-grow min-w-0">
                             <div className="flex items-center gap-2">
-                                <span className="font-bold text-hett-dark text-sm truncate">U-profielen per meter</span>
+                                <span className="font-bold text-hett-dark text-sm truncate">{t('sandwichBuilder.uProfiles')} per meter</span>
                             </div>
-                            <div className="text-xs text-gray-500 font-medium">Optioneel</div>
+                            <div className="text-xs text-gray-500 font-medium">{t('common.optional')}</div>
                         </div>
                         <div className="text-right pl-3">
                             <div className="text-sm font-bold text-hett-dark">
@@ -237,7 +239,7 @@ const SandwichPanelBuilder: React.FC<Props> = ({ product, basePrice, onAddToCart
 
                     {config.extras.uProfiles.enabled && (
                         <div className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg p-3">
-                            <div className="text-xs font-bold text-gray-600 uppercase tracking-wide">Aantal (m)</div>
+                            <div className="text-xs font-bold text-gray-600 uppercase tracking-wide">{t('sandwichBuilder.quantityMeters')}</div>
                             <div className="flex items-center bg-white border border-gray-300 rounded-lg px-2 w-32">
                                 <button
                                     type="button"
@@ -288,13 +290,13 @@ const SandwichPanelBuilder: React.FC<Props> = ({ product, basePrice, onAddToCart
                 {/* Included warranty (unchanged style) */}
                 <div className="space-y-3">
                     <div className="flex justify-between">
-                        <label className="text-sm font-bold text-hett-dark uppercase tracking-wide">Garantie</label>
+                        <label className="text-sm font-bold text-hett-dark uppercase tracking-wide">{t('warranty.guarantee')}</label>
                     </div>
                     <div className="flex items-center p-4 rounded-lg bg-green-50 border border-green-100">
                         <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600 mr-3">
                             <ShieldCheck size={18} />
                         </div>
-                        <div className="flex-grow font-bold text-hett-dark text-sm">5 Jaar Fabrieksgarantie</div>
+                        <div className="flex-grow font-bold text-hett-dark text-sm">{t('warranty.fiveYear')}</div>
                     </div>
                 </div>
             </div>
@@ -302,15 +304,15 @@ const SandwichPanelBuilder: React.FC<Props> = ({ product, basePrice, onAddToCart
             <div className="bg-gray-50 p-6 border-t border-gray-200">
                 <div className="space-y-2 mb-6 text-sm">
                     <div className="flex justify-between text-gray-500">
-                        <span>Product totaal</span>
+                        <span>{t('sandwichBuilder.productTotal')}</span>
                         <span>{formatEUR(toCents(pricing.basePrice), 'cents')}</span>
                     </div>
                     <div className="flex justify-between text-gray-500">
-                        <span>Opties totaal</span>
+                        <span>{t('sandwichBuilder.optionsTotal')}</span>
                         <span>{formatEUR(toCents(pricing.extrasTotal), 'cents')}</span>
                     </div>
                     <div className="flex justify-between text-lg font-black text-hett-dark pt-2 border-t border-gray-200">
-                        <span>Totaal</span>
+                        <span>{t('common.total')}</span>
                         <span>{formatEUR(toCents(pricing.total), 'cents')}</span>
                     </div>
                 </div>
@@ -329,12 +331,12 @@ const SandwichPanelBuilder: React.FC<Props> = ({ product, basePrice, onAddToCart
                         className={`flex-1 flex items-center justify-center gap-2 rounded-lg font-bold text-sm transition-all py-3 ${isValid ? 'bg-hett-primary text-white hover:bg-hett-dark shadow-lg shadow-hett-primary/20' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}
                     >
                         <ShoppingCart size={18} />
-                        In winkelwagen
+                        {t('shop.addToCart')}
                     </button>
                 </div>
                 {!isValid && touched && (
                     <p className="text-center text-xs text-red-500 font-bold mt-2 animate-pulse">
-                        Selecteer a.u.b. alle verplichte opties
+                        {t('configurator.validation.fillRequiredFields')}
                     </p>
                 )}
             </div>

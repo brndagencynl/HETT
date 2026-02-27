@@ -1,10 +1,12 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import PageHeader from '../components/PageHeader';
 import { User, ExternalLink, ShieldCheck } from 'lucide-react';
 import { getShopifyLoginUrl, getShopifyAccountUrl, getShopifyRegisterUrl } from '../src/services/shopify';
 
 const MyAccount: React.FC = () => {
+  const { t } = useTranslation();
   const loginUrl = getShopifyLoginUrl();
   const accountUrl = getShopifyAccountUrl();
   const registerUrl = getShopifyRegisterUrl();
@@ -12,9 +14,9 @@ const MyAccount: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#f6f8fa] font-sans">
       <PageHeader 
-        title="Mijn Account" 
+        title={t('myAccount.title')} 
         subtitle="Account" 
-        description="Beheer uw bestellingen en accountgegevens." 
+        description={t('myAccount.description')} 
         image="https://picsum.photos/1200/400?random=account"
       />
       
@@ -26,11 +28,11 @@ const MyAccount: React.FC = () => {
           </div>
           
           <h2 className="text-2xl font-black text-hett-dark mb-4">
-            Welkom bij Hett
+            {t('myAccount.welcome')}
           </h2>
           
           <p className="text-gray-600 mb-8 leading-relaxed max-w-md mx-auto">
-            Bekijk uw bestellingen, beheer uw adressen en pas uw accountgegevens aan via uw persoonlijke account.
+            {t('myAccount.welcomeDesc')}
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
@@ -40,7 +42,7 @@ const MyAccount: React.FC = () => {
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 bg-hett-dark text-white font-bold py-4 px-8 rounded-2xl hover:bg-hett-brown transition-colors"
             >
-              Inloggen
+              {t('myAccount.login')}
               <ExternalLink size={18} />
             </a>
             
@@ -50,14 +52,14 @@ const MyAccount: React.FC = () => {
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 bg-white border-2 border-hett-dark text-hett-dark font-bold py-4 px-8 rounded-2xl hover:bg-hett-dark hover:text-white transition-colors"
             >
-              Account openen
+              {t('myAccount.createAccount')}
               <ExternalLink size={18} />
             </a>
           </div>
           
           <div className="pt-6 border-t border-gray-100">
             <p className="text-sm text-gray-500 mb-4">
-              Nog geen account?
+              {t('myAccount.noAccount')}
             </p>
             <a 
               href={registerUrl}
@@ -65,14 +67,14 @@ const MyAccount: React.FC = () => {
               rel="noopener noreferrer"
               className="text-hett-brown font-bold hover:underline inline-flex items-center gap-1"
             >
-              Account aanmaken
+              {t('myAccount.register')}
               <ExternalLink size={14} />
             </a>
           </div>
           
           <div className="mt-8 pt-6 border-t border-gray-100 flex items-center justify-center gap-2 text-sm text-gray-500">
             <ShieldCheck size={16} className="text-green-600" />
-            <span>Je account wordt veilig beheerd via Shopify.</span>
+            <span>{t('myAccount.secureNote')}</span>
           </div>
           
         </div>

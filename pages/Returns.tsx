@@ -2,15 +2,18 @@
 import React from 'react';
 import PageHeader from '../components/PageHeader';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ShieldAlert, PackageX, PackageCheck, AlertTriangle, Undo2, Ban, Mail, Camera, Clock, CheckCircle, XCircle } from 'lucide-react';
 
 const Returns: React.FC = () => {
+  const { t } = useTranslation();
+
   return (
     <div className="min-h-screen bg-[#f6f8fa] font-sans">
       <PageHeader 
-        title="Retourbeleid"
-        subtitle="Service"
-        description="Informatie over het herroepingsrecht, retourvoorwaarden en uitzonderingen voor maatwerk."
+        title={t('returns.title')}
+        subtitle={t('returns.subtitle')}
+        description={t('returns.description')}
         image="https://picsum.photos/1200/600?random=return"
       />
 

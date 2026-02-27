@@ -18,10 +18,12 @@ import { useCart } from '../context/CartContext';
 import { resetCart as resetShopifyCart } from '../src/lib/shopify';
 import PageHeader from '../components/PageHeader';
 import { Card } from '../components/ui/card';
+import { useTranslation } from 'react-i18next';
 
 const ThankYou: React.FC = () => {
     const { clearCart } = useCart();
     const [searchParams] = useSearchParams();
+    const { t } = useTranslation();
     
     // Optional: Get order info from URL params (if Shopify passes them)
     const orderId = searchParams.get('order_id');
@@ -39,8 +41,8 @@ const ThankYou: React.FC = () => {
     return (
         <div className="min-h-screen bg-[#f6f8fa] font-sans">
             <PageHeader 
-                title="Bedankt voor uw bestelling!" 
-                description="Uw bestelling is succesvol geplaatst." 
+                title={t('thankYou.title')} 
+                description={t('thankYou.description')} 
                 image="https://picsum.photos/1200/400?random=thankyou" 
             />
             
@@ -55,17 +57,17 @@ const ThankYou: React.FC = () => {
                     
                     {/* Message */}
                     <h1 className="text-3xl md:text-4xl font-black text-hett-dark mb-4">
-                        Bedankt voor uw bestelling!
+                        {t('thankYou.title')}
                     </h1>
                     
                     <p className="text-lg text-gray-600 mb-8 max-w-md mx-auto">
-                        Uw bestelling is succesvol geplaatst. U ontvangt binnen enkele minuten een bevestiging per e-mail.
+                        {t('thankYou.message')}
                     </p>
                     
                     {/* Order Info (if available) */}
                     {(orderId || orderNumber) && (
                         <div className="bg-gray-50 rounded-xl p-6 mb-8 inline-block">
-                            <p className="text-sm text-gray-500 mb-1">Bestelnummer</p>
+                            <p className="text-sm text-gray-500 mb-1">{t('thankYou.orderNumber')}</p>
                             <p className="text-xl font-black text-hett-primary">
                                 #{orderNumber || orderId}
                             </p>
@@ -74,15 +76,15 @@ const ThankYou: React.FC = () => {
                     
                     {/* Next Steps */}
                     <div className="border-t border-gray-100 pt-8 mb-8">
-                        <h2 className="text-lg font-bold text-gray-700 mb-4">Wat gebeurt er nu?</h2>
+                        <h2 className="text-lg font-bold text-gray-700 mb-4">{t('thankYou.whatNext')}</h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
                             <div className="flex gap-3">
                                 <div className="w-10 h-10 rounded-full bg-hett-light flex items-center justify-center flex-shrink-0">
                                     <span className="text-hett-primary font-bold">1</span>
                                 </div>
                                 <div>
-                                    <p className="font-bold text-gray-700">Bevestigingsmail</p>
-                                    <p className="text-sm text-gray-500">U ontvangt een e-mail met uw bestelling.</p>
+                                    <p className="font-bold text-gray-700">{t('thankYou.confirmationEmail')}</p>
+                                    <p className="text-sm text-gray-500">{t('thankYou.confirmationEmailDesc')}</p>
                                 </div>
                             </div>
                             <div className="flex gap-3">
@@ -90,8 +92,8 @@ const ThankYou: React.FC = () => {
                                     <span className="text-hett-primary font-bold">2</span>
                                 </div>
                                 <div>
-                                    <p className="font-bold text-gray-700">Verwerking</p>
-                                    <p className="text-sm text-gray-500">We bereiden uw bestelling voor.</p>
+                                    <p className="font-bold text-gray-700">{t('thankYou.processing')}</p>
+                                    <p className="text-sm text-gray-500">{t('thankYou.processingDesc')}</p>
                                 </div>
                             </div>
                             <div className="flex gap-3">
@@ -99,7 +101,7 @@ const ThankYou: React.FC = () => {
                                     <Package size={18} className="text-hett-primary" />
                                 </div>
                                 <div>
-                                    <p className="font-bold text-gray-700">Verzending</p>
+                                    <p className="font-bold text-gray-700">{t('thankYou.shippingStep')}</p>
                                     <p className="text-sm text-gray-500">U ontvangt een track & trace code.</p>
                                 </div>
                             </div>
@@ -113,13 +115,13 @@ const ThankYou: React.FC = () => {
                             className="btn btn-primary btn-lg inline-flex items-center justify-center gap-2"
                         >
                             <ShoppingBag size={20} />
-                            Verder winkelen
+                            {t('common.continueShopping')}
                         </Link>
                         <Link 
                             to="/" 
                             className="btn btn-outline btn-lg inline-flex items-center justify-center gap-2"
                         >
-                            Naar homepage <ArrowRight size={20} />
+                            {t('thankYou.backToHome')} <ArrowRight size={20} />
                         </Link>
                     </div>
                 </Card>
@@ -127,9 +129,9 @@ const ThankYou: React.FC = () => {
                 {/* Support Info */}
                 <div className="text-center mt-12">
                     <p className="text-gray-500 text-sm">
-                        Vragen over uw bestelling?{' '}
+                        {t('thankYou.orderQuestions')}{' '}
                         <Link to="/contact" className="text-hett-primary font-bold hover:underline">
-                            Neem contact met ons op
+                            {t('thankYou.contactUs')}
                         </Link>
                     </p>
                 </div>

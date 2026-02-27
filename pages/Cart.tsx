@@ -6,6 +6,7 @@ import { extractWidthFromHandle, extractWidthFromSize } from '../src/services/ad
 import { useMaatwerkEdit } from '../context/MaatwerkEditContext';
 import { useSandwichpanelenEdit } from '../context/SandwichpanelenEditContext';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Trash2, ArrowRight, Plus, Minus, ShoppingBag, Info, Pencil, Loader2, AlertCircle, Zap } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import Button from '../components/ui/button';
@@ -20,6 +21,7 @@ import { beginCheckout, isShopifyConfigured } from '../src/lib/shopify';
 import { InlineSurchargeBreakdown } from '../src/components/cart/ConfigSurchargePreview';
 
 const Cart: React.FC = () => {
+    const { t } = useTranslation();
     const { 
       cart,
       cartProducts,
@@ -118,12 +120,12 @@ const Cart: React.FC = () => {
           // Redirect to Shopify checkout
           window.location.href = result.checkoutUrl;
         } else {
-          setCheckoutError(result.error || 'Er is een fout opgetreden bij het afrekenen.');
+          setCheckoutError(result.error || t('cart.checkoutError'));
           setIsCheckingOut(false);
         }
       } catch (error) {
         console.error('[Checkout] Unexpected error:', error);
-        setCheckoutError('Er is een onverwachte fout opgetreden. Probeer het opnieuw.');
+        setCheckoutError(t('cart.unexpectedError'));
         setIsCheckingOut(false);
       }
     };
@@ -147,14 +149,14 @@ const Cart: React.FC = () => {
   if (cartProducts.length === 0) {
     return (
             <div className="min-h-screen bg-[#f6f8fa] font-sans">
-        <PageHeader title="Winkelwagen" description="Uw winkelwagen is nog leeg." image="https://picsum.photos/1200/400?random=99" />
+        <PageHeader title={t('cart.title')} description={t('cart.headerSubtitle')} image="https://picsum.photos/1200/400?random=99" />
                 <div className="container py-20">
                     <Card className="text-center py-16">
             <ShoppingBag size={64} className="mx-auto mb-6 text-gray-300" />
-            <h2 className="text-2xl font-bold text-hett-dark mb-4">Je winkelwagen is leeg</h2>
-            <p className="text-gray-500 mb-8">Voeg producten toe om te beginnen met winkelen.</p>
+            <h2 className="text-2xl font-bold text-hett-dark mb-4">{t('cart.empty')}</h2>
+            <p className="text-gray-500 mb-8">{t('cart.emptySubtitle')}</p>
                         <Link to="/shop" className="btn btn-primary btn-lg">
-                            Verder winkelen
+                            {t('common.continueShopping')}
                         </Link>
                     </Card>
         </div>
@@ -164,7 +166,7 @@ const Cart: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#f6f8fa] font-sans">
-      <PageHeader title="Winkelwagen" description="Controleer uw bestelling." image="https://picsum.photos/1200/400?random=99" />
+      <PageHeader title={t('cart.title')} description={t('cart.headerDescription')} image="https://picsum.photos/1200/400?random=99" />
       
       <div className="container py-12 md:py-20">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
@@ -237,8 +239,8 @@ const Cart: React.FC = () => {
                                                 606,
                                                 })}
                                                 className="p-2 text-gray-400 hover:text-hett-primary transition-colors rounded-lg hover:bg-gray-100"
-                                                title="Bewerken"
-                                                aria-label="Configuratie bewerken"
+                                                title={t('common.edit')}
+                                                aria-label={t('cart.editConfig')}
                                             >
                                                 <Pencil size={16} />
                                             </button>
@@ -249,8 +251,8 @@ const Cart: React.FC = () => {
                                                 type="button"
                                                 onClick={() => openMaatwerkEdit({ cartIndex: idx, item })}
                                                 className="p-2 text-gray-400 hover:text-hett-primary transition-colors rounded-lg hover:bg-gray-100"
-                                                title="Bewerken"
-                                                aria-label="Maatwerk configuratie bewerken"
+                                                title={t('common.edit')}
+                                                aria-label={t('cart.editMaatwerkConfig')}
                                             >
                                                 <Pencil size={16} />
                                             </button>
@@ -262,8 +264,8 @@ const Cart: React.FC = () => {
                                                 type="button"
                                                 onClick={() => openSandwichpanelenEdit({ lineId: item.id, item })}
                                                 className="p-2 text-gray-400 hover:text-hett-primary transition-colors rounded-lg hover:bg-gray-100"
-                                                title="Bewerken"
-                                                aria-label="Bewerken"
+                                                title={t('common.edit')}
+                                                aria-label={t('common.edit')}
                                             >
                                                 <Pencil size={16} />
                                             </button>
@@ -281,8 +283,8 @@ const Cart: React.FC = () => {
                                             type="button"
                                             onClick={() => removeFromCart(idx)}
                                             className="p-2 text-gray-400 hover:text-red-500 transition-colors rounded-lg hover:bg-gray-100"
-                                            title="Verwijderen"
-                                            aria-label="Verwijderen"
+                                            title={t('common.remove')}
+                                            aria-label={t('common.remove')}
                                         >
                                             <Trash2 size={16} />
                                         </button>
@@ -301,9 +303,9 @@ const Cart: React.FC = () => {
                                     </div>
                                 ) : (
                                     <div className="text-xs text-gray-500 space-y-0.5 mt-1">
-                                        {item.selectedSize && <p>Afmeting: {item.selectedSize}</p>}
-                                        {item.selectedColor && <p>Kleur: {item.selectedColor}</p>}
-                                        {item.selectedRoof && <p>Dak: {item.selectedRoof}</p>}
+                                        {item.selectedSize && <p>{t('common.dimension')}: {item.selectedSize}</p>}
+                                        {item.selectedColor && <p>{t('common.color')}: {item.selectedColor}</p>}
+                                        {item.selectedRoof && <p>{t('common.roof')}: {item.selectedRoof}</p>}
                                     </div>
                                 )}
                                 
@@ -314,13 +316,13 @@ const Cart: React.FC = () => {
                                 <div className="flex items-center justify-between gap-3 mt-3 pt-3 border-t border-gray-100">
                                     {/* Quantity controls */}
                                     <div className="flex items-center gap-2">
-                                        <span className="text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-wide hidden md:inline">Aantal</span>
+                                        <span className="text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-wide hidden md:inline">{t('common.quantity')}</span>
                                         <div className="flex items-center gap-1">
                                             <button
                                               type="button"
                                               onClick={() => updateQuantity(idx, item.quantity - 1)}
                                               disabled={item.quantity <= 1}
-                                              aria-label="Minder"
+                                              aria-label={t('common.less')}
                                               className="w-8 h-8 flex items-center justify-center rounded-md border border-gray-200 text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
                                             >
                                               <Minus size={14} />
@@ -331,7 +333,7 @@ const Cart: React.FC = () => {
                                             <button
                                               type="button"
                                               onClick={() => updateQuantity(idx, item.quantity + 1)}
-                                              aria-label="Meer"
+                                              aria-label={t('common.more')}
                                               className="w-8 h-8 flex items-center justify-center rounded-md border border-gray-200 text-gray-600 hover:bg-gray-100"
                                             >
                                               <Plus size={14} />
@@ -341,9 +343,9 @@ const Cart: React.FC = () => {
 
                                     {/* Price */}
                                     <div className="text-right">
-                                        <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wide">Per stuk</div>
+                                        <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wide">{t('common.perUnit')}</div>
                                         <div className="font-bold text-hett-dark text-sm">{formatMoney(unitPrice)}</div>
-                                        <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wide mt-1">Regeltotaal</div>
+                                        <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wide mt-1">{t('cart.lineTotal')}</div>
                                         <div className="font-black text-lg md:text-xl text-hett-dark">{formatMoney(item.totalPrice)}</div>
                                     </div>
                                 </div>
@@ -362,7 +364,7 @@ const Cart: React.FC = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <h3 className="font-bold text-hett-dark">{ledLineItem.title}</h3>
-                        <p className="text-sm text-gray-500">Automatisch berekend op basis van veranda breedte</p>
+                        <p className="text-sm text-gray-500">{t('cart.autoCalculatedVerandaWidth')}</p>
                         <div className="flex items-center gap-2 mt-1 text-sm">
                           <span className="text-amber-700 font-medium">{ledLineItem.quantity} spots</span>
                           <span className="text-gray-400">×</span>
@@ -370,7 +372,7 @@ const Cart: React.FC = () => {
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wide">Totaal</div>
+                        <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wide">{t('common.total')}</div>
                         <div className="font-black text-lg md:text-xl text-hett-dark">{formatMoney(fromCents(ledLineItem.lineTotalCents))}</div>
                       </div>
                     </div>
@@ -386,22 +388,22 @@ const Cart: React.FC = () => {
 
                   {/* Order Summary Card */}
                   <Card padding="wide">
-                    <h3 className="text-xl font-black text-hett-dark mb-6 pb-4 border-b border-gray-100">Overzicht</h3>
+                    <h3 className="text-xl font-black text-hett-dark mb-6 pb-4 border-b border-gray-100">{t('cart.overview')}</h3>
                     
                     <div className="space-y-4 mb-6">
                         <div className="flex justify-between text-gray-600">
-                            <span className="font-medium">Producten subtotaal</span>
+                            <span className="font-medium">{t('cart.productsSubtotal')}</span>
                             <span className="font-bold">{formatMoney(subtotalExVat)}</span>
                         </div>
                         <div className="flex justify-between text-gray-600">
-                            <span className="font-medium">BTW (21%)</span>
+                            <span className="font-medium">{t('common.vat')}</span>
                             <span className="font-bold">{formatMoney(vatAmount)}</span>
                         </div>
                         <div className="flex justify-between text-gray-600">
-                            <span className="font-medium">Verzendkosten</span>
+                            <span className="font-medium">{t('cart.shipping')}</span>
                             <span className={`font-bold ${shippingCostCents === 0 ? 'text-green-600' : ''}`}>
                               {shippingMode === 'pickup'
-                                ? 'Gratis'
+                                ? t('common.free')
                                 : shippingIsValid
                                   ? formatShippingPrice(shippingCostCents)
                                   : '—'}
@@ -411,10 +413,10 @@ const Cart: React.FC = () => {
                     
                     <div className="pt-6 border-t border-gray-100 mb-6">
                         <div className="flex justify-between items-center">
-                            <span className="text-lg font-bold text-gray-700">Totaal</span>
+                            <span className="text-lg font-bold text-gray-700">{t('common.total')}</span>
                             <span className="text-2xl font-black text-hett-dark">{formatMoney(totalInclVat)}</span>
                         </div>
-                        <p className="text-xs text-gray-500 mt-2">Totaal (incl. BTW en verzending)</p>
+                        <p className="text-xs text-gray-500 mt-2">{t('cart.totalInclVatShipping')}</p>
                     </div>
                     
                     <div className="space-y-3">
@@ -430,11 +432,11 @@ const Cart: React.FC = () => {
                             {isCheckingOut ? (
                               <>
                                 <Loader2 size={20} className="animate-spin" />
-                                Bezig met afrekenen...
+                                {t('cart.checkingOut')}
                               </>
                             ) : (
                               <>
-                                Afrekenen <ArrowRight size={20} />
+                                {t('cart.checkout')} <ArrowRight size={20} />
                               </>
                             )}
                         </button>
@@ -442,21 +444,21 @@ const Cart: React.FC = () => {
                           <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
                             <AlertCircle size={18} className="flex-shrink-0 mt-0.5" />
                             <div>
-                              <p className="font-medium">Afrekenen mislukt</p>
+                              <p className="font-medium">{t('cart.checkoutFailed')}</p>
                               <p className="text-red-600">{checkoutError}</p>
                             </div>
                           </div>
                         )}
                         {!canCheckout && shippingMode === 'delivery' && (shippingCountry === 'BE' || shippingCountry === 'DE') && !isCheckingOut && (
                           <p className="text-xs text-red-500 text-center">
-                            Bereken eerst je verzendkosten voor België of Duitsland.
+                            {t('cart.shippingRequired')}
                           </p>
                         )}
                         <Link 
                             to="/shop" 
                             className="btn btn-outline btn-md w-full"
                         >
-                            Verder winkelen
+                            {t('common.continueShopping')}
                         </Link>
                     </div>
                   </Card>
@@ -478,8 +480,8 @@ function CartItemConfigInfo({ title, breakdown, debugId }: { title: string; brea
                 type="button"
                 onClick={() => setOpen(true)}
                 className="p-2 text-gray-400 hover:text-hett-primary transition-colors rounded-lg hover:bg-gray-100"
-                title="Bekijk configuratie & prijsopbouw"
-                aria-label="Bekijk configuratie & prijsopbouw"
+                title="Bekijk configuratie"
+                aria-label="Bekijk configuratie"
             >
                 <Info size={16} />
             </button>

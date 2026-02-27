@@ -14,6 +14,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 // =============================================================================
 // TYPES
@@ -214,8 +215,20 @@ const Thumbnail: React.FC<ThumbnailProps> = ({ item, isActive, onClick }) => {
 // =============================================================================
 
 const HomeHeroShowcase: React.FC = () => {
+  const { t } = useTranslation();
   const [activeIndex, setActiveIndex] = useState(0);
   const [thumbnailsReady, setThumbnailsReady] = useState(false);
+
+  // Override hero text with i18n
+  const translatedItems = heroItems.map((item) => {
+    if (item.id === 'veranda') {
+      return { ...item, title: t('home.hero.title'), subtitle: t('home.hero.subtitle'), ctaText: t('home.hero.verandaCta') };
+    }
+    if (item.id === 'maatwerk-veranda') {
+      return { ...item, title: t('home.hero.maatwerkTitle'), subtitle: t('home.hero.maatwerkSubtitle'), ctaText: t('home.hero.maatwerkCta') };
+    }
+    return item;
+  });
 
   // Delay thumbnail rendering until after initial hero mount (optimize LCP)
   useEffect(() => {
@@ -230,8 +243,8 @@ const HomeHeroShowcase: React.FC = () => {
     }
   }, []);
 
-  const visibleItems = heroItems.filter(item => item.enabled);
-  const currentItem = visibleItems[activeIndex] || heroItems[0];
+  const visibleItems = translatedItems.filter(item => item.enabled);
+  const currentItem = visibleItems[activeIndex] || translatedItems[0];
   const priceMatch = currentItem.title.match(/€\s?\d+/);
   const priceText = priceMatch?.[0];
   const priceIndex = priceText ? currentItem.title.indexOf(priceText) : -1;
@@ -269,7 +282,7 @@ const HomeHeroShowcase: React.FC = () => {
           <div className="flex-1 flex flex-col justify-center max-w-2xl">
             {/* Eyebrow */}
             <span className="text-hett-secondary font-bold text-sm md:text-base tracking-wide uppercase mb-3">
-              HETT VERANDA'S
+              {t('home.hero.eyebrow')}
             </span>
             
             {/* Title */}

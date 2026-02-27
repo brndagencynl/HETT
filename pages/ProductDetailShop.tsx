@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useCart } from '../context/CartContext';
 import { Truck, ShieldCheck, PenTool, ArrowLeft, ChevronLeft, ChevronRight, ShoppingCart, Loader2 } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
@@ -20,6 +21,7 @@ type ProductDetailShopProps = {
 };
 
 const ProductDetailShop: React.FC<ProductDetailShopProps> = ({ productHandle }) => {
+    const { t } = useTranslation();
     const { handle } = useParams<{ handle: string }>();
     const resolvedHandle = productHandle ?? handle;
     const configuratorRef = useRef<VerandaConfiguratorRef>(null);
@@ -47,7 +49,7 @@ const ProductDetailShop: React.FC<ProductDetailShopProps> = ({ productHandle }) 
             console.log('[PDP] handle param', resolvedHandle);
             
             if (!resolvedHandle) {
-                setError('Geen product handle opgegeven');
+                setError(t('shop.noHandleError'));
                 setLoading(false);
                 return;
             }
@@ -63,7 +65,7 @@ const ProductDetailShop: React.FC<ProductDetailShopProps> = ({ productHandle }) 
                 const shopifyProduct = await getProductByHandle(resolvedHandle);
                 
                 if (!shopifyProduct) {
-                    setError('Product niet gevonden');
+                    setError(t('shop.productNotFound'));
                     setLoading(false);
                     return;
                 }
@@ -93,7 +95,7 @@ const ProductDetailShop: React.FC<ProductDetailShopProps> = ({ productHandle }) 
                 setActiveImage(images[0]);
             } catch (err) {
                 console.error('[ProductDetailShop] Error fetching product:', err);
-                setError('Fout bij het laden van het product');
+                setError(t('shop.productLoadError'));
             } finally {
                 setLoading(false);
             }
@@ -108,7 +110,7 @@ const ProductDetailShop: React.FC<ProductDetailShopProps> = ({ productHandle }) 
             <div className="min-h-screen bg-white flex items-center justify-center">
                 <div className="text-center">
                     <Loader2 className="w-12 h-12 animate-spin text-hett-secondary mx-auto mb-4" />
-                    <p className="text-hett-muted font-bold">Product laden...</p>
+                    <p className="text-hett-muted font-bold">{t('common.loading')}</p>
                 </div>
             </div>
         );
@@ -119,10 +121,10 @@ const ProductDetailShop: React.FC<ProductDetailShopProps> = ({ productHandle }) 
         return (
             <div className="min-h-screen bg-white flex items-center justify-center">
                 <div className="text-center max-w-md">
-                    <h2 className="text-2xl font-black text-hett-text mb-4">Product niet gevonden</h2>
-                    <p className="text-hett-muted mb-8">{error || 'Het opgevraagde product bestaat niet of is niet meer beschikbaar.'}</p>
+                    <h2 className="text-2xl font-black text-hett-text mb-4">{t('shop.productNotFound')}</h2>
+                    <p className="text-hett-muted mb-8">{error || t('shop.productNotFound')}</p>
                     <Link to="/shop" className="btn-primary inline-flex items-center gap-2">
-                        <ArrowLeft size={16} /> Terug naar shop
+                        <ArrowLeft size={16} /> {t('shop.backToOverview')}
                     </Link>
                 </div>
             </div>
@@ -176,7 +178,7 @@ const ProductDetailShop: React.FC<ProductDetailShopProps> = ({ productHandle }) 
 
         // Validate variant ID
         if (!product.shopifyVariantId) {
-            const errorMsg = 'Dit product heeft geen beschikbare variant in Shopify.';
+            const errorMsg = t('shop.noVariantError');
             console.error('[ProductDetailShop] No variant ID:', product.id);
             setAccessoryError(errorMsg);
             setTimeout(() => setAccessoryError(null), 4000);
@@ -193,7 +195,7 @@ const ProductDetailShop: React.FC<ProductDetailShopProps> = ({ productHandle }) 
             console.log('[ProductDetailShop] addToCart called successfully');
         } catch (err) {
             console.error('[ProductDetailShop] addToCart error:', err);
-            setAccessoryError('Kon niet toevoegen aan winkelwagen');
+            setAccessoryError(t('shop.addToCartError'));
             setTimeout(() => setAccessoryError(null), 4000);
         } finally {
             setIsAddingAccessory(false);
@@ -261,8 +263,8 @@ const ProductDetailShop: React.FC<ProductDetailShopProps> = ({ productHandle }) 
                     <div className="lg:col-span-5">
                         <div className="card sticky top-32">
                             <div className="flex items-center gap-4 text-xs font-bold text-hett-muted mb-6 pb-6 border-b border-hett-muted/10">
-                                <span className="flex items-center gap-1"><Truck size={14} className="text-green-600" /> Op voorraad</span>
-                                <span className="flex items-center gap-1"><ShieldCheck size={14} className="text-green-600" /> 10 Jaar garantie</span>
+                                <span className="flex items-center gap-1"><Truck size={14} className="text-green-600" /> {t('common.inStock')}</span>
+                                <span className="flex items-center gap-1"><ShieldCheck size={14} className="text-green-600" /> {t('warranty.tenYear')}</span>
                             </div>
 
                             {product.category === 'sandwichpanelen' ? (
@@ -275,12 +277,12 @@ const ProductDetailShop: React.FC<ProductDetailShopProps> = ({ productHandle }) 
                                 <>
                                     <h3 className="text-2xl font-black text-hett-text mb-4">{product.title}</h3>
                                     <p className="text-hett-muted text-sm leading-relaxed mb-8">
-                                        {product.shortDescription || product.description || 'Stel uw product volledig op maat samen in onze configurator.'}
+                                        {product.shortDescription || product.description || t('shop.configureDescription')}
                                     </p>
 
                                     <div className="flex items-baseline gap-2 mb-8">
                                         <span className="text-4xl font-black text-hett-text">{formatEUR(product.priceCents, 'cents')}</span>
-                                        <span className="text-hett-muted text-xs font-bold uppercase tracking-wider">Vanaf prijs</span>
+                                        <span className="text-hett-muted text-xs font-bold uppercase tracking-wider">{t('shop.from')}</span>
                                     </div>
 
                                     <ProductUSPs items={product.usps ?? []} />
@@ -288,16 +290,16 @@ const ProductDetailShop: React.FC<ProductDetailShopProps> = ({ productHandle }) 
                                     <div className="space-y-3">
                                         <button onClick={handleOpenConfigurator} className="btn-primary w-full py-5 text-lg flex items-center justify-center gap-3">
                                             <PenTool size={20} />
-                                            Stel samen
+                                            {t('common.configure')}
                                         </button>
                                     </div>
 
                                     <div className="mt-8 bg-hett-light p-4 rounded-lg space-y-3">
                                         <div className="flex items-start gap-3 text-xs font-bold text-hett-text">
-                                            <span className="text-hett-secondary flex-shrink-0">✓</span> Direct inzicht in de prijs
+                                            <span className="text-hett-secondary flex-shrink-0">✓</span> {t('shop.usp.priceInsight')}
                                         </div>
                                         <div className="flex items-start gap-3 text-xs font-bold text-hett-text">
-                                            <span className="text-hett-secondary flex-shrink-0">✓</span> Gratis verzending in Nederland
+                                            <span className="text-hett-secondary flex-shrink-0">✓</span> {t('shop.usp.freeShippingNL')}
                                         </div>
                                     </div>
                                 </>
@@ -310,7 +312,7 @@ const ProductDetailShop: React.FC<ProductDetailShopProps> = ({ productHandle }) 
 
                                     <div className="flex items-baseline gap-2 mb-8">
                                         <span className="text-4xl font-black text-hett-text">{formatEUR(product.priceCents, 'cents')}</span>
-                                        <span className="text-hett-muted text-xs font-bold uppercase tracking-wider">Incl. BTW</span>
+                                        <span className="text-hett-muted text-xs font-bold uppercase tracking-wider">{t('common.inclVat')}</span>
                                     </div>
 
                                     <ProductUSPs items={product.usps ?? []} />
@@ -339,7 +341,7 @@ const ProductDetailShop: React.FC<ProductDetailShopProps> = ({ productHandle }) 
                                             }`}
                                         >
                                             <ShoppingCart size={20} /> 
-                                            {isAddingAccessory ? 'Toevoegen...' : 'In winkelwagen'}
+                                            {isAddingAccessory ? t('shop.adding') : t('shop.addToCart')}
                                         </button>
                                     </div>
                                 </>
@@ -352,19 +354,19 @@ const ProductDetailShop: React.FC<ProductDetailShopProps> = ({ productHandle }) 
                 <div className="mb-20">
                     <ProductDetailContent
                         uspItems={[
-                            { icon: "shield", title: "Gratis 5 jaar garantie", subtitle: "Op constructie & systeem" },
-                            { icon: "rail", title: "Unieke onderrail", subtitle: "Strak, stabiel en duurzaam" },
-                            { icon: "truck", title: "Gratis levering", subtitle: "In Nederland & België" },
-                            { icon: "tools", title: "Zelf eenvoudig monteren", subtitle: "Duidelijke handleiding inbegrepen" }
+                            { icon: "shield", title: t('productDetail.usp.freeWarranty'), subtitle: t('productDetail.usp.freeWarrantySubtitle') },
+                            { icon: "rail", title: t('productDetail.usp.uniqueRail'), subtitle: t('productDetail.usp.uniqueRailSubtitle') },
+                            { icon: "truck", title: t('productDetail.usp.freeDelivery'), subtitle: t('productDetail.usp.freeDeliverySubtitle') },
+                            { icon: "tools", title: t('productDetail.usp.easyAssembly'), subtitle: t('productDetail.usp.easyAssemblySubtitle') }
                         ]}
                         delivery={{
-                            title: "Levering & montage",
-                            text: "Wij leveren met eigen transport door de Benelux en Duitsland. Elk pakket is compleet en voorzien van een duidelijke montagehandleiding.",
-                            leadTimeLabel: "Huidige levertijd",
-                            leadTimeValue: "10 werkdagen"
+                            title: t('productDetail.delivery.title'),
+                            text: t('productDetail.delivery.text'),
+                            leadTimeLabel: t('productDetail.delivery.leadTimeLabel'),
+                            leadTimeValue: t('productDetail.delivery.leadTimeValue')
                         }}
                         description={{
-                            title: `Over de ${product.title}`,
+                            title: t('productDetail.aboutProduct', { title: product.title }),
                             intro: product.description || product.shortDescription,
                             // Use extra description from Shopify metafield if available
                             extraDescriptionHtml: product.extraDescription || undefined

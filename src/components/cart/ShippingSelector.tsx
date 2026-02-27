@@ -7,6 +7,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { MapPin, Truck, Check, AlertCircle, Lock } from 'lucide-react';
 import { Card } from '../../../components/ui/card';
 import {
@@ -48,6 +49,7 @@ export const ShippingSelector: React.FC<ShippingSelectorProps> = ({
   onPostcodeChange,
   onValidationChange,
 }) => {
+  const { t } = useTranslation();
   const [localPostcode, setLocalPostcode] = useState(postcode);
   const [validationMessage, setValidationMessage] = useState('');
   const [hasInteracted, setHasInteracted] = useState(false);
@@ -88,14 +90,14 @@ export const ShippingSelector: React.FC<ShippingSelectorProps> = ({
   return (
     <Card padding="wide">
       <h3 className="text-lg font-black text-[#003878] mb-4 pb-3 border-b border-gray-100">
-        Bezorging / Afhalen
+        {t('shipping.pickupOrDelivery')}
       </h3>
 
       {/* Lock Banner */}
       {isLocked && (
         <div className="flex items-center gap-2 p-3 mb-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-800">
           <Lock size={16} className="flex-shrink-0" />
-          <span className="text-sm">Bezorgmethode is vergrendeld tijdens het afrekenen.</span>
+          <span className="text-sm">{t('shipping.methodLocked')}</span>
         </div>
       )}
 
@@ -135,10 +137,10 @@ export const ShippingSelector: React.FC<ShippingSelectorProps> = ({
             className={method === 'pickup' ? 'text-[#003878]' : 'text-gray-400'}
           />
           <div className="flex-1">
-            <div className="font-bold text-gray-900">Afhalen in Eindhoven</div>
-            <div className="text-xs text-gray-500">Op ons magazijn ophalen</div>
+            <div className="font-bold text-gray-900">{t('shipping.pickupInEindhoven')}</div>
+            <div className="text-xs text-gray-500">{t('shipping.pickupAtWarehouse')}</div>
           </div>
-          <span className="font-bold text-green-600">Gratis</span>
+          <span className="font-bold text-green-600">{t('common.free')}</span>
         </label>
 
         {/* Delivery Option */}
@@ -174,8 +176,8 @@ export const ShippingSelector: React.FC<ShippingSelectorProps> = ({
             className={method === 'delivery' ? 'text-[#003878]' : 'text-gray-400'}
           />
           <div className="flex-1">
-            <div className="font-bold text-gray-900">Bezorgen</div>
-            <div className="text-xs text-gray-500">Aan huis geleverd</div>
+            <div className="font-bold text-gray-900">{t('shipping.deliver')}</div>
+            <div className="text-xs text-gray-500">{t('shipping.homeDelivery')}</div>
           </div>
           {method === 'delivery' && isValid && (
             <span className={`font-bold ${cost === 0 ? 'text-green-600' : 'text-gray-900'}`}>
@@ -189,7 +191,7 @@ export const ShippingSelector: React.FC<ShippingSelectorProps> = ({
       {method === 'delivery' && (
         <div className={`mt-4 pt-4 border-t border-gray-100 ${isLocked ? 'opacity-60 pointer-events-none' : ''}`}>
           <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Postcode bezorgadres
+            {t('shipping.postalCodeDelivery')}
           </label>
           <div className="relative">
             <input
@@ -230,7 +232,7 @@ export const ShippingSelector: React.FC<ShippingSelectorProps> = ({
 
           {/* Country help text */}
           <p className="mt-2 text-xs text-gray-400">
-            Wij leveren in Nederland, België en Duitsland
+            {t('shipping.deliveryNote')}
           </p>
         </div>
       )}
@@ -240,10 +242,10 @@ export const ShippingSelector: React.FC<ShippingSelectorProps> = ({
         <div className="mt-4 pt-4 border-t border-gray-100">
           <div className="flex items-center gap-2 text-green-600 text-sm font-medium">
             <Check size={16} />
-            <span>Afhalen in Eindhoven (gratis)</span>
+            <span>{t('shipping.pickupFree')}</span>
           </div>
           <p className="mt-1 text-xs text-gray-500">
-            U ontvangt een e-mail zodra uw bestelling klaar staat
+            {t('shipping.pickupNotice')}
           </p>
         </div>
       )}

@@ -151,7 +151,14 @@
     "freeShipping": "Free delivery",
     "avgLeadTime": "Average lead time",
     "photo": "Photo",
-    "model3D": "3D Model"
+    "model3D": "3D Model",
+    "noHandleError": "No product handle provided",
+    "productLoadError": "An error occurred while loading the product.",
+    "configureDescription": "Fully customise your product in our configurator.",
+    "usp": {
+      "priceInsight": "Instant price overview",
+      "freeShippingNL": "Free shipping in the Netherlands"
+    }
   },
   "search": {
     "title": "Search",
@@ -422,16 +429,27 @@
     "maatwerkTitle": "Custom for every garden",
     "guarantee": "10-year warranty",
     "serviceTitle": "Customer-focused service and transparency",
-    "diyTitle": "Easy to install yourself"
+    "diyTitle": "Easy to install yourself",
+    "whyItems": {
+      "outdoor": { "title": "Always inside, outdoors all year!", "description": "With a HETT veranda, you enjoy your garden four seasons long. Sheltered from rain and wind, yet with the full outdoor feeling, you create an extension of your living room." },
+      "custom": { "title": "Custom-made for every garden", "description": "No garden is the same. That's why we deliver all our systems to the millimetre. Whether it's a standard veranda or a fully custom composition — it always fits." },
+      "warranty": { "title": "10-year warranty on all verandas", "description": "We offer a 10-year material warranty on all our verandas. No worries, just enjoy." },
+      "service": { "title": "Customer-focused service and transparency", "description": "From honest advice in the showroom to clear communication about delivery — with us you always know where you stand. No fine print." },
+      "assembly": { "title": "Easy assembly", "description": "Our systems are designed as smart building kits. With clear manuals and videos you can assemble your veranda yourself. And if not? We're happy to help." }
+    },
+    "storyParagraph1": "At HETT Veranda everything revolves around one thing: a veranda that's right. Not standard solutions from a catalogue, but a product that perfectly suits your home, your garden and your way of life. We design and produce aluminium verandas built to provide years of enjoyment.",
+    "storyParagraph2": "Whether you choose a standard veranda or a custom composition — everything is delivered with the same care and quality. From the first configuration to final assembly, we guide you every step of the way."
   },
   "delivery": {
     "title": "Delivery & Shipping",
+    "subtitle": "Service",
     "description": "Everything about our deliveries, shipping costs and what to expect in the Netherlands, Belgium and Germany.",
     "tabs": {
       "delivery": "Delivery & Shipping",
       "warranty": "Warranty & Service",
       "payment": "Ordering & Payment",
-      "returns": "Return Policy"
+      "returns": "Return Policy",
+      "mounting": "Product & Assembly"
     },
     "leadTimes": "Lead times",
     "leadTimesDesc": "We aim to deliver in-stock products within 1 to 2 weeks throughout the Netherlands and Belgium.",
@@ -627,11 +645,14 @@
   },
   "mounting": {
     "title": "Assembly Guides",
+    "subtitle": "Support",
     "description": "Step-by-step instructions and videos to professionally assemble your HETT product.",
     "categories": "Categories",
     "diyTitle": "Do it yourself",
     "diyDesc": "All our products are designed as smart building kits that you can easily assemble yourself. With our guides and videos, we walk you through the assembly process step by step.",
     "pdfGuides": "PDF Guides",
+    "instructionVideos": "Instruction videos",
+    "videoAlt": "Assembly instruction video",
     "guideTitle": "HETT Veranda Assembly Guide",
     "tools": "Required Tools",
     "toolsDesc": "Make sure you have these tools before you start:",
@@ -645,11 +666,13 @@
       "holeSaw": "Hole saw (for spots)"
     },
     "supportNote": "Our technical service is available for quick questions.",
+    "helpDuring": "Need help during assembly?",
     "callSupport": "Call +31 (0)6 85 40 60 33",
     "tabs": {
       "delivery": "Delivery & Pick-up",
       "warranty": "Warranty & Service",
-      "ordering": "Ordering & Payment"
+      "ordering": "Ordering & Payment",
+      "productMontage": "Product & Assembly"
     }
   },
   "payment": {
@@ -743,8 +766,114 @@
     "delivery5to10": "Delivery 5-10 working days",
     "warranty5year": "5 year warranty",
     "gootOptie": "Gutter option",
+    "invalidVariantForSize": "No valid Shopify variant found for this size ({{width}}x{{depth}} cm).",
     "addingToCart": "Adding...",
     "requestQuote": "Request quote"
+  },
+  "categoryPage": {
+    "resultsIn": "Show results in",
+    "results": "results",
+    "defaultSort": "Default",
+    "minPrice": "Min €",
+    "maxPrice": "Max €",
+    "introAccessoires": "At HETT Veranda you will find accessories that perfectly match our verandas and panels, such as LED lighting and finishing components. Easy to add to your order.",
+    "introVerandas": "Discover our high-quality aluminium verandas, designed for comfort, style and durability. Whether you choose a sleek modern design or a timeless look: at HETT you can fully compose your veranda based on your wishes and dimensions. Our verandas are suitable for both private gardens and professional applications and can easily be expanded with side walls, glass sliding walls, roof options and lighting.",
+    "introDefault": "At HETT.nl you will find a wide selection of high-quality {{category}} from top brands. Our systems are available in different sizes and materials, including aluminium and powder-coated steel, so you always have the right solution for your garden project."
+  },
+  "standardVerandaPage": {
+    "pageTitle": "Verandas",
+    "pageSubtitle": "Configure your veranda",
+    "title": "Build your veranda",
+    "subtitle": "Choose a standard size and fully configure your veranda to your wishes",
+    "productNotFound": "Product not found. Check whether the product \"standaard-veranda\" exists in Shopify.",
+    "loadError": "Error loading product.",
+    "genericError": "An error occurred.",
+    "loadingProduct": "Loading product...",
+    "infoStrong": "Standard verandas",
+    "infoTextBeforeLink": "have fixed dimensions and are delivered faster. For a custom-size veranda you can use our",
+    "customConfigurator": "custom configurator",
+    "infoTextAfterLink": ".",
+    "chooseWidth": "Choose width",
+    "chooseDepth": "Choose depth",
+    "selectWidthFirst": "First select a width to see available depths.",
+    "selectedSize": "Selected dimensions",
+    "basePrice": "Base price",
+    "defaultDescription": "High-quality aluminium veranda with many configuration options. Choose your preferred dimensions and fully configure the veranda to your needs.",
+    "fastDelivery": "Fast delivery",
+    "tenYearWarranty": "10-year warranty",
+    "onConstruction": "On construction",
+    "configure": "Configure your veranda",
+    "selectSizeFirst": "Select dimensions first",
+    "orSeeOur": "Or view our",
+    "customVerandas": "custom verandas",
+    "configIncomplete": "Configuration incomplete"
+  },
+  "showroomPage": {
+    "title": "Visit our Showroom",
+    "subtitle": "Book an appointment",
+    "description": "Experience our products in real life. Our advisors are ready with coffee and expert advice.",
+    "locationLabel": "HETT Eindhoven Showroom",
+    "planTitle": "Plan your appointment with our advisor(s)",
+    "duration": "1 hour",
+    "locationShort": "Showroom Eindhoven",
+    "openingContactTitle": "Opening hours & contact details",
+    "specialHours": "Special opening hours",
+    "byAppointment": "By appointment",
+    "closed": "Closed",
+    "mapAlt": "Map",
+    "openInMaps": "Open in Google Maps",
+    "days": {
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday",
+      "sunday": "Sunday"
+    },
+    "specialDays": {
+      "goodFriday": "Good Friday (18 April)",
+      "easterMonday": "Easter Monday (21 April)",
+      "kingsDay": "King's Day (26 April)"
+    }
+  },
+  "mountingSteps": {
+    "title": "Ordering & assembly in 5 clear steps",
+    "description": "From configuration to installation: this is how we keep it clear and transparent.",
+    "whyTitle": "Why HETT?",
+    "whyItems": [
+      "Everything in one overview: price, options and lead time immediately visible",
+      "Assemble yourself or have it installed – you choose what fits",
+      "Personal contact for delivery and aftercare",
+      "Clear manuals and video instructions"
+    ],
+    "note": "At HETT, transparency comes first. No hidden costs, no hassle – just a beautiful product with clear service.",
+    "badges": ["Clear planning", "Assembly by HETT", "Aftercare & support"],
+    "steps": {
+      "1": { "title": "Configure your veranda", "description": "Choose your model, dimensions, colour and options in the configurator. You immediately see an overview of your choices and total price." },
+      "2": { "title": "Place your order", "description": "Review the price and options overview and complete your order. After ordering, you will receive a confirmation by email." },
+      "3": { "title": "Plan delivery", "description": "After processing, we contact you to align the delivery. We discuss accessibility, unloading spot and any special details." },
+      "4": { "title": "On-site assembly (optional)", "description": "Want full peace of mind? HETT Veranda can handle assembly. You can request a no-obligation quote." },
+      "5": { "title": "Aftercare & handover", "description": "After installation, the installer checks everything and gives maintenance/use tips. Questions afterwards? We are always here to help." }
+    }
+  },
+  "mountingPartner": {
+    "badge": "IN-HOUSE ASSEMBLY TEAM",
+    "title": "Assembly by HETT Veranda",
+    "description": "We handle your veranda assembly fully in-house. From planning to handover: you have one point of contact. Assembly is available only based on a personal quote.",
+    "quoteBadge": "Assembly on quotation",
+    "requestQuote": "Request quote",
+    "whatsappUs": "WhatsApp us",
+    "ownService": "In-house assembly service",
+    "sideText1": "Our experienced team installs your veranda professionally and efficiently. You don't have to worry about anything.",
+    "sideText2": "After your order, we contact you to schedule a suitable assembly date.",
+    "quoteOnRequestShort": "On quotation",
+    "note": "Assembly is available throughout the Netherlands. Pricing depends on the type of veranda, location and accessibility. Request a no-obligation quote via our contact page or WhatsApp.",
+    "usps": [
+      "Assembly by our own team",
+      "Scheduling in consultation (after order)",
+      "Neatly installed and delivered"
+    ]
   },
   "privacy": {
     "title": "Privacy Policy",
@@ -774,26 +903,6 @@
       "montage": "Assembly",
       "garantie": "Warranty",
       "retourbeleid": "Return Policy"
-    }
-  },
-  "about": {
-    "whyItems": {
-      "outdoor": { "title": "Always inside, outdoors all year!", "description": "With a HETT veranda, you enjoy your garden four seasons long. Sheltered from rain and wind, yet with the full outdoor feeling, you create an extension of your living room." },
-      "custom": { "title": "Custom-made for every garden", "description": "No garden is the same. That's why we deliver all our systems to the millimetre. Whether it's a standard veranda or a fully custom composition — it always fits." },
-      "warranty": { "title": "10-year warranty on all verandas", "description": "We offer a 10-year material warranty on all our verandas. No worries, just enjoy." },
-      "service": { "title": "Customer-focused service and transparency", "description": "From honest advice in the showroom to clear communication about delivery — with us you always know where you stand. No fine print." },
-      "assembly": { "title": "Easy assembly", "description": "Our systems are designed as smart building kits. With clear manuals and videos you can assemble your veranda yourself. And if not? We're happy to help." }
-    },
-    "storyParagraph1": "At HETT Veranda everything revolves around one thing: a veranda that's right. Not standard solutions from a catalogue, but a product that perfectly suits your home, your garden and your way of life. We design and produce aluminium verandas built to provide years of enjoyment.",
-    "storyParagraph2": "Whether you choose a standard veranda or a custom composition — everything is delivered with the same care and quality. From the first configuration to final assembly, we guide you every step of the way."
-  },
-  "shop": {
-    "noHandleError": "No product handle provided",
-    "productLoadError": "An error occurred while loading the product.",
-    "configureDescription": "Fully customise your product in our configurator.",
-    "usp": {
-      "priceInsight": "Instant price overview",
-      "freeShippingNL": "Free shipping in the Netherlands"
     }
   },
   "productDetail": {

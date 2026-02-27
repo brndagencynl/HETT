@@ -14,14 +14,14 @@ const Mounting: React.FC = () => {
         { id: 'bezorgen', title: t('mounting.tabs.delivery'), icon: Truck, path: '/bezorging' },
         { id: 'garantie', title: t('mounting.tabs.warranty'), icon: ShieldCheck, path: '/garantie-en-klachten' },
         { id: 'betalen', title: t('mounting.tabs.ordering'), icon: CreditCard, path: '/betaalmethoden' },
-        { id: 'montage', title: 'Product & Montage', icon: Pen, path: '/montage-handleiding' },
+        { id: 'montage', title: t('mounting.tabs.productMontage'), icon: Pen, path: '/montage-handleiding' },
     ];
     
   return (
     <div className="min-h-screen bg-[#f6f8fa] font-sans">
       <PageHeader 
         title={t('mounting.title')}
-        subtitle="Support"
+                subtitle={t('mounting.subtitle')}
         description={t('mounting.description')}
         image="https://picsum.photos/1200/600?random=mounting"
       />
@@ -83,7 +83,7 @@ const Mounting: React.FC = () => {
                 {/* Video Section */}
                 <div>
                      <h3 className="text-xl font-bold text-hett-dark mb-6 flex items-center gap-2">
-                        <Youtube className="text-red-600" /> Instructievideo's
+                        <Youtube className="text-red-600" /> {t('mounting.instructionVideos')}
                     </h3>
                     <a
                         href="https://youtu.be/wA4XeNEzMnA"
@@ -95,7 +95,7 @@ const Mounting: React.FC = () => {
                             <img
                                 src="https://img.youtube.com/vi/wA4XeNEzMnA/hqdefault.jpg"
                                 className="w-full h-full object-cover opacity-90"
-                                alt="Instructievideo montagehandleiding"
+                                alt={t('mounting.videoAlt')}
                             />
                             <div className="absolute inset-0 flex items-center justify-center">
                                 <PlayCircle size={56} className="text-white drop-shadow-lg group-hover:scale-110 transition-transform" />
@@ -127,7 +127,7 @@ const Mounting: React.FC = () => {
                     </ul>
 
                     <div className="mt-8 pt-6 border-t border-gray-100">
-                        <h4 className="font-bold text-hett-dark text-sm mb-2">Hulp nodig tijdens montage?</h4>
+                        <h4 className="font-bold text-hett-dark text-sm mb-2">{t('mounting.helpDuring')}</h4>
                         <p className="text-xs text-gray-500 mb-4">{t('mounting.supportNote')}</p>
                         <a href="tel:+31685406033" className="block w-full text-center bg-gray-50 text-hett-dark font-bold py-3 rounded-xl hover:bg-gray-100 transition-colors text-sm">
                             {t('mounting.callSupport')}

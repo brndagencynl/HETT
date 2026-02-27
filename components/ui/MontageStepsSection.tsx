@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { Settings, ShoppingCart, Truck, Wrench, HeartHandshake, CalendarCheck, Users, Headphones } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface Step {
   number: number;
@@ -16,55 +17,56 @@ interface Step {
   icon: React.ElementType;
 }
 
-const STEPS: Step[] = [
-  {
-    number: 1,
-    title: 'Stel uw veranda samen',
-    description: 'Kies uw model, afmeting, kleur en opties in de configurator. U ziet direct een overzicht van uw keuzes en de totaalprijs.',
-    icon: Settings,
-  },
-  {
-    number: 2,
-    title: 'Plaats uw bestelling',
-    description: 'Controleer het prijs- en optiesoverzicht en rond de bestelling af. Na bestelling ontvangt u een bevestiging per e-mail.',
-    icon: ShoppingCart,
-  },
-  {
-    number: 3,
-    title: 'Levering plannen',
-    description: 'Na verwerking nemen we contact op om de levering af te stemmen. We bespreken bereikbaarheid, losplek en eventuele bijzonderheden.',
-    icon: Truck,
-  },
-  {
-    number: 4,
-    title: 'Montage op locatie (optioneel)',
-    description: 'Wilt u volledige ontzorging? Dan verzorgt HETT Veranda de montage. Hiervoor kunt u vrijblijvend een offerte aanvragen.',
-    icon: Wrench,
-  },
-  {
-    number: 5,
-    title: 'Nazorg & oplevering',
-    description: 'Na plaatsing loopt de monteur alles na en ontvangt u tips voor onderhoud en gebruik. Vragen achteraf? We helpen u altijd verder.',
-    icon: HeartHandshake,
-  },
-];
-
-const INFO_BADGES = [
-  { icon: CalendarCheck, label: 'Duidelijke planning' },
-  { icon: Users, label: 'Montage door HETT' },
-  { icon: Headphones, label: 'Nazorg & support' },
-];
-
 const MontageStepsSection: React.FC = () => {
+  const { t } = useTranslation();
+  const steps: Step[] = [
+    {
+      number: 1,
+      title: t('mountingSteps.steps.1.title'),
+      description: t('mountingSteps.steps.1.description'),
+      icon: Settings,
+    },
+    {
+      number: 2,
+      title: t('mountingSteps.steps.2.title'),
+      description: t('mountingSteps.steps.2.description'),
+      icon: ShoppingCart,
+    },
+    {
+      number: 3,
+      title: t('mountingSteps.steps.3.title'),
+      description: t('mountingSteps.steps.3.description'),
+      icon: Truck,
+    },
+    {
+      number: 4,
+      title: t('mountingSteps.steps.4.title'),
+      description: t('mountingSteps.steps.4.description'),
+      icon: Wrench,
+    },
+    {
+      number: 5,
+      title: t('mountingSteps.steps.5.title'),
+      description: t('mountingSteps.steps.5.description'),
+      icon: HeartHandshake,
+    },
+  ];
+
+  const infoBadges = [
+    { icon: CalendarCheck, label: t('mountingSteps.badges.0') },
+    { icon: Users, label: t('mountingSteps.badges.1') },
+    { icon: Headphones, label: t('mountingSteps.badges.2') },
+  ];
+
   return (
     <section className="py-12 md:py-16">
       {/* Section Header */}
       <div className="mb-10">
         <h2 className="text-2xl md:text-3xl font-black text-hett-dark mb-3">
-          Bestellen & montage in 5 duidelijke stappen
+          {t('mountingSteps.title')}
         </h2>
         <p className="text-gray-600 text-base md:text-lg max-w-2xl">
-          Van samenstellen tot plaatsing: zo regelen we het overzichtelijk en transparant.
+          {t('mountingSteps.description')}
         </p>
       </div>
 
@@ -78,9 +80,9 @@ const MontageStepsSection: React.FC = () => {
             <div className="absolute left-6 top-6 bottom-6 w-0.5 bg-gradient-to-b from-[#003878] via-[#003878]/50 to-gray-200" />
             
             <div className="space-y-6">
-              {STEPS.map((step, index) => {
+              {steps.map((step, index) => {
                 const Icon = step.icon;
-                const isLast = index === STEPS.length - 1;
+                const isLast = index === steps.length - 1;
                 
                 return (
                   <div key={step.number} className="relative flex gap-6">
@@ -109,7 +111,7 @@ const MontageStepsSection: React.FC = () => {
 
           {/* Mobile Cards */}
           <div className="md:hidden space-y-4">
-            {STEPS.map((step) => {
+            {steps.map((step) => {
               const Icon = step.icon;
               
               return (
@@ -137,38 +139,38 @@ const MontageStepsSection: React.FC = () => {
         {/* Summary Card (Desktop) */}
         <div className="lg:col-span-4">
           <div className="bg-gradient-to-br from-[#003878] to-[#002050] rounded-2xl p-6 text-white shadow-xl sticky top-32">
-            <h3 className="font-bold text-lg mb-4">Waarom HETT?</h3>
+            <h3 className="font-bold text-lg mb-4">{t('mountingSteps.whyTitle')}</h3>
             
             <ul className="space-y-4 mb-6">
               <li className="flex items-start gap-3">
                 <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0 mt-0.5">
                   <span className="text-xs">✓</span>
                 </div>
-                <span className="text-sm text-white/90">Alles in één overzicht: prijs, opties en levertijd direct zichtbaar</span>
+                <span className="text-sm text-white/90">{t('mountingSteps.whyItems.0')}</span>
               </li>
               <li className="flex items-start gap-3">
                 <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0 mt-0.5">
                   <span className="text-xs">✓</span>
                 </div>
-                <span className="text-sm text-white/90">Zelf monteren of laten plaatsen – u kiest wat past</span>
+                <span className="text-sm text-white/90">{t('mountingSteps.whyItems.1')}</span>
               </li>
               <li className="flex items-start gap-3">
                 <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0 mt-0.5">
                   <span className="text-xs">✓</span>
                 </div>
-                <span className="text-sm text-white/90">Persoonlijk contact voor levering en nazorg</span>
+                <span className="text-sm text-white/90">{t('mountingSteps.whyItems.2')}</span>
               </li>
               <li className="flex items-start gap-3">
                 <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0 mt-0.5">
                   <span className="text-xs">✓</span>
                 </div>
-                <span className="text-sm text-white/90">Heldere handleidingen en video-instructies</span>
+                <span className="text-sm text-white/90">{t('mountingSteps.whyItems.3')}</span>
               </li>
             </ul>
 
             <div className="pt-4 border-t border-white/20">
               <p className="text-xs text-white/70 leading-relaxed">
-                Bij HETT staat transparantie voorop. Geen verborgen kosten, geen gedoe – gewoon een mooi product met duidelijke service.
+                {t('mountingSteps.note')}
               </p>
             </div>
           </div>
@@ -177,7 +179,7 @@ const MontageStepsSection: React.FC = () => {
 
       {/* Info Badges */}
       <div className="mt-8 flex flex-wrap gap-3 md:gap-4">
-        {INFO_BADGES.map((badge) => {
+        {infoBadges.map((badge) => {
           const Icon = badge.icon;
           return (
             <div

@@ -151,7 +151,14 @@
     "freeShipping": "Gratis bezorgd",
     "avgLeadTime": "Gemiddelde levertijd",
     "photo": "Foto",
-    "model3D": "3D Model"
+    "model3D": "3D Model",
+    "noHandleError": "Geen product handle opgegeven",
+    "productLoadError": "Er is een fout opgetreden bij het laden van het product.",
+    "configureDescription": "Stel uw product volledig op maat samen in onze configurator.",
+    "usp": {
+      "priceInsight": "Direct inzicht in de prijs",
+      "freeShippingNL": "Gratis verzending in Nederland"
+    }
   },
   "search": {
     "title": "Zoeken",
@@ -422,16 +429,27 @@
     "maatwerkTitle": "Maatwerk voor elke tuin",
     "guarantee": "10 jaar garantie",
     "serviceTitle": "Klantgerichte service en transparantie",
-    "diyTitle": "Eenvoudig zelf te plaatsen"
+    "diyTitle": "Eenvoudig zelf te plaatsen",
+    "whyItems": {
+      "outdoor": { "title": "Altijd binnen, het hele jaar buiten!", "description": "Met een HETT veranda geniet u vier seizoenen lang van uw tuin. Beschut tegen regen en wind, maar met het volledige buitengevoel creëert u een verlengstuk van uw woonkamer." },
+      "custom": { "title": "Maatwerk voor elke tuin", "description": "Geen tuin is hetzelfde. Daarom leveren wij al onze systemen op de millimeter nauwkeurig. Of het nu gaat om een standaard veranda of een volledig maatwerk samenstelling — het past altijd." },
+      "warranty": { "title": "10 jaar garantie op alle veranda's", "description": "Wij geven op al onze veranda's 10 jaar garantie op het materiaal. Geen zorgen, gewoon genieten." },
+      "service": { "title": "Klantgerichte service en transparantie", "description": "Van eerlijk advies in de showroom tot heldere communicatie over de levering — bij ons weet u altijd waar u aan toe bent. Geen kleine lettertjes." },
+      "assembly": { "title": "Eenvoudige montage", "description": "Onze systemen zijn ontworpen als slimme bouwpakketten. Met duidelijke handleidingen en video's kunt u uw veranda zelf monteren. En lukt het niet? Dan helpen wij u graag." }
+    },
+    "storyParagraph1": "Bij HETT Veranda draait alles om één ding: een veranda die klopt. Geen standaard oplossingen uit een catalogus, maar een product dat perfect past bij uw woning, uw tuin en uw manier van leven. Wij ontwerpen en produceren aluminium veranda's die gebouwd zijn om jarenlang plezier te geven.",
+    "storyParagraph2": "Of je nu kiest voor een standaard veranda of een maatwerk samenstelling — bij ons wordt alles met dezelfde zorg en kwaliteit geleverd. Van de eerste configuratie tot de uiteindelijke montage, wij begeleiden u bij elke stap."
   },
   "delivery": {
     "title": "Bezorging & Verzending",
+    "subtitle": "Service",
     "description": "Alles over onze leveringen, transportkosten en wat u kunt verwachten in Nederland, België en Duitsland.",
     "tabs": {
       "delivery": "Bezorgen & Verzending",
       "warranty": "Garantie & Service",
       "payment": "Bestellen & Betalen",
-      "returns": "Retourbeleid"
+      "returns": "Retourbeleid",
+      "mounting": "Product & Montage"
     },
     "leadTimes": "Levertijden",
     "leadTimesDesc": "Wij streven ernaar om voorraadproducten binnen 1 tot 2 weken te leveren in heel Nederland en België.",
@@ -627,11 +645,14 @@
   },
   "mounting": {
     "title": "Montage Handleidingen",
+    "subtitle": "Support",
     "description": "Stap-voor-stap instructies en video's om uw HETT product vakkundig te monteren.",
     "categories": "Categorieën",
     "diyTitle": "Zelf aan de slag",
     "diyDesc": "Al onze producten zijn ontwikkeld als slim bouwpakket dat u eenvoudig zelf kunt monteren. Met onze handleidingen en video's begeleiden wij u stap voor stap door het montageproces.",
     "pdfGuides": "PDF Handleidingen",
+    "instructionVideos": "Instructievideo's",
+    "videoAlt": "Instructievideo montagehandleiding",
     "guideTitle": "Montagehandleiding HETT Veranda",
     "tools": "Benodigd Gereedschap",
     "toolsDesc": "Zorg dat u deze gereedschappen in huis heeft voordat u begint:",
@@ -645,11 +666,13 @@
       "holeSaw": "Gatenzaag (voor spots)"
     },
     "supportNote": "Onze technische dienst is bereikbaar voor korte vragen.",
+    "helpDuring": "Hulp nodig tijdens montage?",
     "callSupport": "Bel +31 (0)6 85 40 60 33",
     "tabs": {
       "delivery": "Bezorgen & Afhalen",
       "warranty": "Garantie & Service",
-      "ordering": "Bestellen & Betalen"
+      "ordering": "Bestellen & Betalen",
+      "productMontage": "Product & Montage"
     }
   },
   "payment": {
@@ -743,8 +766,114 @@
     "delivery5to10": "Levering 5-10 werkdagen",
     "warranty5year": "5 jaar garantie",
     "gootOptie": "Goot optie",
+    "invalidVariantForSize": "Geen geldige Shopify-variant gevonden voor deze maat ({{width}}x{{depth}} cm).",
     "addingToCart": "Toevoegen...",
     "requestQuote": "Vraag offerte aan"
+  },
+  "categoryPage": {
+    "resultsIn": "Laat resultaten zien in",
+    "results": "resultaten",
+    "defaultSort": "Standaard",
+    "minPrice": "Min €",
+    "maxPrice": "Max €",
+    "introAccessoires": "Bij HETT Veranda vindt u accessoires die perfect aansluiten op onze veranda's en panelen, zoals LED-verlichting en afwerkingscomponenten. Eenvoudig mee te bestellen.",
+    "introVerandas": "Ontdek onze hoogwaardige aluminium veranda's, ontworpen voor comfort, uitstraling en duurzaamheid. Of u nu kiest voor een strak modern design of een tijdloze uitstraling: bij HETT stelt u uw veranda volledig samen op basis van uw wensen en afmetingen. Onze veranda's zijn geschikt voor zowel particuliere tuinen als professionele toepassingen en kunnen eenvoudig worden uitgebreid met zijwanden, glazen schuifwanden, dakopties en verlichting.",
+    "introDefault": "Bij HETT.nl vindt u een ruime selectie aan hoogwaardige {{category}} van topmerken. Onze systemen zijn verkrijgbaar in verschillende maten en materialen, waaronder aluminium en gepoedercoat staal, zodat u altijd de juiste oplossing heeft voor uw tuinproject."
+  },
+  "standardVerandaPage": {
+    "pageTitle": "Veranda's",
+    "pageSubtitle": "Configureer uw veranda",
+    "title": "Stel uw veranda samen",
+    "subtitle": "Kies een standaard maat en configureer uw veranda volledig naar wens",
+    "productNotFound": "Product niet gevonden. Controleer of het product \"standaard-veranda\" bestaat in Shopify.",
+    "loadError": "Fout bij het laden van het product.",
+    "genericError": "Er is een fout opgetreden.",
+    "loadingProduct": "Product laden...",
+    "infoStrong": "Standaard veranda's",
+    "infoTextBeforeLink": "hebben vaste afmetingen en zijn sneller leverbaar. Voor een veranda op maat kunt u onze",
+    "customConfigurator": "maatwerk configurator",
+    "infoTextAfterLink": "gebruiken.",
+    "chooseWidth": "Kies breedte",
+    "chooseDepth": "Kies diepte",
+    "selectWidthFirst": "Selecteer eerst een breedte om de beschikbare dieptes te zien.",
+    "selectedSize": "Geselecteerde afmeting",
+    "basePrice": "Basisprijs",
+    "defaultDescription": "Hoogwaardige aluminium veranda met vele configuratie-opties. Kies uw gewenste afmetingen en stel de veranda volledig samen naar uw wensen.",
+    "fastDelivery": "Snelle levering",
+    "tenYearWarranty": "10 jaar garantie",
+    "onConstruction": "Op constructie",
+    "configure": "Configureer uw veranda",
+    "selectSizeFirst": "Selecteer eerst een afmeting",
+    "orSeeOur": "Of bekijk onze",
+    "customVerandas": "maatwerk veranda's",
+    "configIncomplete": "Configuratie onvolledig"
+  },
+  "showroomPage": {
+    "title": "Bezoek onze Showroom",
+    "subtitle": "Afspraak maken",
+    "description": "Ervaar onze producten in het echt. Onze adviseurs staan klaar met koffie en deskundig advies.",
+    "locationLabel": "Showroom HETT Eindhoven",
+    "planTitle": "Plan hier je afspraak met onze adviseur(s)",
+    "duration": "1 uur",
+    "locationShort": "Showroom Eindhoven",
+    "openingContactTitle": "Openingstijden & contactgegevens",
+    "specialHours": "Afwijkende openingstijden",
+    "byAppointment": "Op afspraak",
+    "closed": "Gesloten",
+    "mapAlt": "Kaart",
+    "openInMaps": "Open in Google Maps",
+    "days": {
+      "monday": "Maandag",
+      "tuesday": "Dinsdag",
+      "wednesday": "Woensdag",
+      "thursday": "Donderdag",
+      "friday": "Vrijdag",
+      "saturday": "Zaterdag",
+      "sunday": "Zondag"
+    },
+    "specialDays": {
+      "goodFriday": "Goede vrijdag (18 april)",
+      "easterMonday": "2e Paasdag (21 april)",
+      "kingsDay": "Koningsdag (26 april)"
+    }
+  },
+  "mountingSteps": {
+    "title": "Bestellen & montage in 5 duidelijke stappen",
+    "description": "Van samenstellen tot plaatsing: zo regelen we het overzichtelijk en transparant.",
+    "whyTitle": "Waarom HETT?",
+    "whyItems": [
+      "Alles in één overzicht: prijs, opties en levertijd direct zichtbaar",
+      "Zelf monteren of laten plaatsen – u kiest wat past",
+      "Persoonlijk contact voor levering en nazorg",
+      "Heldere handleidingen en video-instructies"
+    ],
+    "note": "Bij HETT staat transparantie voorop. Geen verborgen kosten, geen gedoe – gewoon een mooi product met duidelijke service.",
+    "badges": ["Duidelijke planning", "Montage door HETT", "Nazorg & support"],
+    "steps": {
+      "1": { "title": "Stel uw veranda samen", "description": "Kies uw model, afmeting, kleur en opties in de configurator. U ziet direct een overzicht van uw keuzes en de totaalprijs." },
+      "2": { "title": "Plaats uw bestelling", "description": "Controleer het prijs- en optiesoverzicht en rond de bestelling af. Na bestelling ontvangt u een bevestiging per e-mail." },
+      "3": { "title": "Levering plannen", "description": "Na verwerking nemen we contact op om de levering af te stemmen. We bespreken bereikbaarheid, losplek en eventuele bijzonderheden." },
+      "4": { "title": "Montage op locatie (optioneel)", "description": "Wilt u volledige ontzorging? Dan verzorgt HETT Veranda de montage. Hiervoor kunt u vrijblijvend een offerte aanvragen." },
+      "5": { "title": "Nazorg & oplevering", "description": "Na plaatsing loopt de monteur alles na en ontvangt u tips voor onderhoud en gebruik. Vragen achteraf? We helpen u altijd verder." }
+    }
+  },
+  "mountingPartner": {
+    "badge": "EIGEN MONTAGETEAM",
+    "title": "Montage door HETT Veranda",
+    "description": "Wij verzorgen de montage van uw veranda volledig in eigen beheer. Van planning tot oplevering: u heeft één aanspreekpunt. Montage is uitsluitend beschikbaar op basis van een persoonlijke offerte.",
+    "quoteBadge": "Montage op offerte",
+    "requestQuote": "Offerte aanvragen",
+    "whatsappUs": "WhatsApp ons",
+    "ownService": "Eigen montagedienst",
+    "sideText1": "Ons ervaren team plaatst uw veranda vakkundig en efficiënt. U hoeft zich nergens zorgen over te maken.",
+    "sideText2": "Na uw bestelling nemen wij contact op om een geschikte montagedatum in te plannen.",
+    "quoteOnRequestShort": "Op offerte",
+    "note": "Montage is beschikbaar in heel Nederland. De prijs is afhankelijk van het type veranda, locatie en bereikbaarheid. Vraag vrijblijvend een offerte aan via onze contactpagina of WhatsApp.",
+    "usps": [
+      "Montage door ons eigen team",
+      "Inplannen in overleg (na bestelling)",
+      "Netjes geplaatst en opgeleverd"
+    ]
   },
   "privacy": {
     "title": "Privacybeleid",
@@ -774,26 +903,6 @@
       "montage": "Montage",
       "garantie": "Garantie",
       "retourbeleid": "Retourbeleid"
-    }
-  },
-  "about": {
-    "whyItems": {
-      "outdoor": { "title": "Altijd binnen, het hele jaar buiten!", "description": "Met een HETT veranda geniet u vier seizoenen lang van uw tuin. Beschut tegen regen en wind, maar met het volledige buitengevoel creëert u een verlengstuk van uw woonkamer." },
-      "custom": { "title": "Maatwerk voor elke tuin", "description": "Geen tuin is hetzelfde. Daarom leveren wij al onze systemen op de millimeter nauwkeurig. Of het nu gaat om een standaard veranda of een volledig maatwerk samenstelling — het past altijd." },
-      "warranty": { "title": "10 jaar garantie op alle veranda's", "description": "Wij geven op al onze veranda's 10 jaar garantie op het materiaal. Geen zorgen, gewoon genieten." },
-      "service": { "title": "Klantgerichte service en transparantie", "description": "Van eerlijk advies in de showroom tot heldere communicatie over de levering — bij ons weet u altijd waar u aan toe bent. Geen kleine lettertjes." },
-      "assembly": { "title": "Eenvoudige montage", "description": "Onze systemen zijn ontworpen als slimme bouwpakketten. Met duidelijke handleidingen en video's kunt u uw veranda zelf monteren. En lukt het niet? Dan helpen wij u graag." }
-    },
-    "storyParagraph1": "Bij HETT Veranda draait alles om één ding: een veranda die klopt. Geen standaard oplossingen uit een catalogus, maar een product dat perfect past bij uw woning, uw tuin en uw manier van leven. Wij ontwerpen en produceren aluminium veranda's die gebouwd zijn om jarenlang plezier te geven.",
-    "storyParagraph2": "Of je nu kiest voor een standaard veranda of een maatwerk samenstelling — bij ons wordt alles met dezelfde zorg en kwaliteit geleverd. Van de eerste configuratie tot de uiteindelijke montage, wij begeleiden u bij elke stap."
-  },
-  "shop": {
-    "noHandleError": "Geen product handle opgegeven",
-    "productLoadError": "Er is een fout opgetreden bij het laden van het product.",
-    "configureDescription": "Stel uw product volledig op maat samen in onze configurator.",
-    "usp": {
-      "priceInsight": "Direct inzicht in de prijs",
-      "freeShippingNL": "Gratis verzending in Nederland"
     }
   },
   "productDetail": {

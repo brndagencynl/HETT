@@ -25,10 +25,12 @@ import { formatEUR } from '../src/utils/money';
 import { setOfferDraft } from '../src/services/offers/offerStorage';
 import { createStandardOfferDraft } from '../src/services/offers/createStandardOfferDraft';
 import { buildVisualizationLayers, FALLBACK_IMAGE, type VerandaColorId } from '../src/configurator/visual/verandaAssets';
+import { useTranslation } from 'react-i18next';
 
 const VerandaCategoryPage: React.FC = () => {
   const { addToCart } = useCart();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const configuratorRef = useRef<VerandaConfiguratorWizardRef>(null);
 
   // Product data state
@@ -55,13 +57,13 @@ const VerandaCategoryPage: React.FC = () => {
       try {
         const productData = await getStandaardVerandaProduct();
         if (!productData) {
-          setError('Product niet gevonden. Controleer of het product "standaard-veranda" bestaat in Shopify.');
+          setError(t('standardVerandaPage.productNotFound'));
         } else {
           setProduct(productData);
         }
       } catch (err) {
         console.error('Failed to fetch standaard veranda product:', err);
-        setError('Fout bij het laden van het product.');
+        setError(t('standardVerandaPage.loadError'));
       } finally {
         setLoading(false);
       }
@@ -209,13 +211,13 @@ const VerandaCategoryPage: React.FC = () => {
     return (
       <div className="min-h-screen bg-hett-bg">
         <PageHeader
-          title="Veranda's"
-          subtitle="Configureer uw veranda"
+          title={t('standardVerandaPage.pageTitle')}
+          subtitle={t('standardVerandaPage.pageSubtitle')}
         />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="flex items-center justify-center">
             <Loader2 className="w-8 h-8 animate-spin text-hett-secondary" />
-            <span className="ml-3 text-hett-muted font-medium">Product laden...</span>
+            <span className="ml-3 text-hett-muted font-medium">{t('standardVerandaPage.loadingProduct')}</span>
           </div>
         </div>
       </div>
@@ -227,14 +229,14 @@ const VerandaCategoryPage: React.FC = () => {
     return (
       <div className="min-h-screen bg-hett-bg">
         <PageHeader
-          title="Veranda's"
-          subtitle="Configureer uw veranda"
+          title={t('standardVerandaPage.pageTitle')}
+          subtitle={t('standardVerandaPage.pageSubtitle')}
         />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="text-center">
-            <p className="text-red-600 font-medium mb-4">{error || 'Er is een fout opgetreden.'}</p>
+            <p className="text-red-600 font-medium mb-4">{error || t('standardVerandaPage.genericError')}</p>
             <Link to="/" className="text-hett-secondary hover:underline">
-              Terug naar home
+              {t('common.backToHome')}
             </Link>
           </div>
         </div>
@@ -245,8 +247,8 @@ const VerandaCategoryPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-hett-bg pb-20">
       <PageHeader
-        title="Stel uw veranda samen"
-        subtitle="Kies een standaard maat en configureer uw veranda volledig naar wens"
+        title={t('standardVerandaPage.title')}
+        subtitle={t('standardVerandaPage.subtitle')}
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -254,12 +256,11 @@ const VerandaCategoryPage: React.FC = () => {
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-8 flex items-start gap-3">
           <Info size={20} className="text-blue-600 flex-shrink-0 mt-0.5" />
           <div className="text-sm text-blue-800">
-            <strong>Standaard veranda's</strong> hebben vaste afmetingen en zijn sneller leverbaar.
-            Voor een veranda op maat kunt u onze{' '}
+            <strong>{t('standardVerandaPage.infoStrong')}</strong> {t('standardVerandaPage.infoTextBeforeLink')}{' '}
             <Link to="/maatwerk-configurator" className="text-blue-600 hover:underline font-medium">
-              maatwerk configurator
+              {t('standardVerandaPage.customConfigurator')}
             </Link>{' '}
-            gebruiken.
+            {t('standardVerandaPage.infoTextAfterLink')}
           </div>
         </div>
 
@@ -272,7 +273,7 @@ const VerandaCategoryPage: React.FC = () => {
                 <div className="w-8 h-8 rounded-full bg-hett-primary text-white flex items-center justify-center font-bold text-sm">
                   1
                 </div>
-                <h2 className="text-lg font-bold text-hett-dark">Kies breedte</h2>
+                <h2 className="text-lg font-bold text-hett-dark">{t('standardVerandaPage.chooseWidth')}</h2>
               </div>
               
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
@@ -306,7 +307,7 @@ const VerandaCategoryPage: React.FC = () => {
                 }`}>
                   2
                 </div>
-                <h2 className="text-lg font-bold text-hett-dark">Kies diepte</h2>
+                <h2 className="text-lg font-bold text-hett-dark">{t('standardVerandaPage.chooseDepth')}</h2>
               </div>
               
               {availableDepths.length > 0 ? (
@@ -331,7 +332,7 @@ const VerandaCategoryPage: React.FC = () => {
                 </div>
               ) : (
                 <p className="text-gray-500 text-sm">
-                  Selecteer eerst een breedte om de beschikbare dieptes te zien.
+                  {t('standardVerandaPage.selectWidthFirst')}
                 </p>
               )}
             </div>
@@ -341,13 +342,13 @@ const VerandaCategoryPage: React.FC = () => {
               <div className="bg-green-50 border border-green-200 rounded-xl p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="text-sm text-green-700 font-medium">Geselecteerde afmeting</div>
+                    <div className="text-sm text-green-700 font-medium">{t('standardVerandaPage.selectedSize')}</div>
                     <div className="text-xl font-black text-green-800">
                       {selectedWidth} x {selectedDepth} cm
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-sm text-green-700 font-medium">Basisprijs</div>
+                    <div className="text-sm text-green-700 font-medium">{t('standardVerandaPage.basePrice')}</div>
                     <div className="text-2xl font-black text-green-800">
                       {formatEUR(selectedVariant.priceCents, 'cents')}
                     </div>
@@ -371,7 +372,7 @@ const VerandaCategoryPage: React.FC = () => {
               <div className="p-6">
                 <h1 className="text-2xl font-black text-hett-dark mb-2">{product.title}</h1>
                 <p className="text-gray-600 text-sm leading-relaxed">
-                  {product.description || 'Hoogwaardige aluminium veranda met vele configuratie-opties. Kies uw gewenste afmetingen en stel de veranda volledig samen naar uw wensen.'}
+                  {product.description || t('standardVerandaPage.defaultDescription')}
                 </p>
               </div>
             </div>
@@ -383,7 +384,7 @@ const VerandaCategoryPage: React.FC = () => {
                   <Truck size={20} className="text-green-600" />
                 </div>
                 <div>
-                  <div className="font-bold text-hett-dark text-sm">Snelle levering</div>
+                  <div className="font-bold text-hett-dark text-sm">{t('standardVerandaPage.fastDelivery')}</div>
                   <div className="text-xs text-gray-500">1-2 weken</div>
                 </div>
               </div>
@@ -392,8 +393,8 @@ const VerandaCategoryPage: React.FC = () => {
                   <ShieldCheck size={20} className="text-blue-600" />
                 </div>
                 <div>
-                  <div className="font-bold text-hett-dark text-sm">10 jaar garantie</div>
-                  <div className="text-xs text-gray-500">Op constructie</div>
+                  <div className="font-bold text-hett-dark text-sm">{t('standardVerandaPage.tenYearWarranty')}</div>
+                  <div className="text-xs text-gray-500">{t('standardVerandaPage.onConstruction')}</div>
                 </div>
               </div>
             </div>
@@ -409,18 +410,18 @@ const VerandaCategoryPage: React.FC = () => {
               }`}
             >
               <Settings size={22} />
-              {selectedVariant ? 'Configureer uw veranda' : 'Selecteer eerst een afmeting'}
+              {selectedVariant ? t('standardVerandaPage.configure') : t('standardVerandaPage.selectSizeFirst')}
               {selectedVariant && <ArrowRight size={20} />}
             </button>
 
             {/* Alternative: Maatwerk */}
             <div className="text-center">
-              <span className="text-gray-500 text-sm">Of bekijk onze </span>
+              <span className="text-gray-500 text-sm">{t('standardVerandaPage.orSeeOur')} </span>
               <Link
                 to="/maatwerk-configurator"
                 className="text-hett-secondary hover:underline font-medium text-sm"
               >
-                maatwerk veranda's →
+                {t('standardVerandaPage.customVerandas')} →
               </Link>
             </div>
           </div>
@@ -435,7 +436,7 @@ const VerandaCategoryPage: React.FC = () => {
               <span className="text-red-600 text-lg">!</span>
             </div>
             <div className="flex-1">
-              <p className="text-red-800 font-medium text-sm">Configuratie onvolledig</p>
+              <p className="text-red-800 font-medium text-sm">{t('standardVerandaPage.configIncomplete')}</p>
               <p className="text-red-600 text-sm mt-1">{cartError}</p>
             </div>
             <button 

@@ -13,8 +13,10 @@ import { toCents } from '../src/utils/money';
 
 import { CATEGORIES } from '../constants';
 import { CategorySlug } from '../types';
+import { useTranslation } from 'react-i18next';
 
 const Category: React.FC = () => {
+    const { t } = useTranslation();
     const { categorySlug } = useParams();
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [showMoreDesc, setShowMoreDesc] = useState(false);
@@ -147,6 +149,8 @@ const Category: React.FC = () => {
 
     const getCategoryName = (slug: string | undefined): string => {
         if (!slug) return 'Assortiment';
+        if (slug === 'verandas' || slug === 'overkappingen') return t('nav.verandas');
+        if (slug === 'accessoires') return t('nav.accessoires');
         const category = CATEGORIES[slug as CategorySlug];
         return category ? category.label : slug.charAt(0).toUpperCase() + slug.slice(1);
     };
@@ -155,10 +159,10 @@ const Category: React.FC = () => {
 
     const categoryIntro =
         categorySlug === 'accessoires'
-            ? 'Bij HETT Veranda vindt u accessoires die perfect aansluiten op onze veranda\'s en panelen, zoals LED-verlichting en afwerkingscomponenten. Eenvoudig mee te bestellen.'
+            ? t('categoryPage.introAccessoires')
             : isVerandaCategory
-            ? 'Ontdek onze hoogwaardige aluminium veranda\'s, ontworpen voor comfort, uitstraling en duurzaamheid. Of je nu kiest voor een strak modern design of een tijdloze uitstraling: bij HETT stel je jouw veranda volledig samen op basis van jouw wensen en afmetingen. Onze veranda\'s zijn geschikt voor zowel particuliere tuinen als professionele toepassingen en kunnen eenvoudig worden uitgebreid met zijwanden, glazen schuifwanden, dakopties en verlichting.'
-            : `Bij HETT.nl vind je een ruime selectie aan hoogwaardige ${categoryName.toLowerCase()} van topmerken. Onze systemen zijn verkrijgbaar in verschillende maten en materialen, waaronder aluminium en gepoedercoat staal, zodat je altijd de juiste oplossing hebt voor jouw tuinproject.`;
+            ? t('categoryPage.introVerandas')
+            : t('categoryPage.introDefault', { category: categoryName.toLowerCase() });
 
     // Filter to only show public products first, then apply category/brand filters
     const filteredProducts = products.filter(p => {
@@ -299,7 +303,7 @@ const Category: React.FC = () => {
 
         return (
             <div className="border border-gray-200 rounded-lg overflow-hidden divide-y divide-gray-200">
-                <FilterAccordion title="Laat resultaten zien in" defaultOpen>
+                <FilterAccordion title={t('categoryPage.resultsIn')} defaultOpen>
                     <div className="text-blue-700 text-sm font-bold pl-2 cursor-pointer hover:underline">
                         {categoryName} ({filteredProducts.length})
                     </div>
@@ -307,14 +311,14 @@ const Category: React.FC = () => {
                 
                 {isAccessoiresCategory ? (
                     /* Accessoires: Only show Price filter */
-                    <FilterAccordion title="Prijs" defaultOpen>
+                    <FilterAccordion title={t('filters.price')} defaultOpen>
                         <div className="flex items-center gap-2">
                             <div className="flex-1">
                                 <input
                                     type="text"
                                     inputMode="decimal"
                                     pattern="[0-9]*[.,]?[0-9]*"
-                                    placeholder="Min €"
+                                    placeholder={t('categoryPage.minPrice')}
                                     value={currentPriceMin}
                                     onChange={(e) => isPending ? setPendingDraftPriceMin(e.target.value) : setDraftPriceMin(e.target.value)}
                                     onKeyDown={(e) => {
@@ -338,7 +342,7 @@ const Category: React.FC = () => {
                                     type="text"
                                     inputMode="decimal"
                                     pattern="[0-9]*[.,]?[0-9]*"
-                                    placeholder="Max €"
+                                    placeholder={t('categoryPage.maxPrice')}
                                     value={currentPriceMax}
                                     onChange={(e) => isPending ? setPendingDraftPriceMax(e.target.value) : setDraftPriceMax(e.target.value)}
                                     onKeyDown={(e) => {
@@ -366,20 +370,20 @@ const Category: React.FC = () => {
                             }}
                             className="mt-3 w-full py-2 bg-hett-primary text-white text-sm font-bold rounded-md hover:bg-hett-dark transition-colors"
                         >
-                            Toepassen
+                            {t('filters.apply')}
                         </button>
                     </FilterAccordion>
                 ) : isVerandaCategory ? (
                     <>
                         {/* Price Filter */}
-                        <FilterAccordion title="Prijs" defaultOpen>
+                        <FilterAccordion title={t('filters.price')} defaultOpen>
                             <div className="flex items-center gap-2">
                                 <div className="flex-1">
                                     <input
                                         type="text"
                                         inputMode="decimal"
                                         pattern="[0-9]*[.,]?[0-9]*"
-                                        placeholder="Min €"
+                                        placeholder={t('categoryPage.minPrice')}
                                         value={currentPriceMin}
                                         onChange={(e) => isPending ? setPendingDraftPriceMin(e.target.value) : setDraftPriceMin(e.target.value)}
                                         onKeyDown={(e) => {
@@ -403,7 +407,7 @@ const Category: React.FC = () => {
                                         type="text"
                                         inputMode="decimal"
                                         pattern="[0-9]*[.,]?[0-9]*"
-                                        placeholder="Max €"
+                                        placeholder={t('categoryPage.maxPrice')}
                                         value={currentPriceMax}
                                         onChange={(e) => isPending ? setPendingDraftPriceMax(e.target.value) : setDraftPriceMax(e.target.value)}
                                         onKeyDown={(e) => {
@@ -425,7 +429,7 @@ const Category: React.FC = () => {
                         </FilterAccordion>
                         
                         {/* Width Filter */}
-                        <FilterAccordion title="Breedte (cm)" defaultOpen>
+                        <FilterAccordion title={`${t('filters.width')} (cm)`} defaultOpen>
                             {VERANDA_WIDTH_OPTIONS.map((width) => (
                                 <FilterCheckbox
                                     key={width}
@@ -438,7 +442,7 @@ const Category: React.FC = () => {
                         </FilterAccordion>
                         
                         {/* Depth Filter */}
-                        <FilterAccordion title="Diepte (cm)" defaultOpen>
+                        <FilterAccordion title={`${t('filters.depth')} (cm)`} defaultOpen>
                             {VERANDA_DEPTH_OPTIONS.map((depth) => (
                                 <FilterCheckbox
                                     key={depth}
@@ -452,7 +456,7 @@ const Category: React.FC = () => {
                     </>
                 ) : (
                     /* Default brand filter for non-veranda categories */
-                    <FilterAccordion title="Merk" defaultOpen>
+                    <FilterAccordion title={t('filters.brand')} defaultOpen>
                         <FilterCheckbox
                             label="HETT Premium"
                             count={42}
@@ -483,7 +487,7 @@ const Category: React.FC = () => {
                             {categoryIntro}
                         </p>
                         <button onClick={() => setShowMoreDesc(!showMoreDesc)} className="text-blue-700 font-bold text-sm mt-1 hover:underline">
-                            {showMoreDesc ? 'Minder weergeven' : 'Lees meer'}
+                            {showMoreDesc ? t('common.less') : t('common.more')}
                         </button>
                     </div>
                     <div className="w-full h-px bg-gray-200 mt-8"></div>
@@ -493,7 +497,7 @@ const Category: React.FC = () => {
                     {/* Desktop Filter Sidebar */}
                     <aside className="hidden lg:block w-full lg:w-[300px] flex-shrink-0">
                         <div className="flex items-center gap-2 mb-6 text-xl font-bold text-hett-dark">
-                            <SlidersHorizontal size={24} /> Filters
+                            <SlidersHorizontal size={24} /> {t('shop.filters')}
                         </div>
                             {renderFilterContent()}
                     </aside>
@@ -505,7 +509,7 @@ const Category: React.FC = () => {
                             onClick={() => setMobileFiltersOpen(true)}
                         >
                             <SlidersHorizontal size={20} />
-                            Filters
+                            {t('shop.filters')}
                         </button>
 
                         {/* Active Filter Badges */}
@@ -524,14 +528,14 @@ const Category: React.FC = () => {
 
                         <div className="flex flex-wrap items-center justify-between gap-4 mb-8 bg-gray-50 p-3 rounded-lg border border-gray-100">
                             <div className="text-xs sm:text-sm font-medium text-gray-500">
-                                <span className="font-bold text-hett-dark">{loading ? '...' : filteredProducts.length}</span> resultaten
+                                <span className="font-bold text-hett-dark">{loading ? '...' : filteredProducts.length}</span> {t('categoryPage.results')}
                             </div>
 
                             <div className="flex items-center gap-4">
                                 <select className="bg-white border border-gray-300 rounded px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold text-hett-dark outline-none">
-                                    <option>Standaard</option>
-                                    <option>Prijs: Laag - Hoog</option>
-                                    <option>Prijs: Hoog - Laag</option>
+                                    <option>{t('categoryPage.defaultSort')}</option>
+                                    <option>{t('shop.sortPriceLow')}</option>
+                                    <option>{t('shop.sortPriceHigh')}</option>
                                 </select>
 
                                 <div className="hidden sm:flex items-center bg-gray-200/50 rounded-lg p-1">
@@ -544,11 +548,11 @@ const Category: React.FC = () => {
                         {loading ? (
                             <div className="flex items-center justify-center py-20">
                                 <Loader2 className="w-8 h-8 animate-spin text-hett-secondary" />
-                                <span className="ml-3 text-hett-muted font-medium">Producten laden...</span>
+                                <span className="ml-3 text-hett-muted font-medium">{t('shop.loading')}</span>
                             </div>
                         ) : filteredProducts.length === 0 ? (
                             <div className="text-center py-20 bg-white rounded-xl">
-                                <p className="text-hett-muted font-medium">Geen producten gevonden</p>
+                                <p className="text-hett-muted font-medium">{t('shop.noProducts')}</p>
                             </div>
                         ) : (
                             <div className={`grid gap-3 sm:gap-6 ${viewMode === 'grid' ? 'grid-cols-2 sm:grid-cols-2 xl:grid-cols-3' : 'grid-cols-1'}`}>

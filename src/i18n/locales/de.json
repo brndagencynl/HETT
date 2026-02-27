@@ -6,7 +6,7 @@
     "favorites": "Favoriten",
     "projects": "Projekte",
     "news": "Nachrichten",
-    "verandas": "Veranden",
+    "verandas": "Überdachungen",
     "accessoires": "Zubehör",
     "maatwerkConfigurator": "Maß-Konfigurator",
     "projecten": "Projekte",
@@ -86,7 +86,7 @@
     "configRequired": "Konfiguration erforderlich",
     "viewBreakdown": "Konfiguration & Preisübersicht anzeigen",
     "autoCalculatedWidth": "Automatisch berechnet basierend auf Breite",
-    "autoCalculatedVerandaWidth": "Automatisch berechnet basierend auf Verandabreite"
+    "autoCalculatedVerandaWidth": "Automatisch berechnet basierend auf Überdachungsbreite"
   },
   "checkout": {
     "title": "Kasse",
@@ -129,7 +129,7 @@
   "shop": {
     "title": "Shop",
     "subtitle": "Katalog",
-    "description": "Durchstöbern Sie unser komplettes Sortiment an Veranden, Glasschiebewänden und Zubehör.",
+    "description": "Durchstöbern Sie unser komplettes Sortiment an Überdachungen, Glasschiebewänden und Zubehör.",
     "filters": "Filter",
     "category": "Kategorie",
     "productsCount": "Produkte",
@@ -151,7 +151,14 @@
     "freeShipping": "Kostenlose Lieferung",
     "avgLeadTime": "Durchschnittliche Lieferzeit",
     "photo": "Foto",
-    "model3D": "3D-Modell"
+    "model3D": "3D-Modell",
+    "noHandleError": "Kein Produkt-Handle angegeben",
+    "productLoadError": "Beim Laden des Produkts ist ein Fehler aufgetreten.",
+    "configureDescription": "Stellen Sie Ihr Produkt vollständig nach Maß in unserem Konfigurator zusammen.",
+    "usp": {
+      "priceInsight": "Sofortiger Preisüberblick",
+      "freeShippingNL": "Kostenloser Versand in den Niederlanden"
+    }
   },
   "search": {
     "title": "Suche",
@@ -174,13 +181,13 @@
   },
   "home": {
     "popularChoices": "Beliebte Auswahl",
-    "viewAllVerandas": "Alle Veranden ansehen",
+    "viewAllVerandas": "Alle Überdachungen ansehen",
     "hero": {
-      "eyebrow": "HETT VERANDEN",
-      "title": "Veranden ab €699",
+      "eyebrow": "HETT ÜBERDACHUNGEN",
+      "title": "Überdachungen ab €699",
       "subtitle": "Die beste und günstigste auf dem Markt für Heimwerker!",
       "verandaCta": "Selbst konfigurieren",
-      "maatwerkTitle": "Maßanfertigung Veranda",
+      "maatwerkTitle": "Maßanfertigung Überdachung",
       "maatwerkSubtitle": "Sondermaße? Kein Problem mit unserem Maß-Konfigurator.",
       "maatwerkCta": "Jetzt konfigurieren"
     },
@@ -190,11 +197,11 @@
       "description": "Haben Sie eine Frage zu unseren Produkten oder unserem Service? Nachfolgend finden Sie die am häufigsten gestellten Fragen unserer Kunden.",
       "viewAll": "Alle Fragen ansehen",
       "items": [
-        { "question": "Kann ich eine Veranda komplett nach Maß zusammenstellen?", "answer": "Ja. Mit unserem Konfigurator können Sie Ihre Veranda einfach nach Abmessungen, Farben, Dachtyp und Optionen wie Seitenwänden und Beleuchtung zusammenstellen. Abweichende Maße sind über Maßanfertigung möglich." },
-        { "question": "Wie lang ist die Lieferzeit für eine Veranda oder ein Sandwichpaneel?", "answer": "Die durchschnittliche Lieferzeit beträgt 5–10 Werktage. Bei Maßanfertigungen oder speziellen Ausführungen kann die Lieferzeit leicht abweichen. Dies wird immer deutlich beim Produkt angezeigt." },
+        { "question": "Kann ich eine Überdachung komplett nach Maß zusammenstellen?", "answer": "Ja. Mit unserem Konfigurator können Sie Ihre Überdachung einfach nach Abmessungen, Farben, Dachtyp und Optionen wie Seitenwänden und Beleuchtung zusammenstellen. Abweichende Maße sind über Maßanfertigung möglich." },
+        { "question": "Wie lang ist die Lieferzeit für eine Überdachung oder ein Sandwichpaneel?", "answer": "Die durchschnittliche Lieferzeit beträgt 5–10 Werktage. Bei Maßanfertigungen oder speziellen Ausführungen kann die Lieferzeit leicht abweichen. Dies wird immer deutlich beim Produkt angezeigt." },
         { "question": "Liefern Sie auch nach Belgien und Deutschland?", "answer": "Ja. Wir liefern in die Niederlande, nach Belgien und Deutschland. Die Lieferung innerhalb der Niederlande ist kostenlos. Für Belgien und Deutschland werden die Lieferkosten nach Entfernung berechnet." },
         { "question": "Kann ich die Produkte selbst montieren?", "answer": "Ja. Unsere Produkte sind für eine einfache Selbstmontage konzipiert. Sie erhalten eine klare Montageanleitung. Montage durch unser Team ist optional auf Anfrage verfügbar." },
-        { "question": "Kann ich die Produkte auch in einem Showroom ansehen?", "answer": "Ja. In unserem Showroom können Sie verschiedene Veranden, Sandwichpaneele und Ausführungen besichtigen. So bekommen Sie einen guten Eindruck von Materialien, Farben und Möglichkeiten." }
+        { "question": "Kann ich die Produkte auch in einem Showroom ansehen?", "answer": "Ja. In unserem Showroom können Sie verschiedene Überdachungen, Sandwichpaneele und Ausführungen besichtigen. So bekommen Sie einen guten Eindruck von Materialien, Farben und Möglichkeiten." }
       ]
     },
     "usps": {
@@ -207,13 +214,13 @@
       "badge": "SANDWICHPANEELE",
       "title": "Isopar® Plus Lambris: schlanke isolierte Wände.",
       "description1": "Isopar® Plus Lambris ist ein isoliertes Sandwichpaneel mit einer eleganten Lambris-Oberfläche. Es hilft, Wärmeverlust und Zugluft zu reduzieren und verleiht Ihrer Wand sofort ein sauberes, ordentliches Aussehen.",
-      "description2": "Dank des intelligenten Profils können Sie schnell und präzise installieren — ideal für Heimwerker und effizient für Profis. Geeignet für Veranda- und Vordachwände, mit schneller Lieferung und Flexibilität bei Größe und Ausführung.",
+      "description2": "Dank des intelligenten Profils können Sie schnell und präzise installieren — ideal für Heimwerker und effizient für Profis. Geeignet für Überdachungs- und Vordachwände, mit schneller Lieferung und Flexibilität bei Größe und Ausführung.",
       "cta": "Alle Paneele entdecken"
     },
     "showroom": {
       "badge": "SHOWROOM",
-      "title": "Sehen Sie unsere Veranden und Paneele in echt.",
-      "description1": "In unserem Showroom bekommen Sie einen tollen Eindruck von unseren Veranden, Sandwichpaneelen und Ausführungen. Sie können den Unterschied bei Materialien, Farben und Details sehen und fühlen — sehr hilfreich bei der richtigen Wahl.",
+      "title": "Sehen Sie unsere Überdachungen und Paneele in echt.",
+      "description1": "In unserem Showroom bekommen Sie einen tollen Eindruck von unseren Überdachungen, Sandwichpaneelen und Ausführungen. Sie können den Unterschied bei Materialien, Farben und Details sehen und fühlen — sehr hilfreich bei der richtigen Wahl.",
       "description2": "Unsere Spezialisten stehen bereit, um mit Ihnen über Abmessungen, Montage und Anwendungen nachzudenken. Ob Sie sich nur umsehen oder bereits konkrete Pläne haben: Sie sind herzlich willkommen.",
       "cta": "Showroom besuchen",
       "route": "Wegbeschreibung anzeigen"
@@ -221,7 +228,7 @@
   },
   "contact": {
     "title": "Kontakt",
-    "description": "Haben Sie eine Frage zu unseren Veranden, Lieferung, Montage oder einem Angebot? Wir helfen Ihnen gerne. Unser Team ist bereit, schnell zu reagieren und mitzudenken — ob Sie Privatkunde sind oder als Profi bestellen.",
+    "description": "Haben Sie eine Frage zu unseren Überdachungen, Lieferung, Montage oder einem Angebot? Wir helfen Ihnen gerne. Unser Team ist bereit, schnell zu reagieren und mitzudenken — ob Sie Privatkunde sind oder als Profi bestellen.",
     "email": "E-Mail",
     "emailDesc": "Immer 24/7 per E-Mail erreichbar für Fragen, Beratung oder Angebote!",
     "emailCta": "E-Mail-Gespräch öffnen",
@@ -239,12 +246,12 @@
     "showroom": "Showroom besuchen",
     "showroomDesc": "Möchten Sie unsere Produkte persönlich erleben? Vereinbaren Sie einfach einen Termin in unserem Showroom. So können wir uns alle Zeit nehmen, Sie persönlich zu beraten und alle Ihre Fragen zu beantworten.",
     "showroomCta": "Besuch planen",
-    "mapAlt": "HETT Veranden Standort"
+    "mapAlt": "HETT Überdachungen Standort"
   },
   "faq": {
     "title": "Häufig gestellte Fragen",
     "description": "Antworten auf die am häufigsten gestellten Fragen. Können Sie Ihre Frage nicht finden? Nehmen Sie gerne Kontakt mit uns auf.",
-    "pageTitle": "Häufig gestellte Fragen | HETT Veranda's",
+    "pageTitle": "Häufig gestellte Fragen | HETT Überdachungen",
     "categories": {
       "all": "Alle",
       "ordering": "Bestellen & Konfigurieren",
@@ -259,9 +266,9 @@
       "garantie": "Garantie & Service"
     },
     "items": {
-      "1": { "q": "Wie bestelle ich eine Veranda bei HETT Veranda's?", "a": "Sie bestellen ganz einfach über unseren Webshop. Wählen Sie eine Standard-Veranda oder stellen Sie Ihre Veranda über den Konfigurator zusammen. Nach Abschluss der Konfiguration können Sie direkt bestellen oder ein Angebot anfordern." },
-      "2": { "q": "Kann ich eine Veranda komplett nach Maß anfertigen lassen?", "a": "Ja. Neben unseren Standardgrößen bieten wir Maßanfertigungen an. Sie wählen die genaue Breite und Tiefe zentimetergenau." },
-      "3": { "q": "Was ist der Unterschied zwischen Standard- und Maßanfertigung?", "a": "Standard-Veranden haben feste Maße und sind schneller lieferbar. Maßanfertigungen werden genau nach Ihren Wünschen gefertigt und haben einen Maßanfertigungszuschlag." },
+      "1": { "q": "Wie bestelle ich eine Überdachung bei HETT Überdachungen?", "a": "Sie bestellen ganz einfach über unseren Webshop. Wählen Sie eine Standard-Überdachung oder stellen Sie Ihre Überdachung über den Konfigurator zusammen. Nach Abschluss der Konfiguration können Sie direkt bestellen oder ein Angebot anfordern." },
+      "2": { "q": "Kann ich eine Überdachung komplett nach Maß anfertigen lassen?", "a": "Ja. Neben unseren Standardgrößen bieten wir Maßanfertigungen an. Sie wählen die genaue Breite und Tiefe zentimetergenau." },
+      "3": { "q": "Was ist der Unterschied zwischen Standard- und Maßanfertigung?", "a": "Standard-Überdachungen haben feste Maße und sind schneller lieferbar. Maßanfertigungen werden genau nach Ihren Wünschen gefertigt und haben einen Maßanfertigungszuschlag." },
       "4": { "q": "Kann ich meine Bestellung nachträglich ändern?", "a": "Änderungen sind möglich, solange die Bestellung noch nicht in Produktion gegangen ist. Kontaktieren Sie bitte so schnell wie möglich unseren Kundenservice." },
       "5": { "q": "Erhalte ich eine Bestätigung nach meiner Bestellung?", "a": "Ja. Nach Ihrer Bestellung erhalten Sie sofort eine Auftragsbestätigung per E-Mail mit allen Details." },
       "6": { "q": "Was sind die Lieferkosten?", "a": "Niederlande: kostenlose Lieferung. Belgien & Deutschland: Lieferkosten werden nach Entfernung (pro Kilometer) berechnet. Die genauen Kosten sehen Sie beim Checkout." },
@@ -272,16 +279,16 @@
       "11": { "q": "Welche Zahlungsmethoden akzeptieren Sie?", "a": "Wir akzeptieren unter anderem iDEAL, Kreditkarte, Bancontact, Sofort und Shopify Payments." },
       "12": { "q": "Ist die Online-Zahlung sicher?", "a": "Ja. Alle Zahlungen werden über sichere Zahlungsumgebungen abgewickelt und entsprechen den geltenden Sicherheitsstandards." },
       "13": { "q": "Kann ich auf Rechnung bezahlen?", "a": "Zahlung auf Rechnung ist derzeit nicht standardmäßig möglich. Für geschäftliche Bestellungen oder größere Projekte kontaktieren Sie uns bitte." },
-      "14": { "q": "Sind die Produkte für die Selbstmontage geeignet?", "a": "Ja. Unsere Veranden und Sandwichpaneele sind für eine einfache Selbstmontage konzipiert. Sie erhalten eine klare Montageanleitung." },
+      "14": { "q": "Sind die Produkte für die Selbstmontage geeignet?", "a": "Ja. Unsere Überdachungen und Sandwichpaneele sind für eine einfache Selbstmontage konzipiert. Sie erhalten eine klare Montageanleitung." },
       "15": { "q": "Bieten Sie auch Montage an?", "a": "Ja, professionelle Montage durch unser Team ist auf Anfrage möglich. Kontaktieren Sie uns dafür." },
       "16": { "q": "Welche Materialien werden verwendet?", "a": "Unsere Produkte bestehen aus hochwertigem Aluminium, Sicherheitsglas und langlebigen Isolierpaneelen, geeignet für den dauerhaften Außeneinsatz." },
       "17": { "q": "Kann ich Zubehör einzeln bestellen?", "a": "Ja. Zubehör wie LED-Beleuchtung und Profile können über den Webshop einzeln bestellt werden." },
       "18": { "q": "Sind die Produkte pflegeleicht?", "a": "Ja. Aluminium und Glas erfordern nur minimale Pflege und sind leicht zu reinigen." },
-      "19": { "q": "Welche Garantie bekomme ich auf meine Veranda?", "a": "Wir bieten standardmäßig 5 Jahre Garantie auf Konstruktion und System, sofern korrekt montiert." },
+      "19": { "q": "Welche Garantie bekomme ich auf meine Überdachung?", "a": "Wir bieten standardmäßig 5 Jahre Garantie auf Konstruktion und System, sofern korrekt montiert." },
       "20": { "q": "Was deckt die Garantie ab?", "a": "Die Garantie deckt Herstellungs- und Konstruktionsfehler ab. Verschleiß durch unsachgemäßen Gebrauch oder falsche Montage ist nicht abgedeckt." },
       "21": { "q": "Wie melde ich einen Service- oder Garantieanspruch?", "a": "Sie können uns einfach über unsere Kontaktseite oder per E-Mail kontaktieren. Fügen Sie wenn möglich Fotos und Ihre Bestellnummer bei." },
       "22": { "q": "Bieten Sie Unterstützung nach dem Kauf?", "a": "Ja. Auch nach Ihrem Kauf stehen wir für Fragen zu Montage, Wartung und Nutzung bereit." },
-      "23": { "q": "Kann ich die Produkte in echt ansehen?", "a": "Ja. In unserem Showroom können Sie verschiedene Veranden, Sandwichpaneele und Ausführungen besichtigen." },
+      "23": { "q": "Kann ich die Produkte in echt ansehen?", "a": "Ja. In unserem Showroom können Sie verschiedene Überdachungen, Sandwichpaneele und Ausführungen besichtigen." },
       "24": { "q": "Kann ich Beratung bei der Produktwahl bekommen?", "a": "Auf jeden Fall. Unser Team berät Sie gerne und hilft bei der Wahl der richtigen Lösung für Ihre Situation." },
       "25": { "q": "Für wen sind Ihre Produkte geeignet?", "a": "Unsere Produkte sind sowohl für Privatpersonen als auch für Fachleute wie Bauunternehmer und Installateure geeignet." }
     }
@@ -296,7 +303,7 @@
     "addToCart": "In den Warenkorb",
     "deliveryNote": "Lieferung 1-2 Wochen • Kostenloser Versand ab € 2.500,00",
     "montage": "Montage",
-    "montageQuestion": "Möchten Sie professionelle Montage für Ihre Veranda?",
+    "montageQuestion": "Möchten Sie professionelle Montage für Ihre Überdachung?",
     "steps": {
       "color": { "title": "Profilfarbe", "description": "Wählen Sie die Farbe Ihrer Aluminiumprofile" },
       "daktype": { "title": "Dachtyp", "description": "Wählen Sie das Material für Ihre Überdachung" },
@@ -304,7 +311,7 @@
       "zijwand_links": { "title": "Seitenwand links", "description": "Wählen Sie die Verarbeitung für die linke Seite" },
       "zijwand_rechts": { "title": "Seitenwand rechts", "description": "Wählen Sie die Verarbeitung für die rechte Seite" },
       "voorzijde": { "title": "Vorderseite", "description": "Möchten Sie die Vorderseite schließen?" },
-      "verlichting": { "title": "Extras", "description": "Beleuchtung zu Ihrer Veranda hinzufügen" },
+      "verlichting": { "title": "Extras", "description": "Beleuchtung zu Ihrer Überdachung hinzufügen" },
       "overzicht": { "title": "Übersicht", "description": "Überprüfen Sie Ihre Konfiguration" }
     },
     "navigation": {
@@ -326,7 +333,7 @@
       "completeTitle": "Konfiguration abgeschlossen!",
       "completeDescription": "Überprüfen Sie unten Ihre gewählten Optionen und schließen Sie Ihre Bestellung ab.",
       "priceOverview": "Preisübersicht",
-      "basePrice": "Grundpreis Veranda",
+      "basePrice": "Grundpreis Überdachung",
       "totalInclVat": "Gesamt (inkl. MwSt.)",
       "agreement": "Ich habe die Konfiguration überprüft und stimme den angezeigten Optionen und dem Preis zu."
     },
@@ -352,12 +359,12 @@
     "subtitleStandard": "Standardpaket",
     "description": "Überprüfen Sie Ihre Konfiguration und hinterlassen Sie Ihre Daten für ein persönliches Angebot.",
     "emptyTitle": "Keine Konfiguration gefunden",
-    "emptyDescription": "Bitte konfigurieren Sie zuerst Ihre Veranda, um ein Angebot anzufordern.",
-    "emptyHint": "Sie haben noch keine Veranda konfiguriert. Starten Sie einen Konfigurator, um Ihre Veranda zu gestalten.",
+    "emptyDescription": "Bitte konfigurieren Sie zuerst Ihre Überdachung, um ein Angebot anzufordern.",
+    "emptyHint": "Sie haben noch keine Überdachung konfiguriert. Starten Sie einen Konfigurator, um Ihre Überdachung zu gestalten.",
     "emptyStandard": "Standard-Konfigurator",
     "emptyMaatwerk": "Maß-Konfigurator",
     "backMaatwerk": "Zurück zum Konfigurator",
-    "backStandard": "Zurück zu Veranden",
+    "backStandard": "Zurück zu Überdachungen",
     "successTitle": "Angebot gesendet!",
     "successMessage": "Ihre Angebotsanfrage wurde erfolgreich gesendet.",
     "successThanks": "Vielen Dank!",
@@ -412,9 +419,9 @@
     }
   },
   "about": {
-    "title": "Der Standard im Verandabau",
+    "title": "Der Standard im Überdachungsbau",
     "subtitle": "Über HETT",
-    "description": "Wir liefern nicht nur Veranden; wir liefern das Fundament für erstklassige Außenbereiche. Entdecken Sie unsere Geschichte und Mission.",
+    "description": "Wir liefern nicht nur Überdachungen; wir liefern das Fundament für erstklassige Außenbereiche. Entdecken Sie unsere Geschichte und Mission.",
     "storyBadge": "UNSERE GESCHICHTE",
     "storyTitle": "Getrieben von Qualität und Handwerk",
     "whyTitle": "Warum HETT?",
@@ -422,28 +429,39 @@
     "maatwerkTitle": "Maßanfertigung für jeden Garten",
     "guarantee": "10 Jahre Garantie",
     "serviceTitle": "Kundenorientierter Service und Transparenz",
-    "diyTitle": "Einfach selbst zu montieren"
+    "diyTitle": "Einfach selbst zu montieren",
+    "whyItems": {
+      "outdoor": { "title": "Immer drinnen, das ganze Jahr draußen!", "description": "Mit einer HETT Überdachung genießen Sie Ihren Garten vier Jahreszeiten lang. Geschützt vor Regen und Wind, aber mit vollem Outdoor-Gefühl, schaffen Sie eine Erweiterung Ihres Wohnzimmers." },
+      "custom": { "title": "Maßarbeit für jeden Garten", "description": "Kein Garten ist gleich. Deshalb liefern wir alle unsere Systeme millimetergenau. Ob Standard-Überdachung oder vollständig maßgefertigte Zusammenstellung — es passt immer." },
+      "warranty": { "title": "10 Jahre Garantie auf alle Überdachungen", "description": "Wir geben auf alle unsere Überdachungen 10 Jahre Materialgarantie. Keine Sorgen, einfach genießen." },
+      "service": { "title": "Kundenorientierter Service und Transparenz", "description": "Von ehrlicher Beratung im Showroom bis hin zu klarer Kommunikation über die Lieferung — bei uns wissen Sie immer, woran Sie sind. Kein Kleingedrucktes." },
+      "assembly": { "title": "Einfache Montage", "description": "Unsere Systeme sind als clevere Bausätze konzipiert. Mit klaren Anleitungen und Videos können Sie Ihre Überdachung selbst montieren. Und wenn nicht? Dann helfen wir Ihnen gerne." }
+    },
+    "storyParagraph1": "Bei HETT Überdachung dreht sich alles um eines: eine Überdachung, die passt. Keine Standardlösungen aus einem Katalog, sondern ein Produkt, das perfekt zu Ihrem Haus, Ihrem Garten und Ihrer Lebensweise passt. Wir entwerfen und produzieren Aluminium-Überdachungen, die für jahrelange Freude gebaut sind.",
+    "storyParagraph2": "Ob Sie sich für eine Standard-Überdachung oder eine Maßanfertigung entscheiden — bei uns wird alles mit der gleichen Sorgfalt und Qualität geliefert. Von der ersten Konfiguration bis zur endgültigen Montage begleiten wir Sie bei jedem Schritt."
   },
   "delivery": {
     "title": "Lieferung & Versand",
+    "subtitle": "Service",
     "description": "Alles über unsere Lieferungen, Versandkosten und was Sie in den Niederlanden, Belgien und Deutschland erwartet.",
     "tabs": {
       "delivery": "Lieferung & Versand",
       "warranty": "Garantie & Service",
       "payment": "Bestellen & Zahlung",
-      "returns": "Rückgaberecht"
+      "returns": "Rückgaberecht",
+      "mounting": "Produkt & Montage"
     },
     "leadTimes": "Lieferzeiten",
     "leadTimesDesc": "Wir bemühen uns, verfügbare Produkte innerhalb von 1 bis 2 Wochen in den Niederlanden und Belgien zu liefern.",
     "currentLeadTime": "Aktuelle Lieferzeit: 5-10 Werktage",
     "shippingCosts": "Versandkosten",
     "pickupEindhoven": "Abholung in Eindhoven",
-    "verandaUnder300": "Veranda (≤ 300 km)",
-    "verandaOver300": "Veranda (> 300 km)",
+    "verandaUnder300": "Überdachung (≤ 300 km)",
+    "verandaOver300": "Überdachung (> 300 km)",
     "verandaOver300Price": "€ 299,99 Pauschalpreis",
     "accessoriesOnly": "Nur Zubehör",
     "accessoriesPrice": "€ 29,99 Pauschalpreis",
-    "costNote": "Bei kombinierten Bestellungen (Veranda + Zubehör) gelten die Veranda-Regeln. Lieferung auf die Watteninseln ist nicht möglich.",
+    "costNote": "Bei kombinierten Bestellungen (Überdachung + Zubehör) gelten die Überdachungs-Regeln. Lieferung auf die Watteninseln ist nicht möglich.",
     "homeDelivery": "Lieferung nach Hause",
     "homeDeliveryDesc": "Unsere Produkte werden per Spezialtransport geliefert. Das Abladen erfolgt neben dem LKW ('am Bordstein'). Entfernungen werden ab Eindhoven berechnet.",
     "checkDelivery": "Hinweis: Bei Lieferung prüfen",
@@ -479,9 +497,9 @@
     "removeDepth": "Tiefe entfernen"
   },  "configuratorWizard": {
     "montageTitle": "Montage",
-    "montageDesc": "Möchten Sie professionelle Montage für Ihre Veranda?",
+    "montageDesc": "Möchten Sie professionelle Montage für Ihre Überdachung?",
     "montageNo": "Nein, Selbstmontage",
-    "montageNoDesc": "Sie montieren die Veranda selbst oder beauftragen einen eigenen Monteur.",
+    "montageNoDesc": "Sie montieren die Überdachung selbst oder beauftragen einen eigenen Monteur.",
     "montageYes": "Ja, Montage gewünscht",
     "montageYesDesc": "Sie erhalten ein persönliches Montageangebot basierend auf Ihrer Situation.",
     "montageNotice": "Hinweis: Ihre Bestellung läuft über ein Angebot",
@@ -626,12 +644,15 @@
   },
   "mounting": {
     "title": "Montageanleitungen",
+    "subtitle": "Support",
     "description": "Schritt-für-Schritt-Anleitungen und Videos für die fachgerechte Montage Ihres HETT-Produkts.",
     "categories": "Kategorien",
     "diyTitle": "Selbst loslegen",
     "diyDesc": "Alle unsere Produkte sind als intelligente Bausätze konzipiert, die Sie einfach selbst montieren können. Mit unseren Anleitungen und Videos führen wir Sie Schritt für Schritt durch den Montageprozess.",
     "pdfGuides": "PDF-Anleitungen",
-    "guideTitle": "HETT Veranda Montageanleitung",
+    "instructionVideos": "Anleitungsvideos",
+    "videoAlt": "Montageanleitung Video",
+    "guideTitle": "HETT Überdachung Montageanleitung",
     "tools": "Benötigtes Werkzeug",
     "toolsDesc": "Stellen Sie sicher, dass Sie dieses Werkzeug haben, bevor Sie beginnen:",
     "toolsList": {
@@ -644,11 +665,13 @@
       "holeSaw": "Lochsäge (für Spots)"
     },
     "supportNote": "Unser technischer Service ist für kurze Fragen erreichbar.",
+    "helpDuring": "Hilfe während der Montage?",
     "callSupport": "Anrufen +31 (0)6 85 40 60 33",
     "tabs": {
       "delivery": "Lieferung & Abholung",
       "warranty": "Garantie & Service",
-      "ordering": "Bestellen & Bezahlen"
+      "ordering": "Bestellen & Bezahlen",
+      "productMontage": "Produkt & Montage"
     }
   },
   "payment": {
@@ -688,7 +711,7 @@
     "pickup": "Abholung",
     "pickupAddress": "Hoppenkuil 17, 5626DD Eindhoven",
     "deliver": "Lieferung",
-    "deliverDesc": "Veranda ≤ 300 km kostenlos • > 300 km € 299,99 • Zubehör € 29,99",
+    "deliverDesc": "Überdachung ≤ 300 km kostenlos • > 300 km € 299,99 • Zubehör € 29,99",
     "pickupFree": "Abholung in Eindhoven (kostenlos)",
     "pickupNotice": "Sie erhalten eine E-Mail, sobald Ihre Bestellung zur Abholung bereit ist.",
     "country": "Land *",
@@ -702,7 +725,7 @@
     "calculate": "Versandkosten berechnen",
     "freeDelivery": "Kostenlose Lieferung",
     "accessoriesRate": "Zubehör (Pauschale)",
-    "verandaRate": "Veranda (Pauschale)",
+    "verandaRate": "Überdachung (Pauschale)",
     "deliverLabel": "Lieferung",
     "distance": "Entfernung",
     "shippingCosts": "Versandkosten",
@@ -725,7 +748,7 @@
     "infoTitle": "Maßanfertigung:",
     "infoDescription": "Wählen Sie jede Größe zentimetergenau. Der Preis wird automatisch anhand der gewählten Maße berechnet, plus € 364,99 Maßanfertigungszuschlag.",
     "ledSelectFirst": "Wählen Sie zuerst die Abmessungen, um den LED-Preis zu berechnen.",
-    "montageByHett": "Montage durch HETT Veranda",
+    "montageByHett": "Montage durch HETT Überdachung",
     "onQuote": "Auf Anfrage",
     "configComplete": "Konfiguration abgeschlossen!",
     "reviewSelections": "Überprüfen Sie Ihre Auswahl und legen Sie sie in den Warenkorb.",
@@ -738,12 +761,118 @@
     "preview": "Vorschau",
     "dimension": "Abmessung",
     "color": "Farbe",
-    "configureCustom": "Konfigurieren Sie Ihre Veranda nach Maß",
+    "configureCustom": "Konfigurieren Sie Ihre Überdachung nach Maß",
     "delivery5to10": "Lieferung 5-10 Werktage",
     "warranty5year": "5 Jahre Garantie",
     "gootOptie": "Rinneoption",
+    "invalidVariantForSize": "Keine gültige Shopify-Variante für diese Größe gefunden ({{width}}x{{depth}} cm).",
     "addingToCart": "Hinzufügen...",
     "requestQuote": "Angebot anfordern"
+  },
+  "categoryPage": {
+    "resultsIn": "Ergebnisse anzeigen in",
+    "results": "Ergebnisse",
+    "defaultSort": "Standard",
+    "minPrice": "Min €",
+    "maxPrice": "Max €",
+    "introAccessoires": "Bei HETT Überdachung finden Sie Zubehör, das perfekt zu unseren Überdachungen und Paneelen passt, wie LED-Beleuchtung und Abschlussteile. Einfach mitbestellen.",
+    "introVerandas": "Entdecken Sie unsere hochwertigen Aluminium-Überdachungen, entwickelt für Komfort, Optik und Langlebigkeit. Ob modernes, klares Design oder zeitlose Optik: Bei HETT stellen Sie Ihre Überdachung vollständig nach Ihren Wünschen und Maßen zusammen. Unsere Überdachungen eignen sich sowohl für private Gärten als auch für professionelle Anwendungen und lassen sich einfach mit Seitenwänden, Glasschiebewänden, Dachoptionen und Beleuchtung erweitern.",
+    "introDefault": "Bei HETT.nl finden Sie eine große Auswahl hochwertiger {{category}} von Top-Marken. Unsere Systeme sind in verschiedenen Größen und Materialien erhältlich, darunter Aluminium und pulverbeschichteter Stahl, sodass Sie immer die passende Lösung für Ihr Gartenprojekt haben."
+  },
+  "standardVerandaPage": {
+    "pageTitle": "Überdachungen",
+    "pageSubtitle": "Konfigurieren Sie Ihre Überdachung",
+    "title": "Stellen Sie Ihre Überdachung zusammen",
+    "subtitle": "Wählen Sie eine Standardgröße und konfigurieren Sie Ihre Überdachung vollständig nach Wunsch",
+    "productNotFound": "Produkt nicht gefunden. Prüfen Sie, ob das Produkt \"standaard-veranda\" in Shopify existiert.",
+    "loadError": "Fehler beim Laden des Produkts.",
+    "genericError": "Es ist ein Fehler aufgetreten.",
+    "loadingProduct": "Produkt wird geladen...",
+    "infoStrong": "Standard-Überdachungen",
+    "infoTextBeforeLink": "haben feste Maße und sind schneller lieferbar. Für eine Überdachung nach Maß können Sie unseren",
+    "customConfigurator": "Maß-Konfigurator",
+    "infoTextAfterLink": "verwenden.",
+    "chooseWidth": "Breite wählen",
+    "chooseDepth": "Tiefe wählen",
+    "selectWidthFirst": "Wählen Sie zuerst eine Breite, um verfügbare Tiefen zu sehen.",
+    "selectedSize": "Ausgewählte Maße",
+    "basePrice": "Grundpreis",
+    "defaultDescription": "Hochwertige Aluminium-Überdachung mit vielen Konfigurationsoptionen. Wählen Sie Ihre gewünschten Maße und stellen Sie die Überdachung vollständig nach Ihren Wünschen zusammen.",
+    "fastDelivery": "Schnelle Lieferung",
+    "tenYearWarranty": "10 Jahre Garantie",
+    "onConstruction": "Auf Konstruktion",
+    "configure": "Überdachung konfigurieren",
+    "selectSizeFirst": "Zuerst Maße wählen",
+    "orSeeOur": "Oder sehen Sie unsere",
+    "customVerandas": "Maß-Überdachungen",
+    "configIncomplete": "Konfiguration unvollständig"
+  },
+  "showroomPage": {
+    "title": "Besuchen Sie unseren Showroom",
+    "subtitle": "Termin vereinbaren",
+    "description": "Erleben Sie unsere Produkte in echt. Unsere Berater stehen mit Kaffee und fachkundiger Beratung bereit.",
+    "locationLabel": "HETT Showroom Eindhoven",
+    "planTitle": "Planen Sie hier Ihren Termin mit unseren Beratern",
+    "duration": "1 Stunde",
+    "locationShort": "Showroom Eindhoven",
+    "openingContactTitle": "Öffnungszeiten & Kontaktdaten",
+    "specialHours": "Abweichende Öffnungszeiten",
+    "byAppointment": "Nach Vereinbarung",
+    "closed": "Geschlossen",
+    "mapAlt": "Karte",
+    "openInMaps": "In Google Maps öffnen",
+    "days": {
+      "monday": "Montag",
+      "tuesday": "Dienstag",
+      "wednesday": "Mittwoch",
+      "thursday": "Donnerstag",
+      "friday": "Freitag",
+      "saturday": "Samstag",
+      "sunday": "Sonntag"
+    },
+    "specialDays": {
+      "goodFriday": "Karfreitag (18. April)",
+      "easterMonday": "Ostermontag (21. April)",
+      "kingsDay": "Königstag (26. April)"
+    }
+  },
+  "mountingSteps": {
+    "title": "Bestellung & Montage in 5 klaren Schritten",
+    "description": "Von der Konfiguration bis zur Montage: so bleibt alles übersichtlich und transparent.",
+    "whyTitle": "Warum HETT?",
+    "whyItems": [
+      "Alles auf einen Blick: Preis, Optionen und Lieferzeit sofort sichtbar",
+      "Selbst montieren oder montieren lassen – Sie wählen, was passt",
+      "Persönlicher Kontakt für Lieferung und Nachsorge",
+      "Klare Anleitungen und Video-Tutorials"
+    ],
+    "note": "Bei HETT steht Transparenz an erster Stelle. Keine versteckten Kosten, kein Aufwand – einfach ein schönes Produkt mit klarem Service.",
+    "badges": ["Klare Planung", "Montage durch HETT", "Nachsorge & Support"],
+    "steps": {
+      "1": { "title": "Überdachung konfigurieren", "description": "Wählen Sie Modell, Maße, Farbe und Optionen im Konfigurator. Sie sehen sofort eine Übersicht Ihrer Auswahl und den Gesamtpreis." },
+      "2": { "title": "Bestellung aufgeben", "description": "Prüfen Sie Preis- und Optionsübersicht und schließen Sie die Bestellung ab. Nach der Bestellung erhalten Sie eine Bestätigung per E-Mail." },
+      "3": { "title": "Lieferung planen", "description": "Nach der Bearbeitung kontaktieren wir Sie zur Abstimmung der Lieferung. Wir besprechen Erreichbarkeit, Abladeplatz und Besonderheiten." },
+      "4": { "title": "Montage vor Ort (optional)", "description": "Möchten Sie komplette Entlastung? Dann übernimmt HETT Veranda die Montage. Dafür können Sie unverbindlich ein Angebot anfordern." },
+      "5": { "title": "Nachsorge & Übergabe", "description": "Nach der Montage prüft der Monteur alles und gibt Tipps für Wartung und Nutzung. Fragen danach? Wir helfen Ihnen jederzeit weiter." }
+    }
+  },
+  "mountingPartner": {
+    "badge": "EIGENES MONTAGETEAM",
+    "title": "Montage durch HETT Veranda",
+    "description": "Wir übernehmen die Montage Ihrer Überdachung vollständig in Eigenregie. Von der Planung bis zur Übergabe: Sie haben einen Ansprechpartner. Montage ist ausschließlich auf Basis eines persönlichen Angebots verfügbar.",
+    "quoteBadge": "Montage auf Angebot",
+    "requestQuote": "Angebot anfordern",
+    "whatsappUs": "WhatsApp kontaktieren",
+    "ownService": "Eigener Montageservice",
+    "sideText1": "Unser erfahrenes Team montiert Ihre Überdachung fachgerecht und effizient. Sie müssen sich um nichts kümmern.",
+    "sideText2": "Nach Ihrer Bestellung kontaktieren wir Sie, um einen passenden Montagetermin zu vereinbaren.",
+    "quoteOnRequestShort": "Auf Angebot",
+    "note": "Montage ist in den gesamten Niederlanden verfügbar. Der Preis hängt vom Typ der Überdachung, dem Standort und der Erreichbarkeit ab. Fordern Sie unverbindlich ein Angebot über unsere Kontaktseite oder WhatsApp an.",
+    "usps": [
+      "Montage durch unser eigenes Team",
+      "Terminplanung in Abstimmung (nach Bestellung)",
+      "Sauber montiert und übergeben"
+    ]
   },
   "privacy": {
     "title": "Datenschutzrichtlinie",
@@ -751,7 +880,7 @@
   },
   "footer": {
     "contact": "Kontakt",
-    "tagline": "Hochwertige Veranden für jedermann.",
+    "tagline": "Hochwertige Überdachungen für jedermann.",
     "copyright": "© {{year}} HETT Veranda B.V. Alle Rechte vorbehalten.",
     "terms": "Allgemeine Geschäftsbedingungen",
     "columns": {
@@ -760,10 +889,10 @@
       "service": "Service"
     },
     "links": {
-      "verandas": "Veranden",
+      "verandas": "Überdachungen",
       "sandwichpanelen": "Sandwichpaneele",
       "accessoires": "Zubehör",
-      "maatwerkVeranda": "Maßanfertigung Veranda",
+      "maatwerkVeranda": "Maßanfertigung Überdachung",
       "overOns": "Über uns",
       "showroom": "Showroom",
       "projecten": "Projekte",
@@ -773,26 +902,6 @@
       "montage": "Montage",
       "garantie": "Garantie",
       "retourbeleid": "Rückgaberecht"
-    }
-  },
-  "about": {
-    "whyItems": {
-      "outdoor": { "title": "Immer drinnen, das ganze Jahr draußen!", "description": "Mit einer HETT Veranda genießen Sie Ihren Garten vier Jahreszeiten lang. Geschützt vor Regen und Wind, aber mit vollem Outdoor-Gefühl, schaffen Sie eine Erweiterung Ihres Wohnzimmers." },
-      "custom": { "title": "Maßarbeit für jeden Garten", "description": "Kein Garten ist gleich. Deshalb liefern wir alle unsere Systeme millimetergenau. Ob Standard-Veranda oder vollständig maßgefertigte Zusammenstellung — es passt immer." },
-      "warranty": { "title": "10 Jahre Garantie auf alle Veranden", "description": "Wir geben auf alle unsere Veranden 10 Jahre Materialgarantie. Keine Sorgen, einfach genießen." },
-      "service": { "title": "Kundenorientierter Service und Transparenz", "description": "Von ehrlicher Beratung im Showroom bis hin zu klarer Kommunikation über die Lieferung — bei uns wissen Sie immer, woran Sie sind. Kein Kleingedrucktes." },
-      "assembly": { "title": "Einfache Montage", "description": "Unsere Systeme sind als clevere Bausätze konzipiert. Mit klaren Anleitungen und Videos können Sie Ihre Veranda selbst montieren. Und wenn nicht? Dann helfen wir Ihnen gerne." }
-    },
-    "storyParagraph1": "Bei HETT Veranda dreht sich alles um eines: eine Veranda, die passt. Keine Standardlösungen aus einem Katalog, sondern ein Produkt, das perfekt zu Ihrem Haus, Ihrem Garten und Ihrer Lebensweise passt. Wir entwerfen und produzieren Aluminium-Veranden, die für jahrelange Freude gebaut sind.",
-    "storyParagraph2": "Ob Sie sich für eine Standard-Veranda oder eine Maßanfertigung entscheiden — bei uns wird alles mit der gleichen Sorgfalt und Qualität geliefert. Von der ersten Konfiguration bis zur endgültigen Montage begleiten wir Sie bei jedem Schritt."
-  },
-  "shop": {
-    "noHandleError": "Kein Produkt-Handle angegeben",
-    "productLoadError": "Beim Laden des Produkts ist ein Fehler aufgetreten.",
-    "configureDescription": "Stellen Sie Ihr Produkt vollständig nach Maß in unserem Konfigurator zusammen.",
-    "usp": {
-      "priceInsight": "Sofortiger Preisüberblick",
-      "freeShippingNL": "Kostenloser Versand in den Niederlanden"
     }
   },
   "productDetail": {
@@ -808,7 +917,7 @@
     },
     "delivery": {
       "title": "Lieferung & Montage",
-      "text": "Wir liefern mit eigenem Transport durch die Benelux und Deutschland. Veranden werden kostenlos geliefert, Zubehör zum Festpreis.",
+      "text": "Wir liefern mit eigenem Transport durch die Benelux und Deutschland. Überdachungen werden kostenlos geliefert, Zubehör zum Festpreis.",
       "leadTimeLabel": "Aktuelle Lieferzeit",
       "leadTimeValue": "10 Werktage"
     },

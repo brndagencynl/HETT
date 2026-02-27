@@ -268,12 +268,12 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
     // Validate
     const errors = getMaatwerkValidationErrors(config);
     if (errors.length > 0) {
-      alert(`Configuratie incompleet:\n${errors.join('\n')}`);
+      alert(`${t('configurator.validation.fillRequiredFields')}:\n${errors.join('\n')}`);
       return;
     }
 
     if (!isMaatwerkConfigComplete(config)) {
-      alert('Vul alle verplichte velden in.');
+      alert(t('configurator.validation.fillRequiredFields'));
       return;
     }
 
@@ -296,7 +296,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
 
       const variantResult = await resolveMaatwerkVariant(bucketW, bucketD);
       if (!variantResult) {
-        const message = `Geen geldige Shopify-variant gevonden voor deze maat (${bucketW}x${bucketD} cm).`;
+        const message = t('maatwerk.invalidVariantForSize', { width: bucketW, depth: bucketD });
         console.error('[MaatwerkConfigurator]', message);
         setShopifyVariantError(message);
         return;
@@ -356,7 +356,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
       onAddToCart(payload);
     } catch (error) {
       console.error('Add to cart failed:', error);
-      alert('Er is een fout opgetreden. Probeer het opnieuw.');
+      alert(t('configurator.validation.errorOccurred'));
     } finally {
       setIsSubmitting(false);
     }
@@ -367,12 +367,12 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
 
     const errors = getMaatwerkValidationErrors(config);
     if (errors.length > 0) {
-      alert(`Configuratie incompleet:\n${errors.join('\n')}`);
+      alert(`${t('configurator.validation.fillRequiredFields')}:\n${errors.join('\n')}`);
       return;
     }
 
     if (!isMaatwerkConfigComplete(config)) {
-      alert('Vul alle verplichte velden in.');
+      alert(t('configurator.validation.fillRequiredFields'));
       return;
     }
 
@@ -381,7 +381,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
       onSave?.(config);
     } catch (error) {
       console.error('Save edit failed:', error);
-      alert('Er is een fout opgetreden. Probeer het opnieuw.');
+      alert(t('configurator.validation.errorOccurred'));
     } finally {
       setIsSubmitting(false);
     }
@@ -391,11 +391,11 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
   const handleRequestOffer = () => {
     const errors = getMaatwerkValidationErrors(config);
     if (errors.length > 0) {
-      alert(`Configuratie incompleet:\n${errors.join('\n')}`);
+      alert(`${t('configurator.validation.fillRequiredFields')}:\n${errors.join('\n')}`);
       return;
     }
     if (!isMaatwerkConfigComplete(config)) {
-      alert('Vul alle verplichte velden in.');
+      alert(t('configurator.validation.fillRequiredFields'));
       return;
     }
 
@@ -959,7 +959,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
                 className="flex items-center gap-1.5 text-[#003878] hover:text-[#002050] font-semibold text-sm transition-colors"
               >
                 <Edit2 size={14} />
-                Wijzig
+                {t('configurator.navigation.change')}
               </button>
             </div>
           ))}
@@ -967,10 +967,10 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
 
         {/* Price breakdown */}
         <div className="bg-[#eff6ff] rounded-xl p-6 space-y-3">
-          <h4 className="font-bold text-gray-900 text-lg">Prijsoverzicht</h4>
+          <h4 className="font-bold text-gray-900 text-lg">{t('configurator.overview.priceOverview')}</h4>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-gray-600">Basisprijs ({config.size ? formatMaatwerkSize(config.size) : '-'})</span>
+              <span className="text-gray-600">{t('configurator.overview.basePrice')} ({config.size ? formatMaatwerkSize(config.size) : '-'})</span>
               <span className="font-semibold text-gray-900">{formatMaatwerkPrice(priceBreakdown.basePrice)}</span>
             </div>
             {priceBreakdown.selections.filter(s => s.price > 0).map((selection, idx) => (
@@ -981,7 +981,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
             ))}
             {config.verlichting && ledSelectedTotal > 0 && (
               <div className="flex justify-between">
-                <span className="text-gray-600">LED verlichting</span>
+                <span className="text-gray-600">{t('configurator.steps.verlichting.title')}</span>
                 <span className="font-semibold text-gray-900">+ {formatMaatwerkPrice(ledSelectedTotal)}</span>
               </div>
             )}

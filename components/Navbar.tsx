@@ -382,7 +382,12 @@ const Navbar: React.FC = () => {
               </div>
 
               <div className="p-6 border-t border-gray-100 bg-gray-50">
-                <p className="text-xs text-gray-400 font-medium mb-4">{t('nav.needHelp')}</p>
+                <div className="flex items-center justify-between mb-4">
+                  <p className="text-xs text-gray-400 font-medium">{t('nav.needHelp')}</p>
+                  <div className="[&_*]:!text-hett-dark [&_span]:!text-gray-300">
+                    <LangSwitch />
+                  </div>
+                </div>
                 <a href="tel:+31685406033" className="flex items-center gap-3 text-hett-dark font-bold text-lg">
                   <Star size={20} className="text-hett-secondary" fill="currentColor" />
                   +31 (0)6 85 40 60 33

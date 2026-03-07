@@ -1,5 +1,6 @@
 import React, { useState, forwardRef, useImperativeHandle, useMemo, useCallback, useEffect } from 'react';
-import { X, Check, Info, ChevronLeft, ChevronRight, Truck, ShieldCheck, ArrowRight, Lightbulb, Edit2, Eye, ChevronUp, ShoppingBag, Loader2, AlertTriangle, Wrench, FileText } from 'lucide-react';
+import { X, Check, Info, ChevronLeft, ChevronRight, ShieldCheck, ArrowRight, Lightbulb, Edit2, Eye, ChevronUp, ShoppingBag, Loader2, AlertTriangle, Wrench, FileText } from 'lucide-react';
+import DeliveryTime from '../src/components/ui/DeliveryTime';
 import { motion, AnimatePresence } from 'framer-motion';
 import { VERANDA_OPTIONS_UI, DEFAULT_VERANDA_CONFIG, VerandaConfig, COLOR_OPTIONS, DEFAULT_COLOR } from '../src/configurator/schemas/veranda';
 import { calcVerandaPrice, type VerandaProductSize } from '../src/configurator/pricing/veranda';
@@ -82,11 +83,37 @@ interface VerandaConfiguratorWizardProps {
     showResetMessage?: boolean;
     /** Callback when user cancels (especially useful in edit mode) */
     onCancel?: () => void;
+    /** Layout mode: 'modal' (default popup) or 'inline' (renders in-page, no overlay) */
+    layout?: 'modal' | 'inline';
+    /**
+     * When true, an "Afmetingen" step is prepended as step 1.
+     * Requires availableWidths, selectedWidth, selectedDepth, availableDepths,
+     * onWidthChange, onDepthChange to be provided.
+     */
+    showDimensionStep?: boolean;
+    /** Available widths for dimension step */
+    availableWidths?: number[];
+    /** Currently selected width */
+    selectedWidth?: number | null;
+    /** Currently selected depth */
+    selectedDepth?: number | null;
+    /** Available depths for the currently selected width */
+    availableDepths?: number[];
+    /** Callback when width changes */
+    onWidthChange?: (width: number) => void;
+    /** Callback when depth changes */
+    onDepthChange?: (depth: number) => void;
+    /** Label for "choose width" */
+    widthLabel?: string;
+    /** Label for "choose depth" */
+    depthLabel?: string;
+    /** Label for "select width first" hint */
+    selectWidthFirstLabel?: string;
 }
 
 // --- Step Definitions ---
 // Single source of truth for step order
-type StepId = 'color' | 'daktype' | 'goot' | 'zijwand_links' | 'zijwand_rechts' | 'voorzijde' | 'verlichting' | 'montage' | 'overzicht';
+type StepId = 'afmetingen' | 'color' | 'daktype' | 'goot' | 'zijwand_links' | 'zijwand_rechts' | 'voorzijde' | 'verlichting' | 'montage' | 'overzicht';
 
 interface StepDefinition {
     id: StepId;
@@ -176,7 +203,10 @@ const buildSteps = (t: (key: string) => string): StepDefinition[] => [
 ];
 
 // --- Helper Functions ---
-const isStepComplete = (step: StepDefinition, config: Partial<VerandaConfig>): boolean => {
+const isStepComplete = (step: StepDefinition, config: Partial<VerandaConfig>, extraCtx?: { selectedWidth?: number | null; selectedDepth?: number | null }): boolean => {
+    if (step.id === 'afmetingen') {
+        return !!(extraCtx?.selectedWidth && extraCtx?.selectedDepth);
+    }
     if (!step.required) return true;
     if (step.id === 'overzicht') return true;
     if (!step.optionKey) return true;
@@ -213,12 +243,29 @@ const SafeImage = ({ src, alt, className }: { src: string; alt: string; classNam
 };
 
 const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, VerandaConfiguratorWizardProps>(
-    ({ productTitle = "HETT Premium Veranda", basePrice = 1250, widthCm = 606, onSubmit, mode = 'new', showResetMessage = false, onCancel }, ref) => {
+    ({ productTitle = "HETT Premium Veranda", basePrice = 1250, widthCm = 606, onSubmit, mode = 'new', showResetMessage = false, onCancel, layout = 'modal',
+       showDimensionStep = false, availableWidths, selectedWidth, selectedDepth, availableDepths,
+       onWidthChange, onDepthChange, widthLabel, depthLabel, selectWidthFirstLabel,
+    }, ref) => {
     
+    const isInline = layout === 'inline';
     const { t } = useTranslation();
-    const STEPS = useMemo(() => buildSteps(t), [t]);
 
-    const [isOpen, setIsOpen] = useState(false);
+    // Build steps — optionally prepend "Afmetingen" dimension step
+    const STEPS = useMemo(() => {
+        const configSteps = buildSteps(t);
+        if (!showDimensionStep) return configSteps;
+        const dimStep: StepDefinition = {
+            id: 'afmetingen',
+            title: t('configurator.steps.afmetingen.title', { defaultValue: 'Afmetingen' }),
+            description: t('configurator.steps.afmetingen.description', { defaultValue: 'Kies de breedte en diepte van uw veranda' }),
+            required: true,
+        };
+        return [dimStep, ...configSteps];
+    }, [t, showDimensionStep]);
+
+    // In inline mode, always "open" — no modal toggling needed
+    const [isOpen, setIsOpen] = useState(isInline);
     const [currentStepIndex, setCurrentStepIndex] = useState(0);
     const [config, setConfig] = useState<Partial<VerandaConfig>>(DEFAULT_VERANDA_CONFIG);
     const [infoModal, setInfoModal] = useState<{ title: string, text: string } | null>(null);
@@ -306,7 +353,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
     }, [currentStepIndex, config.color]);
 
     const currentStep = STEPS[currentStepIndex];
-    const canProceed = isStepComplete(currentStep, config);
+    const canProceed = isStepComplete(currentStep, config, { selectedWidth, selectedDepth });
     const isLastStep = currentStepIndex === STEPS.length - 1;
 
     useImperativeHandle(ref, () => ({
@@ -316,14 +363,16 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
             setAgreed(false);
             setDidSubmit(false); // Reset submit flag when opening
             setIsOpen(true);
-            document.body.style.overflow = 'hidden';
+            if (!isInline) document.body.style.overflow = 'hidden';
         },
         close: () => closeConfigurator()
     }));
 
     const closeConfigurator = () => {
-        setIsOpen(false);
-        document.body.style.overflow = 'unset';
+        if (!isInline) {
+            setIsOpen(false);
+            document.body.style.overflow = 'unset';
+        }
         // In edit mode, call onCancel ONLY if we didn't submit (user cancelled)
         if (mode === 'edit' && onCancel && !didSubmit) {
             onCancel();
@@ -504,8 +553,100 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
         return choice ? choice.label : String(value);
     };
 
+    // --- Dimension step renderer ---
+    // Mobile: native <select> dropdowns  |  Desktop (sm+): card grid buttons
+    const renderDimensionSelector = () => {
+        const wLabel = widthLabel || t('standardVerandaPage.chooseWidth');
+        const dLabel = depthLabel || t('standardVerandaPage.chooseDepth');
+        const hintLabel = selectWidthFirstLabel || t('standardVerandaPage.selectWidthFirst');
+        const widths = availableWidths || [];
+        const depths = availableDepths || [];
+
+        return (
+            <div className="space-y-6">
+                {/* ── Width ─────────────────────────── */}
+                <div>
+                    <h3 className="text-sm font-bold text-[var(--text)] uppercase tracking-wide mb-3">{wLabel}</h3>
+
+                    {/* Mobile: dropdown */}
+                    <select
+                        value={selectedWidth ?? ''}
+                        onChange={(e) => onWidthChange?.(Number(e.target.value))}
+                        className="sm:hidden w-full rounded-xl border-2 border-[var(--border)] bg-[var(--surface,#fff)] text-[var(--text)] font-bold text-sm px-4 py-3 appearance-none focus:outline-none focus:border-[var(--text)]"
+                    >
+                        <option value="" disabled>{wLabel}</option>
+                        {widths.map((w) => (
+                            <option key={w} value={w}>{w} cm</option>
+                        ))}
+                    </select>
+
+                    {/* Desktop: card grid */}
+                    <div className="hidden sm:grid sm:grid-cols-5 gap-2">
+                        {widths.map((w) => (
+                            <button
+                                key={w}
+                                onClick={() => onWidthChange?.(w)}
+                                className={`ds-card py-3 text-center font-bold text-sm transition-all ${
+                                    selectedWidth === w
+                                        ? 'border-[var(--text)] bg-[var(--text)] text-white'
+                                        : 'hover:border-[var(--border-strong)] text-[var(--text)]'
+                                }`}
+                            >
+                                {w} cm
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* ── Depth ─────────────────────────── */}
+                <div className={`transition-opacity ${selectedWidth ? 'opacity-100' : 'opacity-40 pointer-events-none'}`}>
+                    <h3 className="text-sm font-bold text-[var(--text)] uppercase tracking-wide mb-3">{dLabel}</h3>
+
+                    {depths.length > 0 ? (
+                        <>
+                            {/* Mobile: dropdown */}
+                            <select
+                                value={selectedDepth ?? ''}
+                                onChange={(e) => onDepthChange?.(Number(e.target.value))}
+                                className="sm:hidden w-full rounded-xl border-2 border-[var(--border)] bg-[var(--surface,#fff)] text-[var(--text)] font-bold text-sm px-4 py-3 appearance-none focus:outline-none focus:border-[var(--text)]"
+                            >
+                                <option value="" disabled>{dLabel}</option>
+                                {depths.map((d) => (
+                                    <option key={d} value={d}>{d} cm</option>
+                                ))}
+                            </select>
+
+                            {/* Desktop: card grid */}
+                            <div className="hidden sm:grid sm:grid-cols-4 gap-2">
+                                {depths.map((d) => (
+                                    <button
+                                        key={d}
+                                        onClick={() => onDepthChange?.(d)}
+                                        className={`ds-card py-3 text-center font-bold text-sm transition-all ${
+                                            selectedDepth === d
+                                                ? 'border-[var(--text)] bg-[var(--text)] text-white'
+                                                : 'hover:border-[var(--border-strong)] text-[var(--text)]'
+                                        }`}
+                                    >
+                                        {d} cm
+                                    </button>
+                                ))}
+                            </div>
+                        </>
+                    ) : (
+                        <p className="text-[var(--muted)] text-sm">{hintLabel}</p>
+                    )}
+                </div>
+            </div>
+        );
+    };
+
     // --- Renderers ---
     const renderOptionSelector = () => {
+        if (currentStep.id === 'afmetingen') {
+            return renderDimensionSelector();
+        }
+
         if (currentStep.id === 'overzicht') {
             return renderOverview();
         }
@@ -519,67 +660,63 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
 
         const currentValue = config[currentStep.optionKey as keyof VerandaConfig];
 
-        // Color selector (for kleur step)
+        // Color selector (for kleur step) — always 3 cols, compact
         if (optionDef.type === 'color') {
             return (
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl">
+                <div className="grid grid-cols-3 gap-2 sm:gap-3">
                     {optionDef.choices.map((choice: any) => (
                         <div
                             key={choice.value}
                             onClick={() => setConfig(prev => ({ ...prev, [optionDef.key]: choice.value }))}
-                            className={`relative rounded-xl overflow-hidden cursor-pointer transition-all border-2 p-4 ${
+                            className={`relative rounded-xl overflow-hidden cursor-pointer transition-all border-2 p-2 sm:p-3 ${
                                 currentValue === choice.value 
-                                    ? 'border-[#003878] ring-2 ring-[#003878]/20 shadow-lg bg-[#003878]/5' 
+                                    ? 'border-[#003878] ring-2 ring-[#003878]/20 shadow-sm bg-[#003878]/5' 
                                     : 'border-gray-200 hover:border-gray-300 hover:shadow-md bg-white'
                             }`}
                         >
                             {currentValue === choice.value && (
-                                <div className="absolute top-2 right-2 w-6 h-6 bg-[#003878] rounded-full flex items-center justify-center text-white shadow-sm">
-                                    <Check size={14} strokeWidth={3} />
+                                <div className="absolute top-1.5 right-1.5 w-5 h-5 sm:w-6 sm:h-6 bg-[#003878] rounded-full flex items-center justify-center text-white shadow-sm">
+                                    <Check size={12} strokeWidth={3} />
                                 </div>
                             )}
                             
                             {/* Color swatch */}
                             <div 
-                                className="w-full aspect-square rounded-lg mb-3 border border-gray-200 shadow-inner"
+                                className="w-full aspect-[4/3] rounded-lg mb-2 border border-gray-200 shadow-inner"
                                 style={{ backgroundColor: choice.hex }}
                             />
                             
-                            <span className="block text-sm font-bold text-gray-900 text-center">{choice.label}</span>
-                            {choice.description && (
-                                <span className="block text-xs text-gray-500 text-center mt-1">{choice.description}</span>
-                            )}
+                            <span className="block text-xs sm:text-sm font-bold text-gray-900 text-center">{choice.label}</span>
                         </div>
                     ))}
                 </div>
             );
         }
 
-        // Card-based selector (for daktype) - TEXT-ONLY
+        // Card-based selector (for daktype) - TEXT-ONLY, compact
         if (optionDef.type === 'card') {
             return (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-2 sm:gap-3">
                     {optionDef.choices.map((choice: any) => (
                         <button
                             key={choice.value}
                             type="button"
                             onClick={() => setConfig(prev => ({ ...prev, [optionDef.key]: choice.value }))}
                             aria-pressed={currentValue === choice.value}
-                            className={`relative text-left p-5 rounded-xl border-2 transition-all cursor-pointer min-h-[120px] ${
+                            className={`relative text-left p-3 sm:p-4 rounded-xl border-2 transition-all cursor-pointer ${
                                 currentValue === choice.value 
                                     ? 'border-[#003878] bg-[#003878]/5 ring-2 ring-[#003878]/10 shadow-md' 
                                     : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
                             }`}
                         >
                             {currentValue === choice.value && (
-                                <div className="absolute top-4 right-4 w-6 h-6 bg-[#003878] rounded-full flex items-center justify-center text-white">
-                                    <Check size={14} strokeWidth={3} />
+                                <div className="absolute top-2 right-2 sm:top-3 sm:right-3 w-5 h-5 sm:w-6 sm:h-6 bg-[#003878] rounded-full flex items-center justify-center text-white">
+                                    <Check size={12} strokeWidth={3} />
                                 </div>
                             )}
-                            <span className="block text-base font-bold text-gray-900 mb-2 pr-8">{choice.label}</span>
-                            <span className="block text-sm text-gray-600 leading-relaxed">{choice.description}</span>
+                            <span className="block text-sm sm:text-base font-bold text-gray-900 pr-6">{choice.label}</span>
                             {choice.price > 0 && (
-                                <span className="inline-block mt-3 bg-[#FF7300]/10 text-[#FF7300] text-sm font-bold px-3 py-1 rounded-full">
+                                <span className="inline-block mt-2 bg-[#FF7300]/10 text-[#FF7300] text-xs sm:text-sm font-bold px-2 py-0.5 sm:px-3 sm:py-1 rounded-full">
                                     + {formatEUR(toCents(choice.price), 'cents')}
                                 </span>
                             )}
@@ -591,31 +728,26 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
 
         // Toggle selector (for verlichting) - with dynamic LED pricing
         if (optionDef.type === 'toggle') {
-            console.log(`[LED UI] widthCm=${widthCm}`);
-            console.log(`[LED UI] qty=${ledInfo.qty}`);
-            console.log(`[LED UI] total=${ledInfo.total.toFixed(2)}`);
-            console.log(`[LED UI] enabled=${!!currentValue}`);
-            
             return (
-                <div className="max-w-2xl">
+                <div>
                     <div
                         onClick={() => {
                             setConfig(prev => ({ ...prev, [optionDef.key]: !currentValue }));
                         }}
-                        className={`flex items-center justify-between p-6 rounded-xl border-2 cursor-pointer transition-all ${
+                        className={`flex items-center justify-between p-3 sm:p-5 rounded-xl border-2 cursor-pointer transition-all ${
                             currentValue 
                                 ? 'border-[#003878] bg-[#003878]/5 shadow-md ring-2 ring-[#003878]/10' 
                                 : 'border-gray-200 bg-white hover:border-gray-300'
                         }`}
                     >
-                        <div className="flex items-center gap-4">
-                            <div className={`w-16 h-16 rounded-xl flex items-center justify-center shadow-sm transition-colors ${
+                        <div className="flex items-center gap-3 sm:gap-4">
+                            <div className={`w-10 h-10 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center shadow-sm transition-colors flex-shrink-0 ${
                                 currentValue ? 'bg-[#FF7300] text-white' : 'bg-gray-100 text-gray-400'
                             }`}>
-                                <Lightbulb size={28} fill={currentValue ? "currentColor" : "none"} />
+                                <Lightbulb size={22} fill={currentValue ? "currentColor" : "none"} />
                             </div>
                             <div>
-                                <span className="font-bold text-gray-900 text-lg block">{t('configuratorWizard.ledLighting')}</span>
+                                <span className="font-bold text-gray-900 text-sm sm:text-base block">{t('configuratorWizard.ledLighting')}</span>
                                 {ledAvailable ? (
                                     <>
                                         <span className="text-sm text-gray-600">
@@ -661,12 +793,11 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
             );
         }
 
-        // Radio/Select selector (for walls, goot, voorzijde) - TEXT-ONLY
+        // Radio/Select selector (for walls, goot, voorzijde) - compact
         return (
-            <div className="space-y-3 max-w-2xl">
+            <div className="space-y-2">
                 {optionDef.choices.map((choice: any) => {
                     // For voorzijde and zijwand options, calculate dynamic price based on actual product size
-                    // This ensures glass sliding wall prices reflect the actual width/depth
                     const needsDynamicPrice = optionDef.key === 'voorzijde' 
                         || optionDef.key === 'zijwand_links' 
                         || optionDef.key === 'zijwand_rechts';
@@ -680,25 +811,24 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                             type="button"
                             onClick={() => setConfig(prev => ({ ...prev, [optionDef.key]: choice.value }))}
                             aria-pressed={currentValue === choice.value}
-                            className={`relative w-full text-left p-4 rounded-xl border-2 transition-all cursor-pointer ${
+                            className={`relative w-full text-left p-3 sm:p-4 rounded-xl border-2 transition-all cursor-pointer ${
                                 currentValue === choice.value 
                                     ? 'border-[#003878] bg-[#003878]/5 shadow-md ring-2 ring-[#003878]/10' 
                                     : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
                             }`}
                         >
                             {currentValue === choice.value && (
-                                <div className="absolute top-4 right-4 w-6 h-6 bg-[#003878] rounded-full flex items-center justify-center text-white">
-                                    <Check size={14} strokeWidth={3} />
+                                <div className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 w-5 h-5 sm:w-6 sm:h-6 bg-[#003878] rounded-full flex items-center justify-center text-white">
+                                    <Check size={12} strokeWidth={3} />
                                 </div>
                             )}
-                            <span className={`block font-bold text-base mb-1 pr-8 ${
+                            <span className={`block font-bold text-sm sm:text-base mb-0.5 pr-7 ${
                                 currentValue === choice.value ? 'text-gray-900' : 'text-gray-700'
                             }`}>
                                 {choice.label}
                             </span>
-                            <span className="block text-sm text-gray-600">{choice.description}</span>
                             {displayPrice > 0 && (
-                                <span className="inline-block mt-2 text-sm text-[#FF7300] font-semibold">+ {formatEUR(toCents(displayPrice), 'cents')}</span>
+                                <span className="inline-block mt-1 text-xs sm:text-sm text-[#FF7300] font-semibold">+ {formatEUR(toCents(displayPrice), 'cents')}</span>
                             )}
                         </button>
                     );
@@ -727,8 +857,8 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
         ];
 
         return (
-            <div className="max-w-2xl space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-2 sm:gap-3">
                     {options.map((opt) => {
                         const selected = montageValue === opt.value;
                         return (
@@ -737,24 +867,24 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                                 type="button"
                                 onClick={() => setConfig(prev => ({ ...prev, montage: opt.value }))}
                                 aria-pressed={selected}
-                                className={`relative text-left p-5 rounded-xl border-2 transition-all cursor-pointer min-h-[140px] ${
+                                className={`relative text-left p-3 sm:p-4 rounded-xl border-2 transition-all cursor-pointer ${
                                     selected
                                         ? 'border-[#003878] bg-[#003878]/5 ring-2 ring-[#003878]/10 shadow-md'
                                         : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
                                 }`}
                             >
                                 {selected && (
-                                    <div className="absolute top-4 right-4 w-6 h-6 bg-[#003878] rounded-full flex items-center justify-center text-white">
-                                        <Check size={14} strokeWidth={3} />
+                                    <div className="absolute top-2 right-2 sm:top-3 sm:right-3 w-5 h-5 sm:w-6 sm:h-6 bg-[#003878] rounded-full flex items-center justify-center text-white">
+                                        <Check size={12} strokeWidth={3} />
                                     </div>
                                 )}
-                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-3 ${
+                                <div className={`w-9 h-9 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center mb-2 ${
                                     selected ? 'bg-[#FF7300] text-white' : 'bg-gray-100 text-gray-400'
                                 }`}>
-                                    {opt.icon}
+                                    {React.cloneElement(opt.icon as React.ReactElement, { size: 20 })}
                                 </div>
-                                <span className="block text-base font-bold text-gray-900 mb-2 pr-8">{opt.label}</span>
-                                <span className="block text-sm text-gray-600 leading-relaxed">{opt.description}</span>
+                                <span className="block text-sm sm:text-base font-bold text-gray-900 mb-1 pr-6">{opt.label}</span>
+                                <span className="block text-xs sm:text-sm text-gray-600 leading-relaxed">{opt.description}</span>
                             </button>
                         );
                     })}
@@ -786,16 +916,25 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                 : t('configuratorWizard.ledNotAvailableFor', { width: widthCm }))
             : t('configurator.selection.no');
         
+        // Step offset: when dimension step is present, config steps shift by 1
+        const off = showDimensionStep ? 1 : 0;
+
         // Summary items in exact step order
         const summaryItems = [
-            { stepIndex: 0, label: t('configurator.steps.color.title'), value: getOptionLabel('color', config.color), key: 'color' },
-            { stepIndex: 1, label: t('configurator.steps.daktype.title'), value: getOptionLabel('daktype', config.daktype), key: 'daktype' },
-            { stepIndex: 2, label: t('configurator.steps.goot.title'), value: getOptionLabel('goot', config.goot), key: 'goot' },
-            { stepIndex: 3, label: t('configurator.steps.zijwand_links.title'), value: getOptionLabel('zijwand_links', config.zijwand_links), key: 'zijwand_links' },
-            { stepIndex: 4, label: t('configurator.steps.zijwand_rechts.title'), value: getOptionLabel('zijwand_rechts', config.zijwand_rechts), key: 'zijwand_rechts' },
-            { stepIndex: 5, label: t('configurator.steps.voorzijde.title'), value: getOptionLabel('voorzijde', config.voorzijde), key: 'voorzijde' },
-            { stepIndex: 6, label: t('configurator.steps.verlichting.title'), value: ledSummaryValue, key: 'verlichting' },
-            { stepIndex: 7, label: t('configuratorWizard.montageTitle'), value: config.montage ? t('configuratorWizard.montageOnQuote') : t('configurator.selection.no'), key: 'montage' },
+            ...(showDimensionStep ? [{
+                stepIndex: 0,
+                label: t('configurator.steps.afmetingen.title', { defaultValue: 'Afmetingen' }),
+                value: selectedWidth && selectedDepth ? `${selectedWidth} × ${selectedDepth} cm` : '—',
+                key: 'afmetingen',
+            }] : []),
+            { stepIndex: 0 + off, label: t('configurator.steps.color.title'), value: getOptionLabel('color', config.color), key: 'color' },
+            { stepIndex: 1 + off, label: t('configurator.steps.daktype.title'), value: getOptionLabel('daktype', config.daktype), key: 'daktype' },
+            { stepIndex: 2 + off, label: t('configurator.steps.goot.title'), value: getOptionLabel('goot', config.goot), key: 'goot' },
+            { stepIndex: 3 + off, label: t('configurator.steps.zijwand_links.title'), value: getOptionLabel('zijwand_links', config.zijwand_links), key: 'zijwand_links' },
+            { stepIndex: 4 + off, label: t('configurator.steps.zijwand_rechts.title'), value: getOptionLabel('zijwand_rechts', config.zijwand_rechts), key: 'zijwand_rechts' },
+            { stepIndex: 5 + off, label: t('configurator.steps.voorzijde.title'), value: getOptionLabel('voorzijde', config.voorzijde), key: 'voorzijde' },
+            { stepIndex: 6 + off, label: t('configurator.steps.verlichting.title'), value: ledSummaryValue, key: 'verlichting' },
+            { stepIndex: 7 + off, label: t('configuratorWizard.montageTitle'), value: config.montage ? t('configuratorWizard.montageOnQuote') : t('configurator.selection.no'), key: 'montage' },
         ];
 
         return (
@@ -879,33 +1018,52 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
         );
     };
 
-    const renderProgressIndicator = () => (
-        <div className="flex items-center gap-1.5 mb-8">
-            {STEPS.map((step, idx) => (
-                <React.Fragment key={step.id}>
-                    <button
-                        onClick={() => goToStep(idx)}
-                        disabled={idx > currentStepIndex}
-                        className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
-                            idx === currentStepIndex 
-                                ? 'bg-[#003878] text-white' 
-                                : idx < currentStepIndex 
-                                    ? 'bg-[#003878]/20 text-[#003878] cursor-pointer hover:bg-[#003878]/30' 
-                                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                        }`}
-                        title={step.title}
-                    >
-                        {idx < currentStepIndex ? <Check size={14} /> : idx + 1}
-                    </button>
-                    {idx < STEPS.length - 1 && (
-                        <div className={`h-0.5 w-4 lg:w-6 flex-shrink-0 transition-colors ${
-                            idx < currentStepIndex ? 'bg-[#003878]/30' : 'bg-gray-200'
-                        }`} />
-                    )}
-                </React.Fragment>
-            ))}
-        </div>
-    );
+    const renderProgressIndicator = () => {
+        const totalSteps = STEPS.length;
+        const progressPercent = ((currentStepIndex) / (totalSteps - 1)) * 100;
+
+        return (
+            <div className="mb-6 sm:mb-8 space-y-2 sm:space-y-3">
+                {/* Step text + progress bar */}
+                <div className="flex items-center justify-between">
+                    <span className="text-sm font-bold text-[var(--text)]">
+                        {t('configurator.steps.stepOf', { current: currentStepIndex + 1, total: totalSteps, defaultValue: `Stap ${currentStepIndex + 1} van ${totalSteps}` })}
+                    </span>
+                    <span className="text-sm text-[var(--muted)]">{currentStep.title}</span>
+                </div>
+                <div className="w-full h-1.5 bg-[var(--border)] rounded-full overflow-hidden">
+                    <div
+                        className="h-full bg-[var(--accent,#003878)] rounded-full transition-all duration-300"
+                        style={{ width: `${progressPercent}%` }}
+                    />
+                </div>
+                {/* Breadcrumb trail — step numbers on mobile, full names on sm+ */}
+                <div className="flex flex-wrap gap-1 text-xs text-[var(--muted)]">
+                    {STEPS.map((step, idx) => (
+                        <React.Fragment key={step.id}>
+                            <button
+                                onClick={() => goToStep(idx)}
+                                disabled={idx > currentStepIndex}
+                                className={`transition-colors ${
+                                    idx === currentStepIndex
+                                        ? 'text-[var(--text)] font-bold'
+                                        : idx < currentStepIndex
+                                            ? 'text-[var(--accent,#003878)] hover:underline cursor-pointer'
+                                            : 'text-[var(--muted)] cursor-not-allowed'
+                                }`}
+                            >
+                                {/* Mobile: just the step number */}
+                                <span className="sm:hidden">{idx + 1}</span>
+                                {/* Desktop: full step name */}
+                                <span className="hidden sm:inline">{step.title}</span>
+                            </button>
+                            {idx < STEPS.length - 1 && <span className="text-[var(--border-strong)]">›</span>}
+                        </React.Fragment>
+                    ))}
+                </div>
+            </div>
+        );
+    };
 
     // Count selected options for mobile button
     const selectionCount = useMemo(() => {
@@ -921,43 +1079,45 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
     }, [config]);
 
     // Selection items in step order - always show all options
-    const selectionItems = useMemo(() => [
+    const selectionItems = useMemo(() => {
+        const off = showDimensionStep ? 1 : 0;
+        return [
         {
             key: 'color',
             label: t('configurator.steps.color.title'),
             value: config.color ? getOptionLabel('color', config.color) : null,
-            stepIndex: 0,
+            stepIndex: 0 + off,
             colorHex: config.color ? COLOR_OPTIONS.find(c => c.id === config.color)?.hex : null,
         },
         {
             key: 'daktype',
             label: t('configurator.steps.daktype.title'),
             value: config.daktype ? getOptionLabel('daktype', config.daktype) : null,
-            stepIndex: 1,
+            stepIndex: 1 + off,
         },
         {
             key: 'goot',
             label: t('configurator.steps.goot.title'),
             value: config.goot ? getOptionLabel('goot', config.goot) : null,
-            stepIndex: 2,
+            stepIndex: 2 + off,
         },
         {
             key: 'zijwand_links',
             label: t('configurator.steps.zijwand_links.title'),
             value: config.zijwand_links ? getOptionLabel('zijwand_links', config.zijwand_links) : null,
-            stepIndex: 3,
+            stepIndex: 3 + off,
         },
         {
             key: 'zijwand_rechts',
             label: t('configurator.steps.zijwand_rechts.title'),
             value: config.zijwand_rechts ? getOptionLabel('zijwand_rechts', config.zijwand_rechts) : null,
-            stepIndex: 4,
+            stepIndex: 4 + off,
         },
         {
             key: 'voorzijde',
             label: t('configurator.steps.voorzijde.title'),
             value: config.voorzijde ? getOptionLabel('voorzijde', config.voorzijde) : null,
-            stepIndex: 5,
+            stepIndex: 5 + off,
         },
         {
             key: 'verlichting',
@@ -967,9 +1127,10 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                     ? t('configuratorWizard.yesSpots', { qty: getLedTotals(widthCm).qty })
                     : t('configurator.selection.no'))
                 : null,
-            stepIndex: 6,
+            stepIndex: 6 + off,
         },
-    ], [config, getOptionLabel, t, widthCm]);
+    ];
+    }, [config, getOptionLabel, t, widthCm, showDimensionStep]);
 
     // Reusable Selection Summary Component - shows all options
     const SelectionSummary = ({ showEditButtons = true }: { showEditButtons?: boolean }) => (
@@ -1056,7 +1217,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                         transition={{ type: "spring", damping: 25, stiffness: 300 }}
                         className="hidden lg:flex fixed inset-0 z-[201] items-center justify-center p-6"
                     >
-                        <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[80vh] flex flex-col">
+                        <div className="bg-white rounded-md shadow-sm max-w-lg w-full max-h-[80vh] flex flex-col">
                             {/* Header */}
                             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
                                 <h3 className="text-lg font-bold text-gray-900">{t('configurator.selection.title')}</h3>
@@ -1142,6 +1303,164 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
         );
     };
 
+    // ── INLINE LAYOUT ─────────────────────────────────────────────────
+    if (isInline) {
+        return (
+            <div className="font-sans">
+                {/* Info Modal (inline mode uses fixed overlay) */}
+                <AnimatePresence>
+                    {infoModal && (
+                        <MotionDiv
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/50"
+                            onClick={() => setInfoModal(null)}
+                        >
+                            <MotionDiv
+                                initial={{ scale: 0.95, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                exit={{ scale: 0.95, opacity: 0 }}
+                                className="bg-white rounded-xl p-5 max-w-sm w-full shadow-sm"
+                                onClick={e => e.stopPropagation()}
+                            >
+                                <div className="flex justify-between items-start mb-3">
+                                    <h4 className="font-bold text-base text-gray-900">{infoModal.title}</h4>
+                                    <button onClick={() => setInfoModal(null)} className="p-1 hover:bg-gray-100 rounded-full">
+                                        <X size={18} />
+                                    </button>
+                                </div>
+                                <p className="text-gray-600 text-sm leading-relaxed">{infoModal.text}</p>
+                            </MotionDiv>
+                        </MotionDiv>
+                    )}
+                </AnimatePresence>
+
+                {/* Selection sheet (inline mode) */}
+                <SelectionModal />
+
+                {/* 2-column grid: Preview (left) | Config (right) */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-8">
+
+                    {/* LEFT — Preview/Visualization */}
+                    <div className="lg:sticky lg:top-28 self-start">
+                        <Visualization className="w-full rounded-xl overflow-hidden" />
+                    </div>
+
+                    {/* RIGHT — Configuration Panel */}
+                    <div className="flex flex-col gap-3 lg:gap-4">
+                        {/* Progress + Step title */}
+                        <div className="bg-white rounded-xl border border-gray-200 p-4 lg:p-6">
+                            {renderProgressIndicator()}
+                            <h2 className="text-lg lg:text-xl font-bold text-gray-900 mb-1">{currentStep.title}</h2>
+                            <p className="text-sm text-gray-500 mb-4 lg:mb-6">{currentStep.description}</p>
+
+                            <AnimatePresence mode="wait">
+                                <MotionDiv
+                                    key={currentStepIndex}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -10 }}
+                                    transition={{ duration: 0.2 }}
+                                >
+                                    {renderOptionSelector()}
+                                </MotionDiv>
+                            </AnimatePresence>
+                        </div>
+
+                        {/* Sticky CTA row */}
+                        <div className="sticky bottom-0 z-30">
+                            <div className="bg-white rounded-xl border border-gray-200 p-4 lg:p-6">
+                                {/* Price row — compact on mobile */}
+                                <div className="flex items-center justify-between mb-3 sm:block">
+                                    <span className="text-xs text-gray-500 uppercase tracking-wide font-medium">{t('configurator.footer.totalPriceInclVat')}</span>
+                                    <span className="text-xl sm:text-2xl font-black text-[#003878] sm:block">{formatEUR(toCents(displayTotal), 'cents')}</span>
+                                </div>
+
+                                {/* Navigation Buttons */}
+                                <div className="flex items-center gap-2">
+                                    {currentStepIndex > 0 && (
+                                        <button
+                                            onClick={handleBack}
+                                            className="p-2.5 sm:p-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
+                                        >
+                                            <ChevronLeft size={20} />
+                                        </button>
+                                    )}
+
+                                    {/* Selection Button — icon-only on mobile */}
+                                    <button
+                                        onClick={() => setSelectionOpen(true)}
+                                        className="flex items-center gap-2 px-3 sm:px-4 py-2.5 sm:py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
+                                    >
+                                        <ShoppingBag size={18} className="text-[#003878]" />
+                                        <span className="font-semibold text-sm hidden sm:inline">{t('configurator.selection.title')}</span>
+                                        {selectionCount > 0 && (
+                                            <span className="px-1.5 py-0.5 bg-[#003878] text-white text-[10px] font-bold rounded-full">
+                                                {selectionCount}
+                                            </span>
+                                        )}
+                                    </button>
+
+                                    <div className="flex-1" />
+
+                                    {!isLastStep ? (
+                                        <button
+                                            onClick={handleNext}
+                                            disabled={!canProceed}
+                                            className={`px-5 sm:px-6 py-3 sm:py-3.5 font-bold rounded-xl text-sm flex items-center gap-2 transition-all ${
+                                                canProceed
+                                                    ? 'bg-[#003878] text-white hover:bg-[#002050] shadow-sm shadow-[#003878]/20'
+                                                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                            }`}
+                                        >
+                                            {t('configurator.navigation.next')}
+                                            <ChevronRight size={18} />
+                                        </button>
+                                    ) : (
+                                        <button
+                                            onClick={config.montage ? handleQuoteRequest : handleAddToCart}
+                                            disabled={!agreed || isSubmitting}
+                                            className={`px-5 sm:px-6 py-3 sm:py-3.5 font-bold rounded-xl text-sm flex items-center gap-2 transition-all ${
+                                                agreed && !isSubmitting
+                                                    ? 'bg-[#FF7300] text-white hover:bg-[#E66600] shadow-sm shadow-[#FF7300]/20'
+                                                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                            }`}
+                                        >
+                                            {isSubmitting ? (
+                                                <>
+                                                    <Loader2 size={18} className="animate-spin" />
+                                                    {mode === 'edit' ? t('configuratorWizard.saving') : t('configurator.navigation.adding')}
+                                                </>
+                                            ) : (
+                                                <>
+                                                    {config.montage
+                                                        ? t('configuratorWizard.requestQuote')
+                                                        : (mode === 'edit' ? t('configuratorWizard.saveLabel') : t('configurator.navigation.add'))
+                                                    }
+                                                    {config.montage ? <FileText size={18} /> : <ArrowRight size={18} />}
+                                                </>
+                                            )}
+                                        </button>
+                                    )}
+                                </div>
+
+                                {/* Trust badges — hidden on mobile to save space */}
+                                <div className="hidden sm:flex items-center gap-4 mt-3 pt-3 border-t border-gray-100 text-xs text-gray-500">
+                                    <DeliveryTime label={t('configurator.footer.deliveryTime')} iconSize={12} />
+                                    <span className="flex items-center gap-1.5">
+                                        <ShieldCheck size={12} /> {t('configurator.footer.warranty')}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // ── MODAL LAYOUT (default) ────────────────────────────────────────
     return (
         <AnimatePresence>
             {isOpen && (
@@ -1165,7 +1484,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                                     initial={{ scale: 0.95, opacity: 0 }}
                                     animate={{ scale: 1, opacity: 1 }}
                                     exit={{ scale: 0.95, opacity: 0 }}
-                                    className="bg-white rounded-xl p-5 max-w-sm w-full shadow-xl"
+                                    className="bg-white rounded-xl p-5 max-w-sm w-full shadow-sm"
                                     onClick={e => e.stopPropagation()}
                                 >
                                     <div className="flex justify-between items-start mb-3">
@@ -1189,7 +1508,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                         animate={{ y: 0 }}
                         exit={{ y: "100%" }}
                         transition={{ type: "spring", damping: 30, stiffness: 300 }}
-                        className="h-full w-full lg:h-[95vh] lg:w-[95vw] lg:max-w-[1400px] lg:mx-auto lg:my-auto lg:rounded-2xl bg-white overflow-hidden flex flex-col lg:absolute lg:inset-0 lg:m-auto"
+                        className="h-full w-full lg:h-[95vh] lg:w-[95vw] lg:max-w-[1400px] lg:mx-auto lg:my-auto lg:rounded-md bg-white overflow-hidden flex flex-col lg:absolute lg:inset-0 lg:m-auto"
                     >
                         {/* Close Button */}
                         <button
@@ -1362,9 +1681,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
 
                                     {/* Info badges */}
                                     <div className="flex items-center gap-4 mt-3 text-xs text-gray-500">
-                                        <span className="flex items-center gap-1.5">
-                                            <Truck size={12} /> {t('configurator.footer.deliveryTime')}
-                                        </span>
+                                        <DeliveryTime label={t('configurator.footer.deliveryTime')} iconSize={12} />
                                         <span className="flex items-center gap-1.5">
                                             <ShieldCheck size={12} /> {t('configurator.footer.warranty')}
                                         </span>

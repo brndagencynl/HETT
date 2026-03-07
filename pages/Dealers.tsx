@@ -16,12 +16,12 @@ const Dealers: React.FC = () => {
         image="https://picsum.photos/1200/800?random=2"
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+      <div className="ds-container ds-section">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
             
             {/* CTA Column (Replaces Login) */}
             <div className="lg:col-span-5 order-2 lg:order-1">
-                <div className="bg-white p-8 rounded-[24px] shadow-lg border border-gray-100">
+                <div className="bg-white p-8 rounded-md shadow-sm border border-gray-100">
                     <div className="flex items-center gap-3 mb-6">
                         <Users className="text-hett-dark" size={24} />
                         <h2 className="text-2xl font-bold text-gray-900">Partner worden?</h2>
@@ -113,7 +113,7 @@ const Dealers: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="mt-12 bg-white p-8 border border-gray-200 rounded-[24px] shadow-sm">
+                <div className="mt-12 bg-white p-8 border border-gray-200 rounded-md shadow-sm">
                     <h4 className="font-bold text-hett-dark mb-2 text-lg">Heeft u vragen?</h4>
                     <p className="text-gray-700 mb-4">Wilt u meer weten over de mogelijkheden voor uw bedrijf? Wij komen graag bij u langs voor een kennismaking.</p>
                     <Link to="/contact" className="inline-flex items-center text-hett-brown font-bold hover:underline">

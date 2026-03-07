@@ -13,7 +13,7 @@ const Terms: React.FC = () => {
       />
 
       <div className="max-w-[1000px] mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="bg-white p-8 md:p-16 rounded-[32px] shadow-sm border border-gray-100">
+        <div className="bg-white p-8 md:p-16 rounded-md shadow-sm border border-gray-100">
 
           <p className="text-center font-bold text-lg text-hett-dark mb-12">HETT Veranda</p>
 

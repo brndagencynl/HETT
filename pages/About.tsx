@@ -59,7 +59,7 @@ const About: React.FC = () => {
             />
 
             {/* Content */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+            <div className="ds-container ds-section">
 
                 {/* Intro Section */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-32">
@@ -72,15 +72,15 @@ const About: React.FC = () => {
                         </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
-                        <img src="/assets/images/overons_1.JPG" className="rounded-2xl w-full h-full object-cover shadow-lg transform translate-y-8" alt="Productie" />
-                        <img src="/assets/images/overons_2.JPG" className="rounded-2xl w-full h-full object-cover shadow-lg" alt="Montage" />
+                        <img src="/assets/images/overons_1.JPG" className="rounded-md w-full h-full object-cover shadow-sm transform translate-y-8" alt="Productie" />
+                        <img src="/assets/images/overons_2.JPG" className="rounded-md w-full h-full object-cover shadow-sm" alt="Montage" />
                     </div>
                 </div>
 
                 {/* WAAROM HETT Section (Interactive Tabs) */}
                 <div className="mb-32">
                     <h2 className="text-3xl md:text-4xl font-black text-hett-dark text-center mb-12">{t('about.whyTitle')}</h2>
-                    <div className="bg-white rounded-[32px] overflow-hidden">
+                    <div className="bg-white rounded-md overflow-hidden">
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
                             {/* Left: Tabs */}
@@ -91,8 +91,8 @@ const About: React.FC = () => {
                                         <div
                                             key={item.id}
                                             onClick={() => setActiveTab(index)}
-                                            className={`cursor-pointer rounded-2xl p-6 transition-all duration-300 border ${isActive
-                                                ? 'bg-hett-dark text-white shadow-xl scale-[1.02] border-hett-dark'
+                                            className={`cursor-pointer rounded-md p-6 transition-all duration-300 border ${isActive
+                                                ? 'bg-hett-dark text-white shadow-sm scale-[1.02] border-hett-dark'
                                                 : 'bg-[#f4f2ee] text-hett-dark hover:bg-[#e9e6e0] border-transparent'
                                                 }`}
                                         >
@@ -119,7 +119,7 @@ const About: React.FC = () => {
                             </div>
 
                             {/* Right: Dynamic Image */}
-                            <div className="lg:col-span-7 relative h-[500px] lg:h-auto rounded-[32px] overflow-hidden shadow-2xl group">
+                            <div className="lg:col-span-7 relative h-[500px] lg:h-auto rounded-md overflow-hidden shadow-sm group">
                                 <AnimatePresence mode='wait'>
                                     <motion.img
                                         key={activeTab}

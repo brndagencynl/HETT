@@ -109,7 +109,7 @@ const Checkout: React.FC = () => {
             </p>
             <Link 
               to="/cart" 
-              className="btn btn-primary btn-lg inline-flex items-center gap-2"
+              className="ds-btn ds-btn--primary ds-btn--lg"
             >
               <ShoppingCart size={20} />
               {t('checkout.goToCart')}

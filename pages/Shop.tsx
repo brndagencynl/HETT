@@ -6,7 +6,7 @@ import { Filter, Loader2 } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import { Product } from '../types';
 import { getAllProducts } from '../src/lib/shopify';
-import ProductCard from '../components/ui/ProductCard';
+import ProductCard from '../src/components/products/ProductCard';
 
 const Shop: React.FC = () => {
     const { t } = useTranslation();

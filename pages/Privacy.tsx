@@ -16,7 +16,7 @@ const Privacy: React.FC = () => {
       />
 
       <div className="max-w-[1000px] mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="bg-white p-8 md:p-16 rounded-[32px] shadow-sm border border-gray-100 prose prose-slate max-w-none prose-headings:font-bold prose-headings:text-hett-dark prose-a:text-hett-brown">
+        <div className="bg-white p-8 md:p-16 rounded-md shadow-sm border border-gray-100 prose prose-slate max-w-none prose-headings:font-bold prose-headings:text-hett-dark prose-a:text-hett-brown">
           
           <p>
             HETT B.V., gevestigd aan Industrieweg 45, 5600 AA Eindhoven, is verantwoordelijk voor de verwerking van persoonsgegevens zoals weergegeven in deze privacyverklaring.

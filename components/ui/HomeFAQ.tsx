@@ -41,7 +41,7 @@ const HomeFAQ: React.FC<HomeFAQProps> = () => {
                             </p>
                             <Link
                                 to="/veelgestelde-vragen"
-                                className="btn-primary px-8 py-3.5 text-sm uppercase tracking-wider"
+                                className="ds-btn ds-btn--primary"
                             >
                                 {t('home.faq.viewAll')}
                             </Link>

@@ -16,7 +16,7 @@ const PaymentMethods: React.FC = () => {
       />
 
       <div className="max-w-[1000px] mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="bg-white p-8 md:p-12 rounded-[32px] shadow-sm border border-gray-100">
+        <div className="bg-white p-8 md:p-12 rounded-md shadow-sm border border-gray-100">
             
             <p className="text-gray-600 text-lg mb-12 max-w-2xl">
                 {t('payment.intro')}
@@ -57,7 +57,7 @@ const PaymentMethods: React.FC = () => {
 
             </div>
 
-            <div className="mt-12 p-8 bg-green-50 rounded-2xl border border-green-100 flex items-center gap-6">
+            <div className="mt-12 p-8 bg-green-50 rounded-md border border-green-100 flex items-center gap-6">
                 <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-green-500 shadow-sm flex-shrink-0">
                     <ShieldCheck size={32} />
                 </div>
@@ -76,7 +76,7 @@ const PaymentMethods: React.FC = () => {
 };
 
 const PaymentCard = ({ title, desc, badge }: { title: string, desc: string, badge: string }) => (
-    <div className="p-6 border border-gray-200 rounded-2xl hover:border-hett-brown transition-colors group">
+    <div className="p-6 border border-gray-200 rounded-md hover:border-hett-brown transition-colors group">
         <div className="flex justify-between items-start mb-3">
             <h3 className="font-bold text-hett-dark text-lg group-hover:text-hett-brown">{title}</h3>
             <span className="text-xs font-bold bg-gray-100 text-gray-600 px-2 py-1 rounded">{badge}</span>

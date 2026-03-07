@@ -133,7 +133,7 @@ const CalendlyInline: React.FC<CalendlyInlineProps> = ({ url, className = '' }) 
             href={url}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 bg-hett-dark text-white px-6 py-3 rounded-xl font-bold hover:bg-hett-brown transition-colors"
+            className="ds-btn ds-btn--primary"
           >
             <ExternalLink size={18} />
             Open Calendly

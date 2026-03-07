@@ -328,7 +328,7 @@ const SandwichPanelBuilder: React.FC<Props> = ({ product, basePrice, onAddToCart
                     <button
                         onClick={handleAddToCartClick}
                         disabled={!isValid}
-                        className={`flex-1 flex items-center justify-center gap-2 rounded-lg font-bold text-sm transition-all py-3 ${isValid ? 'bg-hett-primary text-white hover:bg-hett-dark shadow-lg shadow-hett-primary/20' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}
+                        className={`ds-btn ds-btn--primary flex-1 ${!isValid ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
                         <ShoppingCart size={18} />
                         {t('shop.addToCart')}

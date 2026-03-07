@@ -2,7 +2,8 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useCart } from '../context/CartContext';
-import { Truck, ShieldCheck, PenTool, ArrowLeft, ChevronLeft, ChevronRight, ShoppingCart, Loader2 } from 'lucide-react';
+import { ShieldCheck, PenTool, ArrowLeft, ChevronLeft, ChevronRight, ShoppingCart, Loader2 } from 'lucide-react';
+import DeliveryTime from '../src/components/ui/DeliveryTime';
 import PageHeader from '../components/PageHeader';
 import VerandaConfigurator, { VerandaConfiguratorRef } from '../components/VerandaConfigurator';
 import SandwichPanelBuilder from '../components/ui/sandwichpanel/SandwichPanelBuilder';
@@ -240,8 +241,8 @@ const ProductDetailShop: React.FC<ProductDetailShopProps> = ({ productHandle }) 
 
                             {galleryImages.length > 1 && (
                                 <div className="absolute inset-x-4 top-1/2 -translate-y-1/2 flex justify-between pointer-events-none">
-                                    <button onClick={handlePrevImage} className="btn-icon pointer-events-auto shadow-lg"><ChevronLeft size={24} /></button>
-                                    <button onClick={handleNextImage} className="btn-icon pointer-events-auto shadow-lg"><ChevronRight size={24} /></button>
+                                    <button onClick={handlePrevImage} className="btn-icon pointer-events-auto shadow-sm"><ChevronLeft size={24} /></button>
+                                    <button onClick={handleNextImage} className="btn-icon pointer-events-auto shadow-sm"><ChevronRight size={24} /></button>
                                 </div>
                             )}
                         </div>
@@ -263,7 +264,7 @@ const ProductDetailShop: React.FC<ProductDetailShopProps> = ({ productHandle }) 
                     <div className="lg:col-span-5">
                         <div className="card sticky top-32">
                             <div className="flex items-center gap-4 text-xs font-bold text-hett-muted mb-6 pb-6 border-b border-hett-muted/10">
-                                <span className="flex items-center gap-1"><Truck size={14} className="text-green-600" /> {t('common.inStock')}</span>
+                                <DeliveryTime label={t('common.inStock')} />
                                 <span className="flex items-center gap-1"><ShieldCheck size={14} className="text-green-600" /> {t('warranty.tenYear')}</span>
                             </div>
 

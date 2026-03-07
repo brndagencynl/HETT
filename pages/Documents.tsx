@@ -19,9 +19,9 @@ const Documents: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
           {/* Category: Datasheets */}
-          <div className="bg-white p-8 rounded-[32px] shadow-sm border border-gray-100 flex flex-col h-full">
+          <div className="bg-white p-8 rounded-md shadow-sm border border-gray-100 flex flex-col h-full">
             <div className="flex items-center gap-4 mb-8">
-                <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center border border-blue-100">
+                <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-md flex items-center justify-center border border-blue-100">
                     <FileText size={24} />
                 </div>
                 <div>
@@ -38,9 +38,9 @@ const Documents: React.FC = () => {
           </div>
 
           {/* Category: Montage */}
-          <div className="bg-white p-8 rounded-[32px] shadow-sm border border-gray-100 flex flex-col h-full">
+          <div className="bg-white p-8 rounded-md shadow-sm border border-gray-100 flex flex-col h-full">
             <div className="flex items-center gap-4 mb-8">
-                <div className="w-12 h-12 bg-orange-50 text-orange-600 rounded-2xl flex items-center justify-center border border-orange-100">
+                <div className="w-12 h-12 bg-orange-50 text-orange-600 rounded-md flex items-center justify-center border border-orange-100">
                     <FileCheck size={24} />
                 </div>
                 <div>
@@ -57,9 +57,9 @@ const Documents: React.FC = () => {
           </div>
 
           {/* Category: Certificaten */}
-          <div className="bg-white p-8 rounded-[32px] shadow-sm border border-gray-100 flex flex-col h-full">
+          <div className="bg-white p-8 rounded-md shadow-sm border border-gray-100 flex flex-col h-full">
             <div className="flex items-center gap-4 mb-8">
-                <div className="w-12 h-12 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center border border-green-100">
+                <div className="w-12 h-12 bg-green-50 text-green-600 rounded-md flex items-center justify-center border border-green-100">
                     <ShieldCheck size={24} />
                 </div>
                 <div>
@@ -78,7 +78,7 @@ const Documents: React.FC = () => {
         </div>
 
         {/* Extra CTA Section */}
-        <div className="mt-12 bg-hett-dark rounded-[32px] p-10 md:p-12 text-center md:text-left flex flex-col md:flex-row items-center justify-between gap-8 shadow-xl overflow-hidden relative">
+        <div className="mt-12 bg-hett-dark rounded-md p-10 md:p-12 text-center md:text-left flex flex-col md:flex-row items-center justify-between gap-8 shadow-sm overflow-hidden relative">
              {/* Abstract bg element */}
              <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
 
@@ -86,7 +86,7 @@ const Documents: React.FC = () => {
                  <h3 className="text-2xl font-bold text-white mb-2">Mist u een document?</h3>
                  <p className="text-gray-400 max-w-lg">Neem contact op met onze technische dienst voor specifieke vragen, CAD-tekeningen of berekeningen.</p>
              </div>
-             <Link to="/contact" className="relative z-10 bg-white text-hett-dark px-8 py-4 rounded-full font-bold hover:bg-gray-100 transition-colors whitespace-nowrap shadow-md">
+             <Link to="/contact" className="relative z-10 ds-btn ds-btn--secondary">
                  Contact opnemen
              </Link>
         </div>
@@ -97,7 +97,7 @@ const Documents: React.FC = () => {
 
 const DocumentRow = ({ title, size }: { title: string, size: string }) => (
     <li>
-        <button className="w-full flex items-center justify-between group p-4 rounded-2xl bg-gray-50 border border-transparent hover:bg-white hover:border-gray-200 hover:shadow-sm transition-all text-left">
+        <button className="w-full flex items-center justify-between group p-4 rounded-md bg-gray-50 border border-transparent hover:bg-white hover:border-gray-200 hover:shadow-sm transition-all text-left">
             <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-gray-400 group-hover:text-hett-brown shadow-sm border border-gray-100 transition-colors">
                     <Download size={18} strokeWidth={2} />

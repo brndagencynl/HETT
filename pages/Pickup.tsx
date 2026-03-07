@@ -14,7 +14,7 @@ const Pickup: React.FC = () => {
       />
 
       <div className="max-w-[1000px] mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="bg-white p-8 md:p-12 rounded-[32px] shadow-sm border border-gray-100">
+        <div className="bg-white p-8 md:p-12 rounded-md shadow-sm border border-gray-100">
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                 <div>
@@ -44,7 +44,7 @@ const Pickup: React.FC = () => {
                     </ol>
                 </div>
 
-                <div className="bg-gray-50 p-8 rounded-2xl border border-gray-100">
+                <div className="bg-gray-50 p-8 rounded-md border border-gray-100">
                     <h3 className="font-bold text-hett-dark text-xl mb-6">Locatie & Tijden</h3>
                     
                     <div className="space-y-6">
@@ -86,7 +86,7 @@ const Pickup: React.FC = () => {
                 </div>
             </div>
 
-            <div className="mt-12 bg-yellow-50 p-6 rounded-2xl border border-yellow-100 flex gap-4">
+            <div className="mt-12 bg-yellow-50 p-6 rounded-md border border-yellow-100 flex gap-4">
                 <Package className="text-yellow-600 flex-shrink-0" size={24} />
                 <div>
                     <h4 className="font-bold text-yellow-800 text-sm mb-1">Vervoer</h4>

@@ -56,7 +56,7 @@ const Quote: React.FC = () => {
             
             {/* Left: Configuration Summary */}
             <div>
-                <div className="bg-white p-8 rounded-[32px] shadow-sm border border-gray-100 sticky top-32">
+                <div className="bg-white p-8 rounded-md shadow-sm border border-gray-100 sticky top-32">
                     <h2 className="text-2xl font-black text-hett-dark mb-6">{t('quoteRequest.yourConfig')}</h2>
                     
                     <div className="space-y-4 mb-8">
@@ -71,7 +71,7 @@ const Quote: React.FC = () => {
                         <SummaryRow label={t('quoteRequest.lighting')} value={config.lighting || config.verlichting ? t('quoteRequest.ledSet') : t('quoteRequest.none')} />
                     </div>
 
-                    <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100">
+                    <div className="bg-blue-50 p-6 rounded-md border border-blue-100">
                         <div className="flex items-start gap-3">
                             <Check className="text-blue-600 mt-1" size={20} />
                             <div>
@@ -87,36 +87,36 @@ const Quote: React.FC = () => {
 
             {/* Right: Contact Form */}
             <div>
-                <form onSubmit={handleSubmit} className="bg-white p-8 md:p-10 rounded-[32px] shadow-lg border border-gray-100">
+                <form onSubmit={handleSubmit} className="bg-white p-8 md:p-10 rounded-md shadow-sm border border-gray-100">
                     <h2 className="text-2xl font-black text-hett-dark mb-8">{t('quoteRequest.contactDetails')}</h2>
                     
                     <div className="grid grid-cols-2 gap-6 mb-6">
                         <div>
                             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{t('quoteRequest.firstName')}</label>
-                            <input required type="text" value={form.firstName} onChange={e => setForm({...form, firstName: e.target.value})} className="w-full px-5 py-4 border border-gray-200 rounded-2xl bg-gray-50 focus:bg-white focus:border-hett-brown outline-none transition-all" />
+                            <input required type="text" value={form.firstName} onChange={e => setForm({...form, firstName: e.target.value})} className="w-full px-5 py-4 border border-gray-200 rounded-md bg-gray-50 focus:bg-white focus:border-hett-brown outline-none transition-all" />
                         </div>
                         <div>
                             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{t('quoteRequest.lastName')}</label>
-                            <input required type="text" value={form.lastName} onChange={e => setForm({...form, lastName: e.target.value})} className="w-full px-5 py-4 border border-gray-200 rounded-2xl bg-gray-50 focus:bg-white focus:border-hett-brown outline-none transition-all" />
+                            <input required type="text" value={form.lastName} onChange={e => setForm({...form, lastName: e.target.value})} className="w-full px-5 py-4 border border-gray-200 rounded-md bg-gray-50 focus:bg-white focus:border-hett-brown outline-none transition-all" />
                         </div>
                     </div>
 
                     <div className="mb-6">
                         <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{t('quoteRequest.email')}</label>
-                        <input required type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} className="w-full px-5 py-4 border border-gray-200 rounded-2xl bg-gray-50 focus:bg-white focus:border-hett-brown outline-none transition-all" />
+                        <input required type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} className="w-full px-5 py-4 border border-gray-200 rounded-md bg-gray-50 focus:bg-white focus:border-hett-brown outline-none transition-all" />
                     </div>
 
                     <div className="mb-6">
                         <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{t('quoteRequest.phone')}</label>
-                        <input required type="tel" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} className="w-full px-5 py-4 border border-gray-200 rounded-2xl bg-gray-50 focus:bg-white focus:border-hett-brown outline-none transition-all" />
+                        <input required type="tel" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} className="w-full px-5 py-4 border border-gray-200 rounded-md bg-gray-50 focus:bg-white focus:border-hett-brown outline-none transition-all" />
                     </div>
 
                     <div className="mb-8">
                         <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{t('quoteRequest.notes')}</label>
-                        <textarea rows={4} value={form.comments} onChange={e => setForm({...form, comments: e.target.value})} className="w-full px-5 py-4 border border-gray-200 rounded-2xl bg-gray-50 focus:bg-white focus:border-hett-brown outline-none transition-all resize-none"></textarea>
+                        <textarea rows={4} value={form.comments} onChange={e => setForm({...form, comments: e.target.value})} className="w-full px-5 py-4 border border-gray-200 rounded-md bg-gray-50 focus:bg-white focus:border-hett-brown outline-none transition-all resize-none"></textarea>
                     </div>
 
-                    <button type="submit" className="w-full bg-hett-dark text-white font-black text-lg py-5 rounded-2xl hover:bg-hett-brown transition-all shadow-lg flex items-center justify-center gap-3">
+                    <button type="submit" className="ds-btn ds-btn--primary ds-btn--lg ds-btn--full">
                         <Send size={20} /> {t('quoteRequest.submit')}
                     </button>
                     

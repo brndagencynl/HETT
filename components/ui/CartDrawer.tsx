@@ -70,7 +70,7 @@ const CartDrawer: React.FC = () => {
                         animate={{ x: 0 }}
                         exit={{ x: '100%' }}
                         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                        className="fixed inset-y-0 right-0 z-[101] w-full md:w-[480px] bg-[#eff6ff] shadow-2xl flex flex-col font-sans"
+                        className="fixed inset-y-0 right-0 z-[101] w-full md:w-[480px] bg-[#eff6ff] shadow-sm flex flex-col font-sans"
                         ref={drawerRef}
                     >
                         {/* Header */}
@@ -93,7 +93,7 @@ const CartDrawer: React.FC = () => {
                                     <p className="text-lg font-bold text-gray-600 mb-6">{t('cart.emptyDrawer')}</p>
                                     <button
                                         onClick={() => { closeCart(); navigate('/shop'); }}
-                                        className="bg-hett-primary text-white px-8 py-3 rounded-lg font-bold hover:bg-hett-dark transition-colors"
+                                        className="ds-btn ds-btn--primary"
                                     >
                                         {t('common.startShopping')}
                                     </button>
@@ -273,13 +273,13 @@ const CartDrawer: React.FC = () => {
                                 <div className="space-y-3">
                                     <button
                                         onClick={handleCheckout}
-                                        className="w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 shadow-lg transition-colors bg-hett-primary text-white hover:bg-hett-dark shadow-hett-primary/20"
+                                        className="ds-btn ds-btn--primary ds-btn--lg ds-btn--full"
                                     >
                                         {t('cart.checkout')} <ArrowRight size={20} />
                                     </button>
                                     <button
                                         onClick={closeCart}
-                                        className="w-full py-3 bg-white border-2 border-gray-100 text-gray-600 rounded-xl font-bold hover:border-gray-300 hover:text-gray-800 transition-colors"
+                                        className="ds-btn ds-btn--secondary ds-btn--full"
                                     >
                                         {t('common.continueShopping')}
                                     </button>

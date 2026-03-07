@@ -53,7 +53,7 @@ const Page: React.FC = () => {
                     <div className="py-24 text-center">
                         <h1 className="text-2xl font-bold text-hett-dark mb-4">{t('page.notFound')}</h1>
                         <p className="text-hett-muted mb-8">{t('page.notFoundDesc')}</p>
-                        <Link to="/" className="btn-primary">
+                        <Link to="/" className="ds-btn ds-btn--primary">
                             {t('common.backToHome')}
                         </Link>
                     </div>
@@ -81,13 +81,13 @@ const Page: React.FC = () => {
 
                 {/* Page Content */}
                 <article
-                    className="prose prose-lg max-w-none bg-white rounded-2xl p-8 shadow-sm border border-gray-100
+                    className="prose prose-lg max-w-none bg-white rounded-md p-8 shadow-sm border border-gray-100
                         prose-headings:text-hett-dark prose-headings:font-bold
                         prose-p:text-gray-600 prose-p:leading-relaxed
                         prose-a:text-hett-primary prose-a:no-underline hover:prose-a:underline
                         prose-strong:text-hett-dark
                         prose-ul:text-gray-600 prose-ol:text-gray-600
-                        prose-img:rounded-xl prose-img:shadow-lg"
+                        prose-img:rounded-xl prose-img:shadow-sm"
                     dangerouslySetInnerHTML={{ __html: page.body }}
                 />
             </div>

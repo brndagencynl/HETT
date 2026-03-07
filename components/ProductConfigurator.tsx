@@ -31,7 +31,7 @@ const ProductConfigurator: React.FC<ProductConfiguratorProps> = ({ product }) =>
   };
 
   return (
-    <div className="bg-white p-8 rounded-[32px] shadow-lg border border-gray-100 sticky top-32">
+    <div className="bg-white p-8 rounded-md shadow-sm border border-gray-100 sticky top-32">
         <h3 className="text-2xl font-black text-hett-dark mb-6">{t('configurator.title')}</h3>
 
         {/* Price Display */}
@@ -133,7 +133,7 @@ const ProductConfigurator: React.FC<ProductConfiguratorProps> = ({ product }) =>
 
         <button 
             onClick={handleAddToCart}
-            className="w-full bg-hett-dark text-white font-black uppercase tracking-wide py-5 rounded-2xl flex items-center justify-center gap-3 shadow-lg hover:bg-hett-brown transition-all transform hover:-translate-y-1"
+            className="ds-btn ds-btn--primary ds-btn--lg ds-btn--full"
         >
             <ShoppingBag size={20} />
             {t('configurator.addToCart')}

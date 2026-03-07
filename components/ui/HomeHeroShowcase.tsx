@@ -308,7 +308,7 @@ const HomeHeroShowcase: React.FC = () => {
             {/* CTA Button */}
             <Link
               to={currentItem.ctaHref}
-              className="btn-secondary px-8 py-4 text-base md:text-lg w-fit inline-flex items-center gap-3 hover:gap-4 transition-all rounded-xl font-bold"
+              className="ds-btn ds-btn--primary ds-btn--lg"
             >
               {currentItem.ctaText}
               <ArrowRight size={20} />
@@ -321,14 +321,14 @@ const HomeHeroShowcase: React.FC = () => {
               {/* Prev Button */}
               <button
                 onClick={handlePrev}
-                className="w-11 h-11 md:w-12 md:h-12 rounded-full bg-white/95 backdrop-blur-md hover:bg-white flex items-center justify-center transition-all flex-shrink-0 shadow-lg hover:shadow-xl border border-gray-200"
+                className="w-11 h-11 md:w-12 md:h-12 rounded-full bg-white/95 backdrop-blur-md hover:bg-white flex items-center justify-center transition-all flex-shrink-0 shadow-sm hover:shadow-sm border border-gray-200"
                 aria-label="Vorige"
               >
                 <ChevronLeft size={22} className="text-gray-700" />
               </button>
               
               {/* Thumbnail Container - Semi-opaque with backdrop blur */}
-              <div className="bg-white/90 backdrop-blur-md rounded-[24px] px-5 md:px-8 py-4 md:py-5 flex items-center shadow-xl border border-white/50">
+              <div className="bg-white/90 backdrop-blur-md rounded-md px-5 md:px-8 py-4 md:py-5 flex items-center shadow-sm border border-white/50">
                 {thumbnailsReady ? (
                   <div className="flex items-center gap-5 md:gap-8 overflow-x-auto no-scrollbar">
                     {heroItems.map((item, index) => (
@@ -356,7 +356,7 @@ const HomeHeroShowcase: React.FC = () => {
               {/* Next Button */}
               <button
                 onClick={handleNext}
-                className="w-11 h-11 md:w-12 md:h-12 rounded-full bg-white/95 backdrop-blur-md hover:bg-white flex items-center justify-center transition-all flex-shrink-0 shadow-lg hover:shadow-xl border border-gray-200"
+                className="w-11 h-11 md:w-12 md:h-12 rounded-full bg-white/95 backdrop-blur-md hover:bg-white flex items-center justify-center transition-all flex-shrink-0 shadow-sm hover:shadow-sm border border-gray-200"
                 aria-label="Volgende"
               >
                 <ChevronRight size={22} className="text-gray-700" />

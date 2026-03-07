@@ -19,7 +19,8 @@
 
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { X, Check, Info, ChevronLeft, ChevronRight, Truck, ShieldCheck, ArrowRight, Lightbulb, Edit2, Eye, ChevronUp, ShoppingBag, Loader2, Ruler, AlertTriangle, Wrench, FileText } from 'lucide-react';
+import { X, Check, Info, ChevronLeft, ChevronRight, ShieldCheck, ArrowRight, Lightbulb, Edit2, Eye, ChevronUp, ShoppingBag, Loader2, AlertTriangle, Wrench, FileText } from 'lucide-react';
+import DeliveryTime from '../src/components/ui/DeliveryTime';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 
@@ -401,7 +402,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
 
     // Collect all visualization layer URLs (base + overlays in z-order)
     const previewLayers = visualLayers.map(l => l.src);
-    const previewImageUrl = previewLayers[0] || '/renders/veranda/fallback.webp';
+    const previewImageUrl = previewLayers[0] || '/renders/veranda/fallback.png';
 
     const draft = createMaatwerkOfferDraft({
       config,
@@ -568,7 +569,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
                   [&::-webkit-slider-runnable-track]:h-2.5 [&::-webkit-slider-runnable-track]:bg-transparent
                   [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 
                   [&::-webkit-slider-thumb]:bg-[#003878] [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-grab
-                  [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white
+                  [&::-webkit-slider-thumb]:shadow-sm [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white
                   [&::-moz-range-track]:h-2.5 [&::-moz-range-track]:bg-transparent
                   [&::-moz-range-thumb]:w-6 [&::-moz-range-thumb]:h-6 [&::-moz-range-thumb]:bg-[#003878] 
                   [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:cursor-grab [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white
@@ -576,18 +577,21 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
               />
             </div>
 
-            <div className="relative w-[128px] flex-shrink-0">
-              <input
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                value={isDragging ? String(localSliderValue) : inputValue}
-                onChange={handleInputChange}
-                onBlur={handleBlur}
-                onKeyDown={handleKeyDown}
-                className="w-full py-2.5 px-3 pr-10 rounded-md font-semibold text-base text-center border border-gray-200 focus:border-[#003878] focus:ring-2 focus:ring-[#003878]/20 outline-none transition-all"
-              />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-medium pointer-events-none">cm</span>
+            <div className="flex flex-col items-end gap-1 flex-shrink-0">
+              <div className="relative w-[128px]">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  value={isDragging ? String(localSliderValue) : inputValue}
+                  onChange={handleInputChange}
+                  onBlur={handleBlur}
+                  onKeyDown={handleKeyDown}
+                  className="w-full py-2.5 px-3 pr-10 rounded-md font-semibold text-base text-center border border-gray-200 focus:border-[#003878] focus:ring-2 focus:ring-[#003878]/20 outline-none transition-all"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-medium pointer-events-none">cm</span>
+              </div>
+              <span className="text-[10px] text-gray-400">of voer maat in</span>
             </div>
           </div>
 
@@ -619,32 +623,10 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
           configKey="depth"
         />
 
-        <Card padding="tight" className="flex items-start gap-3">
-          <div className="w-9 h-9 bg-[#003878] rounded-lg flex items-center justify-center flex-shrink-0">
-            <Ruler size={18} className="text-white" />
-          </div>
-          <div className="min-w-0">
-            <div className="text-xs text-gray-500">{t('common.dimension')}</div>
-            <div className="font-black text-[#003878] text-base leading-tight">
-              {currentSize.width} × {currentSize.depth} cm
-            </div>
-            <div className="text-[11px] text-gray-500">{areaM2.toFixed(2)} m²</div>
-          </div>
-          <div className="ml-auto text-right flex-shrink-0">
-            <div className="text-xs text-gray-500">{t('maatwerk.basePrice')}</div>
-            <div className="font-black text-[#003878] text-base leading-tight">{formatMaatwerkPrice(priceBreakdown.basePrice)}</div>
-            {priceBreakdown.anchor && (
-              <div className="text-[11px] text-gray-500">{t('maatwerk.inclCustomSurcharge', { amount: formatMaatwerkPrice(priceBreakdown.anchor.customFee) })}</div>
-            )}
-          </div>
-        </Card>
-
-        <Card padding="tight" className="bg-amber-50 border border-amber-200 flex items-start gap-2.5">
-          <Info size={16} className="text-amber-600 mt-0.5 flex-shrink-0" />
-          <div className="text-sm text-amber-800 leading-snug">
-            <strong>{t('maatwerk.infoTitle')}</strong> {t('maatwerk.infoDescription')}
-          </div>
-        </Card>
+        <div className="flex items-start gap-2.5 px-1 text-sm text-gray-500">
+          <Info size={15} className="mt-0.5 flex-shrink-0" />
+          <p>Maatwerk: elke maat tot op de centimeter. Prijs wordt automatisch berekend.</p>
+        </div>
       </div>
     );
   };
@@ -657,32 +639,29 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
     const currentColor = config.color;
 
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl">
+      <div className="grid grid-cols-3 gap-2 sm:gap-3">
         {MAATWERK_COLOR_OPTIONS.map((choice) => (
           <div
             key={choice.id}
             onClick={() => setConfig(prev => ({ ...prev, color: choice.id }))}
-            className={`relative rounded-xl overflow-hidden cursor-pointer transition-all border-2 p-4 ${
+            className={`relative rounded-xl overflow-hidden cursor-pointer transition-all border-2 p-2 sm:p-3 ${
               currentColor === choice.id
-                ? 'border-[#003878] ring-2 ring-[#003878]/20 shadow-lg bg-[#003878]/5'
+                ? 'border-[#003878] ring-2 ring-[#003878]/20 shadow-sm bg-[#003878]/5'
                 : 'border-gray-200 hover:border-gray-300 hover:shadow-md bg-white'
             }`}
           >
             {currentColor === choice.id && (
-              <div className="absolute top-2 right-2 w-6 h-6 bg-[#003878] rounded-full flex items-center justify-center text-white shadow-sm">
-                <Check size={14} strokeWidth={3} />
+              <div className="absolute top-1.5 right-1.5 w-5 h-5 sm:w-6 sm:h-6 bg-[#003878] rounded-full flex items-center justify-center text-white shadow-sm">
+                <Check size={12} strokeWidth={3} />
               </div>
             )}
             
             <div 
-              className="w-full aspect-square rounded-lg mb-3 border border-gray-200 shadow-inner"
+              className="w-full aspect-[4/3] rounded-lg mb-2 border border-gray-200 shadow-inner"
               style={{ backgroundColor: choice.hex }}
             />
             
-            <span className="block text-sm font-bold text-gray-900 text-center">{choice.label}</span>
-            {choice.description && (
-              <span className="block text-xs text-gray-500 text-center mt-1">{choice.description}</span>
-            )}
+            <span className="block text-xs sm:text-sm font-bold text-gray-900 text-center">{choice.label}</span>
           </div>
         ))}
       </div>
@@ -697,7 +676,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
     const currentValue = config[configKey];
 
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-2 sm:gap-3">
         {options.map((choice) => {
           const price = config.size ? getMaatwerkOptionPrice(choice.pricing, config.size) : 0;
           
@@ -707,21 +686,20 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
               type="button"
               onClick={() => setConfig(prev => ({ ...prev, [configKey]: choice.id }))}
               aria-pressed={currentValue === choice.id}
-              className={`relative text-left p-5 rounded-xl border-2 transition-all cursor-pointer min-h-[120px] ${
+              className={`relative text-left p-3 sm:p-4 rounded-xl border-2 transition-all cursor-pointer ${
                 currentValue === choice.id
                   ? 'border-[#003878] bg-[#003878]/5 ring-2 ring-[#003878]/10 shadow-md'
                   : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
               }`}
             >
               {currentValue === choice.id && (
-                <div className="absolute top-4 right-4 w-6 h-6 bg-[#003878] rounded-full flex items-center justify-center text-white">
-                  <Check size={14} strokeWidth={3} />
+                <div className="absolute top-2 right-2 sm:top-3 sm:right-3 w-5 h-5 sm:w-6 sm:h-6 bg-[#003878] rounded-full flex items-center justify-center text-white">
+                  <Check size={12} strokeWidth={3} />
                 </div>
               )}
-              <span className="block text-base font-bold text-gray-900 mb-2 pr-8">{choice.label}</span>
-              <span className="block text-sm text-gray-600 leading-relaxed">{choice.description}</span>
+              <span className="block text-sm sm:text-base font-bold text-gray-900 pr-6">{choice.label}</span>
               {price > 0 && (
-                <span className="inline-block mt-3 bg-[#FF7300]/10 text-[#FF7300] text-sm font-bold px-3 py-1 rounded-full">
+                <span className="inline-block mt-2 bg-[#FF7300]/10 text-[#FF7300] text-xs sm:text-sm font-bold px-2 py-0.5 sm:px-3 sm:py-1 rounded-full">
                   + {formatMaatwerkPrice(price)}
                 </span>
               )}
@@ -740,7 +718,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
     const currentValue = config[configKey];
 
     return (
-      <div className="space-y-3 max-w-2xl">
+      <div className="space-y-2">
         {options.map((choice) => {
           const price = config.size ? getMaatwerkOptionPrice(choice.pricing, config.size) : 0;
           
@@ -750,25 +728,24 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
               type="button"
               onClick={() => setConfig(prev => ({ ...prev, [configKey]: choice.id }))}
               aria-pressed={currentValue === choice.id}
-              className={`relative w-full text-left p-4 rounded-xl border-2 transition-all cursor-pointer ${
+              className={`relative w-full text-left p-3 sm:p-4 rounded-xl border-2 transition-all cursor-pointer ${
                 currentValue === choice.id
                   ? 'border-[#003878] bg-[#003878]/5 shadow-md ring-2 ring-[#003878]/10'
                   : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
               }`}
             >
               {currentValue === choice.id && (
-                <div className="absolute top-4 right-4 w-6 h-6 bg-[#003878] rounded-full flex items-center justify-center text-white">
-                  <Check size={14} strokeWidth={3} />
+                <div className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 w-5 h-5 sm:w-6 sm:h-6 bg-[#003878] rounded-full flex items-center justify-center text-white">
+                  <Check size={12} strokeWidth={3} />
                 </div>
               )}
-              <span className={`block font-bold text-base mb-1 pr-8 ${
+              <span className={`block font-bold text-sm sm:text-base mb-0.5 pr-7 ${
                 currentValue === choice.id ? 'text-gray-900' : 'text-gray-700'
               }`}>
                 {choice.label}
               </span>
-              <span className="block text-sm text-gray-600">{choice.description}</span>
               {price > 0 && (
-                <span className="inline-block mt-2 text-sm text-[#FF7300] font-semibold">+ {formatMaatwerkPrice(price)}</span>
+                <span className="inline-block mt-1 text-xs sm:text-sm text-[#FF7300] font-semibold">+ {formatMaatwerkPrice(price)}</span>
               )}
             </button>
           );
@@ -791,25 +768,25 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
     console.log(`[LED UI] enabled=${!!currentValue}`);
 
     return (
-      <div className="max-w-2xl">
+      <div>
         <div
           onClick={() => {
             setConfig(prev => ({ ...prev, verlichting: !currentValue }));
           }}
-          className={`flex items-center justify-between p-6 rounded-xl border-2 cursor-pointer transition-all ${
+          className={`flex items-center justify-between p-3 sm:p-5 rounded-xl border-2 cursor-pointer transition-all ${
             currentValue
               ? 'border-[#003878] bg-[#003878]/5 shadow-md ring-2 ring-[#003878]/10'
               : 'border-gray-200 bg-white hover:border-gray-300'
           }`}
         >
-          <div className="flex items-center gap-4">
-            <div className={`w-16 h-16 rounded-xl flex items-center justify-center shadow-sm transition-colors ${
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className={`w-10 h-10 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center shadow-sm transition-colors flex-shrink-0 ${
               currentValue ? 'bg-[#FF7300] text-white' : 'bg-gray-100 text-gray-400'
             }`}>
-              <Lightbulb size={28} fill={currentValue ? "currentColor" : "none"} />
+              <Lightbulb size={22} fill={currentValue ? "currentColor" : "none"} />
             </div>
             <div>
-              <span className="font-bold text-gray-900 text-lg block">LED verlichting</span>
+              <span className="font-bold text-gray-900 text-sm sm:text-base block">{t('configuratorWizard.ledLighting')}</span>
               {ledAvailable ? (
                 <>
                   <span className="text-sm text-gray-600">
@@ -864,25 +841,25 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
     const currentValue = config.montage;
 
     return (
-      <div className="max-w-2xl">
+      <div>
         <div
           onClick={() => {
             setConfig(prev => ({ ...prev, montage: !currentValue }));
           }}
-          className={`flex items-center justify-between p-6 rounded-xl border-2 cursor-pointer transition-all ${
+          className={`flex items-center justify-between p-3 sm:p-5 rounded-xl border-2 cursor-pointer transition-all ${
             currentValue
               ? 'border-[#003878] bg-[#003878]/5 shadow-md ring-2 ring-[#003878]/10'
               : 'border-gray-200 bg-white hover:border-gray-300'
           }`}
         >
-          <div className="flex items-center gap-4">
-            <div className={`w-16 h-16 rounded-xl flex items-center justify-center shadow-sm transition-colors ${
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className={`w-10 h-10 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center shadow-sm transition-colors flex-shrink-0 ${
               currentValue ? 'bg-[#003878] text-white' : 'bg-gray-100 text-gray-400'
             }`}>
-              <Wrench size={28} />
+              <Wrench size={22} />
             </div>
             <div>
-              <span className="font-bold text-gray-900 text-lg block">{t('configuratorWizard.montageTitle')}</span>
+              <span className="font-bold text-gray-900 text-sm sm:text-base block">{t('configuratorWizard.montageTitle')}</span>
               <span className="text-sm text-gray-600 block">{t('maatwerk.montageByHett')}</span>
               <span className="block text-sm text-[#FF7300] font-semibold mt-1">
                 {t('maatwerk.onQuote')}
@@ -1051,33 +1028,52 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
   // PROGRESS INDICATOR
   // ==========================================================================
 
-  const renderProgressIndicator = () => (
-    <div className="flex items-center gap-1.5 mb-8 overflow-x-auto pb-2">
-      {MAATWERK_STEPS.map((step, idx) => (
-        <React.Fragment key={step.id}>
-          <button
-            onClick={() => goToStep(idx)}
-            disabled={idx > currentStepIndex}
-            className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
-              idx === currentStepIndex
-                ? 'bg-[#003878] text-white'
-                : idx < currentStepIndex
-                  ? 'bg-[#003878]/20 text-[#003878] cursor-pointer hover:bg-[#003878]/30'
-                  : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-            }`}
-            title={step.title}
-          >
-            {idx < currentStepIndex ? <Check size={14} /> : idx + 1}
-          </button>
-          {idx < MAATWERK_STEPS.length - 1 && (
-            <div className={`h-0.5 w-4 lg:w-6 flex-shrink-0 transition-colors ${
-              idx < currentStepIndex ? 'bg-[#003878]/30' : 'bg-gray-200'
-            }`} />
-          )}
-        </React.Fragment>
-      ))}
-    </div>
-  );
+  const renderProgressIndicator = () => {
+    const totalSteps = MAATWERK_STEPS.length;
+    const progressPercent = ((currentStepIndex) / (totalSteps - 1)) * 100;
+
+    return (
+      <div className="mb-6 sm:mb-8 space-y-2 sm:space-y-3">
+        {/* Step text + progress bar */}
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-bold text-[var(--text)]">
+            {t('configurator.steps.stepOf', { current: currentStepIndex + 1, total: totalSteps, defaultValue: `Stap ${currentStepIndex + 1} van ${totalSteps}` })}
+          </span>
+          <span className="text-sm text-[var(--muted)]">{currentStep.title}</span>
+        </div>
+        <div className="w-full h-1.5 bg-[var(--border)] rounded-full overflow-hidden">
+          <div
+            className="h-full bg-[var(--accent,#003878)] rounded-full transition-all duration-300"
+            style={{ width: `${progressPercent}%` }}
+          />
+        </div>
+        {/* Breadcrumb trail — step numbers on mobile, full names on sm+ */}
+        <div className="flex flex-wrap gap-1 text-xs text-[var(--muted)]">
+          {MAATWERK_STEPS.map((step, idx) => (
+            <React.Fragment key={step.id}>
+              <button
+                onClick={() => goToStep(idx)}
+                disabled={idx > currentStepIndex}
+                className={`transition-colors ${
+                  idx === currentStepIndex
+                    ? 'text-[var(--text)] font-bold'
+                    : idx < currentStepIndex
+                      ? 'text-[var(--accent,#003878)] hover:underline cursor-pointer'
+                      : 'text-[var(--muted)] cursor-not-allowed'
+                }`}
+              >
+                {/* Mobile: just the step number */}
+                <span className="sm:hidden">{idx + 1}</span>
+                {/* Desktop: full step name */}
+                <span className="hidden sm:inline">{step.title}</span>
+              </button>
+              {idx < MAATWERK_STEPS.length - 1 && <span className="text-[var(--border-strong)]">›</span>}
+            </React.Fragment>
+          ))}
+        </div>
+      </div>
+    );
+  };
 
   // ==========================================================================
   // VISUALIZATION
@@ -1162,7 +1158,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-xl p-5 max-w-sm w-full shadow-xl"
+              className="bg-white rounded-xl p-5 max-w-sm w-full shadow-sm"
               onClick={e => e.stopPropagation()}
             >
               <div className="flex justify-between items-start mb-3">
@@ -1177,11 +1173,10 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
         )}
       </AnimatePresence>
 
-      <div className={isModalLayout ? 'py-4 sm:py-6' : 'pt-24 md:pt-28 pb-14'}>
+      <div className={isModalLayout ? 'py-4 sm:py-6' : 'pt-4 md:pt-6 pb-14'}>
         <div className={isModalLayout ? 'px-3 sm:px-6' : 'container'}>
           {!isModalLayout && (
-            <div className="flex items-start justify-between gap-6 mb-6">
-            <div className="min-w-0">
+            <div className="mb-6">
               <div className="flex items-center justify-between gap-3">
                 <h1 className="text-2xl md:text-3xl font-black text-hett-primary">{t('nav.maatwerkConfigurator')}</h1>
                 {onClose && (
@@ -1192,66 +1187,21 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
               </div>
               <p className="text-sm text-hett-muted mt-1">{t('maatwerk.configureCustom')}</p>
             </div>
-            <div className="hidden sm:block text-right flex-shrink-0">
-              <div className="text-xs text-hett-muted uppercase tracking-wide">{t('configurator.overview.totalInclVat')}</div>
-              <div className="text-2xl font-black text-hett-primary">{formatMaatwerkPrice(displayGrandTotal)}</div>
-            </div>
-          </div>
           )}
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 lg:gap-8 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-8 items-start">
             {/* Left: Preview */}
-            <div className="space-y-3 lg:sticky lg:top-28">
-              <Card padding="tight" className="overflow-hidden">
-                <div className="flex items-center justify-between gap-3 mb-3 lg:hidden">
-                  <button
-                    type="button"
-                    onClick={() => setIsMobilePreviewOpen((v) => !v)}
-                    className="flex items-center gap-2 text-sm font-bold text-gray-800"
-                  >
-                    {t('maatwerk.preview')}
-                    <ChevronUp
-                      size={16}
-                      className={`transition-transform ${isMobilePreviewOpen ? 'rotate-180' : 'rotate-0'}`}
-                    />
-                  </button>
-                  <div className="text-xs text-gray-500">{t('maatwerk.stepOf', { current: currentStepIndex + 1, total: MAATWERK_STEPS.length })}</div>
-                </div>
-
-                <div className={`${isMobilePreviewOpen ? 'block' : 'hidden'} lg:block`}>
-                  <Visualization />
-                </div>
-              </Card>
-
-              <div className="flex flex-wrap gap-2">
-                {selectedSize && (
-                  <Chip>
-                    <span className="text-gray-500">{t('maatwerk.dimension')}</span>
-                    <span className="text-gray-900">{selectedSize.width} × {selectedSize.depth} cm</span>
-                  </Chip>
-                )}
-                {selectedColor && (
-                  <Chip>
-                    <span className="text-gray-500">{t('maatwerk.color')}</span>
-                    <span className="text-gray-900">{selectedColor.label}</span>
-                  </Chip>
-                )}
-                {selectedAreaM2 != null && (
-                  <Chip>
-                    <span className="text-gray-500">Oppervlakte</span>
-                    <span className="text-gray-900">{selectedAreaM2.toFixed(2)} m²</span>
-                  </Chip>
-                )}
-              </div>
+            <div className="lg:sticky lg:top-28 self-start">
+              <Visualization className="w-full rounded-xl overflow-hidden" />
             </div>
 
             {/* Right: Controls + Summary */}
-            <div className="space-y-4">
-              <Card padding="tight">
+            <div className="flex flex-col gap-3 lg:gap-4">
+              <div className="bg-white rounded-xl border border-gray-200 p-4 lg:p-6">
                 {renderProgressIndicator()}
 
-                <h2 className="text-xl font-bold text-gray-900 mb-1">{currentStep.title}</h2>
-                <p className="text-sm text-gray-500 mb-4">{currentStep.description}</p>
+                <h2 className="text-lg lg:text-xl font-bold text-gray-900 mb-1">{currentStep.title}</h2>
+                <p className="text-sm text-gray-500 mb-4 lg:mb-6">{currentStep.description}</p>
 
                 <AnimatePresence mode="wait">
                   <MotionDiv
@@ -1264,19 +1214,18 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
                     {renderOptionSelector()}
                   </MotionDiv>
                 </AnimatePresence>
-              </Card>
+              </div>
 
-              {/* Sticky CTA row */}
-              <div className={isModalLayout ? 'sticky bottom-0 z-30' : 'sticky bottom-0 z-30'}>
-                <Card padding="tight" className="border border-gray-200">
-                  <div className="flex items-center justify-between sm:hidden mb-3">
-                    <div>
-                      <div className="text-[11px] text-gray-500 uppercase tracking-wide">Totaal incl. BTW</div>
-                      <div className="text-xl font-black text-[#003878]">{formatMaatwerkPrice(displayGrandTotal)}</div>
-                    </div>
+              <div className="sticky bottom-0 z-30">
+                <div className="bg-white rounded-xl border border-gray-200 p-4 lg:p-6">
+                  {/* Price row — compact on mobile */}
+                  <div className="flex items-center justify-between mb-3 sm:block">
+                    <span className="text-xs text-gray-500 uppercase tracking-wide font-medium">{t('configurator.footer.totalPriceInclVat')}</span>
+                    <span className="text-xl sm:text-2xl font-black text-[#003878] sm:block">{formatMaatwerkPrice(displayGrandTotal)}</span>
                   </div>
 
-                  <div className="flex items-center gap-3">
+                  {/* Navigation + CTA buttons */}
+                  <div className="flex items-center gap-2">
                     {mode === 'edit' && (
                       <button
                         type="button"
@@ -1289,7 +1238,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
                     {currentStepIndex > 0 && (
                       <button
                         onClick={handleBack}
-                        className="p-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
+                        className="p-2.5 sm:p-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
                       >
                         <ChevronLeft size={20} />
                       </button>
@@ -1301,17 +1250,17 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
                       <button
                         onClick={handleNext}
                         disabled={!canProceed}
-                        className={`px-6 py-3 font-bold rounded-xl text-sm flex items-center gap-2 transition-all ${
+                        className={`px-5 sm:px-6 py-3 sm:py-3.5 font-bold rounded-xl text-sm flex items-center gap-2 transition-all ${
                           canProceed
-                            ? 'bg-[#003878] text-white hover:bg-[#002050]'
+                            ? 'bg-[#003878] text-white hover:bg-[#002050] shadow-sm shadow-[#003878]/20'
                             : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                         }`}
                       >
-                        Volgende
+                        {t('configurator.navigation.next')}
                         <ChevronRight size={18} />
                       </button>
                     ) : (
-                      <div className="flex flex-col items-end gap-2">
+                      <div className="flex flex-col items-end gap-2 w-full sm:w-auto">
                         {shopifyVariantError && mode !== 'edit' ? (
                           <div className="max-w-md w-full p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 font-bold">
                             {shopifyVariantError}
@@ -1322,9 +1271,9 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
                           <button
                             onClick={handleRequestOffer}
                             disabled={!agreed}
-                            className={`px-6 py-3 font-bold rounded-xl text-sm flex items-center gap-2 transition-all ${
+                            className={`w-full sm:w-auto px-5 sm:px-6 py-3 sm:py-3.5 font-bold rounded-xl text-sm flex items-center justify-center gap-2 transition-all ${
                               agreed
-                                ? 'bg-[#003878] text-white hover:bg-[#002050] shadow-lg shadow-[#003878]/20'
+                                ? 'bg-[#003878] text-white hover:bg-[#002050] shadow-sm shadow-[#003878]/20'
                                 : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                             }`}
                           >
@@ -1335,9 +1284,9 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
                           <button
                             onClick={mode === 'edit' ? handleSaveEdit : handleAddToCart}
                             disabled={!agreed || isSubmitting}
-                            className={`px-6 py-3 font-bold rounded-xl text-sm flex items-center gap-2 transition-all ${
+                            className={`w-full sm:w-auto px-5 sm:px-6 py-3 sm:py-3.5 font-bold rounded-xl text-sm flex items-center justify-center gap-2 transition-all ${
                               agreed && !isSubmitting
-                                ? 'bg-[#FF7300] text-white hover:bg-[#E66600]'
+                                ? 'bg-[#FF7300] text-white hover:bg-[#E66600] shadow-sm shadow-[#FF7300]/20'
                                 : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                             }`}
                           >
@@ -1358,15 +1307,14 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
                     )}
                   </div>
 
-                  <div className="flex items-center gap-4 mt-3 text-xs text-gray-500">
-                    <span className="flex items-center gap-1.5">
-                      <Truck size={12} /> {t('maatwerk.delivery5to10')}
-                    </span>
+                  {/* Trust badges — hidden on mobile to save space */}
+                  <div className="hidden sm:flex items-center gap-4 mt-3 pt-3 border-t border-gray-100 text-xs text-gray-500">
+                    <DeliveryTime label={t('maatwerk.delivery5to10')} iconSize={12} />
                     <span className="flex items-center gap-1.5">
                       <ShieldCheck size={12} /> {t('maatwerk.warranty5year')}
                     </span>
                   </div>
-                </Card>
+                </div>
               </div>
             </div>
           </div>

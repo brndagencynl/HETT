@@ -7,7 +7,7 @@ import PageHeader from '../components/PageHeader';
 import { motion, AnimatePresence } from 'framer-motion';
 import MobileFilterSheet from '../components/ui/MobileFilterSheet';
 import ActiveFilters from '../components/ui/ActiveFilters';
-import ProductCard from '../components/ui/ProductCard';
+import ProductCard from '../src/components/products/ProductCard';
 import { parseVerandaDimensions, VERANDA_WIDTH_OPTIONS, VERANDA_DEPTH_OPTIONS } from '../src/utils/verandaDimensions';
 import { toCents } from '../src/utils/money';
 
@@ -557,7 +557,7 @@ const Category: React.FC = () => {
                         ) : (
                             <div className={`grid gap-3 sm:gap-6 ${viewMode === 'grid' ? 'grid-cols-2 sm:grid-cols-2 xl:grid-cols-3' : 'grid-cols-1'}`}>
                                 {filteredProducts.map((product) => (
-                                    <ProductCard key={product.id} product={product} viewMode={viewMode} />
+                                    <ProductCard key={product.id} product={product} variant={viewMode === 'list' ? 'compact' : 'listing'} />
                                 ))}
                             </div>
                         )}

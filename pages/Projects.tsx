@@ -95,7 +95,7 @@ const Projects: React.FC = () => {
             <p className="text-hett-muted mb-4">Er is een fout opgetreden bij het laden van de projecten.</p>
             <button 
               onClick={() => window.location.reload()} 
-              className="btn-primary"
+              className="ds-btn ds-btn--primary"
             >
               Probeer opnieuw
             </button>
@@ -157,7 +157,7 @@ const Projects: React.FC = () => {
                 <button
                   onClick={loadMore}
                   disabled={loadingMore}
-                  className="btn-secondary px-8 py-3 inline-flex items-center gap-2"
+                  className="ds-btn ds-btn--secondary"
                 >
                   {loadingMore ? (
                     <>

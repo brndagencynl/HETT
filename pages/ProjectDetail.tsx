@@ -75,7 +75,7 @@ const ProjectDetail: React.FC = () => {
                     <div className="py-24 text-center">
                         <h1 className="text-2xl font-bold text-hett-dark mb-4">Project niet gevonden</h1>
                         <p className="text-hett-muted mb-8">Het project dat u zoekt bestaat niet of is verwijderd.</p>
-                        <Link to="/projecten" className="btn-primary">
+                        <Link to="/projecten" className="ds-btn ds-btn--primary">
                             Terug naar projecten
                         </Link>
                     </div>
@@ -97,7 +97,7 @@ const ProjectDetail: React.FC = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
                     {/* Left Content */}
                     <div className="lg:col-span-8">
-                        <div className="relative h-[400px] lg:h-[500px] rounded-xl overflow-hidden mb-6 shadow-lg bg-gray-100">
+                        <div className="relative h-[400px] lg:h-[500px] rounded-xl overflow-hidden mb-6 shadow-sm bg-gray-100">
                             <img 
                                 src={project.image?.url || getProjectPlaceholder()} 
                                 alt={project.image?.altText || project.title} 

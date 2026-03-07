@@ -1,11 +1,26 @@
 import React from "react";
 
-type Variant = "primary" | "outline" | "ghost";
+type Variant = "primary" | "secondary" | "accent" | "outline" | "ghost" | "link";
 type Size = "sm" | "md" | "lg";
 
 type Props = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: Variant;
   size?: Size;
+};
+
+const variantMap: Record<Variant, string> = {
+  primary: "ds-btn--primary",
+  secondary: "ds-btn--secondary",
+  accent: "ds-btn--accent",
+  outline: "ds-btn--secondary", // alias
+  ghost: "ds-btn--ghost",
+  link: "ds-btn--link",
+};
+
+const sizeMap: Record<Size, string> = {
+  sm: "ds-btn--sm",
+  md: "",
+  lg: "ds-btn--lg",
 };
 
 export default function Button({
@@ -14,19 +29,10 @@ export default function Button({
   className = "",
   ...props
 }: Props) {
-  const variantClass =
-    variant === "primary"
-      ? "btn-primary"
-      : variant === "outline"
-      ? "btn-outline"
-      : "btn-ghost";
-
-  const sizeClass = size === "sm" ? "btn-sm" : size === "lg" ? "btn-lg" : "btn-md";
-
   return (
     <button
       {...props}
-      className={`btn ${variantClass} ${sizeClass} ${className}`.trim()}
+      className={`ds-btn ${variantMap[variant]} ${sizeMap[size]} ${className}`.trim()}
     />
   );
 }

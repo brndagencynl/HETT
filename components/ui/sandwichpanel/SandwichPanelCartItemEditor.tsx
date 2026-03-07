@@ -262,7 +262,7 @@ export default function SandwichPanelCartItemEditor({
             disabled={!isValid}
             className={`flex-1 py-3 px-4 rounded-lg font-bold text-sm transition-all ${
               isValid
-                ? 'bg-hett-primary text-white hover:bg-hett-dark shadow-lg shadow-hett-primary/20'
+                ? 'bg-hett-primary text-white hover:bg-hett-dark shadow-sm shadow-hett-primary/20'
                 : 'bg-gray-200 text-gray-400 cursor-not-allowed'
             }`}
           >

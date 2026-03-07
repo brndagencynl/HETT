@@ -49,7 +49,7 @@ const Blog: React.FC = () => {
                 subtitle="Blijf op de hoogte van het laatste nieuws, tips en inspiratie rondom terrasoverkappingen en buitenleven."
             />
 
-            <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="ds-container ds-section">
                 {loading ? (
                     <div className="py-24 text-center">
                         <span className="text-hett-muted font-medium animate-pulse">Artikelen laden...</span>
@@ -68,7 +68,7 @@ const Blog: React.FC = () => {
                             <Link
                                 key={article.id}
                                 to={`/blog/${article.handle}`}
-                                className="group flex flex-col h-full bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100"
+                                className="group flex flex-col h-full bg-white rounded-md overflow-hidden shadow-sm hover:shadow-sm transition-all duration-300 border border-gray-100"
                             >
                                 {/* Image */}
                                 <div className="aspect-[16/10] relative overflow-hidden bg-gray-100">

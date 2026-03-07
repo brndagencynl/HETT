@@ -5,7 +5,6 @@ import { useMetaPixel } from './src/hooks/useMetaPixel';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
-import WhatsAppButton from './src/components/WhatsAppButton';
 
 import Configurator from './pages/Configurator';
 import Projects from './pages/Projects';
@@ -56,8 +55,12 @@ import Page from './pages/Page';
 // Maatwerk Configurator
 import MaatwerkConfiguratorPage from './pages/MaatwerkConfigurator';
 
-// Veranda Category Page (configurator entry)
+// Veranda Category Page (configurator entry — inline configurator)
 import VerandaCategoryPage from './pages/VerandaCategoryPage';
+
+// Glazen Schuifwanden — TEMPORARILY DISABLED
+// import GlazenSchuifwandenOverview from './pages/GlazenSchuifwandenOverview';
+// import GlazenSchuifwandenDetail from './pages/GlazenSchuifwandenDetail';
 
 // Shopify Test
 import ShopifyTest from './pages/ShopifyTest';
@@ -110,9 +113,13 @@ const AnimatedRoutes: React.FC = () => {
           }
         />
 
+        {/* Glazen Schuifwanden — TEMPORARILY DISABLED */}
+        <Route path="/glazen-schuifwanden" element={<Navigate to="/" replace />} />
+        <Route path="/glazen-schuifwanden/:rail" element={<Navigate to="/" replace />} />
+
         {/* Shop Routes */}
         <Route path="/shop" element={<PageTransition><Shop /></PageTransition>} />
-        {/* Veranda category: show configurator entry instead of product grid */}
+        {/* Veranda category: size selector + inline configurator */}
         <Route path="/categorie/verandas" element={<PageTransition><VerandaCategoryPage /></PageTransition>} />
         <Route path="/categorie/overkappingen" element={<Navigate to="/categorie/verandas" replace />} />
         {/* Other categories: show product grid */}
@@ -182,7 +189,6 @@ const App: React.FC = () => {
   return (
     <HashRouter>
       <MetaPixelTracker />
-      <WhatsAppButton />
       <div className="flex flex-col min-h-screen bg-[#f6f8fa] font-sans text-hett-primary relative">
         <ScrollToTop />
         <Navbar />

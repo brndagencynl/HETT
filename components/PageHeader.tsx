@@ -64,7 +64,8 @@ const PageHeader: React.FC<any> = () => {
             'showroom': t('nav.showroom'),
             'offerte': t('offerte.title'),
             'bezorging': t('delivery.title'),
-            'montage-handleiding': t('nav.montage')
+            'montage-handleiding': t('nav.montage'),
+            'glazen-schuifwanden': t('nav.glazenSchuifwanden')
           };
           label = mapping[segment] || segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ');
       }

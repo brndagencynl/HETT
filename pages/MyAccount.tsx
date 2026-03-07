@@ -21,7 +21,7 @@ const MyAccount: React.FC = () => {
       />
       
       <div className="max-w-[800px] mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="bg-white p-8 md:p-12 rounded-[32px] shadow-sm border border-gray-100 text-center">
+        <div className="bg-white p-8 md:p-12 rounded-md shadow-sm border border-gray-100 text-center">
           
           <div className="w-20 h-20 bg-hett-dark/10 rounded-full flex items-center justify-center mx-auto mb-6">
             <User size={40} className="text-hett-dark" />
@@ -40,7 +40,7 @@ const MyAccount: React.FC = () => {
               href={loginUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 bg-hett-dark text-white font-bold py-4 px-8 rounded-2xl hover:bg-hett-brown transition-colors"
+              className="ds-btn ds-btn--primary ds-btn--lg"
             >
               {t('myAccount.login')}
               <ExternalLink size={18} />
@@ -50,7 +50,7 @@ const MyAccount: React.FC = () => {
               href={accountUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 bg-white border-2 border-hett-dark text-hett-dark font-bold py-4 px-8 rounded-2xl hover:bg-hett-dark hover:text-white transition-colors"
+              className="ds-btn ds-btn--secondary ds-btn--lg"
             >
               {t('myAccount.createAccount')}
               <ExternalLink size={18} />

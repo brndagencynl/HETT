@@ -55,9 +55,9 @@ const Warranty: React.FC = () => {
                         <div className="max-w-[1000px]">
         
         {/* Warranty Section */}
-        <div className="bg-white p-8 md:p-12 rounded-[32px] shadow-sm border border-gray-100 mb-12">
+        <div className="bg-white p-8 md:p-12 rounded-md shadow-sm border border-gray-100 mb-12">
             <div className="flex items-center gap-4 mb-8">
-                <div className="w-12 h-12 bg-green-100 text-green-600 rounded-2xl flex items-center justify-center">
+                <div className="w-12 h-12 bg-green-100 text-green-600 rounded-md flex items-center justify-center">
                     <ShieldCheck size={28} />
                 </div>
                 <h2 className="text-3xl font-black text-hett-dark">{t('warranty.guarantee')}</h2>
@@ -68,14 +68,14 @@ const Warranty: React.FC = () => {
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                <div className="border border-gray-100 p-6 rounded-2xl bg-gray-50">
+                <div className="border border-gray-100 p-6 rounded-md bg-gray-50">
                     <h3 className="font-bold text-hett-dark text-xl mb-2">{t('warranty.fiveYear')}</h3>
                     <p className="text-sm text-gray-500 mb-4">Op aluminium profielen & coating</p>
                     <p className="text-gray-600 text-sm">
                         Wij garanderen dat de aluminium profielen niet zullen doorroesten en dat de poedercoating niet zal afbladderen of overmatig verkleuren onder normale weersomstandigheden.
                     </p>
                 </div>
-                <div className="border border-gray-100 p-6 rounded-2xl bg-gray-50">
+                <div className="border border-gray-100 p-6 rounded-md bg-gray-50">
                     <h3 className="font-bold text-hett-dark text-xl mb-2">{t('warranty.fiveYear')}</h3>
                     <p className="text-sm text-gray-500 mb-4">Op bewegende delen & panelen</p>
                     <p className="text-gray-600 text-sm">
@@ -84,7 +84,7 @@ const Warranty: React.FC = () => {
                 </div>
             </div>
 
-            <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100">
+            <div className="bg-blue-50 p-6 rounded-md border border-blue-100">
                 <h4 className="font-bold text-blue-900 mb-2">{t('warranty.exclusions')}</h4>
                 <ul className="list-disc list-inside text-sm text-blue-800/80 space-y-1">
                     <li>Schade door storm, hagel of andere extreme weersomstandigheden (vaak gedekt door uw opstalverzekering).</li>
@@ -96,9 +96,9 @@ const Warranty: React.FC = () => {
         </div>
 
         {/* Complaints Section */}
-        <div className="bg-white p-8 md:p-12 rounded-[32px] shadow-sm border border-gray-100">
+        <div className="bg-white p-8 md:p-12 rounded-md shadow-sm border border-gray-100">
             <div className="flex items-center gap-4 mb-8">
-                <div className="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center">
+                <div className="w-12 h-12 bg-red-100 text-red-600 rounded-md flex items-center justify-center">
                     <AlertTriangle size={28} />
                 </div>
                 <h2 className="text-3xl font-black text-hett-dark">{t('warranty.complaints')}</h2>
@@ -127,7 +127,7 @@ const Warranty: React.FC = () => {
                 </li>
             </ol>
 
-            <div className="bg-gray-50 p-6 rounded-2xl flex justify-between items-center flex-wrap gap-4">
+            <div className="bg-gray-50 p-6 rounded-md flex justify-between items-center flex-wrap gap-4">
                 <div>
                     <h4 className="font-bold text-gray-900">Niet tevreden met de oplossing?</h4>
                     <p className="text-sm text-gray-500">

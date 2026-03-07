@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import PageHeader from '../components/PageHeader';
-import ProductCard from '../components/ui/ProductCard';
+import ProductCard from '../src/components/products/ProductCard';
 import { getAllProducts } from '../src/lib/shopify';
 import { Product } from '../types';
 import { Loader2 } from 'lucide-react';

@@ -20,8 +20,8 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({ items = [] }) => {
     };
 
     return (
-        <section className="py-12 md:py-16 overflow-hidden">
-            <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="ds-section--sm overflow-hidden">
+            <div className="ds-container">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-8">
                     <h2 className="text-2xl md:text-3xl font-black text-hett-dark">Nieuws & inspiratie</h2>
@@ -44,7 +44,7 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({ items = [] }) => {
                             <Link
                                 key={item.id}
                                 to={`/blog/${item.slug || item.id}`}
-                                className="flex-none w-[300px] md:w-[350px] snap-start group/card flex flex-col h-full bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100"
+                                className="flex-none w-[300px] md:w-[350px] snap-start group/card flex flex-col h-full bg-white rounded-md overflow-hidden shadow-sm hover:shadow-sm transition-all duration-300 border border-gray-100"
                             >
                                 {/* Image Container */}
                                 <div className="aspect-[16/10] relative overflow-hidden bg-gray-100">
@@ -94,7 +94,7 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({ items = [] }) => {
                     {/* Next Button */}
                     <button
                         onClick={scrollNext}
-                        className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-10 w-12 h-12 rounded-full bg-hett-dark text-white shadow-xl flex items-center justify-center hover:bg-hett-primary transition-colors hidden md:flex opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                        className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-10 w-12 h-12 rounded-full bg-hett-dark text-white shadow-sm flex items-center justify-center hover:bg-hett-primary transition-colors hidden md:flex opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                         aria-label="Volgende"
                     >
                         <ChevronRight size={24} />

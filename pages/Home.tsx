@@ -22,9 +22,26 @@ import BlogCarousel from '../components/ui/BlogCarousel';
 import HomeFeatureBlock from '../components/ui/HomeFeatureBlock';
 import HomeShowroomSection from '../components/ui/HomeShowroomSection';
 import HomeFAQ from '../components/ui/HomeFAQ';
-import VerandaPresetCard from '../components/ui/VerandaPresetCard';
+import ProductCard from '../src/components/products/ProductCard';
 import HomeHeroShowcase from '../components/ui/HomeHeroShowcase';
-import { POPULAIRE_VERANDA_KAARTEN } from '../config/homepageContent';
+import { POPULAIRE_VERANDA_KAARTEN, type PopulaireVerandaKaart } from '../config/homepageContent';
+import type { Product } from '../types';
+
+/** Map a hardcoded homepage preset card to the Product shape expected by ProductCard. */
+function presetToProduct(card: PopulaireVerandaKaart): Product {
+    return {
+        id: card.key,
+        title: card.title,
+        category: 'verandas',
+        priceCents: card.prijsVanafCents ?? 0,
+        price: (card.prijsVanafCents ?? 0) / 100,
+        shortDescription: card.description,
+        description: card.description,
+        imageUrl: card.imageSrc,
+        specs: {},
+        requiresConfiguration: true,
+    };
+}
 
 // Icon mapping for USPs
 const iconMap: Record<string, LucideIcon> = {
@@ -113,7 +130,7 @@ const Home: React.FC = () => {
             </div>
             
             {/* Populaire keuzes - Hardcoded Veranda Cards */}
-            //<div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pt-10 mb-20">
+            <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pt-10 mb-20">
                 {/* Header - same style as Inspiratie section */}
                 <div className="flex items-center justify-between mb-8">
                     <h2 className="text-2xl md:text-3xl font-black text-hett-dark">{t('home.popularChoices')}</h2>
@@ -128,7 +145,14 @@ const Home: React.FC = () => {
                 {/* 3-column grid: 1 col mobile, 2 col tablet, 3 col desktop */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {POPULAIRE_VERANDA_KAARTEN.map((card) => (
-                        <VerandaPresetCard key={card.key} card={card} />
+                        <ProductCard
+                            key={card.key}
+                            product={presetToProduct(card)}
+                            href={card.href}
+                            deliveryLabel={card.deliveryLabel}
+                            ctaLabel={card.ctaLabel}
+                            showFromSuffix
+                        />
                     ))}
                 </div>
             </div>

@@ -19,11 +19,11 @@ const ShowroomAppointment: React.FC = () => {
         </div>
 
         {/* Booking Widget Card */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-0 mb-8">
+        <div className="bg-white rounded-md border border-gray-200 shadow-sm p-0 mb-8">
           <iframe
             src={BOOKING_URL}
             title="Afspraak plannen"
-            className="w-full min-h-[700px] md:min-h-[700px] sm:min-h-[600px] rounded-2xl border-none"
+            className="w-full min-h-[700px] md:min-h-[700px] sm:min-h-[600px] rounded-md border-none"
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
             allow="fullscreen"
@@ -41,11 +41,11 @@ const ShowroomAppointment: React.FC = () => {
         </div>
 
         {/* Google Maps Card */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-0 mb-8">
+        <div className="bg-white rounded-md border border-gray-200 shadow-sm p-0 mb-8">
           <iframe
             src={GOOGLE_MAPS_IFRAME}
             title="Showroom locatie Hoppenkuil 17, Eindhoven"
-            className="w-full h-[360px] rounded-2xl border-none"
+            className="w-full h-[360px] rounded-md border-none"
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
             allow="fullscreen"

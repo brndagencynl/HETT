@@ -112,14 +112,14 @@ const ThankYou: React.FC = () => {
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <Link 
                             to="/shop" 
-                            className="btn btn-primary btn-lg inline-flex items-center justify-center gap-2"
+                            className="ds-btn ds-btn--primary ds-btn--lg"
                         >
                             <ShoppingBag size={20} />
                             {t('common.continueShopping')}
                         </Link>
                         <Link 
                             to="/" 
-                            className="btn btn-outline btn-lg inline-flex items-center justify-center gap-2"
+                            className="ds-btn ds-btn--secondary ds-btn--lg"
                         >
                             {t('thankYou.backToHome')} <ArrowRight size={20} />
                         </Link>

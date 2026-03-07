@@ -366,7 +366,7 @@ const Configurator: React.FC = () => {
             </div>
 
             {/* BOTTOM: Full Width Summary & Submit */}
-            <div className="bg-hett-dark rounded-xl text-white p-8 lg:p-12 shadow-xl relative overflow-hidden">
+            <div className="bg-hett-dark rounded-xl text-white p-8 lg:p-12 shadow-sm relative overflow-hidden">
                 {/* Abstract decorative circles */}
                 <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-3xl pointer-events-none -translate-y-1/2 translate-x-1/2"></div>
                 
@@ -392,8 +392,8 @@ const Configurator: React.FC = () => {
                         <button 
                             type="submit"
                             disabled={!isFormValid}
-                            className={`w-full bg-white text-hett-dark font-black uppercase tracking-wide py-4 rounded-lg flex items-center justify-center gap-3 shadow-lg transition-all ${
-                                isFormValid ? 'hover:bg-hett-brown hover:text-white cursor-pointer transform hover:-translate-y-1' : 'opacity-50 cursor-not-allowed'
+                            className={`ds-btn ds-btn--secondary ds-btn--lg ds-btn--full ${
+                                !isFormValid ? 'opacity-50 cursor-not-allowed' : ''
                             }`}
                         >
                             <Calculator size={20} />

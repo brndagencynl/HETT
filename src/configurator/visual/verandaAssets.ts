@@ -8,12 +8,12 @@
  * ASSET STRUCTURE:
  * /public/renders/veranda/
  *   ├── {color}/                    (ral7016, ral9005, ral9001)
- *   │   ├── base.webp               (base image for color)
- *   │   ├── daktype/{choiceId}.webp
- *   │   ├── goot/{choiceId}.webp
- *   │   ├── zijwand_links/{choiceId}.webp
- *   │   ├── zijwand_rechts/{choiceId}.webp
- *   │   └── voorzijde/{choiceId}.webp
+ *   │   ├── base.png                (base image for color)
+ *   │   ├── daktype/{choiceId}.png
+ *   │   ├── goot/{choiceId}.png
+ *   │   ├── zijwand_links/{choiceId}.png
+ *   │   ├── zijwand_rechts/{choiceId}.png
+ *   │   └── voorzijde/{choiceId}.png
  *   └── shared/
  *       └── thumbnails/            (shared thumbnails)
  * 
@@ -60,7 +60,7 @@ const RENDER_BASE_PATH = '/renders/veranda';
 export const DEFAULT_COLOR: VerandaColorId = 'ral7016';
 
 /** Fallback/placeholder image */
-export const FALLBACK_IMAGE = '/renders/veranda/fallback.webp';
+export const FALLBACK_IMAGE = '/renders/veranda/fallback.png';
 
 /** Choice IDs that should not have overlays */
 const NO_OVERLAY_CHOICES = ['geen', 'none', 'false', ''];
@@ -142,7 +142,7 @@ export function normalizeColorId(color: string | undefined | null): VerandaColor
  * Get the base image path for a color
  */
 export function getBaseImagePath(color: VerandaColorId = DEFAULT_COLOR): string {
-  return `${RENDER_BASE_PATH}/${color}/base.webp`;
+  return `${RENDER_BASE_PATH}/${color}/base.png`;
 }
 
 /**
@@ -171,7 +171,7 @@ export function getOverlayPath(
   const filename = getAssetFilename(choiceId);
   
   // Color-dependent path
-  return `${RENDER_BASE_PATH}/${color}/${groupId}/${filename}.webp`;
+  return `${RENDER_BASE_PATH}/${color}/${groupId}/${filename}.png`;
 }
 
 /** Placeholder/fallback thumbnail */
@@ -192,18 +192,18 @@ export function getThumbnailPath(
   // 'geen' option uses a generic "none" thumbnail
   if (NO_OVERLAY_CHOICES.includes(choiceId.toLowerCase())) {
     // Try color-specific 'geen' thumbnail first, else fallback
-    return `${RENDER_BASE_PATH}/${color}/thumbnails/${groupId}_geen.webp`;
+    return `${RENDER_BASE_PATH}/${color}/thumbnails/${groupId}_geen.png`;
   }
   
   // Groups without overlay images (verlichting) - use shared thumbnails
   if (!hasOverlayImages(groupId)) {
-    return `${RENDER_BASE_PATH}/shared/thumbnails/${groupId}_${choiceId}.webp`;
+    return `${RENDER_BASE_PATH}/shared/thumbnails/${groupId}_${choiceId}.png`;
   }
   
   // Apply asset filename mapping
   const filename = getAssetFilename(choiceId);
-  // Color-dependent thumbnail with flat naming: {groupId}_{choiceId}.webp
-  return `${RENDER_BASE_PATH}/${color}/thumbnails/${groupId}_${filename}.webp`;
+  // Color-dependent thumbnail with flat naming: {groupId}_{choiceId}.png
+  return `${RENDER_BASE_PATH}/${color}/thumbnails/${groupId}_${filename}.png`;
 }
 
 /**
@@ -228,14 +228,14 @@ export async function verifyThumbnailUrl(url: string): Promise<boolean> {
  * Get color swatch/preview image for color selector
  */
 export function getColorSwatchPath(color: VerandaColorId): string {
-  return `${RENDER_BASE_PATH}/${color}/swatch.webp`;
+  return `${RENDER_BASE_PATH}/${color}/swatch.png`;
 }
 
 /**
  * Get color preview image (larger than swatch, for cards)
  */
 export function getColorPreviewPath(color: VerandaColorId): string {
-  return `${RENDER_BASE_PATH}/${color}/preview.webp`;
+  return `${RENDER_BASE_PATH}/${color}/preview.png`;
 }
 
 // =============================================================================

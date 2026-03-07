@@ -89,7 +89,7 @@ const Mounting: React.FC = () => {
                         href="https://youtu.be/wA4XeNEzMnA"
                         target="_blank"
                         rel="noreferrer"
-                        className="block bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 group"
+                        className="block bg-white rounded-md overflow-hidden shadow-sm border border-gray-100 group"
                     >
                         <div className="aspect-video bg-gray-200 relative">
                             <img
@@ -98,7 +98,7 @@ const Mounting: React.FC = () => {
                                 alt={t('mounting.videoAlt')}
                             />
                             <div className="absolute inset-0 flex items-center justify-center">
-                                <PlayCircle size={56} className="text-white drop-shadow-lg group-hover:scale-110 transition-transform" />
+                                <PlayCircle size={56} className="text-white drop-shadow-sm group-hover:scale-110 transition-transform" />
                             </div>
                         </div>
                         <div className="p-4">
@@ -111,7 +111,7 @@ const Mounting: React.FC = () => {
 
               {/* Gereedschap Sidebar */}
               <div>
-                <div className="bg-white p-6 rounded-[24px] shadow-sm border border-gray-100 sticky top-32">
+                <div className="bg-white p-6 rounded-md shadow-sm border border-gray-100 sticky top-32">
                     <h3 className="font-bold text-hett-dark text-lg mb-4 flex items-center gap-2">
                         <Wrench size={20} /> {t('mounting.tools')}
                     </h3>

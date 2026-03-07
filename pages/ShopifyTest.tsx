@@ -109,7 +109,7 @@ export default function ShopifyTest() {
       priceCents: toCents(payload.totalPrice),
       shortDescription: "Test maatwerk item",
       description: "Test maatwerk item",
-      imageUrl: "/renders/veranda/ral7016/base.webp",
+      imageUrl: "/renders/veranda/ral7016/base.png",
       specs: {},
       requiresConfiguration: false,
       quantity: 1,

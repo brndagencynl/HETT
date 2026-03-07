@@ -27,11 +27,11 @@ const HomeShowroomSection: React.FC = () => {
                         </div>
 
                         <div className="flex flex-wrap gap-4 pt-2">
-                            <Link to="/showroom" className="btn-primary px-8 py-3.5 text-base shadow-sm hover:shadow-md transition-all group">
+                            <Link to="/showroom" className="ds-btn ds-btn--primary ds-btn--lg group">
                                 {t('home.showroom.cta')}
                                 <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                             </Link>
-                            <Link to="/contact#route" className="px-8 py-3.5 text-base font-bold text-hett-dark border border-gray-300 rounded-lg hover:border-hett-dark hover:bg-white transition-all inline-flex items-center gap-2">
+                            <Link to="/contact#route" className="ds-btn ds-btn--secondary ds-btn--lg">
                                 <MapPin size={18} />
                                 {t('home.showroom.route')}
                             </Link>
@@ -40,7 +40,7 @@ const HomeShowroomSection: React.FC = () => {
 
                     {/* Image */}
                     <div className="flex-1 w-full">
-                        <div className="relative aspect-[4/3] w-full rounded-2xl overflow-hidden shadow-xl bg-gray-100 group">
+                        <div className="relative aspect-[4/3] w-full rounded-md overflow-hidden shadow-sm bg-gray-100 group">
                             <img
                                 src="/assets/images/home_showroom.JPG"
                                 alt="HETT Showroom"

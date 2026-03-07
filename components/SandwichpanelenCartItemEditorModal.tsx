@@ -65,7 +65,7 @@ export default function SandwichpanelenCartItemEditorModal({
           >
             <div className="h-full w-full overflow-y-auto">
               <div className="min-h-full flex items-start justify-center p-3 sm:p-6">
-                <div className="w-full max-w-[640px] bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100">
+                <div className="w-full max-w-[640px] bg-white rounded-md shadow-sm overflow-hidden border border-gray-100">
                   <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-gray-100">
                     <div className="min-w-0">
                       <div className="text-lg sm:text-xl font-black text-hett-dark truncate">{title}</div>

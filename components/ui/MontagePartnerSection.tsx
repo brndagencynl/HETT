@@ -16,7 +16,7 @@ const MontagePartnerSection: React.FC = () => {
   return (
     <section className="py-12 md:py-16">
       {/* Main Card */}
-      <div className="bg-white rounded-2xl border-2 border-[#003878]/20 overflow-hidden shadow-sm">
+      <div className="bg-white rounded-md border-2 border-[#003878]/20 overflow-hidden shadow-sm">
         <div className="grid grid-cols-1 lg:grid-cols-12">
           {/* Content Side */}
           <div className="lg:col-span-7 p-6 md:p-8 lg:p-10">
@@ -35,7 +35,7 @@ const MontagePartnerSection: React.FC = () => {
             </p>
 
             {/* Quote Badge */}
-            <div className="inline-flex items-center gap-3 bg-gradient-to-r from-[#003878] to-[#002050] text-white px-5 py-3 rounded-xl mb-6 shadow-lg">
+            <div className="inline-flex items-center gap-3 bg-gradient-to-r from-[#003878] to-[#002050] text-white px-5 py-3 rounded-xl mb-6 shadow-sm">
               <Sparkles size={20} className="text-yellow-300" />
               <span className="text-lg font-bold">{t('mountingPartner.quoteBadge')}</span>
             </div>
@@ -66,7 +66,7 @@ const MontagePartnerSection: React.FC = () => {
             <div className="flex flex-col sm:flex-row gap-3">
               <Link
                 to="/contact"
-                className="inline-flex items-center justify-center gap-2 bg-[#003878] hover:bg-[#002050] text-white font-bold px-6 py-3.5 rounded-xl transition-colors shadow-lg shadow-[#003878]/20"
+                className="inline-flex items-center justify-center gap-2 bg-[#003878] hover:bg-[#002050] text-white font-bold px-6 py-3.5 rounded-xl transition-colors shadow-sm shadow-[#003878]/20"
               >
                 <Calendar size={18} />
                 {t('mountingPartner.requestQuote')}

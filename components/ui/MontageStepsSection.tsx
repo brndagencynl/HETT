@@ -87,7 +87,7 @@ const MontageStepsSection: React.FC = () => {
                 return (
                   <div key={step.number} className="relative flex gap-6">
                     {/* Number Badge */}
-                    <div className="relative z-10 flex-shrink-0 w-12 h-12 rounded-full bg-[#003878] text-white font-black text-lg flex items-center justify-center shadow-lg">
+                    <div className="relative z-10 flex-shrink-0 w-12 h-12 rounded-full bg-[#003878] text-white font-black text-lg flex items-center justify-center shadow-sm">
                       {step.number}
                     </div>
                     
@@ -138,7 +138,7 @@ const MontageStepsSection: React.FC = () => {
 
         {/* Summary Card (Desktop) */}
         <div className="lg:col-span-4">
-          <div className="bg-gradient-to-br from-[#003878] to-[#002050] rounded-2xl p-6 text-white shadow-xl sticky top-32">
+          <div className="bg-gradient-to-br from-[#003878] to-[#002050] rounded-md p-6 text-white shadow-sm sticky top-32">
             <h3 className="font-bold text-lg mb-4">{t('mountingSteps.whyTitle')}</h3>
             
             <ul className="space-y-4 mb-6">

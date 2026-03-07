@@ -3,26 +3,13 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useWishlist } from '../context/WishlistContext';
-import { useCart } from '../context/CartContext';
 import PageHeader from '../components/PageHeader';
-import { Trash2, ShoppingCart, Heart, ArrowRight, Check, PenTool } from 'lucide-react';
-import { isConfigOnly } from '../utils/productRules';
-import { formatEUR, toCents } from '../src/utils/money';
+import { Heart, Trash2 } from 'lucide-react';
+import ProductCard from '../src/components/products/ProductCard';
 
 const Wishlist: React.FC = () => {
     const { t } = useTranslation();
     const { wishlist, removeFromWishlist } = useWishlist();
-    const { addToCart } = useCart();
-
-    const handleAddToCart = (product: any) => {
-        if (isConfigOnly(product)) return; // Should not happen due to UI logic, but extra safety
-
-        // Simple add for accessories
-        addToCart(product, 1, {
-            color: product.options?.colors?.[0] || 'Standaard',
-            size: product.options?.sizes?.[0] || 'Standaard'
-        });
-    };
 
     return (
         <div className="min-h-screen bg-[#f6f8fa] font-sans">
@@ -50,50 +37,19 @@ const Wishlist: React.FC = () => {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {wishlist.map(product => (
-                            <div key={product.id} className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 group flex flex-col hover:shadow-md transition-shadow">
-                                <Link to={`/products/${product.id}`} className="relative h-64 overflow-hidden block bg-gray-100">
-                                    <img src={product.imageUrl} alt={product.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                            <ProductCard
+                                key={product.id}
+                                product={product}
+                                actionSlot={
                                     <button
-                                        onClick={(e) => { e.preventDefault(); removeFromWishlist(product.id); }}
-                                        className="absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur rounded-lg flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-white shadow-sm transition-colors border border-gray-100"
+                                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); removeFromWishlist(product.id); }}
+                                        className="w-9 h-9 bg-white/90 backdrop-blur rounded flex items-center justify-center text-gray-400 hover:text-red-500 shadow-sm transition-colors border border-[var(--border)]"
                                         title="Verwijderen"
                                     >
-                                        <Trash2 size={18} />
+                                        <Trash2 size={16} />
                                     </button>
-                                </Link>
-                                <div className="p-6 flex flex-col flex-grow">
-                                    <Link to={`/products/${product.id}`} className="block mb-2">
-                                        <span className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 block">{product.category}</span>
-                                        <h3 className="font-bold text-hett-dark text-lg leading-tight hover:underline line-clamp-2">{product.title}</h3>
-                                    </Link>
-
-                                    <div className="flex items-center gap-2 text-green-600 text-xs font-bold mb-4">
-                                        <Check size={14} strokeWidth={3} /> {t('common.inStock')}
-                                    </div>
-
-                                    <div className="mt-auto pt-4 border-t border-gray-50 flex items-center justify-between gap-4">
-                                        <div className="flex flex-col">
-                                            <span className="font-black text-xl text-hett-dark">{formatEUR(product.priceCents ?? toCents(product.price), 'cents')}</span>
-                                            <span className="text-[10px] text-gray-400 font-medium">{t('common.inclVat')}</span>
-                                        </div>
-                                        {isConfigOnly(product) ? (
-                                            <Link
-                                                to={`/products/${product.id}`}
-                                                className="bg-hett-dark text-white p-3 rounded-lg hover:bg-hett-brown transition-colors flex items-center gap-2 text-sm font-bold flex-grow justify-center"
-                                            >
-                                                <PenTool size={18} /> {t('common.configure')}
-                                            </Link>
-                                        ) : (
-                                            <button
-                                                onClick={() => handleAddToCart(product)}
-                                                className="bg-hett-primary text-white p-3 rounded-lg hover:bg-hett-brown transition-colors flex items-center gap-2 text-sm font-bold flex-grow justify-center"
-                                            >
-                                                <ShoppingCart size={18} /> {t('wishlist.addToCart')}
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
+                                }
+                            />
                         ))}
                     </div>
                 )}

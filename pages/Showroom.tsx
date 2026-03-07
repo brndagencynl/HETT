@@ -25,7 +25,7 @@ const Showroom: React.FC = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
                     {/* LEFT COLUMN: Calendly Booking Module */}
-                    <div className="lg:col-span-7 bg-white border border-gray-200 rounded-[24px] shadow-sm overflow-hidden relative z-10">
+                    <div className="lg:col-span-7 bg-white border border-gray-200 rounded-md shadow-sm overflow-hidden relative z-10">
 
                         {/* Module Header */}
                         <div className="p-8 md:p-10 border-b border-gray-100 text-center">
@@ -54,7 +54,7 @@ const Showroom: React.FC = () => {
                     </div>
 
                     {/* RIGHT COLUMN: Info Sidebar */}
-                    <div className="lg:col-span-5 bg-[#fcfbf7] rounded-[24px] p-8 md:p-10 space-y-8 h-full">
+                    <div className="lg:col-span-5 bg-[#fcfbf7] rounded-md p-8 md:p-10 space-y-8 h-full">
 
                         <div>
                             <h3 className="text-2xl font-black text-hett-dark mb-6">{t('showroomPage.openingContactTitle')}</h3>
@@ -127,7 +127,7 @@ const Showroom: React.FC = () => {
                         </div>
 
                         {/* Map */}
-                        <div className="rounded-2xl overflow-hidden shadow-sm border border-gray-200 h-64 relative bg-gray-200 group">
+                        <div className="rounded-md overflow-hidden shadow-sm border border-gray-200 h-64 relative bg-gray-200 group">
                             <img
                                 src="/assets/images/homepagina_2.webp"
                                 alt={t('showroomPage.mapAlt')}
@@ -138,7 +138,7 @@ const Showroom: React.FC = () => {
                                     href="https://maps.app.goo.gl/xaV7aijwoswQ7tuk8"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="bg-white text-hett-dark px-6 py-3 rounded-full font-bold shadow-lg flex items-center gap-2 hover:scale-105 transition-transform"
+                                    className="ds-btn ds-btn--secondary"
                                 >
                                     <MapPin size={18} className="text-hett-brown" />
                                     {t('showroomPage.openInMaps')}

@@ -19,7 +19,7 @@ const OrderReceived: React.FC = () => {
       <div className="max-w-[1000px] mx-auto px-4 sm:px-6 lg:px-8 py-20">
         
         {/* Success Card */}
-        <div className="bg-white rounded-[32px] shadow-lg border border-gray-100 overflow-hidden text-center p-12">
+        <div className="bg-white rounded-md shadow-sm border border-gray-100 overflow-hidden text-center p-12">
             <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-8 animate-in zoom-in duration-500">
                 <CheckCircle size={40} strokeWidth={3} />
             </div>
@@ -30,25 +30,25 @@ const OrderReceived: React.FC = () => {
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 text-left">
-                <div className="bg-gray-50 p-6 rounded-2xl">
+                <div className="bg-gray-50 p-6 rounded-md">
                     <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">{t('orderReceived.orderNumber')}</span>
                     <span className="font-bold text-lg text-hett-dark">#12345</span>
                 </div>
-                <div className="bg-gray-50 p-6 rounded-2xl">
+                <div className="bg-gray-50 p-6 rounded-md">
                     <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">{t('orderReceived.date')}</span>
                     <span className="font-bold text-lg text-hett-dark">26 Mei 2024</span>
                 </div>
-                <div className="bg-gray-50 p-6 rounded-2xl">
+                <div className="bg-gray-50 p-6 rounded-md">
                     <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">{t('common.total')}</span>
                     <span className="font-bold text-lg text-hett-dark">€ 2.244,00</span>
                 </div>
             </div>
 
             <div className="border-t border-gray-100 pt-8 flex flex-col md:flex-row gap-4 justify-center">
-                <Link to="/my-account" className="inline-flex items-center justify-center gap-2 bg-white border-2 border-hett-dark text-hett-dark px-8 py-4 rounded-full font-bold hover:bg-gray-50 transition-colors">
+                <Link to="/my-account" className="ds-btn ds-btn--secondary ds-btn--lg">
                     <Package size={20} /> {t('orderReceived.viewOrder')}
                 </Link>
-                <Link to="/" className="inline-flex items-center justify-center gap-2 bg-hett-dark text-white px-8 py-4 rounded-full font-bold hover:bg-hett-brown transition-colors shadow-lg">
+                <Link to="/" className="ds-btn ds-btn--primary ds-btn--lg">
                     {t('common.continueShopping')} <ArrowRight size={20} />
                 </Link>
             </div>

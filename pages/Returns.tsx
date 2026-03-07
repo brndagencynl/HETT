@@ -20,9 +20,9 @@ const Returns: React.FC = () => {
       <div className="max-w-[1000px] mx-auto px-4 sm:px-6 lg:px-8 py-20 space-y-8">
 
         {/* 1. Algemeen */}
-        <div className="bg-white p-8 md:p-12 rounded-[32px] shadow-sm border border-gray-100">
+        <div className="bg-white p-8 md:p-12 rounded-md shadow-sm border border-gray-100">
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-md flex items-center justify-center">
               <ShieldAlert size={28} />
             </div>
             <h2 className="text-2xl font-black text-hett-dark">1. Algemeen</h2>
@@ -36,9 +36,9 @@ const Returns: React.FC = () => {
         </div>
 
         {/* 2. Maatwerkproducten */}
-        <div className="bg-red-50 p-8 md:p-12 rounded-[32px] shadow-sm border border-red-100">
+        <div className="bg-red-50 p-8 md:p-12 rounded-md shadow-sm border border-red-100">
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-red-100 text-red-600 rounded-md flex items-center justify-center">
               <PackageX size={28} />
             </div>
             <h2 className="text-2xl font-black text-hett-dark">2. Maatwerkproducten</h2>
@@ -46,7 +46,7 @@ const Returns: React.FC = () => {
           <p className="text-gray-700 leading-relaxed mb-4">
             Onze veranda's, glazen schuifwanden, glasdaken en maatwerkconstructies worden speciaal geproduceerd volgens de specificaties van de klant.
           </p>
-          <div className="bg-white p-5 rounded-2xl border border-red-200 mb-4">
+          <div className="bg-white p-5 rounded-md border border-red-200 mb-4">
             <p className="font-bold text-red-700 mb-1">⚠️ Geen herroepingsrecht</p>
             <p className="text-sm text-red-600">
               Conform artikel 6:230p BW geldt voor maatwerkproducten geen wettelijk herroepingsrecht.
@@ -70,9 +70,9 @@ const Returns: React.FC = () => {
         </div>
 
         {/* 3. Standaardproducten */}
-        <div className="bg-white p-8 md:p-12 rounded-[32px] shadow-sm border border-gray-100">
+        <div className="bg-white p-8 md:p-12 rounded-md shadow-sm border border-gray-100">
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-12 h-12 bg-green-100 text-green-600 rounded-2xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-green-100 text-green-600 rounded-md flex items-center justify-center">
               <PackageCheck size={28} />
             </div>
             <h2 className="text-2xl font-black text-hett-dark">3. Standaardproducten</h2>
@@ -103,7 +103,7 @@ const Returns: React.FC = () => {
         {/* 4. Voorwaarden & 7. Uitsluitingen — side by side */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* 4. Voorwaarden */}
-          <div className="bg-white p-8 rounded-[32px] shadow-sm border border-gray-100">
+          <div className="bg-white p-8 rounded-md shadow-sm border border-gray-100">
             <div className="flex items-center gap-3 mb-5">
               <div className="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center">
                 <CheckCircle size={22} />
@@ -133,7 +133,7 @@ const Returns: React.FC = () => {
           </div>
 
           {/* 7. Uitsluitingen */}
-          <div className="bg-white p-8 rounded-[32px] shadow-sm border border-gray-100">
+          <div className="bg-white p-8 rounded-md shadow-sm border border-gray-100">
             <div className="flex items-center gap-3 mb-5">
               <div className="w-10 h-10 bg-red-100 text-red-600 rounded-xl flex items-center justify-center">
                 <Ban size={22} />
@@ -167,9 +167,9 @@ const Returns: React.FC = () => {
         </div>
 
         {/* 5. Schade bij levering */}
-        <div className="bg-white p-8 md:p-12 rounded-[32px] shadow-sm border border-gray-100">
+        <div className="bg-white p-8 md:p-12 rounded-md shadow-sm border border-gray-100">
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-12 h-12 bg-yellow-100 text-yellow-600 rounded-2xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-yellow-100 text-yellow-600 rounded-md flex items-center justify-center">
               <AlertTriangle size={28} />
             </div>
             <h2 className="text-2xl font-black text-hett-dark">5. Schade bij levering</h2>
@@ -178,17 +178,17 @@ const Returns: React.FC = () => {
             Wij verzoeken klanten om de levering direct bij ontvangst te controleren.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="bg-yellow-50 p-5 rounded-2xl border border-yellow-100 text-center">
+            <div className="bg-yellow-50 p-5 rounded-md border border-yellow-100 text-center">
               <Clock size={24} className="text-yellow-600 mx-auto mb-2" />
               <p className="text-sm font-bold text-gray-800 mb-1">Binnen 48 uur</p>
               <p className="text-xs text-gray-500">Zichtbare transportschade schriftelijk melden.</p>
             </div>
-            <div className="bg-yellow-50 p-5 rounded-2xl border border-yellow-100 text-center">
+            <div className="bg-yellow-50 p-5 rounded-md border border-yellow-100 text-center">
               <Camera size={24} className="text-yellow-600 mx-auto mb-2" />
               <p className="text-sm font-bold text-gray-800 mb-1">Foto's maken</p>
               <p className="text-xs text-gray-500">Duidelijke foto's van de schade en verpakking.</p>
             </div>
-            <div className="bg-yellow-50 p-5 rounded-2xl border border-yellow-100 text-center">
+            <div className="bg-yellow-50 p-5 rounded-md border border-yellow-100 text-center">
               <AlertTriangle size={24} className="text-yellow-600 mx-auto mb-2" />
               <p className="text-sm font-bold text-gray-800 mb-1">Termijn</p>
               <p className="text-xs text-gray-500">Latere meldingen kunnen mogelijk niet worden behandeld.</p>
@@ -197,9 +197,9 @@ const Returns: React.FC = () => {
         </div>
 
         {/* 6. Terugbetaling */}
-        <div className="bg-white p-8 md:p-12 rounded-[32px] shadow-sm border border-gray-100">
+        <div className="bg-white p-8 md:p-12 rounded-md shadow-sm border border-gray-100">
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-md flex items-center justify-center">
               <Undo2 size={28} />
             </div>
             <h2 className="text-2xl font-black text-hett-dark">6. Terugbetaling</h2>
@@ -218,9 +218,9 @@ const Returns: React.FC = () => {
         </div>
 
         {/* 8. Contact voor retouraanvraag */}
-        <div className="bg-hett-primary p-8 md:p-12 rounded-[32px] shadow-sm text-white">
+        <div className="bg-hett-primary p-8 md:p-12 rounded-md shadow-sm text-white">
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-white/10 rounded-md flex items-center justify-center">
               <Mail size={28} />
             </div>
             <h2 className="text-2xl font-black">8. Contact voor retouraanvraag</h2>
@@ -250,7 +250,7 @@ const Returns: React.FC = () => {
         </div>
 
         {/* Belangrijk */}
-        <div className="bg-yellow-50 border border-yellow-200 p-8 md:p-10 rounded-[32px]">
+        <div className="bg-yellow-50 border border-yellow-200 p-8 md:p-10 rounded-md">
           <div className="flex items-start gap-4">
             <div className="w-10 h-10 bg-yellow-200 text-yellow-700 rounded-xl flex items-center justify-center flex-shrink-0">
               <AlertTriangle size={22} />

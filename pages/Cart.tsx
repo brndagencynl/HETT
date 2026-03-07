@@ -155,7 +155,7 @@ const Cart: React.FC = () => {
             <ShoppingBag size={64} className="mx-auto mb-6 text-gray-300" />
             <h2 className="text-2xl font-bold text-hett-dark mb-4">{t('cart.empty')}</h2>
             <p className="text-gray-500 mb-8">{t('cart.emptySubtitle')}</p>
-                        <Link to="/shop" className="btn btn-primary btn-lg">
+                        <Link to="/shop" className="ds-btn ds-btn--primary ds-btn--lg">
                             {t('common.continueShopping')}
                         </Link>
                     </Card>
@@ -423,10 +423,10 @@ const Cart: React.FC = () => {
                         <button 
                             onClick={handleProceedToCheckout}
                             disabled={!canCheckout}
-                            className={`btn btn-lg w-full flex items-center justify-center gap-2 ${
+                            className={`ds-btn ds-btn--lg ds-btn--full ${
                               canCheckout 
-                                ? 'btn-primary' 
-                                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                ? 'ds-btn--primary' 
+                                : 'opacity-50 cursor-not-allowed'
                             }`}
                         >
                             {isCheckingOut ? (
@@ -456,7 +456,7 @@ const Cart: React.FC = () => {
                         )}
                         <Link 
                             to="/shop" 
-                            className="btn btn-outline btn-md w-full"
+                            className="ds-btn ds-btn--secondary ds-btn--full"
                         >
                             {t('common.continueShopping')}
                         </Link>

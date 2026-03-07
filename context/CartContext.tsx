@@ -860,6 +860,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       lineTotalCents: mulCents(toCents(options?.price ?? fromCents(product.priceCents)), safeQuantity),
       price: fromCents(toCents(options?.price ?? fromCents(product.priceCents))),
       totalPrice: fromCents(mulCents(toCents(options?.price ?? fromCents(product.priceCents)), safeQuantity)),
+      // Optional config display for configurable accessories (e.g. glazen schuifwanden)
+      ...(options?.displayConfigSummary ? { displayConfigSummary: options.displayConfigSummary } : {}),
+      ...(options?.details ? { details: options.details } : {}),
     };
 
     setCart(prev => {
@@ -926,7 +929,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       price: fromCents(unitPriceCents),
       shortDescription: `Maatwerk veranda ${sizeSummary}`,
       description: 'Op maat geconfigureerde aluminium veranda',
-      imageUrl: `/renders/veranda/${String(payload.selections.find(s => s.groupId === 'color')?.choiceId || 'ral7016')}/base.webp`, // Default preview
+      imageUrl: `/renders/veranda/${String(payload.selections.find(s => s.groupId === 'color')?.choiceId || 'ral7016')}/base.png`, // Default preview
       specs: {},
       requiresConfiguration: false, // Already configured
 

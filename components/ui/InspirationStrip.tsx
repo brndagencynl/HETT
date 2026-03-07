@@ -88,8 +88,8 @@ const InspirationStrip: React.FC<InspirationStripProps> = ({ items, projectCards
 
 
     return (
-        <section className="py-12 md:py-16 overflow-hidden">
-            <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="ds-section--sm overflow-hidden">
+            <div className="ds-container">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-8">
                     <h2 className="text-2xl md:text-3xl font-black text-hett-dark">Inspiratie voor iedere ruimte</h2>
@@ -135,7 +135,7 @@ const InspirationStrip: React.FC<InspirationStripProps> = ({ items, projectCards
                     {/* Next Button */}
                     <button
                         onClick={scrollNext}
-                        className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-10 w-10 h-10 rounded-full bg-hett-dark text-white shadow-xl flex items-center justify-center hover:bg-hett-primary transition-colors hidden md:flex"
+                        className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-10 w-10 h-10 rounded-full bg-hett-dark text-white shadow-sm flex items-center justify-center hover:bg-hett-primary transition-colors hidden md:flex"
                         aria-label="Volgende"
                     >
                         <ChevronRight size={24} />

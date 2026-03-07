@@ -191,7 +191,7 @@ const Offerte: React.FC = () => {
           image="https://picsum.photos/1200/600?random=offerte"
         />
         <div className="max-w-[600px] mx-auto px-4 py-20 text-center">
-          <div className="bg-white p-10 rounded-[32px] shadow-sm border border-gray-100">
+          <div className="bg-white p-10 rounded-md shadow-sm border border-gray-100">
             <FileText size={48} className="text-gray-300 mx-auto mb-4" />
             <h2 className="text-xl font-black text-hett-dark mb-2">{t('offerte.emptyTitle')}</h2>
             <p className="text-gray-500 text-sm mb-6">
@@ -200,14 +200,14 @@ const Offerte: React.FC = () => {
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link
                 to="/categorie/verandas"
-                className="inline-flex items-center gap-2 bg-[#003878] text-white font-bold px-6 py-3 rounded-xl hover:bg-[#002050] transition-colors"
+                className="ds-btn ds-btn--primary"
               >
                 <ArrowLeft size={18} />
                 {t('offerte.emptyStandard')}
               </Link>
               <Link
                 to="/maatwerk-configurator"
-                className="inline-flex items-center gap-2 bg-white border-2 border-gray-200 text-gray-700 font-bold px-6 py-3 rounded-xl hover:border-gray-300 transition-colors"
+                className="ds-btn ds-btn--secondary"
               >
                 {t('offerte.emptyMaatwerk')}
               </Link>
@@ -235,7 +235,7 @@ const Offerte: React.FC = () => {
           image="https://picsum.photos/1200/600?random=offerte"
         />
         <div className="max-w-[600px] mx-auto px-4 py-20 text-center">
-          <div className="bg-white p-10 rounded-[32px] shadow-sm border border-gray-100">
+          <div className="bg-white p-10 rounded-md shadow-sm border border-gray-100">
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <CheckCircle size={32} className="text-green-600" />
             </div>
@@ -252,13 +252,13 @@ const Offerte: React.FC = () => {
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link
                 to="/"
-                className="inline-flex items-center justify-center gap-2 bg-[#003878] text-white font-bold px-6 py-3 rounded-xl hover:bg-[#002050] transition-colors"
+                className="ds-btn ds-btn--primary"
               >
                 {t('offerte.successBackHome')}
               </Link>
               <Link
                 to={backUrl}
-                className="inline-flex items-center justify-center gap-2 bg-white border-2 border-gray-200 text-gray-700 font-bold px-6 py-3 rounded-xl hover:border-gray-300 transition-colors"
+                className="ds-btn ds-btn--secondary"
               >
                 {t('offerte.successNewConfig')}
               </Link>
@@ -287,7 +287,7 @@ const Offerte: React.FC = () => {
           {/* LEFT — Preview + Summary */}
           <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-28">
             {/* Preview image — stacked layers matching configurator */}
-            <div className="bg-white rounded-[24px] shadow-sm border border-gray-100 overflow-hidden">
+            <div className="bg-white rounded-md shadow-sm border border-gray-100 overflow-hidden">
               <div className="aspect-[16/10] bg-gradient-to-br from-gray-100 to-gray-50 relative flex items-center justify-center">
                 {draft.previewLayers && draft.previewLayers.length > 0 ? (
                   draft.previewLayers.map((src, i) => (
@@ -307,7 +307,7 @@ const Offerte: React.FC = () => {
                     alt="Veranda preview"
                     className="w-full h-full object-contain"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/renders/veranda/fallback.webp';
+                      (e.target as HTMLImageElement).src = '/renders/veranda/fallback.png';
                     }}
                   />
                 )}
@@ -325,7 +325,7 @@ const Offerte: React.FC = () => {
             </div>
 
             {/* Pricing card */}
-            <div className="bg-[#eff6ff] rounded-[24px] p-6 space-y-3">
+            <div className="bg-[#eff6ff] rounded-md p-6 space-y-3">
               <h4 className="font-bold text-gray-900 text-lg">{t('offerte.pricing.title')}</h4>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
@@ -362,7 +362,7 @@ const Offerte: React.FC = () => {
           {/* RIGHT — Config + Form */}
           <div className="lg:col-span-7 space-y-6">
             {/* Configuration summary */}
-            <div className="bg-white rounded-[24px] shadow-sm border border-gray-100 overflow-hidden">
+            <div className="bg-white rounded-md shadow-sm border border-gray-100 overflow-hidden">
               <div className="p-6 border-b border-gray-100">
                 <h3 className="text-lg font-black text-hett-dark">{t('offerte.config.title')}</h3>
               </div>
@@ -392,7 +392,7 @@ const Offerte: React.FC = () => {
             </div>
 
             {/* Contact form */}
-            <div className="bg-white rounded-[24px] shadow-sm border border-gray-100 overflow-hidden">
+            <div className="bg-white rounded-md shadow-sm border border-gray-100 overflow-hidden">
               <div className="p-6 border-b border-gray-100">
                 <h3 className="text-lg font-black text-hett-dark">{t('offerte.form.title')}</h3>
                 <p className="text-sm text-gray-500 mt-1">{t('offerte.form.subtitle')}</p>
@@ -501,10 +501,10 @@ const Offerte: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className={`w-full flex items-center justify-center gap-2 px-6 py-4 font-bold rounded-xl text-base transition-all ${
+                  className={`ds-btn ds-btn--accent ds-btn--lg ds-btn--full ${
                     isSubmitting
-                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                      : 'bg-[#FF7300] text-white hover:bg-[#E66600] shadow-lg shadow-[#FF7300]/20'
+                      ? 'opacity-50 cursor-not-allowed'
+                      : ''
                   }`}
                 >
                   {isSubmitting ? (

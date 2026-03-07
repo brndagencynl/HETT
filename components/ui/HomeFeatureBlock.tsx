@@ -41,7 +41,7 @@ const HomeFeatureBlock: React.FC<HomeFeatureBlockProps> = ({
                         </div>
 
                         <div className="flex flex-wrap gap-4 pt-2">
-                            <Link to="/products/sandwichpaneel" className="btn-primary px-8 py-3.5 text-base shadow-sm hover:shadow-md transition-all group">
+                            <Link to="/products/sandwichpaneel" className="ds-btn ds-btn--primary ds-btn--lg group">
                                 {t('home.feature.cta')}
                                 <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                             </Link>
@@ -50,7 +50,7 @@ const HomeFeatureBlock: React.FC<HomeFeatureBlockProps> = ({
 
                     {/* Image */}
                     <div className="flex-1 w-full">
-                        <div className="relative aspect-[4/3] w-full rounded-2xl overflow-hidden shadow-xl bg-gray-100 group">
+                        <div className="relative aspect-[4/3] w-full rounded-md overflow-hidden shadow-sm bg-gray-100 group">
                             <img
                                 src={imageSrc}
                                 alt={imageAlt}

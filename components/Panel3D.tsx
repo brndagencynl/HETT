@@ -28,7 +28,7 @@ const Annotation = ({ position, label, description }: { position: [number, numbe
         </div>
         
         {/* Tooltip Card */}
-        <div className={`absolute bottom-8 left-1/2 -translate-x-1/2 w-56 bg-white/95 backdrop-blur-md p-4 rounded-xl shadow-xl border border-gray-100 transition-all duration-300 origin-bottom ${
+        <div className={`absolute bottom-8 left-1/2 -translate-x-1/2 w-56 bg-white/95 backdrop-blur-md p-4 rounded-xl shadow-sm border border-gray-100 transition-all duration-300 origin-bottom ${
             isOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-2 pointer-events-none'
         }`}>
             <h4 className="font-bold text-hett-dark text-xs uppercase tracking-wider mb-1 border-b border-gray-100 pb-1">{label}</h4>
@@ -70,7 +70,7 @@ const DimensionLine = ({ start, end, label }: { start: [number, number, number],
             
             {/* Label */}
             <Html position={center} center zIndexRange={[50, 0]}>
-                 <div className="bg-hett-dark/90 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-lg whitespace-nowrap backdrop-blur-sm border border-white/10">
+                 <div className="bg-hett-dark/90 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-sm whitespace-nowrap backdrop-blur-sm border border-white/10">
                     {label}
                 </div>
             </Html>

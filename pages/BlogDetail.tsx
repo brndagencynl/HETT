@@ -67,7 +67,7 @@ const BlogDetail: React.FC = () => {
                     <div className="py-24 text-center">
                         <h1 className="text-2xl font-bold text-hett-dark mb-4">Artikel niet gevonden</h1>
                         <p className="text-hett-muted mb-8">Het artikel dat u zoekt bestaat niet of is verwijderd.</p>
-                        <Link to="/blog" className="btn-primary">
+                        <Link to="/blog" className="ds-btn ds-btn--primary">
                             Terug naar blog
                         </Link>
                     </div>
@@ -137,21 +137,21 @@ const BlogDetail: React.FC = () => {
                         prose-a:text-hett-primary prose-a:no-underline hover:prose-a:underline
                         prose-strong:text-hett-dark
                         prose-ul:text-gray-600 prose-ol:text-gray-600
-                        prose-img:rounded-xl prose-img:shadow-lg
+                        prose-img:rounded-xl prose-img:shadow-sm
                         mb-12"
                     dangerouslySetInnerHTML={{ __html: article.content }}
                 />
 
                 {/* Footer CTA */}
                 <div className="border-t border-gray-200 pt-12">
-                    <div className="bg-hett-light rounded-2xl p-8 text-center">
+                    <div className="bg-hett-light rounded-md p-8 text-center">
                         <h3 className="text-xl font-bold text-hett-dark mb-3">
                             Vragen over dit artikel?
                         </h3>
                         <p className="text-hett-muted mb-6">
                             Neem contact met ons op voor meer informatie of advies op maat.
                         </p>
-                        <Link to="/contact" className="btn-primary">
+                        <Link to="/contact" className="ds-btn ds-btn--primary">
                             Contact opnemen
                         </Link>
                     </div>

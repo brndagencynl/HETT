@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { CheckCircle, Settings, Truck } from 'lucide-react';
+import { CheckCircle, Settings } from 'lucide-react';
+import DeliveryTime from '../../src/components/ui/DeliveryTime';
 import { formatEUR } from '../../src/utils/money';
 import type { PopulaireVerandaKaart } from '../../config/homepageContent';
 
@@ -64,9 +65,8 @@ const VerandaPresetCard: React.FC<VerandaPresetCardProps> = ({ card }) => {
             <Settings size={16} />
             {card.ctaLabel}
           </Link>
-          <div className="mt-2 flex items-center gap-1 text-[10px] sm:text-xs text-green-600 font-medium leading-tight">
-            <Truck size={14} className="flex-shrink-0" />
-            <span>{card.deliveryLabel}</span>
+          <div className="mt-2">
+            <DeliveryTime label={card.deliveryLabel} />
           </div>
         </div>
       </div>

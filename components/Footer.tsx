@@ -50,7 +50,7 @@ const Footer: React.FC = () => {
 
     return (
         <footer className="bg-hett-primary text-white pt-16 pb-8 border-t-4 border-hett-secondary">
-            <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="ds-container">
 
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-12 mb-16">
 
@@ -97,7 +97,7 @@ const Footer: React.FC = () => {
                     {/* Contact Block */}
                     <div className="w-full lg:w-auto">
                         <h3 className="text-lg font-bold uppercase tracking-widest mb-6 border-b border-white pb-2">{t('footer.contact')}</h3>
-                        <div className="bg-white/5 p-6 rounded-xl border border-white/20 space-y-4 text-white">
+                        <div className="space-y-4 text-white">
                             <div className="flex items-start gap-3">
                                 <MapPin size={18} className="text-white flex-shrink-0 mt-1" />
                                 <div className="text-sm font-medium">

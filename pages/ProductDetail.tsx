@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { CheckCircle, FileText, Download, ArrowLeft, Box, Image as ImageIcon, ShieldCheck, Truck, Loader2 } from 'lucide-react';
+import { CheckCircle, FileText, Download, ArrowLeft, Box, Image as ImageIcon, ShieldCheck, Loader2 } from 'lucide-react';
+import DeliveryTime from '../src/components/ui/DeliveryTime';
 import Panel3D from '../components/Panel3D';
 import { getProductByHandle } from '../src/lib/shopify';
 import { Product } from '../types';
@@ -96,7 +97,7 @@ const ProductDetail: React.FC = () => {
 
                     {/* Left Column: Images & 3D */}
                     <div>
-                        <div className="relative h-[400px] w-full rounded-[24px] overflow-hidden shadow-lg mb-4 bg-gray-100 border border-gray-100">
+                        <div className="relative h-[400px] w-full rounded-md overflow-hidden shadow-sm mb-4 bg-gray-100 border border-gray-100">
 
                             {/* 3D Toggle Button */}
                             <div className="absolute top-4 right-4 z-20 flex bg-white/90 backdrop-blur rounded-full p-1 shadow-md border border-gray-100">
@@ -159,18 +160,18 @@ const ProductDetail: React.FC = () => {
                         <p className="text-lg text-gray-600 mb-8 leading-relaxed">
                             {product.shortDescription}
                         </p>
-                        <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
+                        <div className="bg-gray-50 p-6 rounded-md border border-gray-100">
                             <div className="flex items-baseline gap-2 mb-6">
                                 <span className="text-4xl font-black text-hett-dark">{formatEUR(product.priceCents ?? toCents(product.price), 'cents')}</span>
                                 <span className="text-sm text-gray-500 font-bold uppercase">{t('common.inclVat')}</span>
                             </div>
                             <ProductUSPs items={product.usps ?? []} />
-                            <Link to="/contact" className="block w-full text-center bg-hett-dark text-white font-bold py-4 rounded-xl hover:opacity-90 transition-all shadow-lg shadow-blue-900/10">
+                            <Link to="/contact" className="block w-full text-center bg-hett-dark text-white font-bold py-4 rounded-xl hover:opacity-90 transition-all shadow-sm shadow-blue-900/10">
                                 {t('offerte.title')}
                             </Link>
                             <div className="mt-4 flex items-center justify-center gap-4 text-xs font-bold text-gray-500">
                                 <span className="flex items-center gap-1"><ShieldCheck size={14} className="text-green-600" /> {t('warranty.fiveYear')}</span>
-                                <span className="flex items-center gap-1"><Truck size={14} className="text-green-600" /> Gratis bezorgd</span>
+                                <DeliveryTime label="Gratis bezorgd" />
                             </div>
                         </div>
                     </div>

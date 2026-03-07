@@ -81,7 +81,7 @@ const MobileFilterSheet: React.FC<MobileFilterSheetProps> = ({
 
                         {/* Footer */}
                         <div className="bottom-sheet__footer">
-                            <button onClick={handleApply} className="btn btn-primary btn-lg">
+                            <button onClick={handleApply} className="ds-btn ds-btn--primary ds-btn--lg ds-btn--full">
                                 Filters toepassen
                             </button>
                         </div>

@@ -12,13 +12,15 @@ import { formatEUR, toCents } from '../src/utils/money';
 import { getLedTotals, LED_UNIT_PRICE_EUR } from '../src/services/addons/led';
 
 /**
- * Convert widthCm to the nearest supported VerandaProductSize
- * This ensures proper pricing for glass sliding walls based on actual product width
+ * Convert widthCm + depthCm to the nearest supported VerandaProductSize
+ * This ensures proper pricing for both width-dependent (voorzijde) and
+ * depth-dependent (zijwanden) options.
  * 
  * @param widthCm - Width in cm (e.g., 506, 606, 706)
- * @returns VerandaProductSize string (e.g., '500x300', '600x300', '700x300')
+ * @param depthCm - Depth in cm (e.g., 250, 300, 350, 400). Defaults to 300.
+ * @returns VerandaProductSize string (e.g., '500x300', '600x400', '700x250')
  */
-function widthCmToProductSize(widthCm: number): VerandaProductSize {
+function widthCmToProductSize(widthCm: number, depthCm: number = 300): VerandaProductSize {
     // Map widthCm to the closest supported width
     // Product handles use 506, 606, 706 etc. which map to 500, 600, 700 sizes
     let width: 500 | 600 | 700;
@@ -29,9 +31,18 @@ function widthCmToProductSize(widthCm: number): VerandaProductSize {
     } else {
         width = 700;
     }
-    // Default depth is 300 - the exact depth doesn't affect glass wall pricing
-    // since glass wall pricing is based on width only
-    return `${width}x300` as VerandaProductSize;
+    // Map depthCm to the closest supported depth
+    let depth: 250 | 300 | 350 | 400;
+    if (depthCm <= 275) {
+        depth = 250;
+    } else if (depthCm <= 325) {
+        depth = 300;
+    } else if (depthCm <= 375) {
+        depth = 350;
+    } else {
+        depth = 400;
+    }
+    return `${width}x${depth}` as VerandaProductSize;
 }
 
 /**
@@ -76,6 +87,8 @@ interface VerandaConfiguratorWizardProps {
     basePrice?: number;
     /** Width of the veranda in cm (e.g. 506, 606, 706) - used for dynamic LED pricing */
     widthCm?: number;
+    /** Depth of the veranda in cm (e.g. 250, 300, 350, 400) - used for depth-dependent side wall pricing */
+    depthCm?: number;
     onSubmit?: (config: VerandaConfig, mode: 'order' | 'quote', price: number, details: { label: string, value: string }[], priceBreakdown: VerandaPriceBreakdown) => void;
     /** 'new' (default) adds to cart, 'edit' updates existing item */
     mode?: 'new' | 'edit';
@@ -243,7 +256,7 @@ const SafeImage = ({ src, alt, className }: { src: string; alt: string; classNam
 };
 
 const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, VerandaConfiguratorWizardProps>(
-    ({ productTitle = "HETT Premium Veranda", basePrice = 1250, widthCm = 606, onSubmit, mode = 'new', showResetMessage = false, onCancel, layout = 'modal',
+    ({ productTitle = "HETT Premium Veranda", basePrice = 1250, widthCm = 606, depthCm = 300, onSubmit, mode = 'new', showResetMessage = false, onCancel, layout = 'modal',
        showDimensionStep = false, availableWidths, selectedWidth, selectedDepth, availableDepths,
        onWidthChange, onDepthChange, widthLabel, depthLabel, selectWidthFirstLabel,
     }, ref) => {
@@ -279,8 +292,10 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
     const ledAvailable = ledInfo.qty > 0;
     const ledSelectedTotal = config.verlichting ? ledInfo.total : 0;
 
-    // Convert widthCm to productSize for correct glass wall pricing
-    const productSize = useMemo(() => widthCmToProductSize(widthCm), [widthCm]);
+    // Convert widthCm + depthCm to productSize for correct pricing
+    // selectedDepth (from dimension step) takes precedence over depthCm prop
+    const effectiveDepth = selectedDepth ?? depthCm;
+    const productSize = useMemo(() => widthCmToProductSize(widthCm, effectiveDepth), [widthCm, effectiveDepth]);
 
     // Price calculation - basePrice comes from Shopify product.price
     // Pass productSize to ensure correct pricing for width-dependent options (e.g., glass sliding walls)

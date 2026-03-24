@@ -282,14 +282,13 @@ export const SIDE_WALL_OPTIONS: OptionChoice[] = [
     description: 'Volledig geïsoleerde wand van sandwichpanelen.',
     pricing: { type: 'bySandwichDepth' },
   },
-  // ── Glazen schuifwand (uitgeschakeld – zet onderstaand blok weer aan om te activeren)
-  // {
-  //   id: 'glas_schuifwand',
-  //   label: 'Glass sliding wall',
-  //   labelNL: 'Glazen schuifwand',
-  //   description: 'Glazen schuifwand over de gehele diepte van de zijkant.',
-  //   pricing: { type: 'byGlassSideWall' },
-  // },
+  {
+    id: 'glas_schuifwand',
+    label: 'Glass sliding wall',
+    labelNL: 'Glazen schuifwand',
+    description: 'Glazen schuifwand over de gehele diepte van de zijkant.',
+    pricing: { type: 'byGlassSideWall' },
+  },
 ] as const;
 
 /**

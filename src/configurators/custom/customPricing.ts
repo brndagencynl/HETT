@@ -372,13 +372,12 @@ export const MAATWERK_SIDEWALL_OPTIONS: MaatwerkOptionChoice[] = [
     description: 'Volledig geïsoleerde wand van sandwichpanelen.',
     pricing: { type: 'bySandwichDepth' },
   },
-  // ── Glazen schuifwand (uitgeschakeld – zet onderstaand blok weer aan om te activeren)
-  // {
-  //   id: 'glas_schuifwand',
-  //   label: 'Glazen schuifwand',
-  //   description: 'Glazen schuifwand over de volledige diepte van de zijkant.',
-  //   pricing: { type: 'byGlassSideWall' },
-  // },
+  {
+    id: 'glas_schuifwand',
+    label: 'Glazen schuifwand',
+    description: 'Glazen schuifwand over de volledige diepte van de zijkant.',
+    pricing: { type: 'byGlassSideWall' },
+  },
 ];
 
 /**

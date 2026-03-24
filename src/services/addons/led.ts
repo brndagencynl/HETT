@@ -30,6 +30,7 @@ export {
   getLedTotals,
   normalizeToLedWidth,
   extractWidthFromHandle,
+  extractDepthFromHandle,
   extractWidthFromSize,
   isLedConfigured,
   buildLedCartLine,
@@ -41,6 +42,7 @@ export {
 import {
   getLedSpotCountForWidthCm,
   extractWidthFromHandle,
+  extractDepthFromHandle,
   extractWidthFromSize,
 } from '../ledPricing';
 

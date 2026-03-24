@@ -18,7 +18,7 @@ const Navbar: React.FC = () => {
   const navLabelMap: Record<string, string> = {
     '/categorie/verandas': t('nav.verandas'),
     '/categorie/accessoires': t('nav.accessoires'),
-    '/glazen-schuifwanden': t('nav.glazenSchuifwanden'),
+    // '/glazen-schuifwanden': t('nav.glazenSchuifwanden'), // Temporarily disabled
     '/maatwerk-configurator': t('nav.maatwerkConfigurator'),
     '/projecten': t('nav.projecten'),
     '/showroom': t('nav.showroom'),

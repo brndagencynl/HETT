@@ -1,19 +1,21 @@
 /**
- * HomeHeroShowcase Component (Optimized)
- * ======================================
- * 
- * Performance optimized hero with:
+ * HomeHeroShowcase Component (Tabbed)
+ * ====================================
+ *
+ * Redesigned hero with tab-based navigation instead of a carousel.
+ * Both options (Veranda & Maatwerk) are always visible via pill-tabs,
+ * solving the problem of slide 2 being overlooked.
+ *
+ * Retained from original:
  * - AVIF + WebP fallback using <picture> elements
  * - Responsive srcset for different viewport sizes
  * - Blur placeholder for hero image
- * - Lazy loading for thumbnails
- * - Thumbnails rendered after initial hero mount
- * - Improved thumbnail visibility (larger, better contrast)
+ * - i18n integration
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 // =============================================================================
@@ -36,7 +38,6 @@ interface HeroItem {
   ctaText: string;
   ctaHref: string;
   images: HeroImageSet;
-  thumbnail: string;
   enabled: boolean;
 }
 
@@ -47,7 +48,7 @@ interface HeroItem {
 const heroItems: HeroItem[] = [
   {
     id: 'veranda',
-    label: 'Veranda',
+    label: 'Bouwpakket veranda',
     title: 'Al een Veranda vanaf €699',
     subtitle: 'De beste en voordeligste in de markt voor de doe-het-zelver!',
     ctaText: 'Stel zelf samen',
@@ -59,12 +60,11 @@ const heroItems: HeroItem[] = [
       webp1024: '/assets/images/homepagina_hero_1_1024.webp',
       webp640: '/assets/images/homepagina_hero_1_640.webp',
     },
-    thumbnail: '/assets/images/homepagina_thumb_1.webp',
     enabled: true,
   },
   {
     id: 'maatwerk-veranda',
-    label: 'Maatwerk',
+    label: 'Maatwerk veranda',
     title: 'Maatwerk Veranda',
     subtitle: 'Speciale maten? Geen probleem met onze maatwerk configurator.',
     ctaText: 'Configureer nu',
@@ -76,13 +76,13 @@ const heroItems: HeroItem[] = [
       webp1024: '/assets/images/homepagina_hero_2_1024.webp',
       webp640: '/assets/images/homepagina_hero_2_640.webp',
     },
-    thumbnail: '/assets/images/homepagina_thumb_2.webp',
     enabled: true,
   },
 ];
 
 // Blur placeholder - simple gray SVG (tiny base64)
-const BLUR_PLACEHOLDER = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiMyYTJhMmEiLz48L3N2Zz4=';
+const BLUR_PLACEHOLDER =
+  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiMyYTJhMmEiLz48L3N2Zz4=';
 
 // =============================================================================
 // HERO IMAGE COMPONENT (Optimized)
@@ -91,16 +91,21 @@ const BLUR_PLACEHOLDER = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVp
 interface HeroImageProps {
   images: HeroImageSet;
   alt: string;
+  isActive: boolean;
   priority?: boolean;
 }
 
-const HeroImage: React.FC<HeroImageProps> = ({ images, alt, priority = false }) => {
+const HeroImage: React.FC<HeroImageProps> = ({ images, alt, isActive, priority = false }) => {
   const [isLoaded, setIsLoaded] = useState(false);
 
   return (
-    <div className="absolute inset-0">
+    <div
+      className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
+        isActive ? 'opacity-100 z-[1]' : 'opacity-0 z-0'
+      }`}
+    >
       {/* Blur placeholder background */}
-      <div 
+      <div
         className={`absolute inset-0 bg-gray-800 transition-opacity duration-500 ${
           isLoaded ? 'opacity-0' : 'opacity-100'
         }`}
@@ -111,39 +116,14 @@ const HeroImage: React.FC<HeroImageProps> = ({ images, alt, priority = false }) 
           transform: 'scale(1.1)',
         }}
       />
-      
+
       {/* Main image with <picture> for format fallback */}
       <picture>
-        {/* AVIF for modern browsers - desktop */}
-        <source
-          type="image/avif"
-          media="(min-width: 1024px)"
-          srcSet={images.avif1920}
-        />
-        {/* WebP for desktop */}
-        <source
-          type="image/webp"
-          media="(min-width: 1024px)"
-          srcSet={images.webp1920}
-        />
-        {/* AVIF for tablet */}
-        <source
-          type="image/avif"
-          media="(min-width: 640px)"
-          srcSet={images.avif1024}
-        />
-        {/* WebP for tablet */}
-        <source
-          type="image/webp"
-          media="(min-width: 640px)"
-          srcSet={images.webp1024}
-        />
-        {/* WebP for mobile */}
-        <source
-          type="image/webp"
-          srcSet={images.webp640}
-        />
-        {/* Fallback img */}
+        <source type="image/avif" media="(min-width: 1024px)" srcSet={images.avif1920} />
+        <source type="image/webp" media="(min-width: 1024px)" srcSet={images.webp1920} />
+        <source type="image/avif" media="(min-width: 640px)" srcSet={images.avif1024} />
+        <source type="image/webp" media="(min-width: 640px)" srcSet={images.webp1024} />
+        <source type="image/webp" srcSet={images.webp640} />
         <img
           src={images.webp1920}
           alt={alt}
@@ -162,51 +142,101 @@ const HeroImage: React.FC<HeroImageProps> = ({ images, alt, priority = false }) 
 };
 
 // =============================================================================
-// THUMBNAIL COMPONENT (Lazy loaded)
+// PILL TABS COMPONENT
 // =============================================================================
 
-interface ThumbnailProps {
-  item: HeroItem;
-  isActive: boolean;
-  onClick: () => void;
+interface PillTabsProps {
+  items: HeroItem[];
+  activeIndex: number;
+  onChange: (index: number) => void;
 }
 
-const Thumbnail: React.FC<ThumbnailProps> = ({ item, isActive, onClick }) => {
+const PillTabs: React.FC<PillTabsProps> = ({ items, activeIndex, onChange }) => {
   return (
-    <button
-      onClick={onClick}
-      className="flex flex-col items-center gap-2.5 flex-shrink-0 group"
+    <div
+      className="inline-flex p-1 rounded-full border border-white/15 bg-white/10 backdrop-blur-xl"
+      role="tablist"
+      aria-label="Hero tabs"
     >
-      {/* Thumbnail image container - larger for better visibility */}
-      <div className={`
-        w-[72px] h-[72px] md:w-[88px] md:h-[88px] 
-        rounded-xl overflow-hidden transition-all duration-200
-        border-2 shadow-sm
-        ${isActive
-          ? 'ring-[3px] ring-teal-500 ring-offset-2 border-teal-500 scale-105'
-          : 'border-gray-300 hover:border-gray-400 hover:ring-2 hover:ring-gray-300 hover:ring-offset-1 hover:scale-102'
-        }
-      `}>
-        <img
-          src={item.thumbnail}
-          srcSet={`${item.thumbnail} 1x, ${item.thumbnail} 2x`}
-          alt={item.label}
-          className="w-full h-full object-cover"
-          loading="lazy"
-          decoding="async"
-        />
-      </div>
-      {/* Label */}
-      <span className={`
-        text-sm md:text-base font-bold whitespace-nowrap transition-colors
-        ${isActive 
-          ? 'text-teal-600' 
-          : 'text-gray-700 group-hover:text-gray-900'
-        }
-      `}>
-        {item.label}
-      </span>
-    </button>
+      {items.map((item, index) => {
+        const isActive = index === activeIndex;
+        return (
+          <button
+            key={item.id}
+            role="tab"
+            aria-selected={isActive}
+            aria-controls={`hero-panel-${item.id}`}
+            onClick={() => onChange(index)}
+            className={`
+              relative px-5 py-2.5 md:px-7 md:py-3 rounded-full text-sm md:text-[15px] font-bold
+              transition-all duration-300 ease-out cursor-pointer whitespace-nowrap
+              ${
+                isActive
+                  ? 'bg-[#FF7A00] text-white shadow-[0_2px_12px_rgba(255,122,0,0.35)]'
+                  : 'text-white/60 hover:text-white/90'
+              }
+            `}
+          >
+            {item.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+};
+
+// =============================================================================
+// SLIDE CONTENT COMPONENT
+// =============================================================================
+
+interface SlideContentProps {
+  item: HeroItem;
+  isActive: boolean;
+}
+
+const SlideContent: React.FC<SlideContentProps> = ({ item, isActive }) => {
+  const priceMatch = item.title.match(/€\s?\d+/);
+  const priceText = priceMatch?.[0];
+  const priceIndex = priceText ? item.title.indexOf(priceText) : -1;
+  const titleStart = priceIndex >= 0 ? item.title.slice(0, priceIndex).trimEnd() : item.title;
+  const titleEnd = priceIndex >= 0 ? item.title.slice(priceIndex + (priceText?.length ?? 0)).trimStart() : '';
+
+  return (
+    <div
+      id={`hero-panel-${item.id}`}
+      role="tabpanel"
+      aria-hidden={!isActive}
+      className={`
+        transition-all duration-500 ease-out
+        ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none absolute inset-0'}
+      `}
+    >
+      {/* Title */}
+      <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-white mb-4 leading-tight">
+        {priceText ? (
+          <span className="inline-flex flex-wrap items-baseline gap-x-2 gap-y-2">
+            <span>{titleStart}</span>
+            <span className="inline-block bg-[#FF7A00] text-white font-extrabold rounded-[10px] shadow-[0_6px_16px_rgba(0,0,0,0.15)] px-2.5 py-1 text-[0.9em] sm:px-3.5 sm:py-2 sm:text-[0.95em]">
+              {priceText}
+            </span>
+            {titleEnd ? <span>{titleEnd}</span> : null}
+          </span>
+        ) : (
+          item.title
+        )}
+      </h1>
+
+      {/* Subtitle */}
+      <p className="text-white/90 text-base md:text-lg lg:text-xl font-medium mb-8 max-w-lg">
+        {item.subtitle}
+      </p>
+
+      {/* CTA Button */}
+      <Link to={item.ctaHref} className="ds-btn ds-btn--secondary ds-btn--lg">
+        {item.ctaText}
+        <ArrowRight size={20} />
+      </Link>
+    </div>
   );
 };
 
@@ -217,150 +247,76 @@ const Thumbnail: React.FC<ThumbnailProps> = ({ item, isActive, onClick }) => {
 const HomeHeroShowcase: React.FC = () => {
   const { t } = useTranslation();
   const [activeIndex, setActiveIndex] = useState(0);
-  const [thumbnailsReady, setThumbnailsReady] = useState(false);
 
   // Override hero text with i18n
-  const translatedItems = heroItems.map((item) => {
-    if (item.id === 'veranda') {
-      return { ...item, title: t('home.hero.title'), subtitle: t('home.hero.subtitle'), ctaText: t('home.hero.verandaCta') };
-    }
-    if (item.id === 'maatwerk-veranda') {
-      return { ...item, title: t('home.hero.maatwerkTitle'), subtitle: t('home.hero.maatwerkSubtitle'), ctaText: t('home.hero.maatwerkCta') };
-    }
-    return item;
-  });
+  const translatedItems = heroItems
+    .filter((item) => item.enabled)
+    .map((item) => {
+      if (item.id === 'veranda') {
+        return {
+          ...item,
+          title: t('home.hero.title'),
+          subtitle: t('home.hero.subtitle'),
+          ctaText: t('home.hero.verandaCta'),
+        };
+      }
+      if (item.id === 'maatwerk-veranda') {
+        return {
+          ...item,
+          title: t('home.hero.maatwerkTitle'),
+          subtitle: t('home.hero.maatwerkSubtitle'),
+          ctaText: t('home.hero.maatwerkCta'),
+        };
+      }
+      return item;
+    });
 
-  // Delay thumbnail rendering until after initial hero mount (optimize LCP)
-  useEffect(() => {
-    // Use requestIdleCallback for non-critical rendering, fallback to setTimeout
-    const callback = () => setThumbnailsReady(true);
-    if ('requestIdleCallback' in window) {
-      const id = requestIdleCallback(callback, { timeout: 100 });
-      return () => cancelIdleCallback(id);
-    } else {
-      const id = setTimeout(callback, 50);
-      return () => clearTimeout(id);
-    }
+  const handleTabChange = useCallback((index: number) => {
+    setActiveIndex(index);
   }, []);
 
-  const visibleItems = translatedItems.filter(item => item.enabled);
-  const currentItem = visibleItems[activeIndex] || translatedItems[0];
-  const priceMatch = currentItem.title.match(/€\s?\d+/);
-  const priceText = priceMatch?.[0];
-  const priceIndex = priceText ? currentItem.title.indexOf(priceText) : -1;
-  const titleStart = priceIndex >= 0 ? currentItem.title.slice(0, priceIndex).trimEnd() : currentItem.title;
-  const titleEnd = priceIndex >= 0 ? currentItem.title.slice(priceIndex + priceText.length).trimStart() : '';
-
-  const handlePrev = () => {
-    setActiveIndex((prev) => (prev === 0 ? visibleItems.length - 1 : prev - 1));
-  };
-
-  const handleNext = () => {
-    setActiveIndex((prev) => (prev === visibleItems.length - 1 ? 0 : prev + 1));
-  };
-
-  const handleThumbnailClick = (index: number) => {
-    setActiveIndex(index);
-  };
+  const currentItem = translatedItems[activeIndex] ?? translatedItems[0];
 
   return (
     <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mb-8">
       <div className="relative rounded-[28px] overflow-hidden min-h-[500px] md:min-h-[550px] lg:min-h-[600px]">
-        {/* Hero Background Image (Priority loaded) */}
-        <HeroImage
-          images={currentItem.images}
-          alt={currentItem.title}
-          priority={activeIndex === 0}
-        />
-        
-        {/* Dark Overlay Gradient */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-black/25 to-black/10" />
-        
-        {/* Content */}
+        {/* ── Background images (all pre-rendered, crossfade via opacity) ── */}
+        {translatedItems.map((item, index) => (
+          <HeroImage
+            key={item.id}
+            images={item.images}
+            alt={item.title}
+            isActive={index === activeIndex}
+            priority={index === 0}
+          />
+        ))}
+
+        {/* ── Dark overlay gradient ── */}
+        <div className="absolute inset-0 z-[2] bg-gradient-to-r from-black/40 via-black/25 to-black/10" />
+
+        {/* ── Content ── */}
         <div className="relative z-10 h-full min-h-[500px] md:min-h-[550px] lg:min-h-[600px] flex flex-col justify-between p-6 md:p-10 lg:p-14">
-          {/* Top Content */}
+          {/* Top section */}
           <div className="flex-1 flex flex-col justify-center max-w-2xl">
+            {/* Pill tabs */}
+            <div className="mb-6 md:mb-8">
+              <PillTabs
+                items={translatedItems}
+                activeIndex={activeIndex}
+                onChange={handleTabChange}
+              />
+            </div>
+
             {/* Eyebrow */}
             <span className="text-hett-secondary font-bold text-sm md:text-base tracking-wide uppercase mb-3">
               {t('home.hero.eyebrow')}
             </span>
-            
-            {/* Title */}
-            <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-white mb-4 leading-tight">
-              {priceText ? (
-                <span className="inline-flex flex-wrap items-baseline gap-x-2 gap-y-2">
-                  <span>{titleStart}</span>
-                  <span className="price-badge inline-block bg-[#FF7A00] text-white font-extrabold rounded-[10px] shadow-[0_6px_16px_rgba(0,0,0,0.15)] px-2.5 py-1 text-[0.9em] sm:px-3.5 sm:py-2 sm:text-[0.95em]">
-                    {priceText}
-                  </span>
-                  {titleEnd ? <span>{titleEnd}</span> : null}
-                </span>
-              ) : (
-                currentItem.title
-              )}
-            </h1>
-            
-            {/* Subtitle */}
-            <p className="text-white/90 text-base md:text-lg lg:text-xl font-medium mb-8 max-w-lg">
-              {currentItem.subtitle}
-            </p>
-            
-            {/* CTA Button */}
-            <Link
-              to={currentItem.ctaHref}
-              className="ds-btn ds-btn--primary ds-btn--lg"
-            >
-              {currentItem.ctaText}
-              <ArrowRight size={20} />
-            </Link>
-          </div>
-          
-          {/* Bottom Thumbnail Strip */}
-          <div className="mt-8">
-            <div className="flex items-center justify-center gap-3 md:gap-4">
-              {/* Prev Button */}
-              <button
-                onClick={handlePrev}
-                className="w-11 h-11 md:w-12 md:h-12 rounded-full bg-white/95 backdrop-blur-md hover:bg-white flex items-center justify-center transition-all flex-shrink-0 shadow-sm hover:shadow-sm border border-gray-200"
-                aria-label="Vorige"
-              >
-                <ChevronLeft size={22} className="text-gray-700" />
-              </button>
-              
-              {/* Thumbnail Container - Semi-opaque with backdrop blur */}
-              <div className="bg-white/90 backdrop-blur-md rounded-md px-5 md:px-8 py-4 md:py-5 flex items-center shadow-sm border border-white/50">
-                {thumbnailsReady ? (
-                  <div className="flex items-center gap-5 md:gap-8 overflow-x-auto no-scrollbar">
-                    {heroItems.map((item, index) => (
-                      <Thumbnail
-                        key={item.id}
-                        item={item}
-                        isActive={index === activeIndex}
-                        onClick={() => handleThumbnailClick(index)}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  // Placeholder while thumbnails load
-                  <div className="flex items-center gap-5 md:gap-8">
-                    {heroItems.map((item) => (
-                      <div key={item.id} className="flex flex-col items-center gap-2.5">
-                        <div className="w-[72px] h-[72px] md:w-[88px] md:h-[88px] rounded-xl bg-gray-200 animate-pulse" />
-                        <div className="h-4 w-16 bg-gray-200 rounded animate-pulse" />
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-              
-              {/* Next Button */}
-              <button
-                onClick={handleNext}
-                className="w-11 h-11 md:w-12 md:h-12 rounded-full bg-white/95 backdrop-blur-md hover:bg-white flex items-center justify-center transition-all flex-shrink-0 shadow-sm hover:shadow-sm border border-gray-200"
-                aria-label="Volgende"
-              >
-                <ChevronRight size={22} className="text-gray-700" />
-              </button>
+
+            {/* Slide content (relative container for absolute positioning of inactive panels) */}
+            <div className="relative">
+              {translatedItems.map((item, index) => (
+                <SlideContent key={item.id} item={item} isActive={index === activeIndex} />
+              ))}
             </div>
           </div>
         </div>

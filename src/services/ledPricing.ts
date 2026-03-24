@@ -203,6 +203,22 @@ export function extractWidthFromHandle(handle: string): number | null {
 }
 
 /**
+ * Extract depth from a Shopify product handle
+ * 
+ * @example
+ * extractDepthFromHandle('aluminium-veranda-706-x-400-cm') → 400
+ * extractDepthFromHandle('veranda-506-x-300') → 300
+ * 
+ * @param handle - Shopify product handle
+ * @returns Depth in cm, or null if not found
+ */
+export function extractDepthFromHandle(handle: string): number | null {
+  // Pattern: -x-{depth} (e.g., -706-x-400)
+  const match = handle.match(/-x-(\d{3,4})/i);
+  return match ? parseInt(match[1], 10) : null;
+}
+
+/**
  * Extract width from product size string
  * 
  * @example

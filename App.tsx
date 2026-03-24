@@ -58,9 +58,8 @@ import MaatwerkConfiguratorPage from './pages/MaatwerkConfigurator';
 // Veranda Category Page (configurator entry — inline configurator)
 import VerandaCategoryPage from './pages/VerandaCategoryPage';
 
-// Glazen Schuifwanden — TEMPORARILY DISABLED
-// import GlazenSchuifwandenOverview from './pages/GlazenSchuifwandenOverview';
-// import GlazenSchuifwandenDetail from './pages/GlazenSchuifwandenDetail';
+import GlazenSchuifwandenOverview from './pages/GlazenSchuifwandenOverview';
+import GlazenSchuifwandenDetail from './pages/GlazenSchuifwandenDetail';
 
 // Shopify Test
 import ShopifyTest from './pages/ShopifyTest';
@@ -113,9 +112,9 @@ const AnimatedRoutes: React.FC = () => {
           }
         />
 
-        {/* Glazen Schuifwanden — TEMPORARILY DISABLED */}
-        <Route path="/glazen-schuifwanden" element={<Navigate to="/" replace />} />
-        <Route path="/glazen-schuifwanden/:rail" element={<Navigate to="/" replace />} />
+        {/* Temporarily disabled — glazen schuifwanden page */}
+        {/* <Route path="/glazen-schuifwanden" element={<PageTransition><GlazenSchuifwandenOverview /></PageTransition>} /> */}
+        {/* <Route path="/glazen-schuifwanden/:rail" element={<PageTransition><GlazenSchuifwandenDetail /></PageTransition>} /> */}
 
         {/* Shop Routes */}
         <Route path="/shop" element={<PageTransition><Shop /></PageTransition>} />

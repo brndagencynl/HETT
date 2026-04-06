@@ -112,7 +112,7 @@ export const ShippingSection: React.FC = () => {
 
   return (
     <Card padding="wide">
-      <h3 className="text-lg font-black text-[#003878] mb-4 pb-3 border-b border-gray-100">
+      <h3 className="text-lg font-black text-[#111111] mb-4 pb-3 border-b border-gray-100">
         {t('shipping.pickupOrDelivery')}
       </h3>
 
@@ -133,7 +133,7 @@ export const ShippingSection: React.FC = () => {
             isShippingLocked ? 'cursor-not-allowed' : 'cursor-pointer'
           } ${
             shippingMode === 'pickup'
-              ? 'border-[#003878] bg-[#003878]/5'
+              ? 'border-[#111111] bg-[#111111]/5'
               : 'border-gray-200 hover:border-gray-300'
           }`}
         >
@@ -148,16 +148,16 @@ export const ShippingSection: React.FC = () => {
           />
           <div
             className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-              shippingMode === 'pickup' ? 'border-[#003878]' : 'border-gray-300'
+              shippingMode === 'pickup' ? 'border-[#111111]' : 'border-gray-300'
             }`}
           >
             {shippingMode === 'pickup' && (
-              <div className="w-2.5 h-2.5 rounded-full bg-[#003878]" />
+              <div className="w-2.5 h-2.5 rounded-full bg-[#111111]" />
             )}
           </div>
           <MapPin
             size={20}
-            className={shippingMode === 'pickup' ? 'text-[#003878]' : 'text-gray-400'}
+            className={shippingMode === 'pickup' ? 'text-[#111111]' : 'text-gray-400'}
           />
           <div className="flex-1">
             <div className="font-bold text-gray-900">{t('shipping.pickup')}</div>
@@ -172,7 +172,7 @@ export const ShippingSection: React.FC = () => {
             isShippingLocked ? 'cursor-not-allowed' : 'cursor-pointer'
           } ${
             shippingMode === 'delivery'
-              ? 'border-[#003878] bg-[#003878]/5'
+              ? 'border-[#111111] bg-[#111111]/5'
               : 'border-gray-200 hover:border-gray-300'
           }`}
         >
@@ -187,16 +187,16 @@ export const ShippingSection: React.FC = () => {
           />
           <div
             className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-              shippingMode === 'delivery' ? 'border-[#003878]' : 'border-gray-300'
+              shippingMode === 'delivery' ? 'border-[#111111]' : 'border-gray-300'
             }`}
           >
             {shippingMode === 'delivery' && (
-              <div className="w-2.5 h-2.5 rounded-full bg-[#003878]" />
+              <div className="w-2.5 h-2.5 rounded-full bg-[#111111]" />
             )}
           </div>
           <Truck
             size={20}
-            className={shippingMode === 'delivery' ? 'text-[#003878]' : 'text-gray-400'}
+            className={shippingMode === 'delivery' ? 'text-[#111111]' : 'text-gray-400'}
           />
           <div className="flex-1">
             <div className="font-bold text-gray-900">{t('shipping.deliver')}</div>
@@ -208,7 +208,7 @@ export const ShippingSection: React.FC = () => {
             </span>
           )}
           {shippingMode === 'delivery' && shippingIsCalculating && (
-            <Loader2 size={18} className="animate-spin text-[#003878]" />
+            <Loader2 size={18} className="animate-spin text-[#111111]" />
           )}
         </label>
       </div>
@@ -242,7 +242,7 @@ export const ShippingSection: React.FC = () => {
                   onChange={(e) => handleCountryChange(e.target.value as ShippingCountry)}
                   disabled={isShippingLocked}
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg bg-white text-gray-900 font-medium 
-                    focus:outline-none focus:ring-2 focus:ring-[#003878] focus:border-transparent
+                    focus:outline-none focus:ring-2 focus:ring-[#111111] focus:border-transparent
                     disabled:cursor-not-allowed disabled:bg-gray-50 appearance-none cursor-pointer"
                 >
                   {COUNTRIES.map(({ code, label }) => (
@@ -273,7 +273,7 @@ export const ShippingSection: React.FC = () => {
                 placeholder="Bijv. Kerkstraat"
                 disabled={isShippingLocked}
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg bg-white text-gray-900 font-medium 
-                  focus:outline-none focus:ring-2 focus:ring-[#003878] focus:border-transparent
+                  focus:outline-none focus:ring-2 focus:ring-[#111111] focus:border-transparent
                   disabled:cursor-not-allowed disabled:bg-gray-50"
               />
             </div>
@@ -291,7 +291,7 @@ export const ShippingSection: React.FC = () => {
                   placeholder="123"
                   disabled={isShippingLocked}
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg bg-white text-gray-900 font-medium 
-                    focus:outline-none focus:ring-2 focus:ring-[#003878] focus:border-transparent
+                    focus:outline-none focus:ring-2 focus:ring-[#111111] focus:border-transparent
                     disabled:cursor-not-allowed disabled:bg-gray-50"
                 />
               </div>
@@ -306,7 +306,7 @@ export const ShippingSection: React.FC = () => {
                   placeholder={shippingCountry === 'NL' ? '1234 AB' : shippingCountry === 'BE' ? '2000' : '10115'}
                   disabled={isShippingLocked}
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg bg-white text-gray-900 font-medium 
-                    focus:outline-none focus:ring-2 focus:ring-[#003878] focus:border-transparent
+                    focus:outline-none focus:ring-2 focus:ring-[#111111] focus:border-transparent
                     disabled:cursor-not-allowed disabled:bg-gray-50"
                 />
               </div>
@@ -324,7 +324,7 @@ export const ShippingSection: React.FC = () => {
                 placeholder={shippingCountry === 'NL' ? 'Amsterdam' : shippingCountry === 'BE' ? 'Antwerpen' : 'Berlin'}
                 disabled={isShippingLocked}
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg bg-white text-gray-900 font-medium 
-                  focus:outline-none focus:ring-2 focus:ring-[#003878] focus:border-transparent
+                  focus:outline-none focus:ring-2 focus:ring-[#111111] focus:border-transparent
                   disabled:cursor-not-allowed disabled:bg-gray-50"
               />
             </div>
@@ -336,10 +336,10 @@ export const ShippingSection: React.FC = () => {
               disabled={isShippingLocked || shippingIsCalculating || !canCalculate}
               className={`w-full py-3 px-4 rounded-lg font-bold text-white transition-all flex items-center justify-center gap-2
                 ${shippingIsCalculating 
-                  ? 'bg-[#003878]/70 cursor-wait' 
+                  ? 'bg-[#111111]/70 cursor-wait' 
                   : shippingIsValid
                     ? 'bg-green-600 hover:bg-green-700'
-                    : 'bg-[#003878] hover:bg-[#003878]/90'
+                    : 'bg-[#111111] hover:bg-[#111111]/90'
                 }
                 disabled:opacity-50 disabled:cursor-not-allowed
               `}
@@ -401,7 +401,7 @@ export const ShippingSection: React.FC = () => {
                   {/* Price */}
                   <div className="flex justify-between items-center pt-2 border-t border-gray-300">
                     <span className="font-semibold text-gray-700">{t('shipping.shippingCosts')}</span>
-                    <span className={`text-lg font-black ${shippingCostCents === 0 ? 'text-green-600' : 'text-[#003878]'}`}>
+                    <span className={`text-lg font-black ${shippingCostCents === 0 ? 'text-green-600' : 'text-[#111111]'}`}>
                       {formatShippingPrice(shippingCostCents)}
                     </span>
                   </div>

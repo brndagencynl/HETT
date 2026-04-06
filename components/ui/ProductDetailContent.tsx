@@ -36,11 +36,11 @@ const ProductDetailContent: React.FC<ProductDetailContentProps> = ({ uspItems, d
                     const Icon = IconMap[item.icon];
                     return (
                         <div key={index} className="bg-[#eff6ff] rounded-md p-4 flex items-center gap-3">
-                            <div className="bg-white p-2 rounded-lg text-[#003878] shadow-sm flex-shrink-0">
+                            <div className="bg-white p-2 rounded-lg text-[#111111] shadow-sm flex-shrink-0">
                                 <Icon size={20} className="stroke-[2.5]" />
                             </div>
                             <div className="min-w-0">
-                                <div className="font-bold text-[#003878] text-sm truncate" title={item.title}>{item.title}</div>
+                                <div className="font-bold text-[#111111] text-sm truncate" title={item.title}>{item.title}</div>
                                 {item.subtitle && <div className="text-xs text-gray-500 truncate" title={item.subtitle}>{item.subtitle}</div>}
                             </div>
                         </div>
@@ -51,8 +51,8 @@ const ProductDetailContent: React.FC<ProductDetailContentProps> = ({ uspItems, d
             {/* 2. Delivery & Montage Block */}
             <div className="bg-[#eff6ff] rounded-md p-6 lg:p-8 flex flex-col md:flex-row gap-6 md:items-center justify-between">
                 <div className="space-y-2 max-w-2xl">
-                    <h3 className="text-xl font-bold text-[#003878] flex items-center gap-2">
-                        <Truck size={24} className="text-[#003878]" />
+                    <h3 className="text-xl font-bold text-[#111111] flex items-center gap-2">
+                        <Truck size={24} className="text-[#111111]" />
                         {delivery.title}
                     </h3>
                     <p className="text-gray-600 leading-relaxed text-sm lg:text-base">
@@ -76,7 +76,7 @@ const ProductDetailContent: React.FC<ProductDetailContentProps> = ({ uspItems, d
                 {/* Left: Description */}
                 <div className="space-y-6">
                     <div>
-                        <h2 className="text-2xl lg:text-3xl font-bold text-[#003878] mb-4">{description.title}</h2>
+                        <h2 className="text-2xl lg:text-3xl font-bold text-[#111111] mb-4">{description.title}</h2>
                         {description.intro && (
                             <p className="text-base lg:text-lg font-medium text-gray-700 leading-relaxed mb-6">
                                 {description.intro}
@@ -100,7 +100,7 @@ const ProductDetailContent: React.FC<ProductDetailContentProps> = ({ uspItems, d
 
                     {description.sections?.map((section, i) => (
                         <div key={i} className="pt-4">
-                            <h3 className="text-lg font-bold text-[#003878] mb-2">{section.heading}</h3>
+                            <h3 className="text-lg font-bold text-[#111111] mb-2">{section.heading}</h3>
                             <p className="text-gray-600 leading-7">{section.body}</p>
                         </div>
                     ))}
@@ -109,7 +109,7 @@ const ProductDetailContent: React.FC<ProductDetailContentProps> = ({ uspItems, d
                 {/* Right: Specs */}
                 <div>
                     <div className="bg-white border border-gray-100 rounded-md p-6 lg:p-8 shadow-sm h-full">
-                        <h3 className="text-xl font-bold text-[#003878] mb-6 flex items-center gap-2">
+                        <h3 className="text-xl font-bold text-[#111111] mb-6 flex items-center gap-2">
                             Specificaties
                         </h3>
                         {specs.length > 0 ? (
@@ -117,7 +117,7 @@ const ProductDetailContent: React.FC<ProductDetailContentProps> = ({ uspItems, d
                                 {specs.map((spec, index) => (
                                     <div key={index} className="flex justify-between py-4 group hover:bg-gray-50 transition-colors px-2 -mx-2 rounded-lg">
                                         <span className="font-medium text-gray-500 text-sm">{spec.label}</span>
-                                        <span className="font-bold text-[#003878] text-sm text-right">{spec.value}</span>
+                                        <span className="font-bold text-[#111111] text-sm text-right">{spec.value}</span>
                                     </div>
                                 ))}
                             </div>

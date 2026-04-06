@@ -1,14 +1,15 @@
 :root {
   /* Brand Colors */
-  --color-primary: #003878;
+  --color-primary: #111111;
   --color-secondary: #FF7300;
-  --color-surface: #eff6ff;
+  --color-accent-blue: #003878;
+  --color-surface: #f7f7f5;
   --color-white: #ffffff;
 
   /* Text Colors */
-  --text: #0f172a;
-  --muted: #64748b;
-  --border: #e5e7eb;
+  --text: #111111;
+  --muted: #555555;
+  --border: #eaeaea;
 
   /* Borders & Radius */
   --radius-sm: 6px;

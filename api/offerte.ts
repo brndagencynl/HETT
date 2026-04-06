@@ -36,17 +36,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const s = StyleSheet.create({
       page:      { padding: 32, fontSize: 11, color: "#0f172a" },
       header:    { flexDirection: "row", justifyContent: "space-between", marginBottom: 18 },
-      brand:     { fontSize: 18, fontWeight: 700, color: "#003878" },
+      brand:     { fontSize: 18, fontWeight: 700, color: "#111111" },
       sub:       { fontSize: 10, color: "#475569", marginTop: 4 },
       badge:     { backgroundColor: "#FF7300", padding: 8, borderRadius: 8, color: "#fff", fontSize: 10 },
       section:   { marginTop: 16, paddingTop: 12, borderTop: "1px solid #e2e8f0" },
-      h2:        { fontSize: 12, fontWeight: 700, marginBottom: 8, color: "#003878" },
+      h2:        { fontSize: 12, fontWeight: 700, marginBottom: 8, color: "#111111" },
       row:       { flexDirection: "row", justifyContent: "space-between", paddingVertical: 4, borderBottom: "1px solid #f1f5f9" },
       label:     { color: "#334155" },
       value:     { color: "#0f172a", fontWeight: 600 },
       totalsBox: { marginTop: 12, padding: 12, backgroundColor: "#EDF0F2", borderRadius: 10 },
       totalLine: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 3 },
-      grand:     { fontSize: 14, fontWeight: 800, color: "#003878" },
+      grand:     { fontSize: 14, fontWeight: 800, color: "#111111" },
       imgWrap:   { marginTop: 10, borderRadius: 10, overflow: "hidden", border: "1px solid #e2e8f0" },
       footer:    { marginTop: 18, fontSize: 9, color: "#64748b" }
     });
@@ -255,7 +255,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const htmlAdmin = `
       <div style="font-family:Inter,Arial,sans-serif;line-height:1.4">
-        <h2 style="color:#003878;margin:0 0 8px">Nieuwe offerteaanvraag</h2>
+        <h2 style="color:#111111;margin:0 0 8px">Nieuwe offerteaanvraag</h2>
         <p style="margin:0 0 12px"><b>Referentie:</b> ${reference}<br/><b>Datum:</b> ${createdAt}</p>
         <p style="margin:0 0 12px"><b>Klant:</b> ${offer.contact.name || "-"} • ${offer.contact.email} • ${offer.contact.phone || "-"}</p>
         <p style="margin:0 0 12px"><b>Product:</b> ${offer.productTitle || "-"}</p>
@@ -265,7 +265,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const htmlCustomer = `
       <div style="font-family:Inter,Arial,sans-serif;line-height:1.4">
-        <h2 style="color:#003878;margin:0 0 8px">Bedankt voor je offerteaanvraag</h2>
+        <h2 style="color:#111111;margin:0 0 8px">Bedankt voor je offerteaanvraag</h2>
         <p style="margin:0 0 12px">We hebben je aanvraag ontvangen. Je ontvangt zo snel mogelijk een reactie.</p>
         <p style="margin:0 0 12px"><b>Referentie:</b> ${reference}</p>
         <p style="margin:0 0 12px;color:#475569">Je PDF-overzicht is bijgevoegd.</p>

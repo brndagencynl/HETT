@@ -22,6 +22,8 @@ export type Option = {
   label: string;
   /** Price delta in EUR incl. BTW (additive on top of Shopify base price) */
   priceDelta: number;
+  /** Optional image URL for visual option cards */
+  imageUrl?: string;
 };
 
 export type SwatchOption = Option & {
@@ -53,15 +55,15 @@ export type SchuifwandConfig = {
 // =============================================================================
 
 const SHARED_TYPE_GLAS: Option[] = [
-  { id: 'helder', label: 'Helder', priceDelta: 0 },
-  { id: 'getint', label: 'Getint', priceDelta: 0 },
+  { id: 'helder', label: 'Helder', priceDelta: 0, imageUrl: '/assets/images/schuifwand/glas-helder.webp' },
+  { id: 'getint', label: 'Getint', priceDelta: 0, imageUrl: '/assets/images/schuifwand/glas-getint.webp' },
 ];
 
 const SHARED_KLEUR_PROFIEL: SwatchOption[] = [
-  { id: 'antraciet', label: 'Antraciet', swatch: '#3A3F45', priceDelta: 0 },
-  { id: 'zwart',     label: 'Zwart',     swatch: '#111111', priceDelta: 0 },
-  { id: 'wit',       label: 'Wit',       swatch: '#F2F2F2', priceDelta: 0 },
-  { id: 'creme',     label: 'Crème',     swatch: '#E7DCC8', priceDelta: 0 },
+  { id: 'antraciet', label: 'Antraciet', swatch: '#3A3F45', priceDelta: 0, imageUrl: '/assets/images/schuifwand/kleur-antraciet.webp' },
+  { id: 'zwart',     label: 'Zwart',     swatch: '#111111', priceDelta: 0, imageUrl: '/assets/images/schuifwand/kleur-zwart.webp' },
+  { id: 'wit',       label: 'Wit',       swatch: '#F2F2F2', priceDelta: 0, imageUrl: '/assets/images/schuifwand/kleur-wit.webp' },
+  { id: 'creme',     label: 'Crème',     swatch: '#E7DCC8', priceDelta: 0, imageUrl: '/assets/images/schuifwand/kleur-creme.webp' },
 ];
 
 const SHARED_EXTRAS: ExtraOption[] = [
@@ -72,6 +74,7 @@ const SHARED_EXTRAS: ExtraOption[] = [
     infoText: 'Glasopvang voorkomt dat panelen doorschieten en helpt bij veilige eindpositie.',
     popular: true,
     priceDelta: 95.0,
+    imageUrl: '/assets/images/schuifwand/extra-glasopvang.webp',
   },
   {
     id: 'tochtstrip',
@@ -79,6 +82,7 @@ const SHARED_EXTRAS: ExtraOption[] = [
     infoText: 'Tochtstrip voor betere afsluiting tussen panelen.',
     popular: true,
     priceDelta: 17.5,
+    imageUrl: '/assets/images/schuifwand/extra-tochtstrip.webp',
   },
   {
     id: 'deurgreep-handvat',
@@ -86,12 +90,14 @@ const SHARED_EXTRAS: ExtraOption[] = [
     infoText: 'Handvat om schuifpanelen makkelijker te bedienen.',
     popular: true,
     priceDelta: 17.5,
+    imageUrl: '/assets/images/schuifwand/extra-handvat.webp',
   },
   {
     id: 'komgreep',
     label: 'Komgreep',
     infoText: 'Ingefreesde komgreep voor strak design.',
     priceDelta: 17.5,
+    imageUrl: '/assets/images/schuifwand/extra-komgreep.webp',
   },
   {
     id: 'meenemers',
@@ -99,12 +105,14 @@ const SHARED_EXTRAS: ExtraOption[] = [
     infoText: 'Meenemers om meerdere panelen samen te laten meelopen.',
     popular: true,
     priceDelta: 12.5,
+    imageUrl: '/assets/images/schuifwand/extra-meenemers.webp',
   },
   {
     id: 'funderingskoker',
     label: 'Funderingskoker',
     infoText: 'Koker voor fundering / uitlijning en extra stabiliteit.',
     priceDelta: 60.0,
+    imageUrl: '/assets/images/schuifwand/extra-funderingskoker.webp',
   },
 ];
 

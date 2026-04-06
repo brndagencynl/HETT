@@ -1,7 +1,8 @@
 /**
  * Glazen Schuifwanden — Detail / PDP
  * ====================================
- * Premium retail aesthetic. Minimal icons, subtle borders, clean typography.
+ * Slimglass-inspired layout: hero image, then configurator with image-card
+ * options for glass type, color, and extras.
  *
  * Pricing: Shopify base + Σ priceDelta × quantity
  * Cart route: A (Storefront Cart API, accessories path)
@@ -10,7 +11,10 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, ChevronLeft, ChevronRight, Loader2, Minus, Plus } from 'lucide-react';
+import {
+  ArrowLeft, ChevronLeft, ChevronRight, Loader2, Minus, Plus,
+  Truck, ShieldCheck, Settings, Package, Check,
+} from 'lucide-react';
 import DeliveryTime from '../src/components/ui/DeliveryTime';
 import PageHeader from '../components/PageHeader';
 import { useCart } from '../context/CartContext';
@@ -25,6 +29,33 @@ import {
 } from '../src/lib/shopify/glazenSchuifwanden';
 import { formatEUR, toCents } from '../src/utils/money';
 import type { Product } from '../types';
+
+/* ── Palette (our brand) ────────────────────────────────────────────────── */
+const C = {
+  primary:   'var(--primary, #111111)',
+  accent:    'var(--secondary, #2A8FCE)',
+  text:      'var(--text, #1a1a1a)',
+  muted:     'var(--muted, #6b7280)',
+  border:    '#e2e5e9',
+  bg:        'var(--bg, #f8f8f6)',
+  card:      '#ffffff',
+  selected:  'var(--secondary, #2A8FCE)',
+} as const;
+
+/* ── Tabs ───────────────────────────────────────────────────────────────── */
+type TabId = 'specs' | 'description';
+
+/* ── Image card fallback (colored placeholder when no image yet) ───────── */
+const ImagePlaceholder: React.FC<{ label: string; swatch?: string }> = ({ label, swatch }) => (
+  <div
+    className="w-full h-full flex items-center justify-center"
+    style={{ backgroundColor: swatch || '#f0f0ee' }}
+  >
+    <span className="text-xs font-medium text-white/80 drop-shadow-sm text-center px-2">
+      {label}
+    </span>
+  </div>
+);
 
 const GlazenSchuifwandenDetail: React.FC = () => {
   const { t } = useTranslation();
@@ -61,6 +92,7 @@ const GlazenSchuifwandenDetail: React.FC = () => {
   const [selectedExtras, setSelectedExtras] = useState<Set<string>>(new Set());
   const [quantity, setQuantity] = useState(1);
   const [addingToCart, setAddingToCart] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabId>('specs');
 
   // Gallery
   const shopifyProduct = shopifyData?.shopifyProduct;
@@ -121,17 +153,17 @@ const GlazenSchuifwandenDetail: React.FC = () => {
   // 404
   if (!config) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center">
         <div className="text-center max-w-md px-6">
-          <h2 className="text-xl font-semibold tracking-tight text-[#111] mb-3">
+          <h2 className="text-xl font-semibold tracking-tight text-[var(--text)] mb-3">
             {t('glazenSchuifwanden.notFound')}
           </h2>
-          <p className="text-sm text-[#555] mb-8 leading-relaxed">
+          <p className="text-sm text-[var(--muted)] mb-8 leading-relaxed">
             {t('glazenSchuifwanden.notFoundHint')}
           </p>
           <Link
             to="/glazen-schuifwanden"
-            className="ds-btn ds-btn--primary text-sm"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold text-white bg-[var(--primary)] hover:opacity-90 transition-opacity"
           >
             <ArrowLeft size={15} /> {t('glazenSchuifwanden.backToOverview')}
           </Link>
@@ -203,312 +235,439 @@ const GlazenSchuifwandenDetail: React.FC = () => {
   // RENDER
   // =========================================================================
   return (
-    <div className="min-h-screen bg-white">
-      <PageHeader title={displayTitle} subtitle={t('glazenSchuifwanden.pageSubtitle')} />
+    <div className="min-h-screen bg-[var(--bg)]">
+      <PageHeader />
 
-      <div className="max-w-[1200px] mx-auto px-6 py-16 md:py-24">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 xl:gap-24">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 lg:pt-10 pb-12">
+        {/* ── Two-column layout: image left (sticky), all content right ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
 
-          {/* ── LEFT: Gallery ──────────────────────────────────────── */}
+          {/* ── LEFT: Sticky Gallery ─────────────────────────────────── */}
           <div className="lg:col-span-7">
-            <div className="relative aspect-[4/3] bg-[#f7f7f5] rounded-md overflow-hidden border border-[#eaeaea]">
-              {shopifyLoading ? (
-                <div className="w-full h-full flex items-center justify-center">
-                  <Loader2 size={28} className="animate-spin text-[#d8d8d8]" />
-                </div>
-              ) : (
-                <img
-                  src={activeImage || mainImage}
-                  alt={displayTitle}
-                  className="w-full h-full object-cover"
-                />
-              )}
-              {allImages.length > 1 && (
-                <div className="absolute inset-x-4 top-1/2 -translate-y-1/2 flex justify-between pointer-events-none">
-                  <button
-                    onClick={() => {
-                      const idx = allImages.indexOf(activeImage);
-                      setActiveImage(allImages[idx === 0 ? allImages.length - 1 : idx - 1]);
-                    }}
-                    className="pointer-events-auto w-9 h-9 flex items-center justify-center bg-white border border-[#eaeaea] rounded-[4px] text-[#111] hover:border-[#d8d8d8] transition-colors"
-                  >
-                    <ChevronLeft size={18} />
-                  </button>
-                  <button
-                    onClick={() => {
-                      const idx = allImages.indexOf(activeImage);
-                      setActiveImage(allImages[idx === allImages.length - 1 ? 0 : idx + 1]);
-                    }}
-                    className="pointer-events-auto w-9 h-9 flex items-center justify-center bg-white border border-[#eaeaea] rounded-[4px] text-[#111] hover:border-[#d8d8d8] transition-colors"
-                  >
-                    <ChevronRight size={18} />
-                  </button>
-                </div>
-              )}
-            </div>
+            <div className="lg:sticky lg:top-28">
+              {/* Main image */}
+              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-white">
+                {shopifyLoading ? (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <Loader2 size={28} className="animate-spin text-gray-300" />
+                  </div>
+                ) : (
+                  <img
+                    src={activeImage || mainImage}
+                    alt={displayTitle}
+                    className="w-full h-full object-cover"
+                  />
+                )}
+                {allImages.length > 1 && (
+                  <div className="absolute inset-x-4 top-1/2 -translate-y-1/2 flex justify-between pointer-events-none">
+                    <button
+                      onClick={() => {
+                        const idx = allImages.indexOf(activeImage);
+                        setActiveImage(allImages[idx === 0 ? allImages.length - 1 : idx - 1]);
+                      }}
+                      className="pointer-events-auto w-10 h-10 flex items-center justify-center bg-white/90 backdrop-blur-sm rounded-full shadow-sm hover:shadow-md transition-shadow text-[var(--text)]"
+                    >
+                      <ChevronLeft size={18} />
+                    </button>
+                    <button
+                      onClick={() => {
+                        const idx = allImages.indexOf(activeImage);
+                        setActiveImage(allImages[idx === allImages.length - 1 ? 0 : idx + 1]);
+                      }}
+                      className="pointer-events-auto w-10 h-10 flex items-center justify-center bg-white/90 backdrop-blur-sm rounded-full shadow-sm hover:shadow-md transition-shadow text-[var(--text)]"
+                    >
+                      <ChevronRight size={18} />
+                    </button>
+                  </div>
+                )}
+              </div>
 
-            {/* Thumbnails */}
-            {allImages.length > 1 && (
-              <div className="grid grid-cols-4 gap-3 mt-4">
-                {allImages.map((img, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setActiveImage(img)}
-                    className={`aspect-square bg-[#f7f7f5] rounded-[4px] overflow-hidden border transition-colors ${
-                      activeImage === img
-                        ? 'border-[#111]'
-                        : 'border-[#eaeaea] hover:border-[#d8d8d8]'
-                    }`}
+              {/* Thumbnails */}
+              {allImages.length > 1 && (
+                <div className="flex gap-3 mt-4 overflow-x-auto pb-1">
+                  {allImages.map((img, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setActiveImage(img)}
+                      className={`flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 transition-all ${
+                        activeImage === img
+                          ? 'border-[var(--secondary)] shadow-sm'
+                          : 'border-transparent hover:border-gray-300'
+                      }`}
+                    >
+                      <img src={img} className="w-full h-full object-cover" alt="" loading="lazy" />
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* USP badges (desktop, below image) */}
+              <div className="hidden lg:flex flex-wrap gap-3 mt-6">
+                {[
+                  { icon: <Truck size={15} />, text: 'Gratis bezorging' },
+                  { icon: <ShieldCheck size={15} />, text: '5 jaar garantie' },
+                  { icon: <Settings size={15} />, text: 'Zelf eenvoudig monteren' },
+                  { icon: <Package size={15} />, text: 'Gehard veiligheidsglas' },
+                ].map((u) => (
+                  <span
+                    key={u.text}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-[13px] font-medium bg-white border border-gray-200 text-[var(--text)]"
                   >
-                    <img src={img} className="w-full h-full object-cover" alt="" loading="lazy" />
-                  </button>
+                    <span className="text-[var(--secondary)]">{u.icon}</span>
+                    {u.text}
+                  </span>
                 ))}
               </div>
-            )}
+            </div>
           </div>
 
-          {/* ── RIGHT: Product info + Configurator ─────────────────── */}
+          {/* ── RIGHT: Title + Price + Configurator + CTA ────────────── */}
           <div className="lg:col-span-5">
-            <div className="sticky top-32">
+            {/* Title */}
+            <h1 className="text-2xl sm:text-3xl font-bold text-[var(--text)] leading-tight mb-2">
+              {displayTitle}
+            </h1>
 
-              {/* Meta line */}
-              <div className="flex items-center gap-4 text-[13px] text-[#555] mb-6">
-                <span>{config.leadTime}</span>
-                <span className="w-px h-3 bg-[#eaeaea]" />
-                <span>{t('glazenSchuifwanden.warranty')}</span>
+            {displayIntro && (
+              <p className="text-[15px] text-[var(--muted)] leading-relaxed mb-4">{displayIntro}</p>
+            )}
+
+            {/* Price */}
+            {basePriceCents > 0 && (
+              <div className="flex items-baseline gap-2 mb-5">
+                <span className="text-3xl font-bold text-[var(--primary)] tabular-nums">
+                  {formatEUR(grandTotal, 'euros')}
+                </span>
+                <span className="text-sm text-[var(--muted)]">incl. BTW</span>
               </div>
+            )}
 
-              {/* Title */}
-              <h1 className="text-[28px] font-semibold tracking-tight text-[#111] leading-[1.15] mb-3">
-                {displayTitle}
-              </h1>
-              {displayIntro && (
-                <p className="text-[15px] text-[#555] leading-relaxed mb-8">{displayIntro}</p>
-              )}
+            {/* USP badges (mobile) */}
+            <div className="flex lg:hidden flex-wrap gap-2 mb-5">
+              {[
+                { icon: <Truck size={13} />, text: 'Gratis bezorging' },
+                { icon: <ShieldCheck size={13} />, text: '5 jaar garantie' },
+                { icon: <Settings size={13} />, text: 'Eenvoudig monteren' },
+              ].map((u) => (
+                <span
+                  key={u.text}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-medium bg-white border border-gray-200 text-[var(--text)]"
+                >
+                  <span className="text-[var(--secondary)]">{u.icon}</span>
+                  {u.text}
+                </span>
+              ))}
+            </div>
 
-              {/* USPs — text-only list */}
-              <ul className="ds-list mb-10">
-                {config.usps.map((bullet, idx) => (
-                  <li key={idx} className="text-[14px]">{bullet}</li>
-                ))}
-              </ul>
+            {/* USPs — bullet list */}
+            <ul className="space-y-2 mb-6">
+              {config.usps.map((bullet, idx) => (
+                <li key={idx} className="flex items-start gap-2.5 text-sm text-[var(--text)]">
+                  <Check size={16} className="mt-0.5 flex-shrink-0 text-[var(--secondary)]" />
+                  {bullet}
+                </li>
+              ))}
+            </ul>
 
-              {/* ── Configurator ──────────────────────────────────── */}
-              {configReady ? (
-                <div className="space-y-8">
-                  <div className="h-px bg-[#eaeaea]" />
+            {/* Delivery */}
+            <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-green-50 border border-green-200 mb-8">
+              <Check size={16} className="text-green-600 flex-shrink-0" />
+              <span className="text-sm font-medium text-green-800">
+                Gratis bezorging | Binnen {config.leadTime} geleverd
+              </span>
+            </div>
 
-                  <p className="text-[13px] font-semibold uppercase tracking-[.08em] text-[#555]">
-                    {t('glazenSchuifwanden.configTitle')}
-                  </p>
+            {/* ── Configurator (in right column) ───────────────────── */}
+            {configReady ? (
+              <div className="space-y-8">
+                <h2 className="text-lg font-bold text-[var(--text)]">
+                  {t('glazenSchuifwanden.configTitle', 'Stel uw schuifwand samen')}
+                </h2>
 
-                  {/* Inbouwbreedte */}
-                  <div>
-                    <label className="block text-[13px] font-medium text-[#111] mb-2">
-                      {t('glazenSchuifwanden.widthLabel')}
-                    </label>
-                    <select
-                      value={selectedInbouwbreedte}
-                      onChange={(e) => setSelectedInbouwbreedte(e.target.value)}
-                      className="ds-select"
-                    >
-                      <option value="">{t('glazenSchuifwanden.selectWidth')}</option>
-                      {config.inbouwbreedte.map((opt) => (
-                        <option key={opt.id} value={opt.id}>
-                          {opt.label}
-                          {opt.priceDelta > 0 ? ` (+${formatEUR(opt.priceDelta, 'euros')})` : ''}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                {/* ── 1. Inbouwbreedte (dropdown) ────────────────── */}
+                <div>
+                  <label className="block text-sm font-semibold text-[var(--text)] mb-2">
+                    {t('glazenSchuifwanden.widthLabel')}
+                  </label>
+                  <select
+                    value={selectedInbouwbreedte}
+                    onChange={(e) => setSelectedInbouwbreedte(e.target.value)}
+                    className={`w-full h-12 px-4 rounded-xl border-2 text-sm bg-white appearance-none transition-colors focus:outline-none focus:border-[var(--secondary)] ${
+                      selectedInbouwbreedte ? 'border-[var(--secondary)]' : 'border-gray-200'
+                    }`}
+                    style={{
+                      backgroundImage: `url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: 'right 16px center',
+                      paddingRight: '44px',
+                    }}
+                  >
+                    <option value="">{t('glazenSchuifwanden.selectWidth')}</option>
+                    {config.inbouwbreedte.map((opt) => (
+                      <option key={opt.id} value={opt.id}>
+                        {opt.label}
+                        {opt.priceDelta > 0 ? ` (+${formatEUR(opt.priceDelta, 'euros')})` : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-                  {/* Werkhoogte */}
-                  <div>
-                    <label className="block text-[13px] font-medium text-[#111] mb-2">
-                      {t('glazenSchuifwanden.heightLabel')}
-                    </label>
-                    <select
-                      value={selectedWerkhoogte}
-                      onChange={(e) => setSelectedWerkhoogte(e.target.value)}
-                      className="ds-select"
-                    >
-                      <option value="">{t('glazenSchuifwanden.selectHeight')}</option>
-                      {config.werkhoogte.map((opt) => (
-                        <option key={opt.id} value={opt.id}>
-                          {opt.label}
-                          {opt.priceDelta > 0 ? ` (+${formatEUR(opt.priceDelta, 'euros')})` : ''}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                {/* ── 2. Werkhoogte (dropdown) ───────────────────── */}
+                <div>
+                  <label className="block text-sm font-semibold text-[var(--text)] mb-2">
+                    {t('glazenSchuifwanden.heightLabel')}
+                  </label>
+                  <select
+                    value={selectedWerkhoogte}
+                    onChange={(e) => setSelectedWerkhoogte(e.target.value)}
+                    className={`w-full h-12 px-4 rounded-xl border-2 text-sm bg-white appearance-none transition-colors focus:outline-none focus:border-[var(--secondary)] ${
+                      selectedWerkhoogte ? 'border-[var(--secondary)]' : 'border-gray-200'
+                    }`}
+                    style={{
+                      backgroundImage: `url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: 'right 16px center',
+                      paddingRight: '44px',
+                    }}
+                  >
+                    <option value="">{t('glazenSchuifwanden.selectHeight')}</option>
+                    {config.werkhoogte.map((opt) => (
+                      <option key={opt.id} value={opt.id}>
+                        {opt.label}
+                        {opt.priceDelta > 0 ? ` (+${formatEUR(opt.priceDelta, 'euros')})` : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-                  {/* Type glas */}
-                  <div>
-                    <label className="block text-[13px] font-medium text-[#111] mb-2">
-                      {t('glazenSchuifwanden.glassTypeLabel')}
-                    </label>
-                    <div className="flex gap-2">
-                      {config.typeGlas.map((glass) => (
+                {/* ── 3. Type glas — compact image cards ──────────── */}
+                <div>
+                  <label className="block text-sm font-semibold text-[var(--text)] mb-2">
+                    {t('glazenSchuifwanden.glassTypeLabel')}
+                  </label>
+                  <div className="flex gap-2">
+                    {config.typeGlas.map((glass) => {
+                      const isSelected = selectedTypeGlas === glass.id;
+                      return (
                         <button
                           key={glass.id}
                           onClick={() => setSelectedTypeGlas(glass.id)}
-                          className={`flex-1 py-2.5 text-[14px] font-medium text-center rounded-md border transition-colors ${
-                            selectedTypeGlas === glass.id
-                              ? 'border-[#111] bg-[#f7f7f5] text-[#111]'
-                              : 'border-[#eaeaea] text-[#555] hover:border-[#d8d8d8]'
+                          className={`group relative flex items-center gap-2.5 pl-1.5 pr-4 py-1.5 rounded-xl border-2 transition-all ${
+                            isSelected
+                              ? 'border-[var(--secondary)] bg-blue-50/40'
+                              : 'border-gray-200 hover:border-gray-300'
                           }`}
                         >
-                          {glass.label}
-                          {glass.priceDelta > 0 && (
-                            <span className="block text-[11px] text-[#999] mt-0.5">
-                              + {formatEUR(glass.priceDelta, 'euros')}
-                            </span>
+                          <div className="w-10 h-10 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0">
+                            {glass.imageUrl ? (
+                              <img
+                                src={glass.imageUrl}
+                                alt={glass.label}
+                                className="w-full h-full object-cover"
+                                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-lg text-gray-400">
+                                {glass.id === 'helder' ? '◻' : '◼'}
+                              </div>
+                            )}
+                          </div>
+                          <div className="text-left">
+                            <span className="text-[13px] font-semibold text-[var(--text)] block leading-tight">{glass.label}</span>
+                            {glass.priceDelta > 0 && (
+                              <span className="text-[11px] text-[var(--muted)]">+ {formatEUR(glass.priceDelta, 'euros')}</span>
+                            )}
+                          </div>
+                          {isSelected && (
+                            <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[var(--secondary)] flex items-center justify-center">
+                              <Check size={11} className="text-white" />
+                            </div>
                           )}
                         </button>
-                      ))}
-                    </div>
+                      );
+                    })}
                   </div>
+                </div>
 
-                  {/* Kleur profiel */}
-                  <div>
-                    <label className="block text-[13px] font-medium text-[#111] mb-2">
-                      {t('glazenSchuifwanden.colorLabel')}
-                    </label>
-                    <div className="flex flex-wrap gap-2">
-                      {config.kleurProfiel.map((color) => (
+                {/* ── 4. Kleur profiel — compact swatches with image ── */}
+                <div>
+                  <label className="block text-sm font-semibold text-[var(--text)] mb-2">
+                    {t('glazenSchuifwanden.colorLabel')}
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {config.kleurProfiel.map((color) => {
+                      const isSelected = selectedKleurProfiel === color.id;
+                      return (
                         <button
                           key={color.id}
                           onClick={() => setSelectedKleurProfiel(color.id)}
-                          className={`flex items-center gap-2 px-3.5 py-2.5 rounded-md border text-[14px] font-medium transition-colors ${
-                            selectedKleurProfiel === color.id
-                              ? 'border-[#111] bg-[#f7f7f5] text-[#111]'
-                              : 'border-[#eaeaea] text-[#555] hover:border-[#d8d8d8]'
+                          className={`group relative flex items-center gap-2.5 pl-1.5 pr-4 py-1.5 rounded-xl border-2 transition-all ${
+                            isSelected
+                              ? 'border-[var(--secondary)] bg-blue-50/40'
+                              : 'border-gray-200 hover:border-gray-300'
                           }`}
                         >
-                          {color.swatch && (
-                            <span
-                              className="w-4 h-4 rounded-full border border-[#d8d8d8] flex-shrink-0"
-                              style={{ backgroundColor: color.swatch }}
-                            />
+                          <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 border border-gray-200">
+                            {color.imageUrl ? (
+                              <img
+                                src={color.imageUrl}
+                                alt={color.label}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).style.display = 'none';
+                                  (e.target as HTMLImageElement).parentElement!.style.backgroundColor = color.swatch || '#ccc';
+                                }}
+                              />
+                            ) : (
+                              <div className="w-full h-full" style={{ backgroundColor: color.swatch || '#ccc' }} />
+                            )}
+                          </div>
+                          <span className="text-[13px] font-semibold text-[var(--text)]">{color.label}</span>
+                          {isSelected && (
+                            <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[var(--secondary)] flex items-center justify-center">
+                              <Check size={11} className="text-white" />
+                            </div>
                           )}
-                          {color.label}
                         </button>
-                      ))}
-                    </div>
+                      );
+                    })}
                   </div>
+                </div>
 
-                  {/* Extra's */}
-                  {config.extras.length > 0 && (
-                    <div>
-                      <label className="block text-[13px] font-medium text-[#111] mb-2">
-                        {t('glazenSchuifwanden.extrasLabel', "Extra's")}
-                      </label>
-                      <div className="space-y-1.5">
-                        {config.extras.map((extra) => {
-                          const on = selectedExtras.has(extra.id);
-                          return (
-                            <button
-                              key={extra.id}
-                              type="button"
-                              onClick={() => toggleExtra(extra.id)}
-                              className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-md border text-left transition-colors ${
-                                on
-                                  ? 'border-[#111] bg-[#f7f7f5]'
-                                  : 'border-[#eaeaea] hover:border-[#d8d8d8]'
-                              }`}
-                            >
-                              {/* Checkbox */}
-                              <span
-                                className={`w-[18px] h-[18px] rounded-[3px] flex-shrink-0 flex items-center justify-center border transition-colors ${
+                {/* ── 5. Extra's — compact horizontal cards ──────── */}
+                {config.extras.length > 0 && (
+                  <div>
+                    <label className="block text-sm font-semibold text-[var(--text)] mb-2">
+                      {t('glazenSchuifwanden.extrasLabel', "Extra's")}
+                    </label>
+                    <div className="space-y-2">
+                      {config.extras.map((extra) => {
+                        const on = selectedExtras.has(extra.id);
+                        return (
+                          <button
+                            key={extra.id}
+                            type="button"
+                            onClick={() => toggleExtra(extra.id)}
+                            className={`group w-full flex items-center gap-3 rounded-xl border-2 overflow-hidden text-left transition-all ${
+                              on
+                                ? 'border-[var(--secondary)] bg-blue-50/40'
+                                : 'border-gray-200 hover:border-gray-300'
+                            }`}
+                          >
+                            {/* Thumbnail */}
+                            <div className="w-16 h-16 flex-shrink-0 bg-gray-100 overflow-hidden relative">
+                              {extra.imageUrl ? (
+                                <img
+                                  src={extra.imageUrl}
+                                  alt={extra.label}
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center">
+                                  <Package size={18} className="text-gray-300" />
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Content */}
+                            <div className="flex-1 min-w-0 py-2 pr-3">
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <span className="text-[13px] font-semibold text-[var(--text)] truncate">{extra.label}</span>
+                                  {extra.popular && (
+                                    <span className="flex-shrink-0 px-1.5 py-0.5 rounded text-[9px] font-bold bg-[var(--secondary)]/10 text-[var(--secondary)] leading-tight">
+                                      Populair
+                                    </span>
+                                  )}
+                                </div>
+                                <span className="text-[13px] font-bold text-[var(--primary)] tabular-nums whitespace-nowrap">
+                                  {formatEUR(extra.priceDelta, 'euros')}
+                                </span>
+                              </div>
+                              {extra.infoText && (
+                                <p className="text-[11px] text-[var(--muted)] mt-0.5 leading-snug line-clamp-1">
+                                  {extra.infoText}
+                                </p>
+                              )}
+                            </div>
+
+                            {/* Toggle indicator */}
+                            <div className="pr-3 flex-shrink-0">
+                              <div
+                                className={`w-5 h-5 rounded-md flex items-center justify-center border-2 transition-colors ${
                                   on
-                                    ? 'bg-[#111] border-[#111]'
-                                    : 'border-[#d8d8d8] bg-white'
+                                    ? 'bg-[var(--secondary)] border-[var(--secondary)]'
+                                    : 'border-gray-300 bg-white group-hover:border-gray-400'
                                 }`}
                               >
-                                {on && (
-                                  <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                                    <path d="M1 3.5L3.5 6L9 1" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                                  </svg>
-                                )}
-                              </span>
-
-                              {/* Text */}
-                              <div className="flex-1 min-w-0">
-                                <span className="text-[14px] font-medium text-[#111]">{extra.label}</span>
-                                {extra.subtitle && (
-                                  <span className="text-[12px] text-[#999] ml-1.5">{extra.subtitle}</span>
-                                )}
+                                {on && <Check size={12} className="text-white" />}
                               </div>
-
-                              {/* Price */}
-                              <span className="text-[13px] font-medium text-[#555] flex-shrink-0 tabular-nums">
-                                + {formatEUR(extra.priceDelta, 'euros')}
-                              </span>
-                            </button>
-                          );
-                        })}
-                      </div>
+                            </div>
+                          </button>
+                        );
+                      })}
                     </div>
-                  )}
+                  </div>
+                )}
 
-                  {/* ── Price summary ───────────────────────────── */}
-                  <div className="h-px bg-[#eaeaea]" />
-
+                {/* ── Price summary + Quantity + CTA ─────────────── */}
+                <div className="rounded-2xl border border-gray-200 bg-white p-5 space-y-4">
                   {basePriceCents > 0 && (
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-[14px] text-[#555]">
+                    <div className="space-y-1.5">
+                      <div className="flex justify-between text-sm text-[var(--muted)]">
                         <span>{t('glazenSchuifwanden.productTotal', 'Product')}</span>
                         <span className="tabular-nums">{formatEUR(basePriceEur, 'euros')}</span>
                       </div>
                       {optionsTotalEur > 0 && (
-                        <div className="flex justify-between text-[14px] text-[#555]">
+                        <div className="flex justify-between text-sm text-[var(--muted)]">
                           <span>{t('glazenSchuifwanden.optionsTotal', 'Opties')}</span>
                           <span className="tabular-nums">+ {formatEUR(optionsTotalEur, 'euros')}</span>
                         </div>
                       )}
-                      <div className="h-px bg-[#eaeaea]" />
+                      <div className="h-px bg-gray-200" />
                       <div className="flex justify-between items-baseline pt-1">
-                        <span className="text-[14px] font-medium text-[#111]">
+                        <span className="text-sm font-semibold text-[var(--text)]">
                           {t('glazenSchuifwanden.totalLabel', 'Totaal')}
                           {quantity > 1 && (
-                            <span className="text-[#999] font-normal ml-1">({quantity}×)</span>
+                            <span className="font-normal ml-1 text-[var(--muted)]">({quantity}x)</span>
                           )}
                         </span>
-                        <span className="ds-price text-[#111]">{formatEUR(grandTotal, 'euros')}</span>
+                        <span className="text-2xl font-bold text-[var(--primary)] tabular-nums">
+                          {formatEUR(grandTotal, 'euros')}
+                        </span>
                       </div>
                     </div>
                   )}
 
-                  {/* ── Quantity + CTA ──────────────────────────── */}
-                  <div className="flex items-center gap-4 pt-2">
-                    {/* Qty */}
-                    <div className="flex items-center border border-[#eaeaea] rounded-md overflow-hidden">
+                  {/* Qty + CTA row */}
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center rounded-full overflow-hidden border border-gray-200">
                       <button
                         onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                         disabled={quantity <= 1}
-                        className="w-10 h-10 flex items-center justify-center text-[#555] hover:bg-[#f7f7f5] disabled:opacity-25 transition-colors"
+                        className="w-10 h-10 flex items-center justify-center text-[var(--muted)] hover:bg-gray-50 disabled:opacity-25 transition-colors"
                       >
                         <Minus size={15} />
                       </button>
-                      <span className="w-10 h-10 flex items-center justify-center text-[14px] font-semibold text-[#111] tabular-nums border-x border-[#eaeaea]">
+                      <span className="w-10 h-10 flex items-center justify-center text-sm font-semibold text-[var(--text)] tabular-nums border-x border-gray-200">
                         {quantity}
                       </span>
                       <button
                         onClick={() => setQuantity((q) => q + 1)}
-                        className="w-10 h-10 flex items-center justify-center text-[#555] hover:bg-[#f7f7f5] transition-colors"
+                        className="w-10 h-10 flex items-center justify-center text-[var(--muted)] hover:bg-gray-50 transition-colors"
                       >
                         <Plus size={15} />
                       </button>
                     </div>
 
-                    {/* CTA */}
                     <button
                       onClick={handleAddToCart}
                       disabled={!canAddToCart || addingToCart}
-                      className={`flex-1 h-12 text-[15px] font-semibold rounded-md transition-colors ${
+                      className={`flex-1 h-12 text-[15px] font-semibold rounded-full transition-all ${
                         canAddToCart
-                          ? 'bg-[#111] text-white hover:bg-black'
-                          : 'bg-[#eaeaea] text-[#999] cursor-not-allowed'
+                          ? 'bg-[var(--primary)] text-white hover:opacity-90 shadow-sm hover:shadow-md'
+                          : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                       }`}
                     >
                       {addingToCart ? (
@@ -521,33 +680,99 @@ const GlazenSchuifwandenDetail: React.FC = () => {
                     </button>
                   </div>
 
-                  {/* Variant warning */}
                   {!shopifyLoading && !shopifyProduct?.shopifyVariantId && (
-                    <p className="text-center text-[12px] text-[#999]">
+                    <p className="text-center text-xs text-[var(--muted)]">
                       {t('glazenSchuifwanden.noVariantWarning')}
                     </p>
                   )}
 
-                  {/* Delivery note */}
-                  <div className="text-center pt-1">
-                    <DeliveryTime label={t('glazenSchuifwanden.deliveryNote', { leadTime: config.leadTime })} />
+                  <div className="flex items-center justify-center gap-2 text-green-700">
+                    <Check size={14} />
+                    <span className="text-xs font-medium">
+                      Gratis bezorging | Binnen {config.leadTime} geleverd
+                    </span>
                   </div>
                 </div>
-              ) : (
-                <>
-                  <div className="h-px bg-[#eaeaea] mt-2" />
-                  <div className="mt-8 border border-[#eaeaea] rounded-md p-5">
-                    <p className="text-[14px] font-medium text-[#111] mb-1">
-                      {t('glazenSchuifwanden.configComingSoon', 'Configurator binnenkort beschikbaar')}
-                    </p>
-                    <p className="text-[13px] text-[#555]">
-                      {t('glazenSchuifwanden.configComingSoonHint', 'De maten voor deze variant worden nog toegevoegd. Neem contact op voor een offerte.')}
-                    </p>
-                  </div>
-                </>
-              )}
-            </div>
+              </div>
+            ) : (
+              <div className="mt-4 rounded-2xl border border-gray-200 bg-white p-6">
+                <p className="text-sm font-semibold text-[var(--text)] mb-1">
+                  {t('glazenSchuifwanden.configComingSoon', 'Configurator binnenkort beschikbaar')}
+                </p>
+                <p className="text-sm text-[var(--muted)]">
+                  {t('glazenSchuifwanden.configComingSoonHint', 'De maten voor deze variant worden nog toegevoegd. Neem contact op voor een offerte.')}
+                </p>
+              </div>
+            )}
           </div>
+        </div>
+      </div>
+
+      {/* ── Tabs section (below the fold) ────────────────────────────── */}
+      <div className="bg-white border-t border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+          <div className="flex gap-1 mb-8 border-b border-gray-200">
+            {([
+              { id: 'specs' as TabId, label: 'Specificaties' },
+              { id: 'description' as TabId, label: 'Beschrijving' },
+            ]).map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-5 py-3 text-sm font-semibold transition-colors relative -mb-px border-b-2 ${
+                  activeTab === tab.id
+                    ? 'text-[var(--primary)] border-[var(--secondary)]'
+                    : 'text-[var(--muted)] border-transparent hover:text-[var(--text)]'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {activeTab === 'specs' && (
+            <div className="max-w-2xl">
+              {[
+                { label: 'Type', value: `${config.rail}-rail schuifsysteem` },
+                { label: 'Glastype', value: '10 mm gehard veiligheidsglas' },
+                { label: 'Materiaal', value: 'Aluminium 6060 T6' },
+                { label: 'Bovenrail', value: '66 mm x 75 mm (B x H)' },
+                { label: 'Onderrail', value: '65 mm x 19 mm (B x H)' },
+                { label: 'Wielen', value: 'Verstelbare gelagerde wielen' },
+                { label: 'Levertijd', value: config.leadTime },
+              ].map((spec) => (
+                <div key={spec.label} className="flex justify-between py-3.5 text-sm border-b border-gray-100">
+                  <span className="text-[var(--muted)]">{spec.label}</span>
+                  <span className="font-medium text-[var(--text)] text-right">{spec.value}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {activeTab === 'description' && (
+            <div className="max-w-2xl space-y-4">
+              <p className="text-[15px] leading-relaxed text-[var(--text)]">
+                De {config.rail}-rail glazen schuifwand is de ideale oplossing om uw veranda, overkapping
+                of tuinkamer te voorzien van een stijlvolle en functionele afsluiting. Met {config.rail} panelen
+                van gehard veiligheidsglas (10 mm) biedt deze schuifwand optimale bescherming tegen wind en regen,
+                terwijl u blijft genieten van maximaal uitzicht.
+              </p>
+              <p className="text-[15px] leading-relaxed text-[var(--text)]">
+                Het aluminium profiel (6060 T6) is standaard verkrijgbaar in vier kleuren: Antraciet,
+                Zwart, Wit en Creme. De unieke lage onderrail van slechts 19 mm zorgt voor een
+                drempelvrije overgang. Dankzij de verstelbare gelagerde wielen schuiven de panelen
+                soepel en geluidsarm.
+              </p>
+              <ul className="space-y-2 pt-2">
+                {config.usps.map((usp, idx) => (
+                  <li key={idx} className="flex items-start gap-2.5 text-sm text-[var(--text)]">
+                    <Check size={16} className="mt-0.5 flex-shrink-0 text-[var(--secondary)]" />
+                    {usp}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       </div>
     </div>

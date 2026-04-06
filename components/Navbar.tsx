@@ -18,7 +18,7 @@ const Navbar: React.FC = () => {
   const navLabelMap: Record<string, string> = {
     '/categorie/verandas': t('nav.verandas'),
     '/categorie/accessoires': t('nav.accessoires'),
-    // '/glazen-schuifwanden': t('nav.glazenSchuifwanden'), // Temporarily disabled
+    '/glazen-schuifwanden': t('nav.glazenSchuifwanden'),
     '/maatwerk-configurator': t('nav.maatwerkConfigurator'),
     '/projecten': t('nav.projecten'),
     '/showroom': t('nav.showroom'),
@@ -134,15 +134,22 @@ const Navbar: React.FC = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      const scrolled = window.scrollY > 40;
-      setIsScrolled(scrolled);
-      if (!scrolled) {
-        setIsSearchOpen(false);
-      }
+      const y = window.scrollY;
+      setIsScrolled(prev => {
+        // Hysteresis: scroll down past 40 to activate, scroll up past 10 to deactivate
+        if (!prev && y > 40) return true;
+        if (prev && y < 10) return false;
+        return prev;
+      });
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Close search when unscrolled
+  useEffect(() => {
+    if (!isScrolled) setIsSearchOpen(false);
+  }, [isScrolled]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -254,7 +261,7 @@ const Navbar: React.FC = () => {
         </div>
 
         {/* DESKTOP TOP BAR */}
-        <div className={`hidden md:block bg-hett-primary text-white text-[11px] font-bold ${isScrolled ? 'h-0 py-0 overflow-hidden' : 'h-auto py-1.5'}`}>
+        <div className={`hidden md:block bg-hett-primary text-white text-[11px] font-bold transition-all duration-300 overflow-hidden ${isScrolled ? 'max-h-0 py-0' : 'max-h-10 py-1.5'}`}>
           <div className="max-w-[1400px] mx-auto px-6 flex justify-between items-center">
             <div className="flex gap-6 uppercase tracking-wider">
               <span className="flex items-center gap-1.5"><Check size={12} className="text-hett-brown" strokeWidth={4} /> {t('nav.since')}</span>
@@ -272,7 +279,7 @@ const Navbar: React.FC = () => {
         </div>
 
         {/* DESKTOP MAIN BAR */}
-        <div className={`hidden md:flex border-b border-gray-100 ${isScrolled ? 'py-2' : 'py-4'}`}>
+        <div className={`hidden md:flex border-b border-gray-100 transition-[padding] duration-300 ${isScrolled ? 'py-2' : 'py-4'}`}>
           <div className="max-w-[1400px] mx-auto px-6 flex items-center justify-between gap-10 w-full">
             <Link to="/" className="flex-shrink-0"><img src="/assets/images/hett-logo-navbar.webp" alt="HETT" className="h-9" /></Link>
 

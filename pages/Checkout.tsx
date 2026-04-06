@@ -103,7 +103,7 @@ const Checkout: React.FC = () => {
                 <AlertTriangle size={32} className="text-amber-600" />
               </div>
             </div>
-            <h2 className="text-2xl font-black text-[#003878] mb-4">{t('checkout.addressRequired')}</h2>
+            <h2 className="text-2xl font-black text-[#111111] mb-4">{t('checkout.addressRequired')}</h2>
             <p className="text-gray-600 mb-8">
               {t('checkout.addressRequiredDesc')}
             </p>
@@ -387,7 +387,7 @@ const Checkout: React.FC = () => {
                                                             <h4 className="font-bold text-sm text-gray-800 mb-1 line-clamp-2">{item.title}</h4>
                                                             {/* Maatwerk size display */}
                                                             {isMaatwerk && item.maatwerkPayload?.size && (
-                                                                <div className="text-xs text-[#003878] font-semibold">
+                                                                <div className="text-xs text-[#111111] font-semibold">
                                                                     {item.maatwerkPayload.size.width} × {item.maatwerkPayload.size.depth} cm
                                                                 </div>
                                                             )}
@@ -507,7 +507,7 @@ const Checkout: React.FC = () => {
                                               }
                                               <Link 
                                                 to="/cart?editShipping=1" 
-                                                className="text-xs text-[#003878] hover:underline font-semibold"
+                                                className="text-xs text-[#111111] hover:underline font-semibold"
                                               >
                                                 {t('checkout.change')}
                                               </Link>

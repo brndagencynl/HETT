@@ -192,7 +192,7 @@ const CartDrawer: React.FC = () => {
 
                                             {/* Maatwerk size display */}
                                             {isMaatwerk && item.maatwerkPayload?.size && (
-                                                <div className="mb-2 text-xs text-[#003878] font-semibold">
+                                                <div className="mb-2 text-xs text-[#111111] font-semibold">
                                                     {item.maatwerkPayload.size.width} × {item.maatwerkPayload.size.depth} cm
                                                 </div>
                                             )}

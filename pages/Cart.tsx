@@ -215,7 +215,7 @@ const Cart: React.FC = () => {
                                         <h3 className="font-bold text-hett-dark text-sm md:text-lg leading-tight flex-1 min-w-0">{item.title}</h3>
                                         {/* Maatwerk size display */}
                                         {isMaatwerk && item.maatwerkPayload?.size && (
-                                            <div className="text-xs text-[#003878] font-semibold mt-1">
+                                            <div className="text-xs text-[#111111] font-semibold mt-1">
                                                 {item.maatwerkPayload.size.width} × {item.maatwerkPayload.size.depth} cm
                                             </div>
                                         )}

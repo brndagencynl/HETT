@@ -133,7 +133,7 @@
 .input:focus,
 .ui-input:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(0, 56, 120, 0.15);
+  box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.1);
 }
 
 .input--surface {
@@ -155,7 +155,7 @@
 .select:focus,
 .ui-select:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(0, 56, 120, 0.15);
+  box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.1);
 }
 
 /* Textarea */
@@ -171,7 +171,7 @@
 
 .ui-textarea:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(0, 56, 120, 0.15);
+  box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.1);
 }
 
 /* Divider */
@@ -190,7 +190,7 @@
   font-weight: 800;
   padding: 0.35rem 0.6rem;
   border-radius: 999px;
-  background: rgba(0, 56, 120, 0.08);
+  background: rgba(17, 17, 17, 0.06);
   color: var(--color-primary);
 }
 

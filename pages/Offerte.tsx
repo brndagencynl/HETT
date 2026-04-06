@@ -340,7 +340,7 @@ const Offerte: React.FC = () => {
                 ))}
                 {/* Montage row — text only, no price */}
                 {draft.selections.some(s => s.priceMode === 'quote') && (
-                  <div className="flex justify-between text-[#003878]">
+                  <div className="flex justify-between text-[#111111]">
                     <span className="font-medium flex items-center gap-1.5">
                       <Wrench size={14} />
                       {t('offerte.pricing.montage')}
@@ -350,7 +350,7 @@ const Offerte: React.FC = () => {
                 )}
                 <div className="border-t-2 border-gray-300 pt-3 mt-3 flex justify-between items-center">
                   <span className="font-bold text-gray-900 text-base">{t('offerte.pricing.totalInclVat')}</span>
-                  <span className="font-black text-2xl text-[#003878]">{f(draft.pricing.total)}</span>
+                  <span className="font-black text-2xl text-[#111111]">{f(draft.pricing.total)}</span>
                 </div>
               </div>
               <p className="text-xs text-gray-500 italic">
@@ -373,7 +373,7 @@ const Offerte: React.FC = () => {
                     <div className="text-right">
                       <span className="text-sm font-bold text-gray-900">{s.valueLabel}</span>
                       {s.priceMode === 'quote' ? (
-                        <span className="block text-xs text-[#003878] font-semibold italic">op offerte</span>
+                        <span className="block text-xs text-[#111111] font-semibold italic">op offerte</span>
                       ) : (s.price ?? 0) > 0 ? (
                         <span className="block text-xs text-[#FF7300] font-semibold">+ {f(s.price!)}</span>
                       ) : null}
@@ -384,7 +384,7 @@ const Offerte: React.FC = () => {
               <div className="p-4 bg-gray-50 text-center">
                 <Link
                   to={backUrl}
-                  className="text-sm text-[#003878] font-semibold hover:underline"
+                  className="text-sm text-[#111111] font-semibold hover:underline"
                 >
                   {t('offerte.config.edit')}
                 </Link>
@@ -408,7 +408,7 @@ const Offerte: React.FC = () => {
                     value={naam}
                     onChange={(e) => setNaam(e.target.value)}
                     placeholder={t('offerte.form.namePlaceholder')}
-                    className={`w-full px-4 py-3 rounded-xl border-2 text-sm transition-colors focus:outline-none focus:border-[#003878] ${
+                    className={`w-full px-4 py-3 rounded-xl border-2 text-sm transition-colors focus:outline-none focus:border-[#111111] ${
                       errors.naam ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-white'
                     }`}
                   />
@@ -425,7 +425,7 @@ const Offerte: React.FC = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder={t('offerte.form.emailPlaceholder')}
-                    className={`w-full px-4 py-3 rounded-xl border-2 text-sm transition-colors focus:outline-none focus:border-[#003878] ${
+                    className={`w-full px-4 py-3 rounded-xl border-2 text-sm transition-colors focus:outline-none focus:border-[#111111] ${
                       errors.email ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-white'
                     }`}
                   />
@@ -442,7 +442,7 @@ const Offerte: React.FC = () => {
                     value={telefoon}
                     onChange={(e) => setTelefoon(e.target.value)}
                     placeholder={t('offerte.form.phonePlaceholder')}
-                    className={`w-full px-4 py-3 rounded-xl border-2 text-sm transition-colors focus:outline-none focus:border-[#003878] ${
+                    className={`w-full px-4 py-3 rounded-xl border-2 text-sm transition-colors focus:outline-none focus:border-[#111111] ${
                       errors.telefoon ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-white'
                     }`}
                   />
@@ -460,7 +460,7 @@ const Offerte: React.FC = () => {
                       value={postcode}
                       onChange={(e) => setPostcode(e.target.value)}
                       placeholder={t('offerte.form.postalCodePlaceholder')}
-                      className={`w-full px-4 py-3 rounded-xl border-2 text-sm transition-colors focus:outline-none focus:border-[#003878] ${
+                      className={`w-full px-4 py-3 rounded-xl border-2 text-sm transition-colors focus:outline-none focus:border-[#111111] ${
                         errors.postcode ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-white'
                       }`}
                     />
@@ -475,7 +475,7 @@ const Offerte: React.FC = () => {
                       value={plaats}
                       onChange={(e) => setPlaats(e.target.value)}
                       placeholder={t('offerte.form.cityPlaceholder')}
-                      className={`w-full px-4 py-3 rounded-xl border-2 text-sm transition-colors focus:outline-none focus:border-[#003878] ${
+                      className={`w-full px-4 py-3 rounded-xl border-2 text-sm transition-colors focus:outline-none focus:border-[#111111] ${
                         errors.plaats ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-white'
                       }`}
                     />
@@ -493,7 +493,7 @@ const Offerte: React.FC = () => {
                     onChange={(e) => setOpmerking(e.target.value)}
                     placeholder={t('offerte.form.notesPlaceholder')}
                     rows={4}
-                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-white text-sm transition-colors focus:outline-none focus:border-[#003878] resize-none"
+                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-white text-sm transition-colors focus:outline-none focus:border-[#111111] resize-none"
                   />
                 </div>
 
@@ -528,7 +528,7 @@ const Offerte: React.FC = () => {
 
                 <p className="text-xs text-gray-400 text-center">
                   {t('offerte.form.privacyNotice')}{' '}
-                  <Link to="/privacy" className="text-[#003878] hover:underline">{t('offerte.form.privacyLink')}</Link>.
+                  <Link to="/privacy" className="text-[#111111] hover:underline">{t('offerte.form.privacyLink')}</Link>.
                 </p>
               </form>
             </div>

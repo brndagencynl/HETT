@@ -685,12 +685,12 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                             onClick={() => setConfig(prev => ({ ...prev, [optionDef.key]: choice.value }))}
                             className={`relative rounded-xl overflow-hidden cursor-pointer transition-all border-2 p-2 sm:p-3 ${
                                 currentValue === choice.value 
-                                    ? 'border-[#003878] ring-2 ring-[#003878]/20 shadow-sm bg-[#003878]/5' 
+                                    ? 'border-[#111111] ring-2 ring-[#111111]/20 shadow-sm bg-[#111111]/5' 
                                     : 'border-gray-200 hover:border-gray-300 hover:shadow-md bg-white'
                             }`}
                         >
                             {currentValue === choice.value && (
-                                <div className="absolute top-1.5 right-1.5 w-5 h-5 sm:w-6 sm:h-6 bg-[#003878] rounded-full flex items-center justify-center text-white shadow-sm">
+                                <div className="absolute top-1.5 right-1.5 w-5 h-5 sm:w-6 sm:h-6 bg-[#111111] rounded-full flex items-center justify-center text-white shadow-sm">
                                     <Check size={12} strokeWidth={3} />
                                 </div>
                             )}
@@ -720,12 +720,12 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                             aria-pressed={currentValue === choice.value}
                             className={`relative text-left p-3 sm:p-4 rounded-xl border-2 transition-all cursor-pointer ${
                                 currentValue === choice.value 
-                                    ? 'border-[#003878] bg-[#003878]/5 ring-2 ring-[#003878]/10 shadow-md' 
+                                    ? 'border-[#111111] bg-[#111111]/5 ring-2 ring-[#111111]/10 shadow-md' 
                                     : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
                             }`}
                         >
                             {currentValue === choice.value && (
-                                <div className="absolute top-2 right-2 sm:top-3 sm:right-3 w-5 h-5 sm:w-6 sm:h-6 bg-[#003878] rounded-full flex items-center justify-center text-white">
+                                <div className="absolute top-2 right-2 sm:top-3 sm:right-3 w-5 h-5 sm:w-6 sm:h-6 bg-[#111111] rounded-full flex items-center justify-center text-white">
                                     <Check size={12} strokeWidth={3} />
                                 </div>
                             )}
@@ -751,7 +751,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                         }}
                         className={`flex items-center justify-between p-3 sm:p-5 rounded-xl border-2 cursor-pointer transition-all ${
                             currentValue 
-                                ? 'border-[#003878] bg-[#003878]/5 shadow-md ring-2 ring-[#003878]/10' 
+                                ? 'border-[#111111] bg-[#111111]/5 shadow-md ring-2 ring-[#111111]/10' 
                                 : 'border-gray-200 bg-white hover:border-gray-300'
                         }`}
                     >
@@ -789,7 +789,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                                     setConfig(prev => ({ ...prev, [optionDef.key]: e.target.checked }));
                                 }}
                             />
-                            <div className="w-14 h-8 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-[#003878] shadow-inner" />
+                            <div className="w-14 h-8 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-[#111111] shadow-inner" />
                         </label>
                     </div>
                     {/* Warning if LED is ON but no mapping */}
@@ -828,12 +828,12 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                             aria-pressed={currentValue === choice.value}
                             className={`relative w-full text-left p-3 sm:p-4 rounded-xl border-2 transition-all cursor-pointer ${
                                 currentValue === choice.value 
-                                    ? 'border-[#003878] bg-[#003878]/5 shadow-md ring-2 ring-[#003878]/10' 
+                                    ? 'border-[#111111] bg-[#111111]/5 shadow-md ring-2 ring-[#111111]/10' 
                                     : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
                             }`}
                         >
                             {currentValue === choice.value && (
-                                <div className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 w-5 h-5 sm:w-6 sm:h-6 bg-[#003878] rounded-full flex items-center justify-center text-white">
+                                <div className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 w-5 h-5 sm:w-6 sm:h-6 bg-[#111111] rounded-full flex items-center justify-center text-white">
                                     <Check size={12} strokeWidth={3} />
                                 </div>
                             )}
@@ -884,12 +884,12 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                                 aria-pressed={selected}
                                 className={`relative text-left p-3 sm:p-4 rounded-xl border-2 transition-all cursor-pointer ${
                                     selected
-                                        ? 'border-[#003878] bg-[#003878]/5 ring-2 ring-[#003878]/10 shadow-md'
+                                        ? 'border-[#111111] bg-[#111111]/5 ring-2 ring-[#111111]/10 shadow-md'
                                         : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
                                 }`}
                             >
                                 {selected && (
-                                    <div className="absolute top-2 right-2 sm:top-3 sm:right-3 w-5 h-5 sm:w-6 sm:h-6 bg-[#003878] rounded-full flex items-center justify-center text-white">
+                                    <div className="absolute top-2 right-2 sm:top-3 sm:right-3 w-5 h-5 sm:w-6 sm:h-6 bg-[#111111] rounded-full flex items-center justify-center text-white">
                                         <Check size={12} strokeWidth={3} />
                                     </div>
                                 )}
@@ -987,7 +987,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                             </div>
                             <button
                                 onClick={() => goToStep(item.stepIndex)}
-                                className="flex items-center gap-1.5 text-[#003878] hover:text-[#002050] font-semibold text-sm transition-colors"
+                                className="flex items-center gap-1.5 text-[#111111] hover:text-[#000000] font-semibold text-sm transition-colors"
                             >
                                 <Edit2 size={14} />
                                 {t('configurator.navigation.edit')}
@@ -1012,7 +1012,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                         ))}
                         <div className="border-t-2 border-gray-300 pt-3 mt-3 flex justify-between items-center">
                             <span className="font-bold text-gray-900 text-base">{t('configurator.overview.totalInclVat')}</span>
-                            <span className="font-black text-2xl text-[#003878]">{formatEUR(toCents(displayTotal), 'cents')}</span>
+                            <span className="font-black text-2xl text-[#111111]">{formatEUR(toCents(displayTotal), 'cents')}</span>
                         </div>
                     </div>
                 </div>
@@ -1023,7 +1023,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                         type="checkbox"
                         checked={agreed}
                         onChange={(e) => setAgreed(e.target.checked)}
-                        className="mt-1 w-5 h-5 rounded border-gray-300 text-[#003878] focus:ring-[#003878] cursor-pointer"
+                        className="mt-1 w-5 h-5 rounded border-gray-300 text-[#111111] focus:ring-[#111111] cursor-pointer"
                     />
                     <span className="text-sm text-gray-700">
                         {t('configurator.overview.agreement')}
@@ -1048,7 +1048,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                 </div>
                 <div className="w-full h-1.5 bg-[var(--border)] rounded-full overflow-hidden">
                     <div
-                        className="h-full bg-[var(--accent,#003878)] rounded-full transition-all duration-300"
+                        className="h-full bg-[var(--accent,#111111)] rounded-full transition-all duration-300"
                         style={{ width: `${progressPercent}%` }}
                     />
                 </div>
@@ -1063,7 +1063,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                                     idx === currentStepIndex
                                         ? 'text-[var(--text)] font-bold'
                                         : idx < currentStepIndex
-                                            ? 'text-[var(--accent,#003878)] hover:underline cursor-pointer'
+                                            ? 'text-[var(--accent,#111111)] hover:underline cursor-pointer'
                                             : 'text-[var(--muted)] cursor-not-allowed'
                                 }`}
                             >
@@ -1172,7 +1172,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                     {showEditButtons && item.value && (
                         <button 
                             onClick={() => { goToStep(item.stepIndex); setSelectionOpen(false); }} 
-                            className="text-xs text-[#003878] font-medium hover:underline flex-shrink-0"
+                            className="text-xs text-[#111111] font-medium hover:underline flex-shrink-0"
                         >
                             {t('configurator.navigation.change')}
                         </button>
@@ -1251,7 +1251,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                             <div className="px-6 py-4 border-t border-gray-100">
                                 <button
                                     onClick={() => setSelectionOpen(false)}
-                                    className="w-full py-3 bg-[#003878] text-white font-semibold rounded-xl hover:bg-[#002050] transition-colors"
+                                    className="w-full py-3 bg-[#111111] text-white font-semibold rounded-xl hover:bg-[#000000] transition-colors"
                                 >
                                     {t('configurator.navigation.close')}
                                 </button>
@@ -1303,7 +1303,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                             </span>
                         )}
                         {config.daktype && (
-                            <span className="px-2.5 py-1 bg-[#003878] text-white text-[10px] font-bold rounded-full uppercase tracking-wide">
+                            <span className="px-2.5 py-1 bg-[#111111] text-white text-[10px] font-bold rounded-full uppercase tracking-wide">
                                 {config.daktype.replace('_', ' ')}
                             </span>
                         )}
@@ -1389,7 +1389,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                                 {/* Price row — compact on mobile */}
                                 <div className="flex items-center justify-between mb-3 sm:block">
                                     <span className="text-xs text-gray-500 uppercase tracking-wide font-medium">{t('configurator.footer.totalPriceInclVat')}</span>
-                                    <span className="text-xl sm:text-2xl font-black text-[#003878] sm:block">{formatEUR(toCents(displayTotal), 'cents')}</span>
+                                    <span className="text-xl sm:text-2xl font-black text-[#111111] sm:block">{formatEUR(toCents(displayTotal), 'cents')}</span>
                                 </div>
 
                                 {/* Navigation Buttons */}
@@ -1408,10 +1408,10 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                                         onClick={() => setSelectionOpen(true)}
                                         className="flex items-center gap-2 px-3 sm:px-4 py-2.5 sm:py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
                                     >
-                                        <ShoppingBag size={18} className="text-[#003878]" />
+                                        <ShoppingBag size={18} className="text-[#111111]" />
                                         <span className="font-semibold text-sm hidden sm:inline">{t('configurator.selection.title')}</span>
                                         {selectionCount > 0 && (
-                                            <span className="px-1.5 py-0.5 bg-[#003878] text-white text-[10px] font-bold rounded-full">
+                                            <span className="px-1.5 py-0.5 bg-[#111111] text-white text-[10px] font-bold rounded-full">
                                                 {selectionCount}
                                             </span>
                                         )}
@@ -1425,7 +1425,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                                             disabled={!canProceed}
                                             className={`px-5 sm:px-6 py-3 sm:py-3.5 font-bold rounded-xl text-sm flex items-center gap-2 transition-all ${
                                                 canProceed
-                                                    ? 'bg-[#003878] text-white hover:bg-[#002050] shadow-sm shadow-[#003878]/20'
+                                                    ? 'bg-[#111111] text-white hover:bg-[#000000] shadow-sm shadow-[#111111]/20'
                                                     : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                                             }`}
                                         >
@@ -1537,7 +1537,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                         <div className="lg:hidden flex-1 overflow-y-auto pb-32">
                             {/* Header with Title */}
                             <div className="px-5 pt-5 pb-4">
-                                <h1 className="text-xl font-black text-[#003878] pr-10">{productTitle}</h1>
+                                <h1 className="text-xl font-black text-[#111111] pr-10">{productTitle}</h1>
                                 <p className="text-sm text-gray-500 mt-1">
                                     {t('configurator.navigation.stepOf', { current: currentStepIndex + 1, total: STEPS.length })} — {currentStep.title}
                                 </p>
@@ -1580,7 +1580,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                             <div className="flex flex-col p-6 pr-0 min-h-0">
                                 {/* Product Title */}
                                 <div className="mb-4 pr-12">
-                                    <h1 className="text-2xl font-black text-[#003878]">{productTitle}</h1>
+                                    <h1 className="text-2xl font-black text-[#111111]">{productTitle}</h1>
                                 </div>
                                 
                                 {/* Visualization - fills available space */}
@@ -1622,7 +1622,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                                     {/* Price */}
                                     <div className="mb-4">
                                         <span className="text-[10px] text-gray-500 uppercase tracking-wide font-medium">{t('configurator.footer.totalPriceInclVat')}</span>
-                                        <span className="block text-2xl font-black text-[#003878]">{formatEUR(toCents(displayTotal), 'cents')}</span>
+                                        <span className="block text-2xl font-black text-[#111111]">{formatEUR(toCents(displayTotal), 'cents')}</span>
                                     </div>
 
                                     {/* Navigation Buttons */}
@@ -1641,10 +1641,10 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                                             onClick={() => setSelectionOpen(true)}
                                             className="flex items-center gap-2 px-4 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
                                         >
-                                            <ShoppingBag size={18} className="text-[#003878]" />
+                                            <ShoppingBag size={18} className="text-[#111111]" />
                                             <span className="font-semibold text-sm">{t('configurator.selection.title')}</span>
                                             {selectionCount > 0 && (
-                                                <span className="px-1.5 py-0.5 bg-[#003878] text-white text-[10px] font-bold rounded-full">
+                                                <span className="px-1.5 py-0.5 bg-[#111111] text-white text-[10px] font-bold rounded-full">
                                                     {selectionCount}
                                                 </span>
                                             )}
@@ -1659,7 +1659,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                                                 disabled={!canProceed}
                                                 className={`px-5 py-3 font-bold rounded-xl text-sm flex items-center gap-2 transition-all ${
                                                     canProceed
-                                                        ? 'bg-[#003878] text-white hover:bg-[#002050]'
+                                                        ? 'bg-[#111111] text-white hover:bg-[#000000]'
                                                         : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                                                 }`}
                                             >
@@ -1714,10 +1714,10 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                                     className="w-full flex items-center justify-between py-2.5 px-4 bg-gray-50 rounded-lg text-left hover:bg-gray-100 transition-colors"
                                 >
                                     <div className="flex items-center gap-2">
-                                        <ShoppingBag size={18} className="text-[#003878]" />
+                                        <ShoppingBag size={18} className="text-[#111111]" />
                                         <span className="font-semibold text-gray-900 text-sm">{t('configurator.selection.title')}</span>
                                         {selectionCount > 0 && (
-                                            <span className="px-1.5 py-0.5 bg-[#003878] text-white text-[10px] font-bold rounded-full">
+                                            <span className="px-1.5 py-0.5 bg-[#111111] text-white text-[10px] font-bold rounded-full">
                                                 {selectionCount}
                                             </span>
                                         )}
@@ -1732,7 +1732,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                                     {/* Price */}
                                     <div>
                                         <span className="text-[10px] text-gray-500 uppercase tracking-wide font-medium">{t('configurator.footer.totalPriceInclVat')}</span>
-                                        <span className="block text-2xl font-black text-[#003878]">{formatEUR(toCents(displayTotal), 'cents')}</span>
+                                        <span className="block text-2xl font-black text-[#111111]">{formatEUR(toCents(displayTotal), 'cents')}</span>
                                     </div>
 
                                     {/* Navigation Buttons */}
@@ -1752,7 +1752,7 @@ const VerandaConfiguratorWizard = forwardRef<VerandaConfiguratorWizardRef, Veran
                                                 disabled={!canProceed}
                                                 className={`px-5 py-3 font-bold rounded-xl text-sm flex items-center gap-2 transition-all ${
                                                     canProceed
-                                                        ? 'bg-[#003878] text-white hover:bg-[#002050]'
+                                                        ? 'bg-[#111111] text-white hover:bg-[#000000]'
                                                         : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                                                 }`}
                                             >

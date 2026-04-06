@@ -112,7 +112,6 @@ const AnimatedRoutes: React.FC = () => {
           }
         />
 
-        {/* Temporarily disabled — glazen schuifwanden page */}
         {/* <Route path="/glazen-schuifwanden" element={<PageTransition><GlazenSchuifwandenOverview /></PageTransition>} /> */}
         {/* <Route path="/glazen-schuifwanden/:rail" element={<PageTransition><GlazenSchuifwandenDetail /></PageTransition>} /> */}
 

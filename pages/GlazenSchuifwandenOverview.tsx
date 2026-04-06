@@ -13,9 +13,11 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ShieldCheck } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
+import DeliveryTime from '../src/components/ui/DeliveryTime';
 import ProductCard from '../src/components/products/ProductCard';
 import { RAIL_CONFIGS, getFromPriceCents } from '../src/config/glazenSchuifwanden';
 import {
@@ -67,32 +69,37 @@ const GlazenSchuifwandenOverview: React.FC = () => {
   });
 
   return (
-    <div className="min-h-screen bg-hett-bg pb-20">
-      <PageHeader
-        title={t('glazenSchuifwanden.pageTitle')}
-        subtitle={t('glazenSchuifwanden.pageSubtitle')}
-      />
+    <div className="min-h-screen bg-[var(--bg)] pb-20">
+      <PageHeader />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Intro */}
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-black text-hett-dark mb-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 lg:pt-10">
+        <div className="mb-2">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-[var(--text)] mb-1">
             {t('glazenSchuifwanden.title')}
           </h1>
-          <p className="text-gray-600 text-sm md:text-base leading-relaxed max-w-3xl">
+          <div className="flex flex-wrap items-center gap-3 sm:gap-5 text-[var(--muted)]">
+            <DeliveryTime label="2-4 weken" />
+            <span className="inline-flex items-center gap-1.5 text-[13px] font-semibold">
+              <ShieldCheck size={14} className="flex-shrink-0" />
+              {t('standardVerandaPage.tenYearWarranty')}
+            </span>
+          </div>
+          <p className="text-[var(--muted)] text-sm md:text-base leading-relaxed max-w-3xl mt-3">
             {t('glazenSchuifwanden.intro')}
           </p>
         </div>
+      </div>
 
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 lg:mt-6">
         {/* Loading indicator */}
         {loading && (
-          <div className="flex items-center gap-2 text-gray-500 mb-6">
+          <div className="flex items-center gap-2 text-[var(--muted)] mb-6">
             <Loader2 size={16} className="animate-spin" />
             <span className="text-sm">{t('common.loading', 'Laden...')}</span>
           </div>
         )}
 
-        {/* Product Grid — same breakpoints as Category.tsx product grid */}
+        {/* Product Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {displayItems.map(({ product, cfg }) => (
             <ProductCard

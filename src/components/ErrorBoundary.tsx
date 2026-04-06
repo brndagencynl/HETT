@@ -121,7 +121,7 @@ class ErrorBoundary extends Component<Props, State> {
               style={{
                 fontSize: '24px',
                 fontWeight: '600',
-                color: '#003878',
+                color: '#111111',
                 marginBottom: '16px',
               }}
             >
@@ -203,17 +203,17 @@ class ErrorBoundary extends Component<Props, State> {
                   fontSize: '16px',
                   fontWeight: '600',
                   color: '#ffffff',
-                  backgroundColor: '#003878',
+                  backgroundColor: '#111111',
                   border: 'none',
                   borderRadius: '6px',
                   cursor: 'pointer',
                   transition: 'background-color 0.2s',
                 }}
                 onMouseOver={(e) =>
-                  (e.currentTarget.style.backgroundColor = '#002E63')
+                  (e.currentTarget.style.backgroundColor = '#000000')
                 }
                 onMouseOut={(e) =>
-                  (e.currentTarget.style.backgroundColor = '#003878')
+                  (e.currentTarget.style.backgroundColor = '#111111')
                 }
               >
                 Herlaad pagina
@@ -224,20 +224,20 @@ class ErrorBoundary extends Component<Props, State> {
                   padding: '12px 24px',
                   fontSize: '16px',
                   fontWeight: '600',
-                  color: '#003878',
+                  color: '#111111',
                   backgroundColor: '#ffffff',
-                  border: '2px solid #003878',
+                  border: '2px solid #111111',
                   borderRadius: '6px',
                   cursor: 'pointer',
                   transition: 'background-color 0.2s, color 0.2s',
                 }}
                 onMouseOver={(e) => {
-                  e.currentTarget.style.backgroundColor = '#003878';
+                  e.currentTarget.style.backgroundColor = '#111111';
                   e.currentTarget.style.color = '#ffffff';
                 }}
                 onMouseOut={(e) => {
                   e.currentTarget.style.backgroundColor = '#ffffff';
-                  e.currentTarget.style.color = '#003878';
+                  e.currentTarget.style.color = '#111111';
                 }}
               >
                 Naar homepagina

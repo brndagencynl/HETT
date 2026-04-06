@@ -267,7 +267,7 @@ export const AddressDeliverySelector: React.FC<AddressDeliverySelectorProps> = (
 
   return (
     <Card padding="wide">
-      <h3 className="text-lg font-black text-[#003878] mb-4 pb-3 border-b border-gray-100">
+      <h3 className="text-lg font-black text-[#111111] mb-4 pb-3 border-b border-gray-100">
         Bezorging & Adres
       </h3>
 
@@ -288,7 +288,7 @@ export const AddressDeliverySelector: React.FC<AddressDeliverySelectorProps> = (
             isLocked ? 'cursor-not-allowed' : 'cursor-pointer'
           } ${
             method === 'pickup'
-              ? 'border-[#003878] bg-[#003878]/5'
+              ? 'border-[#111111] bg-[#111111]/5'
               : 'border-gray-200 hover:border-gray-300'
           }`}
         >
@@ -303,16 +303,16 @@ export const AddressDeliverySelector: React.FC<AddressDeliverySelectorProps> = (
           />
           <div
             className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-              method === 'pickup' ? 'border-[#003878]' : 'border-gray-300'
+              method === 'pickup' ? 'border-[#111111]' : 'border-gray-300'
             }`}
           >
             {method === 'pickup' && (
-              <div className="w-2.5 h-2.5 rounded-full bg-[#003878]" />
+              <div className="w-2.5 h-2.5 rounded-full bg-[#111111]" />
             )}
           </div>
           <MapPin
             size={20}
-            className={method === 'pickup' ? 'text-[#003878]' : 'text-gray-400'}
+            className={method === 'pickup' ? 'text-[#111111]' : 'text-gray-400'}
           />
           <div className="flex-1">
             <div className="font-bold text-gray-900">{t('shipping.pickupInEindhoven')}</div>
@@ -327,7 +327,7 @@ export const AddressDeliverySelector: React.FC<AddressDeliverySelectorProps> = (
             isLocked ? 'cursor-not-allowed' : 'cursor-pointer'
           } ${
             method === 'delivery'
-              ? 'border-[#003878] bg-[#003878]/5'
+              ? 'border-[#111111] bg-[#111111]/5'
               : 'border-gray-200 hover:border-gray-300'
           }`}
         >
@@ -342,16 +342,16 @@ export const AddressDeliverySelector: React.FC<AddressDeliverySelectorProps> = (
           />
           <div
             className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-              method === 'delivery' ? 'border-[#003878]' : 'border-gray-300'
+              method === 'delivery' ? 'border-[#111111]' : 'border-gray-300'
             }`}
           >
             {method === 'delivery' && (
-              <div className="w-2.5 h-2.5 rounded-full bg-[#003878]" />
+              <div className="w-2.5 h-2.5 rounded-full bg-[#111111]" />
             )}
           </div>
           <Truck
             size={20}
-            className={method === 'delivery' ? 'text-[#003878]' : 'text-gray-400'}
+            className={method === 'delivery' ? 'text-[#111111]' : 'text-gray-400'}
           />
           <div className="flex-1">
             <div className="font-bold text-gray-900">{t('shipping.deliver')}</div>
@@ -363,7 +363,7 @@ export const AddressDeliverySelector: React.FC<AddressDeliverySelectorProps> = (
             </span>
           )}
           {method === 'delivery' && isCalculatingShipping && (
-            <Loader2 size={18} className="animate-spin text-[#003878]" />
+            <Loader2 size={18} className="animate-spin text-[#111111]" />
           )}
         </label>
       </div>
@@ -398,7 +398,7 @@ export const AddressDeliverySelector: React.FC<AddressDeliverySelectorProps> = (
                 placeholder="Bijv. Kerkstraat 123"
                 disabled={isLocked}
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg bg-white text-gray-900 font-medium 
-                  focus:outline-none focus:ring-2 focus:ring-[#003878] focus:border-transparent
+                  focus:outline-none focus:ring-2 focus:ring-[#111111] focus:border-transparent
                   disabled:cursor-not-allowed disabled:bg-gray-50"
               />
             </div>
@@ -416,7 +416,7 @@ export const AddressDeliverySelector: React.FC<AddressDeliverySelectorProps> = (
                   placeholder="Bijv. 1234 AB"
                   disabled={isLocked}
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg bg-white text-gray-900 font-medium 
-                    focus:outline-none focus:ring-2 focus:ring-[#003878] focus:border-transparent
+                    focus:outline-none focus:ring-2 focus:ring-[#111111] focus:border-transparent
                     disabled:cursor-not-allowed disabled:bg-gray-50"
                 />
               </div>
@@ -431,7 +431,7 @@ export const AddressDeliverySelector: React.FC<AddressDeliverySelectorProps> = (
                   placeholder="Bijv. Amsterdam"
                   disabled={isLocked}
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg bg-white text-gray-900 font-medium 
-                    focus:outline-none focus:ring-2 focus:ring-[#003878] focus:border-transparent
+                    focus:outline-none focus:ring-2 focus:ring-[#111111] focus:border-transparent
                     disabled:cursor-not-allowed disabled:bg-gray-50"
                 />
               </div>
@@ -448,7 +448,7 @@ export const AddressDeliverySelector: React.FC<AddressDeliverySelectorProps> = (
                   onChange={(e) => handleFieldChange('country', e.target.value)}
                   disabled={isLocked}
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg bg-white text-gray-900 font-medium 
-                    focus:outline-none focus:ring-2 focus:ring-[#003878] focus:border-transparent
+                    focus:outline-none focus:ring-2 focus:ring-[#111111] focus:border-transparent
                     disabled:cursor-not-allowed disabled:bg-gray-50 appearance-none cursor-pointer"
                 >
                   {SUPPORTED_COUNTRIES.map(({ code, label }) => (
@@ -471,10 +471,10 @@ export const AddressDeliverySelector: React.FC<AddressDeliverySelectorProps> = (
               disabled={isLocked || validationStatus === 'validating' || isCalculatingShipping || !isAddressComplete(localAddress)}
               className={`w-full py-3 px-4 rounded-lg font-bold text-white transition-all flex items-center justify-center gap-2
                 ${(validationStatus === 'validating' || isCalculatingShipping)
-                  ? 'bg-[#003878]/70 cursor-wait' 
+                  ? 'bg-[#111111]/70 cursor-wait' 
                   : validationStatus === 'valid'
                     ? 'bg-green-600 hover:bg-green-700'
-                    : 'bg-[#003878] hover:bg-[#003878]/90'
+                    : 'bg-[#111111] hover:bg-[#111111]/90'
                 }
                 disabled:opacity-50 disabled:cursor-not-allowed
               `}

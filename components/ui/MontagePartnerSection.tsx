@@ -16,12 +16,12 @@ const MontagePartnerSection: React.FC = () => {
   return (
     <section className="py-12 md:py-16">
       {/* Main Card */}
-      <div className="bg-white rounded-md border-2 border-[#003878]/20 overflow-hidden shadow-sm">
+      <div className="bg-white rounded-md border-2 border-[#111111]/20 overflow-hidden shadow-sm">
         <div className="grid grid-cols-1 lg:grid-cols-12">
           {/* Content Side */}
           <div className="lg:col-span-7 p-6 md:p-8 lg:p-10">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 bg-[#003878]/10 text-[#003878] text-xs font-bold px-3 py-1.5 rounded-full mb-4">
+            <div className="inline-flex items-center gap-2 bg-[#111111]/10 text-[#111111] text-xs font-bold px-3 py-1.5 rounded-full mb-4">
               <Wrench size={14} />
               {t('mountingPartner.badge')}
             </div>
@@ -35,7 +35,7 @@ const MontagePartnerSection: React.FC = () => {
             </p>
 
             {/* Quote Badge */}
-            <div className="inline-flex items-center gap-3 bg-gradient-to-r from-[#003878] to-[#002050] text-white px-5 py-3 rounded-xl mb-6 shadow-sm">
+            <div className="inline-flex items-center gap-3 bg-gradient-to-r from-[#111111] to-[#000000] text-white px-5 py-3 rounded-xl mb-6 shadow-sm">
               <Sparkles size={20} className="text-yellow-300" />
               <span className="text-lg font-bold">{t('mountingPartner.quoteBadge')}</span>
             </div>
@@ -66,7 +66,7 @@ const MontagePartnerSection: React.FC = () => {
             <div className="flex flex-col sm:flex-row gap-3">
               <Link
                 to="/contact"
-                className="inline-flex items-center justify-center gap-2 bg-[#003878] hover:bg-[#002050] text-white font-bold px-6 py-3.5 rounded-xl transition-colors shadow-sm shadow-[#003878]/20"
+                className="inline-flex items-center justify-center gap-2 bg-[#111111] hover:bg-[#000000] text-white font-bold px-6 py-3.5 rounded-xl transition-colors shadow-sm shadow-[#111111]/20"
               >
                 <Calendar size={18} />
                 {t('mountingPartner.requestQuote')}
@@ -84,10 +84,10 @@ const MontagePartnerSection: React.FC = () => {
           </div>
 
           {/* Visual Side */}
-          <div className="lg:col-span-5 bg-gradient-to-br from-[#003878]/5 to-[#003878]/10 p-6 md:p-8 lg:p-10 flex flex-col justify-center">
+          <div className="lg:col-span-5 bg-gradient-to-br from-[#111111]/5 to-[#111111]/10 p-6 md:p-8 lg:p-10 flex flex-col justify-center">
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
               <div className="flex items-center gap-4 mb-4">
-                <div className="w-14 h-14 rounded-xl bg-[#003878] flex items-center justify-center">
+                <div className="w-14 h-14 rounded-xl bg-[#111111] flex items-center justify-center">
                   <Wrench size={28} className="text-white" />
                 </div>
                 <div>
@@ -109,7 +109,7 @@ const MontagePartnerSection: React.FC = () => {
               <div className="mt-4 pt-4 border-t border-gray-100 lg:hidden">
                 <div className="text-center">
                   <span className="text-xs text-gray-500 uppercase tracking-wide">{t('configuratorWizard.montageTitle')}</span>
-                  <p className="text-lg font-black text-[#003878]">{t('mountingPartner.quoteOnRequestShort')}</p>
+                  <p className="text-lg font-black text-[#111111]">{t('mountingPartner.quoteOnRequestShort')}</p>
                 </div>
               </div>
             </div>

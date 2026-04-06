@@ -7,7 +7,7 @@ export const CATEGORIES: Record<CategorySlug, { label: string; path: string; req
 
 export const NAV_ITEMS: NavItem[] = [
   ...Object.values(CATEGORIES).map(c => ({ label: c.label, path: c.path })),
-  // { label: 'Glazen schuifwanden', path: '/glazen-schuifwanden' }, // Temporarily disabled
+  // { label: 'Glazen schuifwanden', path: '/glazen-schuifwanden' },
   { label: 'Maatwerk configurator', path: '/maatwerk-configurator' },
   { label: 'Projecten', path: '/projecten' },
   { label: 'Showroom', path: '/showroom' },

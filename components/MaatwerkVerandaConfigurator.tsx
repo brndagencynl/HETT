@@ -549,7 +549,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
               <div className="absolute inset-x-0 h-2.5 bg-gray-200 rounded-full" />
               {/* Track fill - use calc to account for thumb radius (12px) so fill ends at thumb center */}
               <div 
-                className="absolute left-0 h-2.5 bg-[#003878] rounded-full pointer-events-none"
+                className="absolute left-0 h-2.5 bg-[#111111] rounded-full pointer-events-none"
                 style={{ width: `calc(${percent}% + ${12 - (percent / 100) * 24}px)` }}
               />
               {/* Actual range input */}
@@ -568,10 +568,10 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
                 className="absolute inset-0 w-full h-full cursor-pointer appearance-none bg-transparent z-10
                   [&::-webkit-slider-runnable-track]:h-2.5 [&::-webkit-slider-runnable-track]:bg-transparent
                   [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 
-                  [&::-webkit-slider-thumb]:bg-[#003878] [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-grab
+                  [&::-webkit-slider-thumb]:bg-[#111111] [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-grab
                   [&::-webkit-slider-thumb]:shadow-sm [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white
                   [&::-moz-range-track]:h-2.5 [&::-moz-range-track]:bg-transparent
-                  [&::-moz-range-thumb]:w-6 [&::-moz-range-thumb]:h-6 [&::-moz-range-thumb]:bg-[#003878] 
+                  [&::-moz-range-thumb]:w-6 [&::-moz-range-thumb]:h-6 [&::-moz-range-thumb]:bg-[#111111] 
                   [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:cursor-grab [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white
                   [&::-moz-range-thumb]:border-0"
               />
@@ -587,7 +587,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
                   onChange={handleInputChange}
                   onBlur={handleBlur}
                   onKeyDown={handleKeyDown}
-                  className="w-full py-2.5 px-3 pr-10 rounded-md font-semibold text-base text-center border border-gray-200 focus:border-[#003878] focus:ring-2 focus:ring-[#003878]/20 outline-none transition-all"
+                  className="w-full py-2.5 px-3 pr-10 rounded-md font-semibold text-base text-center border border-gray-200 focus:border-[#111111] focus:ring-2 focus:ring-[#111111]/20 outline-none transition-all"
                 />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-medium pointer-events-none">cm</span>
               </div>
@@ -646,12 +646,12 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
             onClick={() => setConfig(prev => ({ ...prev, color: choice.id }))}
             className={`relative rounded-xl overflow-hidden cursor-pointer transition-all border-2 p-2 sm:p-3 ${
               currentColor === choice.id
-                ? 'border-[#003878] ring-2 ring-[#003878]/20 shadow-sm bg-[#003878]/5'
+                ? 'border-[#111111] ring-2 ring-[#111111]/20 shadow-sm bg-[#111111]/5'
                 : 'border-gray-200 hover:border-gray-300 hover:shadow-md bg-white'
             }`}
           >
             {currentColor === choice.id && (
-              <div className="absolute top-1.5 right-1.5 w-5 h-5 sm:w-6 sm:h-6 bg-[#003878] rounded-full flex items-center justify-center text-white shadow-sm">
+              <div className="absolute top-1.5 right-1.5 w-5 h-5 sm:w-6 sm:h-6 bg-[#111111] rounded-full flex items-center justify-center text-white shadow-sm">
                 <Check size={12} strokeWidth={3} />
               </div>
             )}
@@ -688,12 +688,12 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
               aria-pressed={currentValue === choice.id}
               className={`relative text-left p-3 sm:p-4 rounded-xl border-2 transition-all cursor-pointer ${
                 currentValue === choice.id
-                  ? 'border-[#003878] bg-[#003878]/5 ring-2 ring-[#003878]/10 shadow-md'
+                  ? 'border-[#111111] bg-[#111111]/5 ring-2 ring-[#111111]/10 shadow-md'
                   : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
               }`}
             >
               {currentValue === choice.id && (
-                <div className="absolute top-2 right-2 sm:top-3 sm:right-3 w-5 h-5 sm:w-6 sm:h-6 bg-[#003878] rounded-full flex items-center justify-center text-white">
+                <div className="absolute top-2 right-2 sm:top-3 sm:right-3 w-5 h-5 sm:w-6 sm:h-6 bg-[#111111] rounded-full flex items-center justify-center text-white">
                   <Check size={12} strokeWidth={3} />
                 </div>
               )}
@@ -730,12 +730,12 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
               aria-pressed={currentValue === choice.id}
               className={`relative w-full text-left p-3 sm:p-4 rounded-xl border-2 transition-all cursor-pointer ${
                 currentValue === choice.id
-                  ? 'border-[#003878] bg-[#003878]/5 shadow-md ring-2 ring-[#003878]/10'
+                  ? 'border-[#111111] bg-[#111111]/5 shadow-md ring-2 ring-[#111111]/10'
                   : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
               }`}
             >
               {currentValue === choice.id && (
-                <div className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 w-5 h-5 sm:w-6 sm:h-6 bg-[#003878] rounded-full flex items-center justify-center text-white">
+                <div className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 w-5 h-5 sm:w-6 sm:h-6 bg-[#111111] rounded-full flex items-center justify-center text-white">
                   <Check size={12} strokeWidth={3} />
                 </div>
               )}
@@ -775,7 +775,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
           }}
           className={`flex items-center justify-between p-3 sm:p-5 rounded-xl border-2 cursor-pointer transition-all ${
             currentValue
-              ? 'border-[#003878] bg-[#003878]/5 shadow-md ring-2 ring-[#003878]/10'
+              ? 'border-[#111111] bg-[#111111]/5 shadow-md ring-2 ring-[#111111]/10'
               : 'border-gray-200 bg-white hover:border-gray-300'
           }`}
         >
@@ -816,7 +816,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
                 setConfig(prev => ({ ...prev, verlichting: e.target.checked }));
               }}
             />
-            <div className="w-14 h-8 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-[#003878] shadow-inner" />
+            <div className="w-14 h-8 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-[#111111] shadow-inner" />
           </label>
         </div>
         {/* Warning if LED is ON but no mapping */}
@@ -848,13 +848,13 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
           }}
           className={`flex items-center justify-between p-3 sm:p-5 rounded-xl border-2 cursor-pointer transition-all ${
             currentValue
-              ? 'border-[#003878] bg-[#003878]/5 shadow-md ring-2 ring-[#003878]/10'
+              ? 'border-[#111111] bg-[#111111]/5 shadow-md ring-2 ring-[#111111]/10'
               : 'border-gray-200 bg-white hover:border-gray-300'
           }`}
         >
           <div className="flex items-center gap-3 sm:gap-4">
             <div className={`w-10 h-10 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center shadow-sm transition-colors flex-shrink-0 ${
-              currentValue ? 'bg-[#003878] text-white' : 'bg-gray-100 text-gray-400'
+              currentValue ? 'bg-[#111111] text-white' : 'bg-gray-100 text-gray-400'
             }`}>
               <Wrench size={22} />
             </div>
@@ -875,7 +875,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
                 setConfig(prev => ({ ...prev, montage: e.target.checked }));
               }}
             />
-            <div className="w-14 h-8 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-[#003878] shadow-inner" />
+            <div className="w-14 h-8 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-[#111111] shadow-inner" />
           </label>
         </div>
         <p className="mt-4 text-sm text-gray-500 italic px-2">
@@ -933,7 +933,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
               </div>
               <button
                 onClick={() => goToStep(item.stepIndex)}
-                className="flex items-center gap-1.5 text-[#003878] hover:text-[#002050] font-semibold text-sm transition-colors"
+                className="flex items-center gap-1.5 text-[#111111] hover:text-[#000000] font-semibold text-sm transition-colors"
               >
                 <Edit2 size={14} />
                 {t('configurator.navigation.change')}
@@ -964,7 +964,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
             )}
             <div className="border-t-2 border-gray-300 pt-3 mt-3 flex justify-between items-center">
               <span className="font-bold text-gray-900 text-base">{t('configurator.overview.totalInclVat')}</span>
-              <span className="font-black text-2xl text-[#003878]">{formatMaatwerkPrice(displayGrandTotal)}</span>
+              <span className="font-black text-2xl text-[#111111]">{formatMaatwerkPrice(displayGrandTotal)}</span>
             </div>
           </div>
         </div>
@@ -975,15 +975,15 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
             type="checkbox"
             checked={agreed}
             onChange={(e) => setAgreed(e.target.checked)}
-            className="mt-1 w-5 h-5 rounded border-gray-300 text-[#003878] focus:ring-[#003878] cursor-pointer"
+            className="mt-1 w-5 h-5 rounded border-gray-300 text-[#111111] focus:ring-[#111111] cursor-pointer"
           />
           <span className="text-sm text-gray-700">
             {t('maatwerk.agreementText')}{' '}
-            <Link to="/algemene-voorwaarden" className="text-[#003878] underline hover:no-underline" target="_blank" rel="noopener noreferrer">
+            <Link to="/algemene-voorwaarden" className="text-[#111111] underline hover:no-underline" target="_blank" rel="noopener noreferrer">
               {t('maatwerk.termsLink')}
             </Link>{' '}
             {t('maatwerk.andRead')}{' '}
-            <Link to="/privacy" className="text-[#003878] underline hover:no-underline" target="_blank" rel="noopener noreferrer">
+            <Link to="/privacy" className="text-[#111111] underline hover:no-underline" target="_blank" rel="noopener noreferrer">
               {t('maatwerk.privacyLink')}
             </Link>{' '}
             {t('maatwerk.read')}
@@ -1043,7 +1043,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
         </div>
         <div className="w-full h-1.5 bg-[var(--border)] rounded-full overflow-hidden">
           <div
-            className="h-full bg-[var(--accent,#003878)] rounded-full transition-all duration-300"
+            className="h-full bg-[var(--accent,#111111)] rounded-full transition-all duration-300"
             style={{ width: `${progressPercent}%` }}
           />
         </div>
@@ -1058,7 +1058,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
                   idx === currentStepIndex
                     ? 'text-[var(--text)] font-bold'
                     : idx < currentStepIndex
-                      ? 'text-[var(--accent,#003878)] hover:underline cursor-pointer'
+                      ? 'text-[var(--accent,#111111)] hover:underline cursor-pointer'
                       : 'text-[var(--muted)] cursor-not-allowed'
                 }`}
               >
@@ -1104,7 +1104,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
           {/* Config badges */}
           <div className="absolute bottom-3 left-3 flex flex-wrap gap-1.5">
             {config.size && (
-              <span className="px-2.5 py-1 bg-[#003878] text-white text-[10px] font-bold rounded-full uppercase tracking-wide">
+              <span className="px-2.5 py-1 bg-[#111111] text-white text-[10px] font-bold rounded-full uppercase tracking-wide">
                 {config.size.width}×{config.size.depth}
               </span>
             )}
@@ -1143,7 +1143,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
   const isModalLayout = layout === 'modal';
 
   return (
-    <div className={isModalLayout ? 'font-sans bg-white' : 'bg-hett-bg font-sans'}>
+    <div className={isModalLayout ? 'font-sans bg-white' : 'bg-[var(--bg)] font-sans'}>
       {/* Info Modal */}
       <AnimatePresence>
         {infoModal && (
@@ -1173,19 +1173,28 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
         )}
       </AnimatePresence>
 
-      <div className={isModalLayout ? 'py-4 sm:py-6' : 'pt-4 md:pt-6 pb-14'}>
-        <div className={isModalLayout ? 'px-3 sm:px-6' : 'container'}>
+      <div className={isModalLayout ? 'py-4 sm:py-6' : 'pt-4 lg:pt-10 pb-20'}>
+        <div className={isModalLayout ? 'px-3 sm:px-6' : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'}>
           {!isModalLayout && (
-            <div className="mb-6">
+            <div className="mb-2">
               <div className="flex items-center justify-between gap-3">
-                <h1 className="text-2xl md:text-3xl font-black text-hett-primary">{t('nav.maatwerkConfigurator')}</h1>
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-[var(--text)]">{t('nav.maatwerkConfigurator')}</h1>
                 {onClose && (
                   <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full">
                     <X size={20} />
                   </button>
                 )}
               </div>
-              <p className="text-sm text-hett-muted mt-1">{t('maatwerk.configureCustom')}</p>
+              <div className="flex flex-wrap items-center gap-3 sm:gap-5 text-[var(--muted)] mt-1">
+                <DeliveryTime label="3-5 weken" />
+                <span className="inline-flex items-center gap-1.5 text-[13px] font-semibold">
+                  <ShieldCheck size={14} className="flex-shrink-0" />
+                  {t('standardVerandaPage.tenYearWarranty')}
+                </span>
+                <Link to="/categorie/verandas" className="text-[13px] font-semibold text-[var(--text)] underline underline-offset-2 sm:ml-auto">
+                  {t('standardVerandaPage.title')} →
+                </Link>
+              </div>
             </div>
           )}
 
@@ -1221,7 +1230,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
                   {/* Price row — compact on mobile */}
                   <div className="flex items-center justify-between mb-3 sm:block">
                     <span className="text-xs text-gray-500 uppercase tracking-wide font-medium">{t('configurator.footer.totalPriceInclVat')}</span>
-                    <span className="text-xl sm:text-2xl font-black text-[#003878] sm:block">{formatMaatwerkPrice(displayGrandTotal)}</span>
+                    <span className="text-xl sm:text-2xl font-black text-[#111111] sm:block">{formatMaatwerkPrice(displayGrandTotal)}</span>
                   </div>
 
                   {/* Navigation + CTA buttons */}
@@ -1252,7 +1261,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
                         disabled={!canProceed}
                         className={`px-5 sm:px-6 py-3 sm:py-3.5 font-bold rounded-xl text-sm flex items-center gap-2 transition-all ${
                           canProceed
-                            ? 'bg-[#003878] text-white hover:bg-[#002050] shadow-sm shadow-[#003878]/20'
+                            ? 'bg-[#111111] text-white hover:bg-[#000000] shadow-sm shadow-[#111111]/20'
                             : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                         }`}
                       >
@@ -1273,7 +1282,7 @@ const MaatwerkVerandaConfigurator: React.FC<MaatwerkVerandaConfiguratorProps> = 
                             disabled={!agreed}
                             className={`w-full sm:w-auto px-5 sm:px-6 py-3 sm:py-3.5 font-bold rounded-xl text-sm flex items-center justify-center gap-2 transition-all ${
                               agreed
-                                ? 'bg-[#003878] text-white hover:bg-[#002050] shadow-sm shadow-[#003878]/20'
+                                ? 'bg-[#111111] text-white hover:bg-[#000000] shadow-sm shadow-[#111111]/20'
                                 : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                             }`}
                           >

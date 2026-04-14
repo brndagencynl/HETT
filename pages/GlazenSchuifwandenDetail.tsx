@@ -144,7 +144,7 @@ const GlazenSchuifwandenDetail: React.FC = () => {
   );
 
   // Extras that support quantity selection
-  const QUANTIFIABLE_EXTRAS = useMemo(() => new Set(['tochtstrip', 'deurgreep-handvat', 'meenemers']), []);
+  const QUANTIFIABLE_EXTRAS = useMemo(() => new Set(['tochtstrip', 'deurgreep', 'meenemers']), []);
 
   // Pricing
   const basePriceCents = shopifyProduct?.priceCents ?? 0;

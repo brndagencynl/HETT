@@ -32,7 +32,7 @@ const FUNDERINGSKOKER_PRICE_BY_RAIL: Record<RailType, number> = {
 const EXTRA_HANDLES: string[] = [
   'glasopvang',
   'tochtstrip',
-  'deurgreep-handvat',
+  'deurgreep',
   'komgreep',
   'meenemers',
   'funderingskoker',
@@ -42,7 +42,7 @@ const EXTRA_HANDLES: string[] = [
 const POPULAR_HANDLES = new Set([
   'glasopvang',
   'tochtstrip',
-  'deurgreep-handvat',
+  'deurgreep',
   'meenemers',
 ]);
 

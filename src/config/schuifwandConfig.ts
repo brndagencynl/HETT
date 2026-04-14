@@ -100,7 +100,7 @@ const SHARED_EXTRAS: ExtraOption[] = [
     imageUrl: '/assets/images/schuifwand/extra-tochtstrip.webp',
   },
   {
-    id: 'deurgreep-handvat',
+    id: 'deurgreep',
     label: 'Deurgreep handvat',
     infoText: 'Handvat om schuifpanelen makkelijker te bedienen.',
     popular: true,

@@ -112,8 +112,8 @@ const AnimatedRoutes: React.FC = () => {
           }
         />
 
-        {/* <Route path="/glazen-schuifwanden" element={<PageTransition><GlazenSchuifwandenOverview /></PageTransition>} /> */}
-        {/* <Route path="/glazen-schuifwanden/:rail" element={<PageTransition><GlazenSchuifwandenDetail /></PageTransition>} /> */}
+        <Route path="/glazen-schuifwanden" element={<PageTransition><GlazenSchuifwandenOverview /></PageTransition>} />
+        <Route path="/glazen-schuifwanden/:rail" element={<PageTransition><GlazenSchuifwandenDetail /></PageTransition>} />
 
         {/* Shop Routes */}
         <Route path="/shop" element={<PageTransition><Shop /></PageTransition>} />

@@ -1,30 +1,24 @@
 /**
- * Glazen Schuifwanden — Overview Page (Shopify-integrated)
- * =========================================================
+ * Glazen Schuifwanden — Overview Page (Shopify-driven)
+ * =====================================================
  *
  * Landing page at /glazen-schuifwanden showing all rail variants as
  * product cards.
  *
- * Product images & titles come from Shopify (tag: "glazen-schuifwand").
- * USPs, lead times and "from" prices come from the hardcoded config.
- *
- * Falls back to the hardcoded rail config data (without images) when
- * Shopify products haven't loaded yet or aren't available.
+ * Products are fetched directly from Shopify (tag: "glazen-schuifwand").
+ * Only products that exist in Shopify are displayed — no hardcoded fallbacks.
  */
 
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Loader2, ShieldCheck } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import DeliveryTime from '../src/components/ui/DeliveryTime';
 import ProductCard from '../src/components/products/ProductCard';
-import { RAIL_CONFIGS, getFromPriceCents } from '../src/config/glazenSchuifwanden';
 import {
   getGlazenSchuifwandenProducts,
   type GlazenSchuifwandProduct,
 } from '../src/lib/shopify/glazenSchuifwanden';
-import type { Product } from '../types';
 
 const GlazenSchuifwandenOverview: React.FC = () => {
   const { t } = useTranslation();
@@ -46,27 +40,6 @@ const GlazenSchuifwandenOverview: React.FC = () => {
     })();
     return () => { cancelled = true; };
   }, []);
-
-  // Build display list: merge Shopify data where available, fall back to hardcoded config
-  const displayItems = RAIL_CONFIGS.map((cfg) => {
-    const matched = products.find((p) => p.railConfig.rail === cfg.rail);
-    const fromPriceCents = getFromPriceCents(cfg.rail) || cfg.fallbackPriceCents;
-
-    const product: Product = {
-      id: cfg.slug,
-      title: matched?.shopifyProduct.title || `${cfg.rail}-rail glazen schuifwand`,
-      category: 'verandas',
-      priceCents: fromPriceCents,
-      price: fromPriceCents / 100,
-      shortDescription: matched?.shopifyProduct.shortDescription || '',
-      description: '',
-      imageUrl: matched?.shopifyProduct.imageUrl || '/assets/images/glass_sliding_walls.webp',
-      specs: {},
-      requiresConfiguration: true,
-    };
-
-    return { product, cfg };
-  });
 
   return (
     <div className="min-h-screen bg-[var(--bg)] pb-20">
@@ -99,14 +72,21 @@ const GlazenSchuifwandenOverview: React.FC = () => {
           </div>
         )}
 
+        {/* Empty state */}
+        {!loading && products.length === 0 && (
+          <p className="text-[var(--muted)] text-sm">
+            {t('glazenSchuifwanden.noProducts', 'Geen glazen schuifwanden gevonden.')}
+          </p>
+        )}
+
         {/* Product Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {displayItems.map(({ product, cfg }) => (
+          {products.map((item) => (
             <ProductCard
-              key={cfg.slug}
-              product={product}
-              href={`/glazen-schuifwanden/${cfg.slug}`}
-              deliveryLabel={cfg.leadTime}
+              key={item.railConfig.slug}
+              product={item.shopifyProduct}
+              href={`/glazen-schuifwanden/${item.railConfig.slug}`}
+              deliveryLabel={item.railConfig.leadTime}
               ctaLabel={t('glazenSchuifwanden.configure')}
               showFromSuffix
             />

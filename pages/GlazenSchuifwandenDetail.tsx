@@ -13,7 +13,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   ArrowLeft, ChevronLeft, ChevronRight, Loader2, Minus, Plus,
-  Truck, ShieldCheck, Settings, Package, Check,
+  Truck, ShieldCheck, Settings, Package, Check, Info, X,
 } from 'lucide-react';
 import DeliveryTime from '../src/components/ui/DeliveryTime';
 import PageHeader from '../components/PageHeader';
@@ -22,11 +22,14 @@ import {
   getSchuifwandConfigBySlug,
   calcOptionsTotalEur,
   buildConfigSummary,
+  type ExtraOption,
+  type RailType,
 } from '../src/config/schuifwandConfig';
 import {
   getGlazenSchuifwandBySlug,
   type GlazenSchuifwandProduct,
 } from '../src/lib/shopify/glazenSchuifwanden';
+import { getSchuifwandExtras } from '../src/lib/shopify/schuifwandExtras';
 import { formatEUR, toCents } from '../src/utils/money';
 import type { Product } from '../types';
 
@@ -64,17 +67,26 @@ const GlazenSchuifwandenDetail: React.FC = () => {
 
   const config = getSchuifwandConfigBySlug(rail || '');
 
-  // Shopify
+  // Shopify product
   const [shopifyData, setShopifyData] = useState<GlazenSchuifwandProduct | null>(null);
   const [shopifyLoading, setShopifyLoading] = useState(true);
 
+  // Shopify extras (from Accessoires collection)
+  const [shopifyExtras, setShopifyExtras] = useState<ExtraOption[]>([]);
+
   useEffect(() => {
-    if (!rail) return;
+    if (!rail || !config) return;
     let cancelled = false;
     (async () => {
       try {
-        const data = await getGlazenSchuifwandBySlug(rail);
-        if (!cancelled) setShopifyData(data);
+        const [data, extras] = await Promise.all([
+          getGlazenSchuifwandBySlug(rail),
+          getSchuifwandExtras(config.rail as RailType),
+        ]);
+        if (!cancelled) {
+          setShopifyData(data);
+          setShopifyExtras(extras);
+        }
       } catch (err) {
         console.error('[PDP] Fetch error:', err);
       } finally {
@@ -82,28 +94,44 @@ const GlazenSchuifwandenDetail: React.FC = () => {
       }
     })();
     return () => { cancelled = true; };
-  }, [rail]);
+  }, [rail, config]);
 
   // State
   const [selectedInbouwbreedte, setSelectedInbouwbreedte] = useState('');
   const [selectedWerkhoogte, setSelectedWerkhoogte] = useState('');
   const [selectedTypeGlas, setSelectedTypeGlas] = useState('helder');
   const [selectedKleurProfiel, setSelectedKleurProfiel] = useState('antraciet');
-  const [selectedExtras, setSelectedExtras] = useState<Set<string>>(new Set());
+  const [selectedExtras, setSelectedExtras] = useState<Map<string, number>>(new Map());
   const [quantity, setQuantity] = useState(1);
   const [addingToCart, setAddingToCart] = useState(false);
   const [activeTab, setActiveTab] = useState<TabId>('specs');
+  const [openTooltip, setOpenTooltip] = useState<string | null>(null);
 
-  // Gallery
+  // Gallery — image switches reactively with glass type
   const shopifyProduct = shopifyData?.shopifyProduct;
-  const mainImage = shopifyProduct?.imageUrl || '/assets/images/glass_sliding_walls.webp';
-  const [activeImage, setActiveImage] = useState(mainImage);
+  const productImages = useMemo(() => shopifyProduct?.images ?? [], [shopifyProduct]);
+  const IMAGE_INDEX_BY_GLASS: Record<string, number> = { helder: 0, getint: 1 };
+  const fallbackImage = '/assets/images/glass_sliding_walls.webp';
 
-  useEffect(() => {
-    if (shopifyProduct?.imageUrl) setActiveImage(shopifyProduct.imageUrl);
-  }, [shopifyProduct?.imageUrl]);
+  const mainImage = productImages[0] || shopifyProduct?.imageUrl || fallbackImage;
 
-  const allImages = useMemo(() => [...new Set([mainImage])], [mainImage]);
+  // Derive the glass-specific image (reactive to both data load + glass type change)
+  const glassImage = useMemo(() => {
+    if (!productImages.length) return mainImage;
+    const idx = IMAGE_INDEX_BY_GLASS[selectedTypeGlas] ?? 0;
+    return productImages[idx] || productImages[0] || mainImage;
+  }, [productImages, selectedTypeGlas, mainImage]);
+
+  // activeImage = glassImage by default, but can be overridden by gallery nav
+  const [imageOverride, setImageOverride] = useState<string | null>(null);
+
+  // Reset override when glass type changes (so it snaps to the right image)
+  useEffect(() => { setImageOverride(null); }, [selectedTypeGlas]);
+
+  const activeImage = imageOverride ?? glassImage;
+  const setActiveImage = useCallback((url: string) => setImageOverride(url), []);
+
+  const allImages = useMemo(() => [...new Set(productImages.length ? productImages : [mainImage])], [productImages, mainImage]);
 
   // Derived selections
   const selectedBreedteOpt = config?.inbouwbreedte.find((o) => o.id === selectedInbouwbreedte);
@@ -111,9 +139,12 @@ const GlazenSchuifwandenDetail: React.FC = () => {
   const selectedGlasOpt = config?.typeGlas.find((o) => o.id === selectedTypeGlas);
   const selectedKleurOpt = config?.kleurProfiel.find((o) => o.id === selectedKleurProfiel);
   const selectedExtrasArr = useMemo(
-    () => config?.extras.filter((e) => selectedExtras.has(e.id)) || [],
-    [config?.extras, selectedExtras],
+    () => shopifyExtras.filter((e) => selectedExtras.has(e.id)),
+    [shopifyExtras, selectedExtras],
   );
+
+  // Extras that support quantity selection
+  const QUANTIFIABLE_EXTRAS = useMemo(() => new Set(['tochtstrip', 'deurgreep-handvat', 'meenemers']), []);
 
   // Pricing
   const basePriceCents = shopifyProduct?.priceCents ?? 0;
@@ -126,23 +157,43 @@ const GlazenSchuifwandenDetail: React.FC = () => {
         typeGlas: selectedGlasOpt,
         kleurProfiel: selectedKleurOpt,
         extras: selectedExtrasArr,
+        extraQuantities: selectedExtras,
       }),
-    [selectedBreedteOpt, selectedHoogteOpt, selectedGlasOpt, selectedKleurOpt, selectedExtrasArr],
+    [selectedBreedteOpt, selectedHoogteOpt, selectedGlasOpt, selectedKleurOpt, selectedExtrasArr, selectedExtras],
   );
   const unitTotal = basePriceEur + optionsTotalEur;
   const grandTotal = unitTotal * quantity;
 
+  const hasBreedte = config ? config.inbouwbreedte.length > 0 : false;
+  const hasHoogte = config ? config.werkhoogte.length > 0 : false;
+
   const canAddToCart =
-    !!selectedInbouwbreedte &&
-    !!selectedWerkhoogte &&
+    (!hasBreedte || !!selectedInbouwbreedte) &&
+    (!hasHoogte || !!selectedWerkhoogte) &&
     !!selectedTypeGlas &&
     !!selectedKleurProfiel &&
     basePriceCents > 0;
 
   const toggleExtra = useCallback((id: string) => {
     setSelectedExtras((prev) => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      const next = new Map(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.set(id, 1);
+      }
+      return next;
+    });
+  }, []);
+
+  const setExtraQty = useCallback((id: string, qty: number) => {
+    setSelectedExtras((prev) => {
+      const next = new Map(prev);
+      if (qty <= 0) {
+        next.delete(id);
+      } else {
+        next.set(id, qty);
+      }
       return next;
     });
   }, []);
@@ -172,8 +223,6 @@ const GlazenSchuifwandenDetail: React.FC = () => {
     );
   }
 
-  const configReady = config.inbouwbreedte.length > 0 && config.werkhoogte.length > 0;
-
   // ── Add to cart ─────────────────────────────────────────────────────────
   const handleAddToCart = () => {
     if (!canAddToCart) return;
@@ -188,8 +237,9 @@ const GlazenSchuifwandenDetail: React.FC = () => {
       typeGlas: selectedGlasOpt,
       kleurProfiel: selectedKleurOpt,
       extras: selectedExtrasArr,
+      extraQuantities: selectedExtras,
     });
-    const extrasKey = [...selectedExtras].sort().join('+') || 'none';
+    const extrasKey = [...selectedExtras.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([id, qty]) => `${id}:${qty}`).join('+') || 'none';
     const configKey = `${config.slug}-${selectedInbouwbreedte}-${selectedWerkhoogte}-${selectedTypeGlas}-${selectedKleurProfiel}-${extrasKey}`;
 
     const product: Product = {
@@ -216,7 +266,10 @@ const GlazenSchuifwandenDetail: React.FC = () => {
     if (selectedExtrasArr.length > 0) {
       details.push({
         label: t('glazenSchuifwanden.extrasLabel', "Extra's"),
-        value: selectedExtrasArr.map((e) => e.label).join(', '),
+        value: selectedExtrasArr.map((e) => {
+          const qty = selectedExtras.get(e.id) ?? 1;
+          return qty > 1 ? `${e.label} (${qty}×)` : e.label;
+        }).join(', '),
       });
     }
 
@@ -378,14 +431,13 @@ const GlazenSchuifwandenDetail: React.FC = () => {
             </div>
 
             {/* ── Configurator (in right column) ───────────────────── */}
-            {configReady ? (
               <div className="space-y-8">
                 <h2 className="text-lg font-bold text-[var(--text)]">
                   {t('glazenSchuifwanden.configTitle', 'Stel uw schuifwand samen')}
                 </h2>
 
                 {/* ── 1. Inbouwbreedte (dropdown) ────────────────── */}
-                <div>
+                {hasBreedte && (<div>
                   <label className="block text-sm font-semibold text-[var(--text)] mb-2">
                     {t('glazenSchuifwanden.widthLabel')}
                   </label>
@@ -410,10 +462,10 @@ const GlazenSchuifwandenDetail: React.FC = () => {
                       </option>
                     ))}
                   </select>
-                </div>
+                </div>)}
 
                 {/* ── 2. Werkhoogte (dropdown) ───────────────────── */}
-                <div>
+                {hasHoogte && (<div>
                   <label className="block text-sm font-semibold text-[var(--text)] mb-2">
                     {t('glazenSchuifwanden.heightLabel')}
                   </label>
@@ -438,7 +490,7 @@ const GlazenSchuifwandenDetail: React.FC = () => {
                       </option>
                     ))}
                   </select>
-                </div>
+                </div>)}
 
                 {/* ── 3. Type glas — compact image cards ──────────── */}
                 <div>
@@ -448,6 +500,8 @@ const GlazenSchuifwandenDetail: React.FC = () => {
                   <div className="flex gap-2">
                     {config.typeGlas.map((glass) => {
                       const isSelected = selectedTypeGlas === glass.id;
+                      const glassImageIdx = IMAGE_INDEX_BY_GLASS[glass.id] ?? 0;
+                      const glassThumb = productImages[glassImageIdx] || glass.imageUrl;
                       return (
                         <button
                           key={glass.id}
@@ -459,9 +513,9 @@ const GlazenSchuifwandenDetail: React.FC = () => {
                           }`}
                         >
                           <div className="w-10 h-10 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0">
-                            {glass.imageUrl ? (
+                            {glassThumb ? (
                               <img
-                                src={glass.imageUrl}
+                                src={glassThumb}
                                 alt={glass.label}
                                 className="w-full h-full object-cover"
                                 onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
@@ -534,77 +588,132 @@ const GlazenSchuifwandenDetail: React.FC = () => {
                   </div>
                 </div>
 
-                {/* ── 5. Extra's — compact horizontal cards ──────── */}
-                {config.extras.length > 0 && (
+                {/* ── 5. Extra's — from Shopify Accessoires ──────── */}
+                {shopifyExtras.length > 0 && (
                   <div>
                     <label className="block text-sm font-semibold text-[var(--text)] mb-2">
                       {t('glazenSchuifwanden.extrasLabel', "Extra's")}
                     </label>
                     <div className="space-y-2">
-                      {config.extras.map((extra) => {
+                      {shopifyExtras.map((extra) => {
                         const on = selectedExtras.has(extra.id);
+                        const qty = selectedExtras.get(extra.id) ?? 0;
+                        const isQuantifiable = QUANTIFIABLE_EXTRAS.has(extra.id);
+                        const tooltipOpen = openTooltip === extra.id;
                         return (
-                          <button
-                            key={extra.id}
-                            type="button"
-                            onClick={() => toggleExtra(extra.id)}
-                            className={`group w-full flex items-center gap-3 rounded-xl border-2 overflow-hidden text-left transition-all ${
-                              on
-                                ? 'border-[var(--secondary)] bg-blue-50/40'
-                                : 'border-gray-200 hover:border-gray-300'
-                            }`}
-                          >
-                            {/* Thumbnail */}
-                            <div className="w-16 h-16 flex-shrink-0 bg-gray-100 overflow-hidden relative">
-                              {extra.imageUrl ? (
-                                <img
-                                  src={extra.imageUrl}
-                                  alt={extra.label}
-                                  className="w-full h-full object-cover"
-                                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                                />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center">
-                                  <Package size={18} className="text-gray-300" />
-                                </div>
-                              )}
-                            </div>
+                          <div key={extra.id} className="relative">
+                            <button
+                              type="button"
+                              onClick={() => { if (!isQuantifiable || !on) toggleExtra(extra.id); }}
+                              className={`group w-full flex items-center gap-3 rounded-xl border-2 overflow-hidden text-left transition-all ${
+                                on
+                                  ? 'border-[var(--secondary)] bg-blue-50/40'
+                                  : 'border-gray-200 hover:border-gray-300'
+                              }`}
+                            >
+                              {/* Thumbnail */}
+                              <div className="w-16 h-16 flex-shrink-0 bg-gray-100 overflow-hidden relative">
+                                {extra.imageUrl ? (
+                                  <img
+                                    src={extra.imageUrl}
+                                    alt={extra.label}
+                                    className="w-full h-full object-cover"
+                                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                  />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center">
+                                    <Package size={18} className="text-gray-300" />
+                                  </div>
+                                )}
+                              </div>
 
-                            {/* Content */}
-                            <div className="flex-1 min-w-0 py-2 pr-3">
-                              <div className="flex items-center justify-between gap-2">
-                                <div className="flex items-center gap-2 min-w-0">
-                                  <span className="text-[13px] font-semibold text-[var(--text)] truncate">{extra.label}</span>
-                                  {extra.popular && (
-                                    <span className="flex-shrink-0 px-1.5 py-0.5 rounded text-[9px] font-bold bg-[var(--secondary)]/10 text-[var(--secondary)] leading-tight">
-                                      Populair
+                              {/* Content */}
+                              <div className="flex-1 min-w-0 py-2 pr-1">
+                                <div className="flex items-center justify-between gap-2">
+                                  <div className="flex items-center gap-2 min-w-0">
+                                    <span className="text-[13px] font-semibold text-[var(--text)] truncate">{extra.label}</span>
+                                  </div>
+                                  <span className="text-[13px] font-bold text-[var(--primary)] tabular-nums whitespace-nowrap">
+                                    {formatEUR(on && isQuantifiable ? extra.priceDelta * qty : extra.priceDelta, 'euros')}
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* Quantity controls for quantifiable extras */}
+                              {isQuantifiable && on && (
+                                <div
+                                  className="flex items-center flex-shrink-0"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <div className="flex items-center rounded-lg overflow-hidden border border-gray-200 bg-white">
+                                    <button
+                                      type="button"
+                                      onClick={() => setExtraQty(extra.id, qty - 1)}
+                                      className="w-7 h-7 flex items-center justify-center text-[var(--muted)] hover:bg-gray-50 transition-colors"
+                                    >
+                                      <Minus size={12} />
+                                    </button>
+                                    <span className="w-6 h-7 flex items-center justify-center text-[12px] font-semibold text-[var(--text)] tabular-nums border-x border-gray-200">
+                                      {qty}
                                     </span>
-                                  )}
+                                    <button
+                                      type="button"
+                                      onClick={() => setExtraQty(extra.id, qty + 1)}
+                                      className="w-7 h-7 flex items-center justify-center text-[var(--muted)] hover:bg-gray-50 transition-colors"
+                                    >
+                                      <Plus size={12} />
+                                    </button>
+                                  </div>
                                 </div>
-                                <span className="text-[13px] font-bold text-[var(--primary)] tabular-nums whitespace-nowrap">
-                                  {formatEUR(extra.priceDelta, 'euros')}
-                                </span>
-                              </div>
-                              {extra.infoText && (
-                                <p className="text-[11px] text-[var(--muted)] mt-0.5 leading-snug line-clamp-1">
-                                  {extra.infoText}
-                                </p>
                               )}
-                            </div>
 
-                            {/* Toggle indicator */}
-                            <div className="pr-3 flex-shrink-0">
-                              <div
-                                className={`w-5 h-5 rounded-md flex items-center justify-center border-2 transition-colors ${
-                                  on
-                                    ? 'bg-[var(--secondary)] border-[var(--secondary)]'
-                                    : 'border-gray-300 bg-white group-hover:border-gray-400'
-                                }`}
-                              >
-                                {on && <Check size={12} className="text-white" />}
+                              {/* Info button */}
+                              {extra.infoText && (
+                                <div
+                                  className="flex-shrink-0"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setOpenTooltip(tooltipOpen ? null : extra.id);
+                                  }}
+                                >
+                                  <div className="w-6 h-6 rounded-full flex items-center justify-center text-[var(--muted)] hover:text-[var(--text)] hover:bg-gray-100 transition-colors">
+                                    <Info size={14} />
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Toggle indicator */}
+                              <div className="pr-3 flex-shrink-0">
+                                <div
+                                  className="w-5 h-5 rounded-md flex items-center justify-center border-2 transition-colors"
+                                  style={{
+                                    backgroundColor: on ? '#2A8FCE' : '#ffffff',
+                                    borderColor: on ? '#2A8FCE' : '#d1d5db',
+                                  }}
+                                >
+                                  {on && <Check size={12} className="text-white" />}
+                                </div>
                               </div>
-                            </div>
-                          </button>
+                            </button>
+
+                            {/* Tooltip */}
+                            {tooltipOpen && extra.infoText && (
+                              <div className="absolute left-0 right-0 mt-1 z-20 bg-white border border-gray-200 rounded-xl shadow-lg p-3 animate-in fade-in">
+                                <div className="flex items-start justify-between gap-2">
+                                  <p className="text-[12px] leading-relaxed text-[var(--text)]">
+                                    {extra.infoText}
+                                  </p>
+                                  <button
+                                    type="button"
+                                    onClick={(e) => { e.stopPropagation(); setOpenTooltip(null); }}
+                                    className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[var(--muted)] hover:text-[var(--text)] hover:bg-gray-100 transition-colors"
+                                  >
+                                    <X size={12} />
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
                         );
                       })}
                     </div>
@@ -666,9 +775,10 @@ const GlazenSchuifwandenDetail: React.FC = () => {
                       disabled={!canAddToCart || addingToCart}
                       className={`flex-1 h-12 text-[15px] font-semibold rounded-full transition-all ${
                         canAddToCart
-                          ? 'bg-[var(--primary)] text-white hover:opacity-90 shadow-sm hover:shadow-md'
+                          ? 'text-white hover:opacity-90 shadow-sm hover:shadow-md'
                           : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                       }`}
+                      style={canAddToCart ? { backgroundColor: '#F28C28' } : undefined}
                     >
                       {addingToCart ? (
                         <Loader2 size={18} className="animate-spin mx-auto" />
@@ -694,16 +804,6 @@ const GlazenSchuifwandenDetail: React.FC = () => {
                   </div>
                 </div>
               </div>
-            ) : (
-              <div className="mt-4 rounded-2xl border border-gray-200 bg-white p-6">
-                <p className="text-sm font-semibold text-[var(--text)] mb-1">
-                  {t('glazenSchuifwanden.configComingSoon', 'Configurator binnenkort beschikbaar')}
-                </p>
-                <p className="text-sm text-[var(--muted)]">
-                  {t('glazenSchuifwanden.configComingSoonHint', 'De maten voor deze variant worden nog toegevoegd. Neem contact op voor een offerte.')}
-                </p>
-              </div>
-            )}
           </div>
         </div>
       </div>

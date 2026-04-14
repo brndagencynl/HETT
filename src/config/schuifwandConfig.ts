@@ -51,7 +51,7 @@ export type SchuifwandConfig = {
 };
 
 // =============================================================================
-// SHARED OPTIONS  (glass & colour apply to all rails)
+// SHARED OPTIONS  (glass, colour & werkhoogte apply to all rails)
 // =============================================================================
 
 const SHARED_TYPE_GLAS: Option[] = [
@@ -60,10 +60,25 @@ const SHARED_TYPE_GLAS: Option[] = [
 ];
 
 const SHARED_KLEUR_PROFIEL: SwatchOption[] = [
-  { id: 'antraciet', label: 'Antraciet', swatch: '#3A3F45', priceDelta: 0, imageUrl: '/assets/images/schuifwand/kleur-antraciet.webp' },
-  { id: 'zwart',     label: 'Zwart',     swatch: '#111111', priceDelta: 0, imageUrl: '/assets/images/schuifwand/kleur-zwart.webp' },
-  { id: 'wit',       label: 'Wit',       swatch: '#F2F2F2', priceDelta: 0, imageUrl: '/assets/images/schuifwand/kleur-wit.webp' },
-  { id: 'creme',     label: 'Crème',     swatch: '#E7DCC8', priceDelta: 0, imageUrl: '/assets/images/schuifwand/kleur-creme.webp' },
+  { id: 'antraciet', label: 'RAL 7016 Antraciet', swatch: '#3A3F45', priceDelta: 0, imageUrl: '/assets/images/schuifwand/kleur-antraciet.webp' },
+  { id: 'zwart',     label: 'RAL 9005 Zwart',     swatch: '#111111', priceDelta: 0, imageUrl: '/assets/images/schuifwand/kleur-zwart.webp' },
+  { id: 'creme',     label: 'RAL 9001 Crème',     swatch: '#E7DCC8', priceDelta: 0, imageUrl: '/assets/images/schuifwand/kleur-creme.webp' },
+];
+
+const SHARED_WERKHOOGTE: Option[] = [
+  { id: '198-202', label: '198 cm tot 202 cm', priceDelta: 0 },
+  { id: '203-207', label: '203 cm tot 207 cm', priceDelta: 0 },
+  { id: '208-212', label: '208 cm tot 212 cm', priceDelta: 0 },
+  { id: '213-217', label: '213 cm tot 217 cm', priceDelta: 0 },
+  { id: '218-222', label: '218 cm tot 222 cm', priceDelta: 0 },
+  { id: '223-227', label: '223 cm tot 227 cm', priceDelta: 0 },
+  { id: '228-232', label: '228 cm tot 232 cm', priceDelta: 0 },
+  { id: '233-237', label: '233 cm tot 237 cm', priceDelta: 0 },
+  { id: '238-242', label: '238 cm tot 242 cm', priceDelta: 0 },
+  { id: '243-247', label: '243 cm tot 247 cm', priceDelta: 0 },
+  { id: '248-252', label: '248 cm tot 252 cm', priceDelta: 0 },
+  { id: '253-257', label: '253 cm tot 257 cm', priceDelta: 0 },
+  { id: '258-262', label: '258 cm tot 262 cm', priceDelta: 0 },
 ];
 
 const SHARED_EXTRAS: ExtraOption[] = [
@@ -137,21 +152,7 @@ export const schuifwandConfigByRail: Record<RailType, SchuifwandConfig> = {
       { id: '184-193', label: '184 cm tot 193 cm (2 × 98 cm)', priceDelta: 0 },
       { id: '194-204', label: '194 cm tot 204 cm (2 × 103 cm)', priceDelta: 0 },
     ],
-    werkhoogte: [
-      { id: '199-202', label: '199 cm tot 202 cm', priceDelta: 0 },
-      { id: '204-207', label: '204 cm tot 207 cm', priceDelta: 0 },
-      { id: '209-212', label: '209 cm tot 212 cm', priceDelta: 0 },
-      { id: '214-217', label: '214 cm tot 217 cm', priceDelta: 0 },
-      { id: '219-222', label: '219 cm tot 222 cm', priceDelta: 0 },
-      { id: '224-227', label: '224 cm tot 227 cm', priceDelta: 0 },
-      { id: '229-232', label: '229 cm tot 232 cm', priceDelta: 0 },
-      { id: '234-237', label: '234 cm tot 237 cm', priceDelta: 0 },
-      { id: '239-242', label: '239 cm tot 242 cm', priceDelta: 0 },
-      { id: '244-247', label: '244 cm tot 247 cm', priceDelta: 0 },
-      { id: '249-252', label: '249 cm tot 252 cm', priceDelta: 0 },
-      { id: '254-257', label: '254 cm tot 257 cm', priceDelta: 0 },
-      { id: '259-262', label: '259 cm tot 262 cm', priceDelta: 0 },
-    ],
+    werkhoogte: SHARED_WERKHOOGTE,
     typeGlas: SHARED_TYPE_GLAS,
     kleurProfiel: SHARED_KLEUR_PROFIEL,
     extras: SHARED_EXTRAS,
@@ -168,8 +169,12 @@ export const schuifwandConfigByRail: Record<RailType, SchuifwandConfig> = {
       'Populairste keuze voor veranda\'s',
     ],
     leadTime: '3-5 werkdagen',
-    inbouwbreedte: [],
-    werkhoogte: [],
+    inbouwbreedte: [
+      { id: '243-266', label: '243 cm tot 266 cm (3 × 90 cm)', priceDelta: 0 },
+      { id: '267-290', label: '267 cm tot 290 cm (3 × 98 cm)', priceDelta: 0 },
+      { id: '291-305', label: '291 cm tot 305 cm (3 × 103 cm)', priceDelta: 0 },
+    ],
+    werkhoogte: SHARED_WERKHOOGTE,
     typeGlas: SHARED_TYPE_GLAS,
     kleurProfiel: SHARED_KLEUR_PROFIEL,
     extras: SHARED_EXTRAS,
@@ -184,8 +189,12 @@ export const schuifwandConfigByRail: Record<RailType, SchuifwandConfig> = {
       'Maximale ventilatie mogelijk',
     ],
     leadTime: '3-5 werkdagen',
-    inbouwbreedte: [],
-    werkhoogte: [],
+    inbouwbreedte: [
+      { id: '323-354', label: '323 cm tot 354 cm (4 × 90 cm)', priceDelta: 0 },
+      { id: '355-386', label: '355 cm tot 386 cm (4 × 98 cm)', priceDelta: 0 },
+      { id: '387-405', label: '387 cm tot 405 cm (4 × 103 cm)', priceDelta: 0 },
+    ],
+    werkhoogte: SHARED_WERKHOOGTE,
     typeGlas: SHARED_TYPE_GLAS,
     kleurProfiel: SHARED_KLEUR_PROFIEL,
     extras: SHARED_EXTRAS,
@@ -200,8 +209,12 @@ export const schuifwandConfigByRail: Record<RailType, SchuifwandConfig> = {
       'Ideaal voor grote veranda\'s',
     ],
     leadTime: '5-7 werkdagen',
-    inbouwbreedte: [],
-    werkhoogte: [],
+    inbouwbreedte: [
+      { id: '406-440', label: '406 cm tot 440 cm (5 × 90 cm)', priceDelta: 0 },
+      { id: '441-480', label: '441 cm tot 480 cm (5 × 98 cm)', priceDelta: 0 },
+      { id: '481-505', label: '481 cm tot 505 cm (5 × 103 cm)', priceDelta: 0 },
+    ],
+    werkhoogte: SHARED_WERKHOOGTE,
     typeGlas: SHARED_TYPE_GLAS,
     kleurProfiel: SHARED_KLEUR_PROFIEL,
     extras: SHARED_EXTRAS,
@@ -216,8 +229,12 @@ export const schuifwandConfigByRail: Record<RailType, SchuifwandConfig> = {
       'Volledig open te schuiven',
     ],
     leadTime: '5-7 werkdagen',
-    inbouwbreedte: [],
-    werkhoogte: [],
+    inbouwbreedte: [
+      { id: '506-528', label: '506 cm tot 528 cm (6 × 90 cm)', priceDelta: 0 },
+      { id: '529-577', label: '529 cm tot 577 cm (6 × 98 cm)', priceDelta: 0 },
+      { id: '578-605', label: '578 cm tot 605 cm (6 × 103 cm)', priceDelta: 0 },
+    ],
+    werkhoogte: SHARED_WERKHOOGTE,
     typeGlas: SHARED_TYPE_GLAS,
     kleurProfiel: SHARED_KLEUR_PROFIEL,
     extras: SHARED_EXTRAS,
@@ -243,6 +260,7 @@ export function getSchuifwandConfig(rail: RailType): SchuifwandConfig {
 
 /**
  * Calculate options total (EUR) from selected option priceDelta values.
+ * extraQuantities maps extra id → quantity (default 1 if not specified).
  */
 export function calcOptionsTotalEur(selections: {
   inbouwbreedte?: Option;
@@ -250,6 +268,7 @@ export function calcOptionsTotalEur(selections: {
   typeGlas?: Option;
   kleurProfiel?: SwatchOption;
   extras: ExtraOption[];
+  extraQuantities?: Map<string, number>;
 }): number {
   let total = 0;
   if (selections.inbouwbreedte) total += selections.inbouwbreedte.priceDelta;
@@ -257,7 +276,8 @@ export function calcOptionsTotalEur(selections: {
   if (selections.typeGlas) total += selections.typeGlas.priceDelta;
   if (selections.kleurProfiel) total += selections.kleurProfiel.priceDelta;
   for (const extra of selections.extras) {
-    total += extra.priceDelta;
+    const qty = selections.extraQuantities?.get(extra.id) ?? 1;
+    total += extra.priceDelta * qty;
   }
   return total;
 }
@@ -271,6 +291,7 @@ export function buildConfigSummary(cfg: SchuifwandConfig, selections: {
   typeGlas?: Option;
   kleurProfiel?: SwatchOption;
   extras: ExtraOption[];
+  extraQuantities?: Map<string, number>;
 }): string {
   const parts: string[] = [`${cfg.rail}-rail`];
   if (selections.inbouwbreedte) parts.push(selections.inbouwbreedte.label);
@@ -278,7 +299,10 @@ export function buildConfigSummary(cfg: SchuifwandConfig, selections: {
   if (selections.typeGlas) parts.push(selections.typeGlas.label);
   if (selections.kleurProfiel) parts.push(selections.kleurProfiel.label);
   if (selections.extras.length > 0) {
-    parts.push(selections.extras.map((e) => e.label).join(', '));
+    parts.push(selections.extras.map((e) => {
+      const qty = selections.extraQuantities?.get(e.id) ?? 1;
+      return qty > 1 ? `${e.label} (${qty}×)` : e.label;
+    }).join(', '));
   }
   return parts.join(' • ');
 }

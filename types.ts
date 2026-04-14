@@ -26,6 +26,8 @@ export interface Product {
   shortDescription: string;
   description: string;
   imageUrl: string;
+  /** All product images (URLs) from Shopify, ordered as uploaded */
+  images?: string[];
   specs: {
     [key: string]: string | string[];
   };

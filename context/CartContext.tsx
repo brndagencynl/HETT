@@ -863,6 +863,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Optional config display for configurable accessories (e.g. glazen schuifwanden)
       ...(options?.displayConfigSummary ? { displayConfigSummary: options.displayConfigSummary } : {}),
       ...(options?.details ? { details: options.details } : {}),
+      ...(options?.pricing ? { pricing: options.pricing } : {}),
     };
 
     setCart(prev => {

@@ -369,6 +369,40 @@ export function buildBundleGroupingAttributes(params: {
 }
 
 // =============================================================================
+// GLAZEN SCHUIFWANDEN ATTRIBUTES
+// =============================================================================
+
+/**
+ * Build customer-facing attributes for glazen schuifwanden.
+ * Uses the `details` array stored on the cart item.
+ *
+ * Output format:
+ * - Inbouwbreedte: "267 cm tot 290 cm (3 × 98 cm)"
+ * - Werkhoogte: "218 cm tot 222 cm"
+ * - Type glas: "Helder"
+ * - Kleur: "RAL 7016 Antraciet"
+ * - Extra's: "Deurgreep (2×), Tochtstrip"
+ * - Referentie: GLAZENSC-XXXX
+ */
+function buildGlazenSchuifwandAttributes(item: CartItem): ShopifyLineAttribute[] {
+  const attributes: ShopifyLineAttribute[] = [];
+
+  if (item.details && item.details.length > 0) {
+    for (const detail of item.details) {
+      if (detail.label && detail.value) {
+        attributes.push({ key: detail.label, value: detail.value });
+      }
+    }
+  }
+
+  // Reference ID
+  const refId = generateReferenceId(item);
+  attributes.push({ key: 'Referentie', value: refId });
+
+  return attributes;
+}
+
+// =============================================================================
 // SANDWICHPANELEN ATTRIBUTES
 // =============================================================================
 
@@ -417,21 +451,26 @@ export function buildSandwichpanelenAttributes(item: CartItem): ShopifyLineAttri
 // UTILITY: DETECT CONFIG TYPE
 // =============================================================================
 
-type ConfigType = 'veranda' | 'maatwerk' | 'sandwichpaneel' | 'accessoire';
+type ConfigType = 'veranda' | 'maatwerk' | 'sandwichpaneel' | 'glazen_schuifwand' | 'accessoire';
 
 export function detectConfigType(item: CartItem): ConfigType {
   if (item.type === 'custom_veranda' || item.maatwerkPayload) {
     return 'maatwerk';
   }
-  
+
   if (item.type === 'sandwichpanelen' || item.config?.category === 'sandwichpanelen') {
     return 'sandwichpaneel';
   }
-  
+
   if (item.config?.category === 'verandas') {
     return 'veranda';
   }
-  
+
+  // Detect glazen schuifwanden by id prefix (set in GlazenSchuifwandenDetail.tsx)
+  if (item.id?.startsWith('glazen-schuifwand-')) {
+    return 'glazen_schuifwand';
+  }
+
   return 'accessoire';
 }
 
@@ -454,6 +493,8 @@ export function toCleanShopifyLineAttributes(item: CartItem): ShopifyLineAttribu
       return buildMainProductAttributes(item);
     case 'sandwichpaneel':
       return buildSandwichpanelenAttributes(item);
+    case 'glazen_schuifwand':
+      return buildGlazenSchuifwandAttributes(item);
     case 'accessoire':
     default:
       // Accessories don't have config attributes

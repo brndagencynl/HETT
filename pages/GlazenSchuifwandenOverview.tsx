@@ -84,7 +84,7 @@ const GlazenSchuifwandenOverview: React.FC = () => {
           {products.map((item) => (
             <ProductCard
               key={item.railConfig.slug}
-              product={item.shopifyProduct}
+              product={{ ...item.shopifyProduct, requiresConfiguration: true }}
               href={`/glazen-schuifwanden/${item.railConfig.slug}`}
               deliveryLabel={item.railConfig.leadTime}
               ctaLabel={t('glazenSchuifwanden.configure')}

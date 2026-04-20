@@ -273,12 +273,37 @@ const GlazenSchuifwandenDetail: React.FC = () => {
       });
     }
 
+    // Build pricing breakdown for checkout surcharge lines
+    const pricingBreakdown: { label: string; amount: number }[] = [];
+    if (selectedBreedteOpt && selectedBreedteOpt.priceDelta > 0) {
+      pricingBreakdown.push({ label: selectedBreedteOpt.label, amount: selectedBreedteOpt.priceDelta });
+    }
+    if (selectedHoogteOpt && selectedHoogteOpt.priceDelta > 0) {
+      pricingBreakdown.push({ label: selectedHoogteOpt.label, amount: selectedHoogteOpt.priceDelta });
+    }
+    if (selectedGlasOpt && selectedGlasOpt.priceDelta > 0) {
+      pricingBreakdown.push({ label: selectedGlasOpt.label, amount: selectedGlasOpt.priceDelta });
+    }
+    if (selectedKleurOpt && selectedKleurOpt.priceDelta > 0) {
+      pricingBreakdown.push({ label: selectedKleurOpt.label, amount: selectedKleurOpt.priceDelta });
+    }
+    for (const extra of selectedExtrasArr) {
+      const qty = selectedExtras.get(extra.id) ?? 1;
+      pricingBreakdown.push({ label: extra.label, amount: extra.priceDelta * qty });
+    }
+
     addToCart(product, quantity, {
       price: unitTotal,
       color: selectedKleurOpt?.label || '',
       size: `${selectedInbouwbreedte} • ${selectedWerkhoogte}`,
       displayConfigSummary: summary,
       details,
+      pricing: {
+        basePrice: basePriceEur,
+        extrasTotal: optionsTotalEur,
+        total: unitTotal,
+        breakdown: pricingBreakdown,
+      },
     });
 
     setAddingToCart(false);

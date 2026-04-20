@@ -28,7 +28,7 @@ import {
 // TYPES
 // =============================================================================
 
-export type ConfigType = 'veranda' | 'maatwerk' | 'sandwich' | 'unknown';
+export type ConfigType = 'veranda' | 'maatwerk' | 'sandwich' | 'glazen_schuifwand' | 'unknown';
 
 export interface SurchargeResult {
   /** Surcharge amount in cents */
@@ -73,6 +73,8 @@ export function getOptionsSurchargeCents(item: CartItem): SurchargeResult {
         return calculateMaatwerkSurcharge(item);
       case 'sandwich':
         return calculateSandwichSurcharge(item);
+      case 'glazen_schuifwand':
+        return calculateGlazenSchuifwandSurcharge(item);
       default:
         return {
           amountCents: 0,
@@ -121,6 +123,11 @@ function detectConfigType(item: CartItem): ConfigType {
   
   if (item.category === 'sandwichpanelen') {
     return 'sandwich';
+  }
+
+  // Check for glazen schuifwanden (by id prefix from GlazenSchuifwandenDetail.tsx)
+  if (item.id?.startsWith('glazen-schuifwand-')) {
+    return 'glazen_schuifwand';
   }
 
   // Check for regular veranda
@@ -287,6 +294,42 @@ function calculateSandwichSurcharge(item: CartItem): SurchargeResult {
     amountCents: extrasCents,
     configType: 'sandwich',
     summary: summaryParts.join(', ') || 'Geen extra opties',
+    success: true,
+  };
+}
+
+// =============================================================================
+// GLAZEN SCHUIFWANDEN SURCHARGE
+// =============================================================================
+
+/**
+ * Calculate options surcharge for a glazen schuifwand item.
+ * Uses the `pricing` field stored on the cart item (set in GlazenSchuifwandenDetail.tsx).
+ */
+function calculateGlazenSchuifwandSurcharge(item: CartItem): SurchargeResult {
+  const pricing = item.pricing;
+
+  if (!pricing || pricing.extrasTotal <= 0) {
+    console.log('[getOptionsSurchargeCents] Glazen schuifwand has no extras surcharge');
+    return {
+      amountCents: 0,
+      configType: 'glazen_schuifwand',
+      summary: 'Geen extra opties',
+      success: true,
+    };
+  }
+
+  const extrasCents = toCents(pricing.extrasTotal);
+  const summaryParts = pricing.breakdown
+    .filter(b => b.amount > 0)
+    .map(b => `${b.label} (€${b.amount.toFixed(2)})`);
+
+  console.log(`[getOptionsSurchargeCents] Glazen schuifwand extrasTotal: ${pricing.extrasTotal} EUR = ${extrasCents} cents`);
+
+  return {
+    amountCents: extrasCents,
+    configType: 'glazen_schuifwand',
+    summary: summaryParts.join(', ') || 'Schuifwand opties',
     success: true,
   };
 }
